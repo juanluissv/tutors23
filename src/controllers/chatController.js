@@ -26,7 +26,7 @@ const getChat = asyncHandler(async (req, res) => {
     });
 
     const pc = new Pinecone({
-        apiKey: 'pcsk_3nnCur_4aDmfdwCBCVgLeaHcG7ADtU3r6UJ87vSBZNySGrjsA5hVGQtY4uU3YvTwtKUKw1',
+        apiKey: process.env.PINECONE_API_KEY,
       });
 
       const pineconeIndex = pc.index('langchain-docs');
