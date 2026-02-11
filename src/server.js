@@ -26,9 +26,9 @@ const __dirname = path.resolve() //set  __dirname to current directory
 // app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
 
 
-app.get('/', (req, res) => {
-    res.send("API is running...")
-})
+// app.get('/', (req, res) => {
+//     res.send("API is running...")
+// })
 
 app.use('/api/chat', chatRoutes);
 
@@ -42,6 +42,7 @@ app.use('/api/chat', chatRoutes);
 
 
 
+console.log(process.env.NODE_ENV);
 
 
 if (process.env.NODE_ENV === 'production') {
