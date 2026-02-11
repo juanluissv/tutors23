@@ -1,39 +1,35 @@
 {
-  "name": "tutor1",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^13.5.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+    "name": "src",
+    "version": "1.0.0",
+    "description": "Ecommerce",
+    "type": "module",
+    "main": "server.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node src/server.js",
+        "server": "nodemon src/server.js",
+        "client": "npm start --prefix frontend",
+        "dev": "concurrently \"npm run server\" \"npm run client\"",
+        "data:import": "node src/seeder.js",
+        "data:destroy": "node src/seeder.js -d"
+    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@llamaindex/openai": "^0.4.22",
+        "@llamaindex/pinecone": "^0.1.22",
+        "@llamaindex/readers": "^3.1.21",
+        "@llamaindex/workflow": "^1.1.24",
+        "@pinecone-database/pinecone": "^7.0.0",
+        "bcryptjs": "^2.4.3",
+        "concurrently": "^8.2.2",
+        "cookie-parser": "^1.4.6",
+        "dotenv": "^16.4.1",
+        "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.2",
+        "llamaindex": "^0.12.1",
+        "mongoose": "^8.1.1",
+        "multer": "^1.4.5-lts.1",
+        "nodemon": "^3.0.3"
+    }
 }
