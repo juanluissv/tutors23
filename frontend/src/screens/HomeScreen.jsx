@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useGetChatMutation } from '../slices/chatSlice';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Icon URLs from Figma
 const imgVector = "https://www.figma.com/api/mcp/asset/723162b6-de90-4133-b1f8-eede50d70e47";
@@ -109,7 +111,28 @@ function App() {
                     className={message.type === 'question' ? 'message-question' : 'message-answer'}
                   >
                     <div className="message-content">
-                      {message.content}
+                      {message.type === 'answer' ? (
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            code: ({node, inline, className, children, ...props}) => {
+                              return inline ? (
+                                <code className="inline-code" {...props}>
+                                  {children}
+                                </code>
+                              ) : (
+                                <code className="code-block" {...props}>
+                                  {children}
+                                </code>
+                              );
+                            }
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      ) : (
+                        message.content
+                      )}
                     </div>
                   </div>
                 ))}
