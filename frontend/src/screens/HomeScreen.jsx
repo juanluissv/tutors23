@@ -16,6 +16,7 @@ function App() {
     const [messages, setMessages] = useState([]);
     // Sidebar closed by default on mobile, open on desktop
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
+    const [showSubheading, setShowSubheading] = useState(false);
     const messagesEndRef = useRef(null);
 
     const [getChat, { isLoading }] = useGetChatMutation();
@@ -49,6 +50,15 @@ function App() {
         return () => window.removeEventListener('resize', handleResize);
     }, [isSidebarOpen]);
 
+    // Show subheading after 3 seconds
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowSubheading(true);
+        }, 3000); // 3000ms = 3 seconds
+
+        return () => clearTimeout(timer); // Cleanup on unmount
+    }, []);
+
     const submitHandler = async (e) => {
         e.preventDefault();
         if (!question.trim()) return;
@@ -62,6 +72,27 @@ function App() {
 
         try {
             const res = await getChat({ question: currentQuestion });
+            console.log(res);
+            
+            // Add the answer to messages
+            const aiMessage = { type: 'answer', content: res.data.message };
+            setMessages(prev => [...prev, aiMessage]);
+        } catch (error) {
+            console.error(error);
+            const errorMessage = { type: 'answer', content: 'Sorry, there was an error processing your question.' };
+            setMessages(prev => [...prev, errorMessage]);
+        }
+    }
+
+    const handleSubheadingClick = async () => {
+        const predefinedQuestion = "suggest me some questions to ask";
+        
+        // Add the question to messages immediately
+        const userMessage = { type: 'question', content: predefinedQuestion };
+        setMessages(prev => [...prev, userMessage]);
+
+        try {
+            const res = await getChat({ question: predefinedQuestion });
             console.log(res);
             
             // Add the answer to messages
@@ -102,6 +133,14 @@ function App() {
             {messages.length === 0 ? (
               <div className="center-content">
                 <h1 className="main-heading">What would you like to learn today?</h1>
+                {showSubheading && (
+                  <small 
+                    className="main-subheading animate-fade-in clickable-subheading" 
+                    onClick={handleSubheadingClick}
+                  >
+                    suggest me some questions to ask
+                  </small>
+                )}
               </div>
             ) : (
               <div className="chat-messages">

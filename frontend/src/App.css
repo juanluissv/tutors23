@@ -292,9 +292,60 @@
   font-weight: 500;
   color: #1e2939;
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 24px;
   letter-spacing: 0.4px;
   line-height: 36px;
+}
+
+.main-subheading {
+  display: block;
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 24px;
+  font-weight: 400;
+  opacity: 0;
+}
+
+.clickable-subheading {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  border: 1px solid transparent;
+}
+
+.clickable-subheading:hover {
+  color: #2563eb;
+  background: #f0f9ff;
+  transform: scale(1.05);
+  border-color: #bfdbfe;
+}
+
+.clickable-subheading:active {
+  transform: scale(0.98);
+  background: #dbeafe;
+}
+
+/* Fade-in animation */
+.animate-fade-in {
+  animation: fadeIn 1s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .input-area {
@@ -451,6 +502,13 @@
   word-wrap: break-word;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.main-subheading {
+  font-size: 12px;
+  color: #6a7282;
+  text-align: center;
+  line-height: 16px;
 }
 
 .message-answer {
@@ -760,7 +818,16 @@
   .main-heading {
     font-size: 24px;
     line-height: 32px;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
+  }
+
+  .main-subheading {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .clickable-subheading {
+    padding: 6px 12px;
   }
 
   /* Center content */
@@ -870,8 +937,21 @@
   .main-heading {
     font-size: 20px;
     line-height: 28px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     padding: 0 10px;
+  }
+
+  .main-subheading {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  .clickable-subheading {
+    padding: 5px 10px;
+  }
+
+  .clickable-subheading:hover {
+    transform: scale(1.03);
   }
 
   /* Chat messages */
@@ -1004,6 +1084,12 @@
   .main-heading {
     font-size: 18px;
     line-height: 26px;
+    margin-bottom: 12px;
+  }
+
+  .main-subheading {
+    font-size: 11px;
+    margin-bottom: 12px;
   }
 
   .header-left button span,
@@ -1090,6 +1176,12 @@
 
   .main-heading {
     font-size: 34px;
+    margin-bottom: 28px;
+  }
+
+  .main-subheading {
+    font-size: 15px;
+    margin-bottom: 28px;
   }
 }
 
