@@ -48,10 +48,13 @@ function Sidebar({ isOpen, toggleSidebar }) {
           
         </nav>
 
-        <h3 className="section-heading">Your chats</h3>
+        <h3 className="section-heading">Your Subjects</h3>
         <button className="nav-button  menu2">
           &nbsp; - Warren Buffett <br /> &nbsp; &nbsp; Shareholder Report
           </button>
+          <a href="https://www.berkshirehathaway.com/letters/2023ltr.pdf" target="_blank" className="navButton22  ">
+            Report Link
+          </a>
       </div>
     </div>
   );
