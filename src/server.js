@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 // import uploadRoutes from './routes/uploadRoutes.js';
 // import userRoutes from './routes/userRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
+import ttsRoutes from './routes/ttsRoutes.js';
 
 dotenv.config()
 
@@ -31,6 +32,7 @@ const __dirname = path.resolve() //set  __dirname to current directory
 // })
 
 app.use('/api/chat', chatRoutes);
+app.use('/api/tts', ttsRoutes);
 
 
 

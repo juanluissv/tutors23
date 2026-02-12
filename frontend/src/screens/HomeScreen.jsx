@@ -6,6 +6,7 @@ import { useGetChatMutation } from '../slices/chatSlice';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+
 // Icon URLs from Figma
 const imgVector = "https://www.figma.com/api/mcp/asset/723162b6-de90-4133-b1f8-eede50d70e47";
 const imgVector2 = "https://www.figma.com/api/mcp/asset/233ff404-949d-499e-b272-47afd90ec4c7";
@@ -17,7 +18,9 @@ function App() {
     // Sidebar closed by default on mobile, open on desktop
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
     const [showSubheading, setShowSubheading] = useState(false);
+    const [playingAudio, setPlayingAudio] = useState(null); // Track which message is playing audio
     const messagesEndRef = useRef(null);
+    const audioRef = useRef(null);
 
     const [getChat, { isLoading }] = useGetChatMutation();
 
@@ -57,6 +60,16 @@ function App() {
         }, 3000); // 3000ms = 3 seconds
 
         return () => clearTimeout(timer); // Cleanup on unmount
+    }, []);
+
+    // Cleanup audio on component unmount
+    useEffect(() => {
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
     }, []);
 
     const submitHandler = async (e) => {
@@ -105,6 +118,58 @@ function App() {
         }
     }
 
+    const playAudio = async (text, messageIndex) => {
+        try {
+            // Stop current audio if playing
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+
+            // If clicking the same message that's playing, just stop it
+            if (playingAudio === messageIndex) {
+                setPlayingAudio(null);
+                return;
+            }
+
+            setPlayingAudio(messageIndex);
+
+            const response = await fetch('/api/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate speech');
+            }
+
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            const audio = new Audio(audioUrl);
+            audioRef.current = audio;
+
+            audio.onended = () => {
+                setPlayingAudio(null);
+                URL.revokeObjectURL(audioUrl);
+            };
+
+            audio.onerror = () => {
+                setPlayingAudio(null);
+                URL.revokeObjectURL(audioUrl);
+                console.error('Error playing audio');
+            };
+
+            await audio.play();
+        } catch (error) {
+            console.error('Error generating speech:', error);
+            setPlayingAudio(null);
+        }
+    };
+
 
 
 
@@ -149,29 +214,50 @@ function App() {
                     key={index} 
                     className={message.type === 'question' ? 'message-question' : 'message-answer'}
                   >
-                    <div className="message-content">
-                      {message.type === 'answer' ? (
-                        <ReactMarkdown 
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            code: ({node, inline, className, children, ...props}) => {
-                              return inline ? (
-                                <code className="inline-code" {...props}>
-                                  {children}
-                                </code>
-                              ) : (
-                                <code className="code-block" {...props}>
-                                  {children}
-                                </code>
-                              );
-                            }
-                          }}
-                        >
-                          {message.content}
-                        </ReactMarkdown>
-                      ) : (
-                        message.content
-                      )}
+                    <div className="message-wrapper">
+                      <div className="message-content">
+                        {message.type === 'answer' ? (
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              code: ({node, inline, className, children, ...props}) => {
+                                return inline ? (
+                                  <code className="inline-code" {...props}>
+                                    {children}
+                                  </code>
+                                ) : (
+                                  <code className="code-block" {...props}>
+                                    {children}
+                                  </code>
+                                );
+                              }
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        ) : (
+                          message.content
+                        )}
+                      </div>
+                      <button 
+                        className="voice-button"
+                        onClick={() => playAudio(message.content, index)}
+                        aria-label="Play audio"
+                        title="Play audio"
+                      >
+                        {playingAudio === index ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="6" y="4" width="4" height="16" />
+                            <rect x="14" y="4" width="4" height="16" />
+                          </svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                          </svg>
+                        )}
+                      </button>
                     </div>
                   </div>
                 ))}
