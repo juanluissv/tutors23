@@ -12,14 +12,40 @@ const imgIcon9 = "https://www.figma.com/api/mcp/asset/f97f23f3-6aa1-4800-886e-0d
 function App() {
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([]);
+    // Sidebar closed by default on mobile, open on desktop
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
     const messagesEndRef = useRef(null);
 
     const [getChat, { isLoading }] = useGetChatMutation();
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    // Close sidebar when clicking outside on mobile
+    const closeSidebarOnMobile = () => {
+        if (window.innerWidth <= 768 && isSidebarOpen) {
+            setIsSidebarOpen(false);
+        }
+    };
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isLoading]);
+
+    // Handle window resize for responsive sidebar behavior
+    useEffect(() => {
+        const handleResize = () => {
+            // On desktop, keep sidebar open; on mobile, close it
+            if (window.innerWidth > 768 && !isSidebarOpen) {
+                setIsSidebarOpen(true);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [isSidebarOpen]);
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -59,11 +85,16 @@ function App() {
       </button> */}
 
       <div className="main-container">
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        
+        {/* Overlay for mobile - click to close sidebar */}
+        {isSidebarOpen && window.innerWidth <= 768 && (
+          <div className="sidebar-overlay" onClick={closeSidebarOnMobile}></div>
+        )}
 
         {/* Main Content */}
         <div className="main-content">
-          <Header />
+          <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
           <div className="content-area">
             {messages.length === 0 ? (
@@ -123,7 +154,7 @@ function App() {
               </button>
             </div>
             <p className="footer-text">
-              AI can make mistakes. Check important info.
+              {/* AI can make mistakes. Check important info. */}
             </p>
           </div>
         </div>

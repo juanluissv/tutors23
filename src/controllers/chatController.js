@@ -22,7 +22,7 @@ const getChat = asyncHandler(async (req, res) => {
     });
 
     Settings.embedModel = new OpenAIEmbedding({
-        model: 'text-embedding-3-small'
+        model: 'text-embedding-ada-002'  // This model produces exactly 1536 dimensions
     });
 
     const pc = new Pinecone({
@@ -30,25 +30,27 @@ const getChat = asyncHandler(async (req, res) => {
       });
 
       const pineconeIndex = pc.index('langchain-docs');
+      //console.log(pineconeIndex);
 
       const vectorStore = new PineconeVectorStore({
         pineconeIndex,
         indexName: 'langchain-docs',
       });
+      //console.log(vectorStore);
 
       const storageContext = await storageContextFromDefaults({
         vectorStore,
       });
+      // console.log(storageContext);
 
       const index = await VectorStoreIndex.fromVectorStore(
         vectorStore,
         storageContext
       );
-
+        //console.log(index);
 
       const queryEngine = index.asQueryEngine();
   const result = await queryEngine.query({
-    //query: 'please give me the main points of the entire report and the main advice?',
     query: question
   });
     

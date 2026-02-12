@@ -9,11 +9,11 @@ const imgIcon4 = "https://www.figma.com/api/mcp/asset/2b4a1e98-3d18-4211-9bcc-e9
 const imgIcon5 = "https://www.figma.com/api/mcp/asset/5a2fab9e-f622-4d48-b32c-2ea77aaa4049";
 const imgIcon6 = "https://www.figma.com/api/mcp/asset/f1fd38f0-abee-4ff0-a78a-bfe485366c42";
 
-function Sidebar() {
+function Sidebar({ isOpen, toggleSidebar }) {
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <div className="sidebar-header">
-        <button className="menu-button">
+        <button className="menu-button" onClick={toggleSidebar}>
           <img src={imgIcon} alt="Menu" className="icon" />
         </button>
       </div>
@@ -22,31 +22,36 @@ function Sidebar() {
         <nav className="navigation">
           <button className="nav-button">
             <img src={imgIcon1} alt="" />
-            <span>New chat</span>
+            <span>New Tutor</span>
           </button>
           <button className="nav-button">
             <img src={imgIcon2} alt="" />
-            <span>Search chats</span>
+            <span>Search Tutor</span>
           </button>
-          <button className="nav-button">
+          {/* <button className="nav-button">
             <img src={imgIcon3} alt="" />
             <span>Images</span>
           </button>
           <button className="nav-button">
             <img src={imgIcon4} alt="" />
             <span>Apps</span>
-          </button>
-          <button className="nav-button">
-            <img src={imgIcon5} alt="" />
-            <span>Codex</span>
-          </button>
+          </button> */}
           <button className="nav-button">
             <img src={imgIcon6} alt="" />
-            <span>Projects</span>
+            <span>Subjects</span>            
           </button>
+          {/* <button className="nav-button">
+            <img src={imgIcon6} alt="" />
+            <span>Projects</span>
+          </button> */}
+
+          
         </nav>
 
         <h3 className="section-heading">Your chats</h3>
+        <button className="nav-button  menu2">
+          &nbsp; - Warren Buffett <br /> &nbsp; &nbsp; Shareholder Report
+          </button>
       </div>
     </div>
   );
