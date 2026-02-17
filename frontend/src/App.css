@@ -337,6 +337,20 @@
   animation: fadeIn 1s ease-in forwards;
 }
 
+.nav-button-link {
+  text-decoration: none;
+  color: #364153;
+}
+
+.nav-button-link:hover {
+  text-decoration: none;
+  color: #364153;
+}
+
+.nav-button-link:active {
+  text-decoration: none;
+  color: #364153;
+}
 @keyframes fadeIn {
   0% {
     opacity: 0;

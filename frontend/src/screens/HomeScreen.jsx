@@ -1,5 +1,6 @@
 import '../App.css';
 import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useGetChatMutation } from '../slices/chatSlice';
@@ -12,7 +13,12 @@ const imgVector = "https://www.figma.com/api/mcp/asset/723162b6-de90-4133-b1f8-e
 const imgVector2 = "https://www.figma.com/api/mcp/asset/233ff404-949d-499e-b272-47afd90ec4c7";
 const imgIcon9 = "https://www.figma.com/api/mcp/asset/f97f23f3-6aa1-4800-886e-0d66f48f67ed";
 
-function App() {
+function HomeScreen() {
+
+  const { id } = useParams();
+
+
+
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([]);
     // Sidebar closed by default on mobile, open on desktop
@@ -84,7 +90,7 @@ function App() {
         setQuestion(""); // Clear input
 
         try {
-            const res = await getChat({ question: currentQuestion });
+            const res = await getChat({ question: currentQuestion, id });
             console.log(res);
             
             // Add the answer to messages
@@ -97,15 +103,34 @@ function App() {
         }
     }
 
+    const [predefinedQuestion, setPredefinedQuestion] = useState("");
+    const [learningMaterial, setLearningMaterial] = useState("");
+
+    useEffect(() => {
+      if (id == 'ciencias1') {
+        setPredefinedQuestion("sugiereme algo para preguntar sobre el libro de texto de ciencias 1");
+        setLearningMaterial("Que vas a aprender hoy?")
+      } else {
+        setPredefinedQuestion("suggest me some questions to ask");
+        setLearningMaterial("What would you like to learn today?")
+
+      }
+
+    }, [id]);
+
+
+
     const handleSubheadingClick = async () => {
-        const predefinedQuestion = "suggest me some questions to ask";
+     
+
+
         
         // Add the question to messages immediately
         const userMessage = { type: 'question', content: predefinedQuestion };
         setMessages(prev => [...prev, userMessage]);
 
         try {
-            const res = await getChat({ question: predefinedQuestion });
+            const res = await getChat({ question: predefinedQuestion, id });
             console.log(res);
             
             // Add the answer to messages
@@ -197,13 +222,13 @@ function App() {
           <div className="content-area">
             {messages.length === 0 ? (
               <div className="center-content">
-                <h1 className="main-heading">What would you like to learn today?</h1>
+                <h1 className="main-heading">{learningMaterial}</h1>
                 {showSubheading && (
                   <small 
                     className="main-subheading animate-fade-in clickable-subheading" 
                     onClick={handleSubheadingClick}
                   >
-                    suggest me some questions to ask
+                    {predefinedQuestion}
                   </small>
                 )}
               </div>
@@ -311,4 +336,4 @@ function App() {
   );
 }
 
-export default App;
+export default HomeScreen;

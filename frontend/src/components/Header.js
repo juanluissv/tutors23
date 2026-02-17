@@ -1,13 +1,12 @@
 import React from 'react';
 
 // Icon URLs from Figma
-const imgIcon = "https://www.figma.com/api/mcp/asset/b8cf5fd6-92d5-4c99-b108-f60d194c46cb";
-const imgIcon7 = "https://www.figma.com/api/mcp/asset/af161c66-380d-444e-9482-9a285977b7fd";
-const imgIcon8 = "https://www.figma.com/api/mcp/asset/d1ac8988-06bf-4483-ab30-0c3739cf1742";
+const imgIcon = "https://www.figma.com/api/mcp/asset/0af1f7fd-f3b0-447c-85f2-11ecd9f8aa71";
+const imgIcon7 = "https://www.figma.com/api/mcp/asset/34081ae6-9743-48f6-89b6-b8e08cae2713";
+const imgIcon8 = "https://www.figma.com/api/mcp/asset/57585464-16e0-42a2-b3c9-898747cb85ef";
 
 function Header({ isSidebarOpen, toggleSidebar }) {
 
-  console.log(isSidebarOpen);
 
   return (
     <header className={`header ${!isSidebarOpen ? 'header-centered' : ''}`}>
