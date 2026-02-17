@@ -118,6 +118,19 @@ function HomeScreen() {
 
     }, [id]);
 
+    // Clear chat history when switching subjects
+    useEffect(() => {
+      setMessages([]);
+      setShowSubheading(false);
+      
+      // Reset subheading timer
+      const timer = setTimeout(() => {
+        setShowSubheading(true);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }, [id]);
+
 
 
     const handleSubheadingClick = async () => {
