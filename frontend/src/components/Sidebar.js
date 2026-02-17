@@ -57,19 +57,21 @@ function Sidebar({ isOpen, toggleSidebar }) {
         <button className={`nav-button ${location.pathname === '/subjects/langchain-docs' ? 'menu2' : ''}`}>
           &nbsp; - Warren Buffett <br /> &nbsp; &nbsp; Shareholder Report
           </button>
+          
+          </Link>
           <a href="https://www.berkshirehathaway.com/letters/2023ltr.pdf" target="_blank" className="navButton22  ">
             Report Link
           </a> <br /><br />
-          </Link>
 
           <Link to="/subjects/ciencias1" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/subjects/ciencias1' ? 'menu2' : ''}`}>
           &nbsp; - Ciencia y Tecnología <br /> &nbsp; &nbsp;  1 año bachillerato El Salvador
           </button>
+          
+          </Link>
           <a href="https://www.mined.gob.sv/materiales/2026/CIENCIA_Y_TECNOLOGIA/2.%20Libros%20de%20texto/Libro%20de%20texto%201.%C2%B0%20a%C3%B1o%20de%20bachillerato.pdf" target="_blank" className="navButton22  ">
             Book Link
           </a>
-          </Link>
 
 
       </div>

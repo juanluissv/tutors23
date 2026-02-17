@@ -233,11 +233,19 @@
   font-weight: 500;
   letter-spacing: -0.15px;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .navButton22{
   color: rgb(0, 110, 255);
   margin-left: 22%;
+  cursor: pointer;
+}
+
+.navButton22:hover{
+  color: rgb(0, 110, 255);
+  margin-left: 22%;
+  cursor: pointer;
 }
 
 
@@ -340,16 +348,19 @@
 .nav-button-link {
   text-decoration: none;
   color: #364153;
+  cursor: pointer;
 }
 
 .nav-button-link:hover {
   text-decoration: none;
   color: #364153;
+  cursor: pointer;
 }
 
 .nav-button-link:active {
   text-decoration: none;
   color: #364153;
+  cursor: pointer;
 }
 @keyframes fadeIn {
   0% {
