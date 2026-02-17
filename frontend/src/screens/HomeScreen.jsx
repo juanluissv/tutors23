@@ -77,6 +77,10 @@ function HomeScreen() {
             }
         };
     }, []);
+    const [predefinedQuestion, setPredefinedQuestion] = useState("");
+    const [learningMaterial, setLearningMaterial] = useState("");
+
+   
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -103,8 +107,7 @@ function HomeScreen() {
         }
     }
 
-    const [predefinedQuestion, setPredefinedQuestion] = useState("");
-    const [learningMaterial, setLearningMaterial] = useState("");
+
 
     useEffect(() => {
       if (id == 'ciencias1') {
@@ -113,10 +116,21 @@ function HomeScreen() {
       } else {
         setPredefinedQuestion("suggest me some questions to ask");
         setLearningMaterial("What would you like to learn today?")
-
       }
 
+      // if(id == undefined){
+      //   //id = 'langchain-docs';
+      //   setPredefinedQuestion("suggest me some questions to ask");
+      //   setLearningMaterial("What would you like to learn today?");
+      // }
+
     }, [id]);
+
+
+    //console.log(id);
+
+
+
 
     // Clear chat history when switching subjects
     useEffect(() => {
@@ -143,12 +157,19 @@ function HomeScreen() {
         setMessages(prev => [...prev, userMessage]);
 
         try {
-            const res = await getChat({ question: predefinedQuestion, id });
-            console.log(res);
-            
+          if(id == undefined){
+            const res = await getChat({ question: predefinedQuestion, 'id': 'langchain-docs' });
             // Add the answer to messages
             const aiMessage = { type: 'answer', content: res.data.message };
             setMessages(prev => [...prev, aiMessage]);
+          }
+
+          if (id != undefined){
+            const res = await getChat({ question: predefinedQuestion, id });
+            // Add the answer to messages
+            const aiMessage = { type: 'answer', content: res.data.message };
+            setMessages(prev => [...prev, aiMessage]);
+          }
         } catch (error) {
             console.error(error);
             const errorMessage = { type: 'answer', content: 'Sorry, there was an error processing your question.' };
