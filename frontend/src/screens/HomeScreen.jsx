@@ -92,9 +92,15 @@ function HomeScreen() {
         
         const currentQuestion = question;
         setQuestion(""); // Clear input
-
+        let res;
         try {
-            const res = await getChat({ question: currentQuestion, id });
+          if(id == undefined){
+             res = await getChat({ question: currentQuestion, 'id': 'langchain-docs' });
+          }
+          if (id != undefined){
+             res = await getChat({ question: currentQuestion, id });
+          }
+            // const res = await getChat({ question: currentQuestion, id });
             console.log(res);
             
             // Add the answer to messages
@@ -205,7 +211,19 @@ function HomeScreen() {
                 throw new Error('Failed to generate speech');
             }
 
-            const audioBlob = await response.blob();
+            // Handle streaming response
+            const reader = response.body.getReader();
+            const chunks = [];
+            
+            // Read chunks as they arrive
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+            }
+            
+            // Combine chunks into blob (WAV format for fastest playback)
+            const audioBlob = new Blob(chunks, { type: 'audio/wav' });
             const audioUrl = URL.createObjectURL(audioBlob);
             
             const audio = new Audio(audioUrl);

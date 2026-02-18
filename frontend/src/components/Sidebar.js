@@ -27,10 +27,15 @@ function Sidebar({ isOpen, toggleSidebar }) {
             <img src={imgIcon1} alt="" />
             <span>New Tutor</span>
           </button>
+
+          <Link to="/ask" className="nav-button-link">
           <button className="nav-button">
             <img src={imgIcon5} alt="" />
-            <span>Ask your Teacher</span>
+            <span>Ask your class Teacher</span>
           </button>
+          </Link>
+
+
           {/* <button className="nav-button">
             <img src={imgIcon3} alt="" />
             <span>Images</span>

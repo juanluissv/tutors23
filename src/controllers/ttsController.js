@@ -1,5 +1,6 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import OpenAI from 'openai';
+import { playAudio } from "openai/helpers/audio";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -17,20 +18,36 @@ const generateSpeech = asyncHandler(async (req, res) => {
     }
 
     try {
-        const mp3 = await openai.audio.speech.create({
-            model: "tts-1",
-            voice: "nova", // Options: alloy, echo, fable, onyx, nova, shimmer
+        // Create streaming audio response - WAV format for fastest playback
+        const response = await openai.audio.speech.create({
+            model: "gpt-4o-mini-tts",
+            voice: "marin", // Options: alloy, ash, ballad, coral, echo, fable, nova, onyx, sage, shimmer, verse, marin, cedar
             input: text,
+            response_format: "wav" // WAV for lowest latency
         });
 
-        const buffer = Buffer.from(await mp3.arrayBuffer());
-        
+        // Set headers for streaming with chunked transfer encoding
         res.set({
-            'Content-Type': 'audio/mpeg',
-            'Content-Length': buffer.length,
+            'Content-Type': 'audio/wav',
+            'Transfer-Encoding': 'chunked',
         });
         
-        res.send(buffer);
+        // Get the Web Stream reader
+        const stream = response.body;
+        const reader = stream.getReader();
+        
+        // Read and write chunks as they arrive
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                res.write(value); // Write chunk to response
+            }
+            res.end(); // Close the response when done
+        } finally {
+            reader.releaseLock();
+        }
+        
     } catch (error) {
         console.error('TTS Error:', error);
         res.status(500);
