@@ -8,10 +8,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 
-// Icon URLs from Figma
-const imgVector = "https://www.figma.com/api/mcp/asset/723162b6-de90-4133-b1f8-eede50d70e47";
-const imgVector2 = "https://www.figma.com/api/mcp/asset/233ff404-949d-499e-b272-47afd90ec4c7";
-const imgIcon9 = "https://www.figma.com/api/mcp/asset/f97f23f3-6aa1-4800-886e-0d66f48f67ed";
+// Send button icon from Figma design (node 1-67)
+const SendButtonIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="send-button-icon">
+    <path d="M10 4v12M4 10l6-6 6 6" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 function HomeScreen() {
 
@@ -375,7 +377,7 @@ function HomeScreen() {
                 onClick={submitHandler}
                 disabled={isLoading || !question.trim()}
               >
-                <img src={imgIcon9} alt="Send" />
+                <SendButtonIcon />
               </button>
             </div>
             <p className="footer-text">

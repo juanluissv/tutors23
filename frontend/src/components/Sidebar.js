@@ -1,14 +1,55 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom'
 
-// Icon URLs from Figma
-const imgIcon = "https://www.figma.com/api/mcp/asset/0af1f7fd-f3b0-447c-85f2-11ecd9f8aa71";
-const imgIcon1 = "https://www.figma.com/api/mcp/asset/72f23316-e1e2-4362-934d-a609aad86bdd";
-const imgIcon2 = "https://www.figma.com/api/mcp/asset/89e3ab0c-527d-47d6-83c5-a3ae02fe3d06";
-const imgIcon3 = "https://www.figma.com/api/mcp/asset/507bab4e-5164-4c9b-bb12-e263e9926c63";
-const imgIcon4 = "https://www.figma.com/api/mcp/asset/4d054f7a-b61c-4036-a0c1-521fc8343796";
-const imgIcon5 = "https://www.figma.com/api/mcp/asset/c3f70b4f-39b0-4f63-9e56-d912a8ab7cbe";
-const imgIcon6 = "https://www.figma.com/api/mcp/asset/e8c2d8c3-6bc0-4958-b4aa-91805be6e734";
+// Hamburger menu icon
+const imgIcon = "/burg.svg";
+
+// Colorful inline SVG icons
+const IconNewTutor = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
+    <path d="M12 2L14.5 8.5L21 9L16 13.5L17.5 20L12 17L6.5 20L8 13.5L3 9L9.5 8.5L12 2Z" fill="url(#star-gradient)" stroke="url(#star-gradient)" strokeWidth="1.5" strokeLinejoin="round"/>
+    <defs>
+      <linearGradient id="star-gradient" x1="3" y1="2" x2="21" y2="20" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#F59E0B"/>
+        <stop offset="1" stopColor="#EF4444"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+const IconAskTeacher = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
+    <circle cx="12" cy="12" r="10" stroke="url(#chat-stroke)" strokeWidth="2" fill="url(#chat-fill)"/>
+    <path d="M8 10h8M8 14h5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+    <defs>
+      <linearGradient id="chat-stroke" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#6366F1"/>
+        <stop offset="1" stopColor="#8B5CF6"/>
+      </linearGradient>
+      <linearGradient id="chat-fill" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#6366F1"/>
+        <stop offset="1" stopColor="#7C3AED"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+const IconSubjects = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
+    <path d="M4 6h16v12H4V6z" stroke="url(#book-stroke)" strokeWidth="2" strokeLinejoin="round" fill="url(#book-fill)"/>
+    <path d="M4 6h16M9 10h6M9 14h4" stroke="url(#book-stroke)" strokeWidth="1.5" strokeLinecap="round"/>
+    <defs>
+      <linearGradient id="book-stroke" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#10B981"/>
+        <stop offset="1" stopColor="#06B6D4"/>
+      </linearGradient>
+      <linearGradient id="book-fill" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#34D399" stopOpacity="0.4"/>
+        <stop offset="1" stopColor="#22D3EE" stopOpacity="0.5"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
 
 function Sidebar({ isOpen, toggleSidebar }) {
   const location = useLocation();
@@ -24,13 +65,13 @@ function Sidebar({ isOpen, toggleSidebar }) {
       <div className="sidebar-content">
         <nav className="navigation">
           <button className="nav-button">
-            <img src={imgIcon1} alt="" />
+            <IconNewTutor />
             <span>New Tutor</span>
           </button>
 
           <Link to="/ask" className="nav-button-link">
           <button className="nav-button">
-            <img src={imgIcon5} alt="" />
+            <IconAskTeacher />
             <span>Ask your class Teacher</span>
           </button>
           </Link>
@@ -45,7 +86,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
             <span>Apps</span>
           </button> */}
           <button className="nav-button">
-            <img src={imgIcon6} alt="" />
+            <IconSubjects />
             <span>Subjects</span>            
           </button>
           {/* <button className="nav-button">

@@ -140,9 +140,11 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
-.nav-button img {
+.nav-button img,
+.nav-button svg {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
 }
 
 .nav-button span {
@@ -502,7 +504,8 @@
   transition: background 0.2s;
 }
 
-.send-button img {
+.send-button img,
+.send-button svg {
   width: 20px;
   height: 20px;
 }
@@ -1185,7 +1188,8 @@
     height: 28px;
   }
 
-  .send-button img {
+  .send-button img,
+  .send-button svg {
     width: 18px;
     height: 18px;
   }
@@ -1224,7 +1228,8 @@
     font-size: 13px;
   }
 
-  .nav-button img {
+  .nav-button img,
+  .nav-button svg {
     width: 18px;
     height: 18px;
   }
