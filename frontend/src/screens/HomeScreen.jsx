@@ -31,10 +31,43 @@ function HomeScreen() {
     const audioRef = useRef(null);
     const abortControllerRef = useRef(null);
     const audioUrlRef = useRef(null);
+    const audioEventHandlersRef = useRef({ onended: null, onerror: null });
     const [predefinedQuestion, setPredefinedQuestion] = useState("");
     const [learningMaterial, setLearningMaterial] = useState("");
 
     const [getChat, { isLoading }] = useGetChatMutation();
+
+    const cleanupAudio = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+
+        if (audioRef.current) {
+            const audio = audioRef.current;
+            audio.pause();
+            
+            if (audioEventHandlersRef.current.onended) {
+                audio.removeEventListener('ended', audioEventHandlersRef.current.onended);
+            }
+            if (audioEventHandlersRef.current.onerror) {
+                audio.removeEventListener('error', audioEventHandlersRef.current.onerror);
+            }
+            audioEventHandlersRef.current = { onended: null, onerror: null };
+            
+            audio.src = '';
+            audio.load();
+            audioRef.current = null;
+        }
+
+        if (audioUrlRef.current) {
+            URL.revokeObjectURL(audioUrlRef.current);
+            audioUrlRef.current = null;
+        }
+
+        setPlayingAudio(null);
+        setLoadingAudio(null);
+    };
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -77,17 +110,7 @@ function HomeScreen() {
     // Cleanup audio on component unmount
     useEffect(() => {
         return () => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
-            if (audioUrlRef.current) {
-                URL.revokeObjectURL(audioUrlRef.current);
-                audioUrlRef.current = null;
-            }
+            cleanupAudio();
         };
     }, []);
    
@@ -97,7 +120,7 @@ function HomeScreen() {
         setPredefinedQuestion("sugiereme algo para preguntar sobre el libro de texto de ciencias 1");
         setLearningMaterial("Que vas a aprender hoy?")
       } else {
-        setPredefinedQuestion("suggest me some questions to ask");
+        setPredefinedQuestion("suggest me some questions to ask about Warren Buffett Shareholder Report");
         setLearningMaterial("What would you like to learn today?")
       }
 
@@ -107,8 +130,9 @@ function HomeScreen() {
 
 
 
-    // Clear chat history when switching subjects
+    // Clear chat history and cleanup audio when switching subjects
     useEffect(() => {
+      cleanupAudio();
       setMessages([]);
       setShowSubheading(false);
       
@@ -189,32 +213,16 @@ function HomeScreen() {
 
     const playAudio = async (text, messageIndex) => {
         try {
-            // Abort any previous request
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-
-            // Stop current audio if playing
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
-
-            // Clean up previous audio URL
-            if (audioUrlRef.current) {
-                URL.revokeObjectURL(audioUrlRef.current);
-                audioUrlRef.current = null;
-            }
-
             // If clicking the same message that's playing or loading, just stop it
             if (playingAudio === messageIndex || loadingAudio === messageIndex) {
-                setPlayingAudio(null);
-                setLoadingAudio(null);
+                cleanupAudio();
                 return;
             }
 
-            // Clear previous states and set loading
-            setPlayingAudio(null);
+            // Clean up any previous audio before starting new one
+            cleanupAudio();
+
+            // Set loading state
             setLoadingAudio(messageIndex);
 
             // Create new abort controller for this request
@@ -241,22 +249,18 @@ function HomeScreen() {
             const audio = new Audio(audioUrl);
             audioRef.current = audio;
 
-            audio.onended = () => {
-                setPlayingAudio(null);
-                if (audioUrlRef.current) {
-                    URL.revokeObjectURL(audioUrlRef.current);
-                    audioUrlRef.current = null;
-                }
+            const handleEnded = () => {
+                cleanupAudio();
             };
 
-            audio.onerror = () => {
-                setPlayingAudio(null);
-                if (audioUrlRef.current) {
-                    URL.revokeObjectURL(audioUrlRef.current);
-                    audioUrlRef.current = null;
-                }
+            const handleError = () => {
                 console.error('Error playing audio');
+                cleanupAudio();
             };
+
+            audioEventHandlersRef.current = { onended: handleEnded, onerror: handleError };
+            audio.addEventListener('ended', handleEnded);
+            audio.addEventListener('error', handleError);
 
             // Audio is ready, switch from loading to playing
             setLoadingAudio(null);
@@ -264,12 +268,10 @@ function HomeScreen() {
             await audio.play();
         } catch (error) {
             if (error.name === 'AbortError') {
-                setLoadingAudio(null);
                 return;
             }
             console.error('Error generating speech:', error);
-            setPlayingAudio(null);
-            setLoadingAudio(null);
+            cleanupAudio();
         }
     };
 

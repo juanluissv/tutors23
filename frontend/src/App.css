@@ -71,6 +71,7 @@
 .sidebar-header {
   border-bottom: 1.25px solid #e5e7eb;
   padding: 12px;
+  padding-bottom: 20px;
 }
 
 .menu-button {
@@ -254,7 +255,7 @@
 .header-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   padding: 2px 16px;
   border-radius: 12px;
 }
@@ -264,7 +265,6 @@
   font-weight: 600;
   color: #6366f1;
   letter-spacing: -0.3px;
-  padding-top: 13px;
 }
 
 .logo-image {
@@ -354,12 +354,34 @@
   flex: 1;
 }
 
+.center-content3 {
+  max-width: 768px;
+  width: 100%;
+  padding: 20px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  margin-top: 0px;
+  flex-direction: column;
+  flex: 1;
+}
+
 .main-heading {
   font-size: 30px;
   font-weight: 500;
   color: #1e2939;
   text-align: center;
   margin-bottom: 24px;
+  letter-spacing: 0.4px;
+  line-height: 36px;
+}
+
+.main-heading-answers {
+  font-size: 30px;
+  font-weight: 500;
+  color: #1e2939;
+  text-align: center;
+  margin-bottom: 0px;
   letter-spacing: 0.4px;
   line-height: 36px;
 }
@@ -1468,6 +1490,261 @@
   background: linear-gradient(135deg, #b88cff 0%, #9b5de5 100%);
 }
 
+/* Answers Screen Styles */
+.answers-heading {
+  color: #1fb6ff;
+  margin-bottom:10px;
+  font-size: 32px;
+}
+
+.answers-container {
+  display: flex;
+  flex-direction: row;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto 40px;
+  padding: 40px;
+  border: 1px dashed #d1d5dc;
+  border-radius: 16px;
+  position: relative;
+  min-height: 500px;
+}
+
+.answers-timeline {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  padding-top: 42px;
+  padding-bottom: 0px;
+}
+
+.timeline-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.timeline-badge-blue {
+  background: #1fb6ff;
+}
+
+.timeline-badge-orange {
+  background: #ff9a56;
+}
+
+.timeline-line {
+  flex: 1;
+  width: 2px;
+  background: #d1d5dc;
+  margin: 8px 0;
+}
+
+.timeline-spacer {
+  flex: 1;
+}
+
+.answers-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+}
+
+.answer-card-wrapper {
+  display: flex;
+  width: 100%;
+}
+
+.answer-card-wrapper.left {
+  justify-content: flex-start;
+  padding-right: 55%;
+  margin-top: -10px;
+
+}
+
+.answer-card-wrapper.right {
+  justify-content: flex-end;
+  padding-left: 55%;
+  margin-top: -80px;
+}
+
+.answer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.answer-category {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.answer-category-blue {
+  color: #1fb6ff;
+}
+
+.answer-category-orange {
+  color: #ff9a56;
+}
+
+.badge-icon {
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.answer-thumbnail {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.thumbnail-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+}
+
+.thumbnail-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.thumbnail-lines .line {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  width: 80%;
+}
+
+.thumbnail-lines .line.short {
+  width: 50%;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.play-button {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.answer-question {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1e2939;
+  text-align: center;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.watch-answer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 32px;
+  border-radius: 25px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.watch-answer-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.watch-answer-btn:active {
+  transform: translateY(0);
+}
+
+.watch-answer-blue {
+  background: linear-gradient(135deg, #1fb6ff 0%, #0091e6 100%);
+}
+
+.watch-answer-orange {
+  background: linear-gradient(135deg, #ff9a56 0%, #ff6b35 100%);
+}
+
+.watch-answer-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding-bottom: 40px;
+}
+
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-btn:hover {
+  background: #f3f4f6;
+  transform: scale(1.05);
+}
+
+.pagination-btn.active {
+  background: linear-gradient(135deg, #1fb6ff 0%, #0091e6 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(31, 182, 255, 0.3);
+}
+
 /* Responsive design for upload cards */
 @media (max-width: 992px) {
   .upload-cards-container {
@@ -1477,6 +1754,31 @@
   
   .upload-card {
     min-height: 120px;
+  }
+
+  .answers-container {
+    min-height: auto;
+  }
+
+  .answers-timeline {
+    top: 40px;
+    bottom: 80px;
+  }
+
+  .answer-card-wrapper.left,
+  .answer-card-wrapper.right {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+
+  .answer-card-wrapper.left {
+    justify-content: flex-start;
+    padding-right: 55%;
+  }
+
+  .answer-card-wrapper.right {
+    justify-content: flex-end;
+    padding-left: 55%;
   }
 }
 
@@ -1498,6 +1800,55 @@
   .upload-card-icon svg {
     width: 20px;
     height: 20px;
+  }
+
+  .answers-heading {
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+
+  .answers-container {
+    padding: 20px;
+    min-height: auto;
+  }
+
+  .answers-timeline {
+    display: none;
+  }
+
+  .answers-cards {
+    gap: 30px;
+  }
+
+  .answer-card-wrapper.left,
+  .answer-card-wrapper.right {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .answer-card {
+    max-width: 100%;
+  }
+
+  .answer-category {
+    font-size: 14px;
+  }
+
+  .answer-question {
+    font-size: 14px;
+  }
+
+  .watch-answer-btn {
+    padding: 10px 24px;
+    font-size: 13px;
+    min-width: 160px;
+  }
+
+  .pagination-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
   }
 }
 

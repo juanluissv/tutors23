@@ -34,6 +34,28 @@ const IconAskTeacher = () => (
   </svg>
 );
 
+const IconTeacherAnswers = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
+    <rect x="2" y="4" width="20" height="14" rx="2" stroke="url(#video-stroke)" strokeWidth="2" fill="url(#video-fill)"/>
+    <circle cx="18" cy="6" r="3" fill="url(#badge-gradient)" stroke="white" strokeWidth="1"/>
+    <path d="M10 9l5 3-5 3V9z" fill="white"/>
+    <defs>
+      <linearGradient id="video-stroke" x1="2" y1="4" x2="22" y2="18" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#EC4899"/>
+        <stop offset="1" stopColor="#F43F5E"/>
+      </linearGradient>
+      <linearGradient id="video-fill" x1="2" y1="4" x2="22" y2="18" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#F472B6" stopOpacity="0.4"/>
+        <stop offset="1" stopColor="#FB7185" stopOpacity="0.5"/>
+      </linearGradient>
+      <linearGradient id="badge-gradient" x1="15" y1="3" x2="21" y2="9" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#F59E0B"/>
+        <stop offset="1" stopColor="#EF4444"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const IconSubjects = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
     <path d="M4 6h16v12H4V6z" stroke="url(#book-stroke)" strokeWidth="2" strokeLinejoin="round" fill="url(#book-fill)"/>
@@ -64,37 +86,28 @@ function Sidebar({ isOpen, toggleSidebar }) {
 
       <div className="sidebar-content">
         <nav className="navigation">
+        <Link to="/" className="nav-button-link">
           <button className="nav-button">
             <IconNewTutor />
-            <span>New Tutor</span>
+            <span>AI Tutor</span>
           </button>
-
+          </Link>
           <Link to="/ask" className="nav-button-link">
           <button className="nav-button">
             <IconAskTeacher />
             <span>Ask your class Teacher</span>
           </button>
-          </Link>
-
-
-          {/* <button className="nav-button">
-            <img src={imgIcon3} alt="" />
-            <span>Images</span>
-          </button>
+          </Link>     
+          <Link to="/answers" className="nav-button-link">
           <button className="nav-button">
-            <img src={imgIcon4} alt="" />
-            <span>Apps</span>
-          </button> */}
+            <IconTeacherAnswers />
+            <span>Teacher Answers</span>
+          </button>
+          </Link>        
           <button className="nav-button">
             <IconSubjects />
             <span>Subjects</span>            
-          </button>
-          {/* <button className="nav-button">
-            <img src={imgIcon6} alt="" />
-            <span>Projects</span>
-          </button> */}
-
-          
+          </button>                    
         </nav>
 
         <h3 className="section-heading">Your Subjects</h3>
