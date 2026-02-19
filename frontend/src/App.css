@@ -659,6 +659,30 @@
   height: 16px;
 }
 
+.voice-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.voice-button:disabled:hover {
+  background: transparent;
+  color: #6b7280;
+}
+
+/* Audio loading spinner animation */
+.audio-loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Markdown Formatting Styles */
 .message-content h1,
 .message-content h2,

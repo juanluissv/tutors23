@@ -23,12 +23,16 @@ function HomeScreen() {
 
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([]);
-    // Sidebar closed by default on mobile, open on desktop
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
     const [showSubheading, setShowSubheading] = useState(false);
     const [playingAudio, setPlayingAudio] = useState(null); // Track which message is playing audio
+    const [loadingAudio, setLoadingAudio] = useState(null); // Track which message is loading audio
     const messagesEndRef = useRef(null);
     const audioRef = useRef(null);
+    const abortControllerRef = useRef(null);
+    const audioUrlRef = useRef(null);
+    const [predefinedQuestion, setPredefinedQuestion] = useState("");
+    const [learningMaterial, setLearningMaterial] = useState("");
 
     const [getChat, { isLoading }] = useGetChatMutation();
 
@@ -73,16 +77,48 @@ function HomeScreen() {
     // Cleanup audio on component unmount
     useEffect(() => {
         return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;
             }
+            if (audioUrlRef.current) {
+                URL.revokeObjectURL(audioUrlRef.current);
+                audioUrlRef.current = null;
+            }
         };
     }, []);
-    const [predefinedQuestion, setPredefinedQuestion] = useState("");
-    const [learningMaterial, setLearningMaterial] = useState("");
-
    
+
+    useEffect(() => {
+      if (id == 'ciencias1') {
+        setPredefinedQuestion("sugiereme algo para preguntar sobre el libro de texto de ciencias 1");
+        setLearningMaterial("Que vas a aprender hoy?")
+      } else {
+        setPredefinedQuestion("suggest me some questions to ask");
+        setLearningMaterial("What would you like to learn today?")
+      }
+
+    }, [id]);
+
+
+
+
+
+    // Clear chat history when switching subjects
+    useEffect(() => {
+      setMessages([]);
+      setShowSubheading(false);
+      
+      // Reset subheading timer
+      const timer = setTimeout(() => {
+        setShowSubheading(true);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }, [id]);
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -117,41 +153,7 @@ function HomeScreen() {
 
 
 
-    useEffect(() => {
-      if (id == 'ciencias1') {
-        setPredefinedQuestion("sugiereme algo para preguntar sobre el libro de texto de ciencias 1");
-        setLearningMaterial("Que vas a aprender hoy?")
-      } else {
-        setPredefinedQuestion("suggest me some questions to ask");
-        setLearningMaterial("What would you like to learn today?")
-      }
-
-      // if(id == undefined){
-      //   //id = 'langchain-docs';
-      //   setPredefinedQuestion("suggest me some questions to ask");
-      //   setLearningMaterial("What would you like to learn today?");
-      // }
-
-    }, [id]);
-
-
-    //console.log(id);
-
-
-
-
-    // Clear chat history when switching subjects
-    useEffect(() => {
-      setMessages([]);
-      setShowSubheading(false);
-      
-      // Reset subheading timer
-      const timer = setTimeout(() => {
-        setShowSubheading(true);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }, [id]);
+    
 
 
 
@@ -187,19 +189,36 @@ function HomeScreen() {
 
     const playAudio = async (text, messageIndex) => {
         try {
+            // Abort any previous request
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+
             // Stop current audio if playing
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;
             }
 
-            // If clicking the same message that's playing, just stop it
-            if (playingAudio === messageIndex) {
+            // Clean up previous audio URL
+            if (audioUrlRef.current) {
+                URL.revokeObjectURL(audioUrlRef.current);
+                audioUrlRef.current = null;
+            }
+
+            // If clicking the same message that's playing or loading, just stop it
+            if (playingAudio === messageIndex || loadingAudio === messageIndex) {
                 setPlayingAudio(null);
+                setLoadingAudio(null);
                 return;
             }
 
-            setPlayingAudio(messageIndex);
+            // Clear previous states and set loading
+            setPlayingAudio(null);
+            setLoadingAudio(messageIndex);
+
+            // Create new abort controller for this request
+            abortControllerRef.current = new AbortController();
 
             const response = await fetch('/api/tts', {
                 method: 'POST',
@@ -207,45 +226,50 @@ function HomeScreen() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ text }),
+                signal: abortControllerRef.current.signal,
             });
 
             if (!response.ok) {
                 throw new Error('Failed to generate speech');
             }
 
-            // Handle streaming response
-            const reader = response.body.getReader();
-            const chunks = [];
-            
-            // Read chunks as they arrive
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                chunks.push(value);
-            }
-            
-            // Combine chunks into blob (WAV format for fastest playback)
-            const audioBlob = new Blob(chunks, { type: 'audio/wav' });
+            // Get the blob directly (MP3 format for better streaming)
+            const audioBlob = await response.blob();
             const audioUrl = URL.createObjectURL(audioBlob);
+            audioUrlRef.current = audioUrl;
             
             const audio = new Audio(audioUrl);
             audioRef.current = audio;
 
             audio.onended = () => {
                 setPlayingAudio(null);
-                URL.revokeObjectURL(audioUrl);
+                if (audioUrlRef.current) {
+                    URL.revokeObjectURL(audioUrlRef.current);
+                    audioUrlRef.current = null;
+                }
             };
 
             audio.onerror = () => {
                 setPlayingAudio(null);
-                URL.revokeObjectURL(audioUrl);
+                if (audioUrlRef.current) {
+                    URL.revokeObjectURL(audioUrlRef.current);
+                    audioUrlRef.current = null;
+                }
                 console.error('Error playing audio');
             };
 
+            // Audio is ready, switch from loading to playing
+            setLoadingAudio(null);
+            setPlayingAudio(messageIndex);
             await audio.play();
         } catch (error) {
+            if (error.name === 'AbortError') {
+                setLoadingAudio(null);
+                return;
+            }
             console.error('Error generating speech:', error);
             setPlayingAudio(null);
+            setLoadingAudio(null);
         }
     };
 
@@ -321,10 +345,16 @@ function HomeScreen() {
                       <button 
                         className="voice-button"
                         onClick={() => playAudio(message.content, index)}
-                        aria-label="Play audio"
-                        title="Play audio"
+                        aria-label={loadingAudio === index ? "Loading audio" : playingAudio === index ? "Stop audio" : "Play audio"}
+                        title={loadingAudio === index ? "Loading audio..." : playingAudio === index ? "Stop audio" : "Play audio"}
+                        disabled={loadingAudio !== null && loadingAudio !== index}
                       >
-                        {playingAudio === index ? (
+                        {loadingAudio === index ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="audio-loading-spinner">
+                            <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                            <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                          </svg>
+                        ) : playingAudio === index ? (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <rect x="6" y="4" width="4" height="16" />
                             <rect x="14" y="4" width="4" height="16" />

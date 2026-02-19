@@ -18,17 +18,17 @@ const generateSpeech = asyncHandler(async (req, res) => {
     }
 
     try {
-        // Create streaming audio response - WAV format for fastest playback
+        // Create streaming audio response - MP3 format for better streaming
         const response = await openai.audio.speech.create({
             model: "gpt-4o-mini-tts",
             voice: "marin", // Options: alloy, ash, ballad, coral, echo, fable, nova, onyx, sage, shimmer, verse, marin, cedar
             input: text,
-            response_format: "wav" // WAV for lowest latency
+            response_format: "mp3" // MP3 for better streaming compatibility
         });
 
         // Set headers for streaming with chunked transfer encoding
         res.set({
-            'Content-Type': 'audio/wav',
+            'Content-Type': 'audio/mpeg',
             'Transfer-Encoding': 'chunked',
         });
         
