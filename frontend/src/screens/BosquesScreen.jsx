@@ -7,6 +7,8 @@ function BosquesScreen() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
     const [activeText, setActiveText] = useState('');
     const [allCues, setAllCues] = useState([]);
+    const [audioLoading, setAudioLoading] = useState(true);
+    const [videoLoading, setVideoLoading] = useState(true);
     
     const audioRef = useRef(null);
     const contentRef = useRef(null);
@@ -148,6 +150,13 @@ function BosquesScreen() {
                                         Link del libro
                                     </a>
                                     <br /><br />
+
+
+
+
+                                    
+                                    
+                                    
                                 </div>
 
                                 {/* Profundización Section */}
@@ -156,16 +165,52 @@ function BosquesScreen() {
 
                                     {/* Los bosques: importancia y clasificación */}
                                     <div style={{ marginBottom: '40px' }}>
+                                        {audioLoading && (
+                                            <div style={{ 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'center', 
+                                                padding: '20px', 
+                                                marginBottom: '20px',
+                                                backgroundColor: '#f5f7fa',
+                                                borderRadius: '12px',
+                                                border: '2px solid #e5e7eb'
+                                            }}>
+                                                <svg 
+                                                    width="24" 
+                                                    height="24" 
+                                                    viewBox="0 0 24 24" 
+                                                    fill="none" 
+                                                    stroke="#3b82f6" 
+                                                    strokeWidth="2" 
+                                                    className="audio-loading-spinner"
+                                                    style={{ marginRight: '12px' }}
+                                                >
+                                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                                    <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                                                </svg>
+                                                <span style={{ color: '#374151', fontSize: '15px', fontWeight: '500' }}>
+                                                    Cargando audio...
+                                                </span>
+                                            </div>
+                                        )}
                                         <audio 
                                             ref={audioRef}
                                             src="/bosques.mp3" 
                                             loop 
                                             controls 
                                             onTimeUpdate={handleTimeUpdate}
-                                            style={{ width: '100%', marginBottom: '20px' }}
+                                            onLoadedData={() => setAudioLoading(false)}
+                                            onLoadStart={() => setAudioLoading(true)}
+                                            onError={() => setAudioLoading(false)}
+                                            style={{ width: '100%', marginBottom: '20px', display: audioLoading ? 'none' : 'block' }}
                                         />
-                                        El audio esta sincronizado con el texto, puedes usar el audio para escuchar el libro de texto mientras lo lees. 
-                                        <br />  <br />  
+                                        {!audioLoading && (
+                                            <>
+                                                El audio esta sincronizado con el texto, puedes usar el audio para escuchar el libro de texto mientras lo lees. 
+                                                <br />  <br />
+                                            </>
+                                        )}  
 
                                         <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '20px' }}>Los bosques: importancia y clasificación</h3>
                                         <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
@@ -300,8 +345,60 @@ function BosquesScreen() {
                                         </div>
                                     </div>
 
-                                                                        {/* <video src="/bosques1.mp4" loop controls style={{ width: '100%', height: 'auto' }} /> */}
-                                    <video src="/bosques1.mp4" loop controls style={{ width: '100%', height: 'auto' }} />
+
+                                    {videoLoading && (
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center', 
+                                            padding: '40px', 
+                                            marginBottom: '20px',
+                                            backgroundColor: '#f5f7fa',
+                                            borderRadius: '12px',
+                                            border: '2px solid #e5e7eb',
+                                            minHeight: '200px'
+                                        }}>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <svg 
+                                                    width="32" 
+                                                    height="32" 
+                                                    viewBox="0 0 24 24" 
+                                                    fill="none" 
+                                                    stroke="#3b82f6" 
+                                                    strokeWidth="2" 
+                                                    className="audio-loading-spinner"
+                                                    style={{ marginBottom: '12px' }}
+                                                >
+                                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                                    <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                                                </svg>
+                                                <div style={{ color: '#374151', fontSize: '15px', fontWeight: '500' }}>
+                                                    Cargando video...
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    <video 
+                                        src="/bosques1.mp4" 
+                                        loop 
+                                        controls 
+                                        onLoadedData={() => setVideoLoading(false)}
+                                        onLoadStart={() => setVideoLoading(true)}
+                                        onError={() => setVideoLoading(false)}
+                                        style={{ 
+                                            width: '100%', 
+                                            height: 'auto', 
+                                            borderRadius: '12px',
+                                            display: videoLoading ? 'none' : 'block'
+                                        }} 
+                                    />
+
+
+
+
+
+
 
 
                                 </div>

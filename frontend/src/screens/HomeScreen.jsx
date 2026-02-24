@@ -15,7 +15,21 @@ const SendButtonIcon = () => (
   </svg>
 );
 
+
+
 function HomeScreen() {
+
+const question1 = "Qué porcentaje de la superficie terrestre mundial está cubierto por bosques y cuál es su importancia vital?"
+const question2 = "Según la zona climática, ¿cuál es la distribución porcentual de los bosques en el mundo?"
+const question3 = "Qué características climáticas y biológicas definen a los bosques tropicales?"
+const question4 = "De acuerdo con la FAO, ¿qué actividad productiva es responsable de casi el 90 % de la deforestación en zonas tropicales entre 2000 y 2018?"
+const question5 = "Cuáles son las causas principales de la deforestación en el Sudeste Asiático?"
+const question6 = "Defina el concepto de tenencia de la tierra."
+const question7 = "Explique la diferencia entre la propiedad comunal y la propiedad estatal de la tierra."
+const question8 = "Cómo influyó la Guerra Fría en las políticas de tenencia de la tierra en América Latina?"
+const question9 = "Qué factores caracterizan el neocolonialismo actual y los conflictos de tierras en África?"
+const question10 = "En qué consiste la iniciativa de los bancos de tierras en el Caribe oriental?"
+
 
   const { id } = useParams();
 
@@ -34,6 +48,7 @@ function HomeScreen() {
     const audioEventHandlersRef = useRef({ onended: null, onerror: null });
     const [predefinedQuestion, setPredefinedQuestion] = useState("");
     const [learningMaterial, setLearningMaterial] = useState("");
+    const [showQuestions, setShowQuestions] = useState(false);
 
     const [getChat, { isLoading }] = useGetChatMutation();
 
@@ -107,6 +122,7 @@ function HomeScreen() {
         return () => clearTimeout(timer); // Cleanup on unmount
     }, []);
 
+
     // Cleanup audio on component unmount
     useEffect(() => {
         return () => {
@@ -120,8 +136,8 @@ function HomeScreen() {
         setPredefinedQuestion("suggest me some questions to ask about Warren Buffett Shareholder Report");
         setLearningMaterial("What would you like to learn today?")
       } else {
-        
-        setPredefinedQuestion("Soy un Tutor de AI especializado en el libro de Ciudadania y Valores 9 grado El Salvador, sugiereme algo que preguntar ");
+        //put a  line break after the text "Soy un Tutor de AI especializado en el libro de Ciudadania y Valores 9 grado El Salvador, "   
+        setPredefinedQuestion("Soy un Tutor de AI especializado en el libro de Ciudadania y Valores 9 grado El Salvador,   Sugiereme algo que preguntar ");
         setLearningMaterial("Que vas a aprender hoy?")
       }
 
@@ -136,6 +152,7 @@ function HomeScreen() {
       cleanupAudio();
       setMessages([]);
       setShowSubheading(false);
+      setShowQuestions(false);
       
       // Reset subheading timer
       const timer = setTimeout(() => {
@@ -182,25 +199,21 @@ function HomeScreen() {
 
 
 
-    const handleSubheadingClick = async () => {
-     
-
-
-        
+    const handleQuestionClick = async (selectedQuestion) => {
         // Add the question to messages immediately
-        const userMessage = { type: 'question', content: predefinedQuestion };
+        const userMessage = { type: 'question', content: selectedQuestion };
         setMessages(prev => [...prev, userMessage]);
 
         try {
           if(id == undefined){
-            const res = await getChat({ question: predefinedQuestion, 'id': 'unidad1' });
+            const res = await getChat({ question: selectedQuestion, 'id': 'unidad1' });
             // Add the answer to messages
             const aiMessage = { type: 'answer', content: res.data.message };
             setMessages(prev => [...prev, aiMessage]);
           }
 
           if (id != undefined){
-            const res = await getChat({ question: predefinedQuestion, id });
+            const res = await getChat({ question: selectedQuestion, id });
             // Add the answer to messages
             const aiMessage = { type: 'answer', content: res.data.message };
             setMessages(prev => [...prev, aiMessage]);
@@ -278,7 +291,7 @@ function HomeScreen() {
 
 
 
-
+console.log(question1);
 
   return (
     <div className="chat-app">
@@ -304,13 +317,77 @@ function HomeScreen() {
             {messages.length === 0 ? (
               <div className="center-content">
                 <h1 className="main-heading">{learningMaterial}</h1>
-                {showSubheading && (
+                {showSubheading && !showQuestions && (
                   <small 
                     className="main-subheading animate-fade-in clickable-subheading" 
-                    onClick={handleSubheadingClick}
+                    onClick={() => setShowQuestions(true)}
                   >
                     {predefinedQuestion}
                   </small>
+                )}
+                {showQuestions && (
+                  <div className="predefined-questions-container animate-fade-in">
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question1)}
+                    >
+                      {question1}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question2)}
+                    >
+                      {question2}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question3)}
+                    >
+                      {question3}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question4)}
+                    >
+                      {question4}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question5)}
+                    >
+                      {question5}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question6)}
+                    >
+                      {question6}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question7)}
+                    >
+                      {question7}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question8)}
+                    >
+                      {question8}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question9)}
+                    >
+                      {question9}
+                    </small>
+                    <small 
+                      className="main-subheading clickable-subheading" 
+                      onClick={() => handleQuestionClick(question10)}
+                    >
+                      {question10}
+                    </small>
+                  </div>
                 )}
               </div>
             ) : (
