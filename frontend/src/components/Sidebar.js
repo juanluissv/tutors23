@@ -114,16 +114,18 @@ function Sidebar({ isOpen, toggleSidebar }) {
 
 
         <Link to="/subjects/unidad1" className="nav-button-link">
-        <button className={`nav-button ${location.pathname === '/subjects/langchain-docs' ? 'menu2' : ''}`}>
+        <button className={`nav-button ${location.pathname === '/subjects/unidad1' ? 'menu2' : ''}`}>
           &nbsp; - Ciudadania y Valores  <br /> &nbsp; &nbsp; 9 grado El Salvador 
           </button>    
           </Link>
 
           {/*  small subheading to bosques */}
           <Link to="/bosques" className="nav-button-link">
-          <p style={{ fontSize: '12px', color: '#666', marginBottom: '10px', fontWeight: '500', marginLeft: '30px' }}>
+          <button className={`nav-button ${location.pathname === '/bosques' ? 'menu2' : ''}`}>
+          <p className='subLink33' >
             &nbsp; - Bosques  tropicales
           </p>
+          </button>
           </Link>
 
 

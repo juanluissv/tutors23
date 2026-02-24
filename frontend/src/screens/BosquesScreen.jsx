@@ -29,10 +29,16 @@ function BosquesScreen() {
                             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
 
                                 <div style={{ display: 'inline-block', backgroundColor: '#e8f5e9', padding: '8px 24px', borderRadius: '20px', marginBottom: '16px' }}>
-                                    <span style={{ color: '#2e7d32', fontSize: '14px', fontWeight: '500' }}>Los bosques tropicales en el mundo</span>
+                                    <span style={{ color: '#2e7d32', fontSize: '14px', fontWeight: '500' }}>Libro convertido a web, video and audio by AI</span>
                                     {/* <h1 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '8px' }}>Los bosques tropicales en el mundo</h1> */}
-
+                                    
                                 </div><br />
+                                <a 
+                                    href="https://www.mined.gob.sv/materiales/2026/CIUDADANIA_Y_VALORES/2.%20Libros%20de%20texto/Libro%20de%20texto%209.%C2%B0%20grado.pdf" 
+                                    target="_blank" className="navButton23"
+                                >
+                                        Link del libro
+                                    </a> <br /><br />
                                 <video src="/bosques1.mp4"  loop controls style={{ width: '100%', height: 'auto' }} />
 
                                 {/* <h1 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '8px' }}>Los bosques tropicales en el mundo</h1> */}
@@ -92,7 +98,7 @@ function BosquesScreen() {
 
                             {/* Profundización Section */}
                             <div style={{ marginBottom: '60px' }}>
-                                <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '40px' }}>Profundización</h2>
+                                <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '40px' }}>Los bosques tropicales en el mundo</h2>
 
                                 {/* Los bosques: importancia y clasificación */}
                                 <div style={{ marginBottom: '40px' }}>

@@ -296,6 +296,37 @@
 }
 
 
+.navButton23{
+  font-size: 12px;
+  color: rgb(0, 110, 255);
+  cursor: pointer;
+}
+
+.navButton23:hover{
+  color: rgb(0, 110, 255);
+  cursor: pointer;
+}
+
+.subLink33{
+  font-size: 12px;
+  color: #0078d7;
+  margin-bottom: 20px;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 30px;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+
+.subLink33:hover{
+  color: rgb(0, 110, 255);
+  cursor: pointer;
+}
+
+
+
+
 
 .user-button {
   width: 32px;
