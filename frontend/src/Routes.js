@@ -7,6 +7,7 @@ import App from './App';
 import HomeScreen from './screens/HomeScreen';
 import AskScreen  from './screens/AskScreen';
 import AnswersScreen from './screens/AnswersScreen';
+import BosquesScreen from './screens/BosquesScreen';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -15,6 +16,8 @@ const router = createBrowserRouter(
             <Route  path="/subjects/:id" element={<HomeScreen />} />
             <Route  path="/ask" element={<AskScreen />} />
             <Route  path="/answers" element={<AnswersScreen />} />
+            <Route  path="/bosques" element={<BosquesScreen />} />
+
         </Route>
     )
 );

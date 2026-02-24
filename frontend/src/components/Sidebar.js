@@ -112,17 +112,42 @@ function Sidebar({ isOpen, toggleSidebar }) {
 
         <h3 className="section-heading">Your Subjects</h3>
 
+
+        <Link to="/subjects/unidad1" className="nav-button-link">
+        <button className={`nav-button ${location.pathname === '/subjects/langchain-docs' ? 'menu2' : ''}`}>
+          &nbsp; - Ciudadania y Valores  <br /> &nbsp; &nbsp; 9 grado El Salvador 
+          </button>    
+          </Link>
+
+          {/*  small subheading to bosques */}
+          <Link to="/bosques" className="nav-button-link">
+          <p style={{ fontSize: '12px', color: '#666', marginBottom: '10px', fontWeight: '500', marginLeft: '30px' }}>
+            &nbsp; - Bosques  tropicales
+          </p>
+          </Link>
+
+
+
+
+
+          
+
+
+
+
+
+
         <Link to="/subjects/langchain-docs" className="nav-button-link">
         <button className={`nav-button ${location.pathname === '/subjects/langchain-docs' ? 'menu2' : ''}`}>
           &nbsp; - Warren Buffett <br /> &nbsp; &nbsp; Shareholder Report
-          </button>
-          
+          </button>          
           </Link>
+
           <a href="https://www.berkshirehathaway.com/letters/2023ltr.pdf" target="_blank" className="navButton22  ">
             Report Link
           </a> <br /><br />
 
-          <Link to="/subjects/ciencias1" className="nav-button-link">
+          {/* <Link to="/subjects/ciencias1" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/subjects/ciencias1' ? 'menu2' : ''}`}>
           &nbsp; - Ciencia y Tecnología <br /> &nbsp; &nbsp;  1 año bachillerato El Salvador
           </button>
@@ -130,7 +155,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
           </Link>
           <a href="https://www.mined.gob.sv/materiales/2026/CIENCIA_Y_TECNOLOGIA/2.%20Libros%20de%20texto/Libro%20de%20texto%201.%C2%B0%20a%C3%B1o%20de%20bachillerato.pdf" target="_blank" className="navButton22  ">
             Book Link
-          </a>
+          </a> */}
 
 
       </div>

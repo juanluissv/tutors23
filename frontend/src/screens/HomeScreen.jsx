@@ -116,12 +116,13 @@ function HomeScreen() {
    
 
     useEffect(() => {
-      if (id == 'ciencias1') {
-        setPredefinedQuestion("sugiereme algo para preguntar sobre el libro de texto de ciencias 1");
-        setLearningMaterial("Que vas a aprender hoy?")
-      } else {
+      if (id == 'langchain-docs') {
         setPredefinedQuestion("suggest me some questions to ask about Warren Buffett Shareholder Report");
         setLearningMaterial("What would you like to learn today?")
+      } else {
+        
+        setPredefinedQuestion("sugiereme algo para preguntar sobre el libro de texto ");
+        setLearningMaterial("Que vas a aprender hoy?")
       }
 
     }, [id]);
@@ -157,7 +158,7 @@ function HomeScreen() {
         let res;
         try {
           if(id == undefined){
-             res = await getChat({ question: currentQuestion, 'id': 'langchain-docs' });
+             res = await getChat({ question: currentQuestion, 'id': 'unidad1' });
           }
           if (id != undefined){
              res = await getChat({ question: currentQuestion, id });
@@ -192,7 +193,7 @@ function HomeScreen() {
 
         try {
           if(id == undefined){
-            const res = await getChat({ question: predefinedQuestion, 'id': 'langchain-docs' });
+            const res = await getChat({ question: predefinedQuestion, 'id': 'unidad1' });
             // Add the answer to messages
             const aiMessage = { type: 'answer', content: res.data.message };
             setMessages(prev => [...prev, aiMessage]);
