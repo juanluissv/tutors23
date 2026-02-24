@@ -113,13 +113,24 @@ function Sidebar({ isOpen, toggleSidebar }) {
         <h3 className="section-heading">Your Subjects</h3>
 
 
-        <Link to="/subjects/unidad1" className="nav-button-link">
-        <button className={`nav-button ${location.pathname === '/subjects/unidad1' ? 'menu2' : ''}`}>
+        {/* <Link to="/subjects/unidad1" className="nav-button-link"> */}
+        <button className={`nav-button ${location.pathname === '/subjects/unidad132' ? 'menu2' : ''}`}>
           &nbsp; - Ciudadania y Valores  <br /> &nbsp; &nbsp; 9 grado El Salvador 
           </button>    
-          </Link>
+          {/* </Link> */}
 
           {/*  small subheading to bosques */}
+
+          <Link to="/subjects/unidad1" className="nav-button-link">
+          <button className={`nav-button ${location.pathname === '/subjects/unidad1' ? 'menu2' : ''}`}>
+          <p className='subLink33' >
+            &nbsp; -  Ask AI Tutor about the book
+          </p>
+          </button>
+          </Link>
+
+
+
           <Link to="/bosques" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/bosques' ? 'menu2' : ''}`}>
           <p className='subLink33' >

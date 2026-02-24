@@ -121,7 +121,7 @@ function HomeScreen() {
         setLearningMaterial("What would you like to learn today?")
       } else {
         
-        setPredefinedQuestion("sugiereme algo para preguntar sobre el libro de Ciudadania y Valores 9 grado El Salvador");
+        setPredefinedQuestion("Soy un Tutor de AI especializado en el libro de Ciudadania y Valores 9 grado El Salvador, sugiereme algo que preguntar ");
         setLearningMaterial("Que vas a aprender hoy?")
       }
 
