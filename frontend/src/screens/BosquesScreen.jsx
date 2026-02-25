@@ -149,20 +149,11 @@ function BosquesScreen() {
                                     >
                                         Link del libro
                                     </a>
-                                    <br /><br />
-
-
-
-
-                                    
-                                    
-                                    
+                                    <br /><br />                                                                        
                                 </div>
-
                                 {/* Profundización Section */}
                                 <div style={{ marginBottom: '60px' }}>
                                     <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '40px' }}>Los bosques tropicales en el mundo</h2>
-
                                     {/* Los bosques: importancia y clasificación */}
                                     <div style={{ marginBottom: '40px' }}>
                                         {audioLoading && (
@@ -196,8 +187,7 @@ function BosquesScreen() {
                                         )}
                                         <audio 
                                             ref={audioRef}
-                                            src="/bosques.mp3" 
-                                            loop 
+                                            src="/bosques.mp3"                                          
                                             controls 
                                             onTimeUpdate={handleTimeUpdate}
                                             onLoadedData={() => setAudioLoading(false)}
@@ -214,11 +204,19 @@ function BosquesScreen() {
 
                                         <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '20px' }}>Los bosques: importancia y clasificación</h3>
                                         <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
-                                            Los bosques son ecosistemas complejos que desempeñan un papel vital para la vida humana. Cubren alrededor del 31 % de la superficie terrestre del mundo y cumplen diversas funciones, entre las que se incluyen producción de oxígeno, purificación del aire, provisión de agua y de otros recursos naturales, por lo que son muy importantes para el mantenimiento de la salud y el equilibrio del planeta.
+                                            Los bosques son ecosistemas complejos que desempeñan un papel vital para la vida humana. Cubren alrededor del 31 % de la superficie terrestre del mundo y cumplen diversas funciones 
+                                        </p>
+
+                                        <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
+                                            Entre las que se incluyen producción de oxígeno, purificación del aire, provisión de agua y de otros recursos naturales, por lo que son muy importantes para el mantenimiento de la salud y el equilibrio del planeta.
                                         </p>
                                         <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '30px' }}>
-                                            La clasificación de los bosques se basa en distintos criterios, como la zona climática en la que se encuentran, el tipo de vegetación que los conforman o su función ecológica. En relación con la zona climática, los bosques se dividen en: tropicales, subtropicales, templados y boreales. De estos, las zonas tropicales destacan por tener la mayor proporción de bosques a nivel mundial, alcanzando el 45 %, mientras que el resto se distribuye entre las otras zonas climáticas.
+                                            La clasificación de los bosques se basa en distintos criterios, como la zona climática en la que se encuentran, el tipo de vegetación que los conforman o su función ecológica. 
                                         </p>
+                                        <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '30px' }}>
+                                        En relación con la zona climática, los bosques se dividen en: tropicales, subtropicales, templados y boreales. De estos, las zonas tropicales destacan por tener la mayor proporción de bosques a nivel mundial, alcanzando el 45 %, mientras que el resto se distribuye entre las otras zonas climáticas.
+                                        </p>
+
 
                                         {/* Chart */}
                                         <div style={{ backgroundColor: '#f5f5f5', padding: '32px', borderRadius: '12px', marginBottom: '24px' }}>
@@ -254,8 +252,17 @@ function BosquesScreen() {
                                     {/* Características de los bosques tropicales */}
                                     <div style={{ marginBottom: '40px' }}>
                                         <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '20px' }}>Características de los bosques tropicales</h3>
+                                            <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
+                                            Los bosques tropicales se localizan en la zona intertropical y constituyen uno de los ecosistemas más transcendentales a nivel mundial. 
+                                        </p>
                                         <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
-                                            Los bosques tropicales se localizan en la zona intertropical y constituyen uno de los ecosistemas más transcendentales a nivel mundial. Se caracterizan por su clima cálido y húmedo y experimentan precipitaciones abundantes a lo largo de todo el año, creando condiciones propicias para la vida vegetal y animal. Además, destacan por albergar una asombrosa diversidad biológica, con aproximadamente el 60 % de las especies conocidas de fauna y flora a nivel mundial. Sin embargo, en las últimas décadas, la deforestación ha amenazado seriamente la salud y la estabilidad de estos, afectando a regiones enteras.
+                                            Se caracterizan por su clima cálido y húmedo y experimentan precipitaciones abundantes a lo largo de todo el año, creando condiciones propicias para la vida vegetal y animal.
+                                        </p>
+                                        <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
+                                            Además, destacan por albergar una asombrosa diversidad biológica, con aproximadamente el 60 % de las especies conocidas de fauna y flora a nivel mundial.
+                                        </p>
+                                        <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
+                                            Sin embargo, en las últimas décadas, la deforestación ha amenazado seriamente la salud y la estabilidad de estos, afectando a regiones enteras.
                                         </p>
                                     </div>
 
@@ -305,7 +312,10 @@ function BosquesScreen() {
                                             <p style={{ fontSize: '14px', fontWeight: '600', color: '#e65100', marginBottom: '12px' }}>Doc. 2 — El impacto de las actividades productivas</p>
                                             <h4 style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a', marginBottom: '16px' }}>El impacto de las actividades productivas en la deforestación</h4>
                                             <p style={{ fontSize: '15px', lineHeight: '1.7', color: '#333', marginBottom: 0 }}>
-                                                En un estudio reciente, la FAO concluyó que, entre 2000 y 2018, casi el 90 % de la deforestación en zonas tropicales guarda relación con la agricultura (el 52.3 % se derivaba de la ampliación de las tierras de cultivo y el 37.5 %, de la ampliación de las tierras de pastoreo de ganado). Las tierras de cultivo provocaron más del 75 % de la deforestación de África y Asia. La causa más importante en América del Sur y Oceanía fue el pastoreo de ganado.
+                                                En un estudio reciente, la FAO concluyó que, entre 2000 y 2018, casi el 90 % de la deforestación en zonas tropicales guarda relación con la agricultura (el 52.3 % se derivaba de la ampliación de las tierras de cultivo y el 37.5 %
+                                                </p>
+                                                <p style={{ fontSize: '15px', lineHeight: '1.7', color: '#333', marginBottom: 0 }}>
+                                                De la ampliación de las tierras de pastoreo de ganado). Las tierras de cultivo provocaron más del 75 % de la deforestación de África y Asia. La causa más importante en América del Sur y Oceanía fue el pastoreo de ganado.
                                             </p>
                                             <p style={{ fontSize: '13px', color: '#777', marginTop: '16px', marginBottom: 0 }}>Fuente: FAO (2022). El estado de los bosques del mundo.</p>
                                         </div>
@@ -315,10 +325,23 @@ function BosquesScreen() {
                                     <div style={{ marginBottom: '40px' }}>
                                         <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '20px' }}>Regiones afectadas por la deforestación</h3>
                                         <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
-                                            Las regiones más afectadas por la deforestación en las zonas tropicales se localizan en América del Sur, el centro de África y el sudeste de Asia. En América del Sur, la deforestación se concentra en la Amazonía, que es el bosque tropical más grande del mundo. En África, la Selva del Congo se encuentra amenazada por la expansión de la agricultura, la ganadería y la minería. En Asia, la deforestación se produce principalmente en Indonesia, Malasia y Birmania, a causa del cultivo de palma aceitera y la sobreexplotación de madera para la industria de papel.
+                                            Las regiones más afectadas por la deforestación en las zonas tropicales se localizan en América del Sur, el centro de África y el sudeste de Asia.
                                         </p>
+                                            <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
+                                            En América del Sur, la deforestación se concentra en la Amazonía, que es el bosque tropical más grande del mundo. En África, la Selva del Congo se encuentra amenazada por la expansión de la agricultura, la ganadería y la minería.
+                                            </p>
+                                            <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
+                                            En Asia, la deforestación se produce principalmente en Indonesia, Malasia y Birmania, a causa del cultivo de palma aceitera y la sobreexplotación de madera para la industria de papel.
+                                            </p>
+                                        
                                         <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '30px' }}>
-                                            La conversión de bosques tropicales en plantaciones agrícolas para la producción de cultivos comerciales, como la soya y la palma aceitera, sigue siendo la causa más significativa de deforestación en todo el mundo. La soya se utiliza principalmente como alimento para ganado, cerdos y aves de corral, y como ingrediente en productos procesados. La palma africana o aceitera se cultiva para obtener aceite de palma, que es un compuesto común en muchos alimentos y productos cosméticos. La expansión de tierras para el pastoreo y la ganadería, así como la industria del papel y la extracción ilegal de madera, que a menudo se destina a los mercados internacionales, también aumenta la degradación de los bosques y, en última instancia, su riesgo de desaparición.
+                                            La conversión de bosques tropicales en plantaciones agrícolas para la producción de cultivos comerciales, como la soya y la palma aceitera, sigue siendo la causa más significativa de deforestación en todo el mundo. 
+                                            </p>
+                                            <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '30px' }}>
+                                            La soya se utiliza principalmente como alimento para ganado, cerdos y aves de corral, y como ingrediente en productos procesados. La palma africana o aceitera se cultiva para obtener aceite de palma, que es un compuesto común en muchos alimentos y productos cosméticos. 
+                                            </p>
+                                            <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '30px' }}>
+                                            La expansión de tierras para el pastoreo y la ganadería, así como la industria del papel y la extracción ilegal de madera, que a menudo se destina a los mercados internacionales, también aumenta la degradación de los bosques y, en última instancia, su riesgo de desaparición.
                                         </p>
 
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
@@ -377,11 +400,9 @@ function BosquesScreen() {
                                                 </div>
                                             </div>
                                         </div>
-                                    )}
-                                    
+                                    )}                     
                                     <video 
-                                        src="/bosques1.mp4" 
-                                        loop 
+                                        src="/bosques1.mp4"                                          
                                         controls 
                                         onLoadedData={() => setVideoLoading(false)}
                                         onLoadStart={() => setVideoLoading(true)}
@@ -393,14 +414,6 @@ function BosquesScreen() {
                                             display: videoLoading ? 'none' : 'block'
                                         }} 
                                     />
-
-
-
-
-
-
-
-
                                 </div>
 
                                 {/* Consolidación Section */}
