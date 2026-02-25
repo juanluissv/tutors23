@@ -106,15 +106,15 @@ function Sidebar({ isOpen, toggleSidebar }) {
           </Link>        
           <button className="nav-button">
             <IconSubjects />
-            <span>Subjects</span>            
+            <span>Your Subjects:</span>            
           </button>                    
         </nav>
 
-        <h3 className="section-heading">Your Subjects</h3>
+        {/* <h3 className="section-heading">Your Subjects</h3> */}
 
 
         {/* <Link to="/subjects/unidad1" className="nav-button-link"> */}
-        <button className={`nav-button ${location.pathname === '/subjects/unidad132' ? 'menu2' : ''}`}>
+        <button className={`nav-button nav23`}>
           &nbsp; - Ciudadania y Valores  <br /> &nbsp; &nbsp; 9 grado El Salvador 
           </button>    
           {/* </Link> */}
@@ -124,7 +124,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <Link to="/subjects/unidad1" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/subjects/unidad1' ? 'menu2' : ''}`}>
           <p className='subLink33' >
-            &nbsp; -  Ask AI Tutor about the book
+            &nbsp; -  Ask AI Tutor 
           </p>
           </button>
           </Link>
@@ -134,10 +134,10 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <Link to="/bosques" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/bosques' ? 'menu2' : ''}`}>
           <p className='subLink33' >
-            &nbsp; - Bosques  tropicales
+            &nbsp; - Clase Bosques  tropicales
           </p>
           </button>
-          </Link>
+          </Link> <br /><br />
 
 
 
