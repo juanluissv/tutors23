@@ -134,6 +134,19 @@
   margin-top: -10px;
 }
 
+.link25{
+  color: blue;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  display: block;
+  text-align: center;
+}
+
 .nav-button:hover {
   background: rgba(0, 0, 0, 0.05);
 }

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { Link } from 'react-router-dom';
 import '../App.css';
 
 function BosquesScreen() {
@@ -149,7 +150,10 @@ function BosquesScreen() {
                                     >
                                         Link del libro
                                     </a>
-                                    <br /><br />                                                                        
+                                    <br />  <br />    
+                                    <Link to="/forest" className='link25' >English Version</Link>
+
+                                                                                                      
                                 </div>
                                 {/* Profundización Section */}
                                 <div style={{ marginBottom: '60px' }}>
@@ -473,7 +477,6 @@ function BosquesScreen() {
                 </div>
             </div>
 
-            <h1>Bosques</h1>
         </div>
     );
 }
