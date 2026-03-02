@@ -337,6 +337,8 @@
 }
 
 
+
+
 .subLink33:hover{
   color: rgb(0, 110, 255);
   cursor: pointer;
@@ -426,13 +428,13 @@
 }
 
 .main-heading-answers {
-  font-size: 30px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
   color: #1e2939;
   text-align: center;
   margin-bottom: 0px;
   letter-spacing: 0.4px;
-  line-height: 36px;
+  line-height: 26px;
 }
 
 .main-subheading {
@@ -1543,13 +1545,14 @@
 .answers-heading {
   color: #1fb6ff;
   margin-bottom:10px;
-  font-size: 32px;
+  font-size: 25px;
 }
 
 .answers-container {
   display: flex;
   flex-direction: row;
-  max-width: 900px;
+  max-width: 1200px;
+  min-width: 100%;
   width: 100%;
   margin: 0 auto 40px;
   padding: 40px;
@@ -1605,7 +1608,7 @@
 .answers-cards {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 105px;
   width: 100%;
 }
 
@@ -1617,14 +1620,14 @@
 .answer-card-wrapper.left {
   justify-content: flex-start;
   padding-right: 55%;
-  margin-top: -10px;
+  margin-top: -15px;
 
 }
 
 .answer-card-wrapper.right {
   justify-content: flex-end;
   padding-left: 55%;
-  margin-top: -80px;
+  margin-top: -120px;
 }
 
 .answer-card {

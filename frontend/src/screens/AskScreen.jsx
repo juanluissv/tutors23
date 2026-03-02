@@ -23,9 +23,9 @@ function AskScreen() {
                 <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                 <div className="content-area">
                     <div className="center-content2">
-                        <h1 className="main-heading">Ask your class Teacher</h1>
+                        <h1 className="main-heading">Ask Your Class Teacher</h1>
                         
-                        <p className="upload-subtitle">Upload a video or record your question</p>
+                        <p className="upload-subtitle">Record your screen or camera to ask your question</p>
                         
                         <div className="upload-cards-container">
                             
@@ -33,9 +33,22 @@ function AskScreen() {
                                 <div className="upload-card-header">
                                     <h2>Upload new video</h2>
                                     <div className="upload-card-icon">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <circle cx="12" cy="12" r="3"></circle>
-                                            <path d="M12 1v6m0 6v6m5.657-13.657l-4.243 4.243m-2.828 2.828l-4.243 4.243m16.97-.485l-6-6m-6 6l-6-6"></path>
+                                        {/* this is the icon for the video upload */}
+                                        <svg
+                                            width="24"
+                                            height="24"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            {/* Arrow pointing up */}
+                                            <path d="M12 3v12" />
+                                            <path d="M7 8l5-5 5 5" />
+                                            {/* Upload tray */}
+                                            <path d="M5 15h14v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4z" />
                                         </svg>
                                     </div>
                                 </div>

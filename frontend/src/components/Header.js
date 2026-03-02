@@ -10,25 +10,13 @@ function Header({ isSidebarOpen, toggleSidebar }) {
 
   return (
     <header className={`header ${!isSidebarOpen ? 'header-centered' : ''}`}>
+             
+      {/* this is logo */}
       <div className="header-left">
-        {/* {!isSidebarOpen && (
-          <button className="toggle-sidebar-button" onClick={toggleSidebar}>
-            <img src={imgIcon} alt="Menu" className="icon" />
-          </button>
-        )} */}
-
-        {/* this is logo */}
         <div className="header-logo">
           <img src="https://app.asktolearn.co/assets/img/log4.png" alt="Ask to Learn" className="logo-image" />
           <span className="logo-text">Ask to Learn</span>
-        </div>
-
-        {/* <button className="header-button logo">
-          <span>Ask to Learn AI Tutor</span>
-        </button> */}
-
-
-
+        </div>        
       </div>
 
       <button className="user-button">

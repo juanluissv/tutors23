@@ -17,6 +17,207 @@ const IconNewTutor = () => (
   </svg>
 );
 
+
+const IconNewTutor2 = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="sidebar-nav-icon"
+  >
+    {/* Graduation cap */}
+    <path
+      d="M3 9L12 4L21 9L12 14L3 9Z"
+      fill="url(#cap-top-gradient)"
+      stroke="url(#cap-top-gradient)"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M7 11.5V15C7 16.657 9.239 18 12 18C14.761 18 17 16.657 17 15V11.5"
+      fill="url(#cap-base-fill)"
+      stroke="url(#cap-base-stroke)"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Tassel */}
+    <path
+      d="M18.5 9.5V13"
+      stroke="url(#cap-tassel-stroke)"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+    />
+    <circle
+      cx="18.5"
+      cy="13.8"
+      r="0.9"
+      fill="url(#cap-tassel-stroke)"
+    />
+    <defs>
+      <linearGradient
+        id="cap-top-gradient"
+        x1="3"
+        y1="4"
+        x2="21"
+        y2="14"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#4F46E5" />
+        <stop offset="1" stopColor="#6366F1" />
+      </linearGradient>
+      <linearGradient
+        id="cap-base-fill"
+        x1="7"
+        y1="11.5"
+        x2="17"
+        y2="18"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#A5B4FC" stopOpacity="0.4" />
+        <stop offset="1" stopColor="#C4B5FD" stopOpacity="0.6" />
+      </linearGradient>
+      <linearGradient
+        id="cap-base-stroke"
+        x1="7"
+        y1="11.5"
+        x2="17"
+        y2="18"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#4F46E5" />
+        <stop offset="1" stopColor="#7C3AED" />
+      </linearGradient>
+      <linearGradient
+        id="cap-tassel-stroke"
+        x1="18"
+        y1="9.5"
+        x2="19"
+        y2="14.7"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#F59E0B" />
+        <stop offset="1" stopColor="#F97316" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+
+const IconNewTutor3 = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="sidebar-nav-icon"
+  >
+    {/* Idea / learning lightbulb */}
+    <path
+      d="M12 3C9.238 3 7 5.239 7 8C7 9.657 7.803 11.125 9.047 12.047C9.856 12.641 10.25 13.46 10.25 14.31V15C10.25 15.966 11.067 16.75 12 16.75C12.933 16.75 13.75 15.966 13.75 15V14.31C13.75 13.46 14.144 12.641 14.953 12.047C16.197 11.125 17 9.657 17 8C17 5.239 14.762 3 12 3Z"
+      fill="url(#bulb-fill)"
+      stroke="url(#bulb-stroke)"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Bulb base */}
+    <rect
+      x="10"
+      y="16.75"
+      width="4"
+      height="2.3"
+      rx="0.9"
+      fill="url(#base-fill)"
+    />
+    <path
+      d="M10 19.6H14"
+      stroke="url(#base-stroke)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    {/* Little rays */}
+    <path
+      d="M12 1.8V3"
+      stroke="url(#ray-stroke)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5.8 5.2L6.7 6.1"
+      stroke="url(#ray-stroke)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M18.2 5.2L17.3 6.1"
+      stroke="url(#ray-stroke)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <defs>
+      <linearGradient
+        id="bulb-fill"
+        x1="7"
+        y1="3"
+        x2="17"
+        y2="16"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#FDE68A" stopOpacity="0.85" />
+        <stop offset="1" stopColor="#FDBA74" stopOpacity="0.95" />
+      </linearGradient>
+      <linearGradient
+        id="bulb-stroke"
+        x1="7"
+        y1="3"
+        x2="17"
+        y2="16"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#F59E0B" />
+        <stop offset="1" stopColor="#EA580C" />
+      </linearGradient>
+      <linearGradient
+        id="base-fill"
+        x1="10"
+        y1="16.75"
+        x2="14"
+        y2="19.05"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#4B5563" />
+        <stop offset="1" stopColor="#111827" />
+      </linearGradient>
+      <linearGradient
+        id="base-stroke"
+        x1="10"
+        y1="19.6"
+        x2="14"
+        y2="19.6"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#9CA3AF" />
+        <stop offset="1" stopColor="#E5E7EB" />
+      </linearGradient>
+      <linearGradient
+        id="ray-stroke"
+        x1="5.8"
+        y1="1.8"
+        x2="18.2"
+        y2="6.1"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#FBBF24" />
+        <stop offset="1" stopColor="#F97316" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const IconAskTeacher = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
     <circle cx="12" cy="12" r="10" stroke="url(#chat-stroke)" strokeWidth="2" fill="url(#chat-fill)"/>
@@ -88,14 +289,14 @@ function Sidebar({ isOpen, toggleSidebar }) {
         <nav className="navigation">
         <Link to="/" className="nav-button-link">
           <button className="nav-button">
-            <IconNewTutor />
+            <IconNewTutor3 />
             <span>AI Tutor</span>
           </button>
           </Link>
           <Link to="/ask" className="nav-button-link">
           <button className="nav-button">
             <IconAskTeacher />
-            <span>Ask your class Teacher</span>
+            <span>Ask Your Class Teacher</span>
           </button>
           </Link>     
           <Link to="/answers" className="nav-button-link">
@@ -115,7 +316,12 @@ function Sidebar({ isOpen, toggleSidebar }) {
 
         {/* <Link to="/subjects/unidad1" className="nav-button-link"> */}
         <button className={`nav-button nav23`}>
-          &nbsp; - Ciudadania y Valores  <br /> &nbsp; &nbsp; 9 grado El Salvador 
+          
+
+          
+          
+        <IconNewTutor />
+       Ciudadania y Valores  <br /> &nbsp;  9 grado El Salvador 
           </button>    
           {/* </Link> */}
 
@@ -124,7 +330,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <Link to="/subjects/unidad1" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/subjects/unidad1' ? 'menu2' : ''}`}>
           <p className='subLink33' >
-            &nbsp; -  Ask AI Tutor 
+             <IconNewTutor2  /> Ask AI Tutor
           </p>
           </button>
           </Link>
@@ -134,10 +340,10 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <Link to="/bosques" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/bosques' ? 'menu2' : ''}`}>
           <p className='subLink33' >
-            &nbsp; - Clase Bosques  tropicales
+          <IconNewTutor2 /> Clase Bosques  tropicales
           </p>
           </button>
-          </Link> <br /><br />
+          </Link> <br />
 
 
 
@@ -152,7 +358,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
 
         <Link to="/subjects/langchain-docs" className="nav-button-link">
         <button className={`nav-button ${location.pathname === '/subjects/langchain-docs' ? 'menu2' : ''}`}>
-          &nbsp; - Warren Buffett <br /> &nbsp; &nbsp; Shareholder Report
+           <IconNewTutor /> Warren Buffett <br />  Shareholder Report
           </button>          
           </Link>
 
