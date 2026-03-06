@@ -43,7 +43,7 @@ function AnswersScreen() {
                   <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                   <div className="content-area">
                     <div className="center-content3">
-                        <h3 className="main-heading-answers answers-heading">5 new answers from teachers</h3>
+                        <h3 className="main-heading-answers answers-heading">2 new answers from teachers</h3>
                         
                         <div className="answers-container">
                             <div className="answers-timeline">

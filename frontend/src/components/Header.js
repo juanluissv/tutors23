@@ -9,7 +9,7 @@ function Header({ isSidebarOpen, toggleSidebar }) {
 
 
   return (
-    <header className={`header ${!isSidebarOpen ? 'header-centered' : ''}`}>
+    <header className='header header-centered'>
              
       {/* this is logo */}
       <div className="header-left">

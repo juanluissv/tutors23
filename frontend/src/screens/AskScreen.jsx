@@ -29,11 +29,10 @@ function AskScreen() {
                         
                         <div className="upload-cards-container">
                             
-                            <div className="upload-card upload-card-orange">
+                            {/* <div className="upload-card upload-card-orange">
                                 <div className="upload-card-header">
                                     <h2>Upload new video</h2>
                                     <div className="upload-card-icon">
-                                        {/* this is the icon for the video upload */}
                                         <svg
                                             width="24"
                                             height="24"
@@ -44,18 +43,16 @@ function AskScreen() {
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
                                         >
-                                            {/* Arrow pointing up */}
                                             <path d="M12 3v12" />
                                             <path d="M7 8l5-5 5 5" />
-                                            {/* Upload tray */}
                                             <path d="M5 15h14v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4z" />
                                         </svg>
                                     </div>
                                 </div>
                                 <p className="upload-card-subtitle">↑ Upload up to a 5 minutes question</p>
-                            </div>
+                            </div> */}
                             
-                            <div className="upload-card upload-card-blue">
+                            <div className="upload-card upload-card-purple">
                                 <div className="upload-card-header">
                                     <h2>Record PC screen</h2>
                                     <div className="upload-card-icon">
@@ -68,7 +65,7 @@ function AskScreen() {
                                 <p className="upload-card-subtitle">✦ Record up to a 5 minutes question</p>
                             </div>
                             
-                            <div className="upload-card upload-card-purple">
+                            <div className="upload-card upload-card-orange">
                                 <div className="upload-card-header">
                                     <h2>Record Camera</h2>
                                     <div className="upload-card-icon">
