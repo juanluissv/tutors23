@@ -754,10 +754,10 @@
 .fixed-video-bottom-right {
   position: fixed;
   /* bottom: 246px; */
-  top: 330px;
+  top: 320px;
   right: 25px;
-  width: 160px;
-  height: 160px;
+  width: 170px;
+  height: 170px;
   max-width: 30vw;
   max-height: 30vw;
   z-index: 2000;
@@ -836,8 +836,8 @@
 @media (min-width: 1443px) {
   .fixed-video-bottom-right {
     position: fixed;
-    top: 420px;
-    right: 100px;
+    top: 400px;
+    right: 140px;
     width: 180px;
     height: 180px;
     max-width: 30vw;

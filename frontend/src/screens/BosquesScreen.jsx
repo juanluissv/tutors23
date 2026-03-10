@@ -202,7 +202,8 @@ function BosquesScreen() {
                                             )}
                                             <video 
                                                 ref={classVideoRef}
-                                                src="https://res.cloudinary.com/dutglmj02/video/upload/v1773175656/classm1_izjixt.mp4"                                          
+                                                // src="https://res.cloudinary.com/dutglmj02/video/upload/v1773175656/classm1_izjixt.mp4"                                          
+                                                src="classm1.mp4"                                          
                                                 controls={false}
                                                 onLoadedData={() => setVideoLoading(false)}
                                                 onLoadStart={() => setVideoLoading(true)}
