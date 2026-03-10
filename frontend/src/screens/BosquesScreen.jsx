@@ -10,9 +10,11 @@ function BosquesScreen() {
     const [allCues, setAllCues] = useState([]);
     const [audioLoading, setAudioLoading] = useState(true);
     const [videoLoading, setVideoLoading] = useState(true);
+    const [isClassVideoPlaying, setIsClassVideoPlaying] = useState(false);
     
     const audioRef = useRef(null);
     const contentRef = useRef(null);
+    const classVideoRef = useRef(null);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -21,7 +23,7 @@ function BosquesScreen() {
     useEffect(() => {
         const loadVTT = async () => {
             try {
-                const response = await fetch('/bosques.vtt');
+                const response = await fetch('/class1.vtt');
                 const vttText = await response.text();
                 const cues = parseVTT(vttText);
                 
@@ -85,11 +87,9 @@ function BosquesScreen() {
         return 0;
     };
 
-    const handleTimeUpdate = () => {
-        if (!audioRef.current || allCues.length === 0) return;
+    const handleTimeUpdate = (currentTime) => {
+        if (allCues.length === 0) return;
 
-        const currentTime = audioRef.current.currentTime;
-        
         const currentCue = allCues.find(
             cue => currentTime >= cue.start && currentTime < cue.end
         );
@@ -127,6 +127,18 @@ function BosquesScreen() {
         highlighted.forEach(el => el.classList.remove('karaoke-active'));
     };
 
+    const handleClassVideoToggle = () => {
+        if (!classVideoRef.current) return;
+
+        if (classVideoRef.current.paused || classVideoRef.current.ended) {
+            classVideoRef.current.play();
+            setIsClassVideoPlaying(true);
+        } else {
+            classVideoRef.current.pause();
+            setIsClassVideoPlaying(false);
+        }
+    };
+
     return (
         <div className="chat-app">
             <div className="main-container">
@@ -154,66 +166,81 @@ function BosquesScreen() {
                                     <Link to="/forest" className='link25' >English Version</Link>
 
                                                                                                       
-                                </div>
-                                {/* Profundización Section */}
-                                <div style={{ marginBottom: '60px' }}>
+                                </div>                                
+                                <div style={{ marginBottom: '60px' }}>                                    
                                     <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '40px' }}>Los bosques tropicales en el mundo</h2>
-                                    {/* Los bosques: importancia y clasificación */}
                                     <div style={{ marginBottom: '40px' }}>
-                                        {audioLoading && (
-                                            <div style={{ 
-                                                display: 'flex', 
-                                                alignItems: 'center', 
-                                                justifyContent: 'center', 
-                                                padding: '20px', 
-                                                marginBottom: '20px',
-                                                backgroundColor: '#f5f7fa',
-                                                borderRadius: '12px',
-                                                border: '2px solid #e5e7eb'
-                                            }}>
-                                                <svg 
-                                                    width="24" 
-                                                    height="24" 
-                                                    viewBox="0 0 24 24" 
-                                                    fill="none" 
-                                                    stroke="#3b82f6" 
-                                                    strokeWidth="2" 
-                                                    className="audio-loading-spinner"
-                                                    style={{ marginRight: '12px' }}
-                                                >
-                                                    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
-                                                    <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
-                                                </svg>
-                                                <span style={{ color: '#374151', fontSize: '15px', fontWeight: '500' }}>
-                                                    Cargando audio...
-                                                </span>
-                                            </div>
-                                        )}
-                                        <audio 
-                                            ref={audioRef}
-                                            src="/bosques.mp3"                                          
-                                            controls 
-                                            onTimeUpdate={handleTimeUpdate}
-                                            onLoadedData={() => setAudioLoading(false)}
-                                            onLoadStart={() => setAudioLoading(true)}
-                                            onError={() => setAudioLoading(false)}
-                                            style={{ width: '100%', marginBottom: '20px', display: audioLoading ? 'none' : 'block' }}
-                                        />
-                                        {!audioLoading && (
-                                            <>
-                                                El audio esta sincronizado con el texto, puedes usar el audio para escuchar el libro de texto mientras lo lees. 
-                                                <br />  <br />
-                                            </>
-                                        )}  
+                                       
+
+                
+
+                                    <div className="fixed-video-bottom-right">
+                                        <div className="fixed-video-wrapper">
+                                            {videoLoading && (
+                                                <div className="fixed-video-loading-overlay">
+                                                    <svg 
+                                                        width="28" 
+                                                        height="28" 
+                                                        viewBox="0 0 24 24" 
+                                                        fill="none" 
+                                                        stroke="#ffffff" 
+                                                        strokeWidth="2" 
+                                                        className="audio-loading-spinner"
+                                                    >
+                                                        <circle 
+                                                            cx="12" 
+                                                            cy="12" 
+                                                            r="10" 
+                                                            strokeOpacity="0.25" 
+                                                        />
+                                                        <path 
+                                                            d="M12 2a10 10 0 0 1 10 10" 
+                                                            strokeLinecap="round" 
+                                                        />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            <video 
+                                                ref={classVideoRef}
+                                                src="/class31.mp4"                                          
+                                                controls={false}
+                                                onLoadedData={() => setVideoLoading(false)}
+                                                onLoadStart={() => setVideoLoading(true)}
+                                                onError={() => setVideoLoading(false)}
+                                                onPlay={() => setIsClassVideoPlaying(true)}
+                                                onPause={() => setIsClassVideoPlaying(false)}
+                                                onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
+                                            />
+                                        </div>
+                                        <div className="fixed-video-controls">
+                                            <button 
+                                                type="button" 
+                                                className="fixed-video-button"
+                                                onClick={handleClassVideoToggle}
+                                                title={isClassVideoPlaying ? "Pause video" : "Play video"}
+                                            >
+                                                {isClassVideoPlaying ? (
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <rect x="6" y="4" width="4" height="16" />
+                                                        <rect x="14" y="4" width="4" height="16" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polygon points="5 3 19 12 5 21 5 3" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
 
                                         <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '20px' }}>Los bosques: importancia y clasificación</h3>
                                         <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
                                             Los bosques son ecosistemas complejos que desempeñan un papel vital para la vida humana. Cubren alrededor del 31 % de la superficie terrestre del mundo y cumplen diversas funciones 
                                         </p>
 
-                                        <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
+                                        {/* <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '16px' }}>
                                             Entre las que se incluyen producción de oxígeno, purificación del aire, provisión de agua y de otros recursos naturales, por lo que son muy importantes para el mantenimiento de la salud y el equilibrio del planeta.
-                                        </p>
+                                        </p> */}
                                         <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#333', marginBottom: '30px' }}>
                                             La clasificación de los bosques se basa en distintos criterios, como la zona climática en la que se encuentran, el tipo de vegetación que los conforman o su función ecológica. 
                                         </p>
@@ -420,12 +447,10 @@ function BosquesScreen() {
                                     />
                                 </div>
 
-                                {/* Consolidación Section */}
                                 <div style={{ marginBottom: '60px' }}>
-                                    <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '40px' }}>Consolidación</h2>
+                                    {/* <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '40px' }}>Consolidación</h2> */}
 
-                                    {/* Actividad 6 */}
-                                    <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
+                                    {/* <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
                                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
                                             <div style={{ backgroundColor: '#1976d2', color: 'white', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', flexShrink: 0 }}>6</div>
                                             <div style={{ flex: 1 }}>
@@ -436,10 +461,9 @@ function BosquesScreen() {
                                                 </p>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
 
-                                    {/* Actividad 8 */}
-                                    <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
+                                    {/* <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
                                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
                                             <div style={{ backgroundColor: '#1976d2', color: 'white', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', flexShrink: 0 }}>8</div>
                                             <div style={{ flex: 1 }}>
@@ -469,8 +493,9 @@ function BosquesScreen() {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
+                                    </div> */}
+
+                                </div>                                
                             </div>
                         </div>
                     </div>
