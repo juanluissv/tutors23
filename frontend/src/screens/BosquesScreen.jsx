@@ -202,7 +202,7 @@ function BosquesScreen() {
                                             )}
                                             <video 
                                                 ref={classVideoRef}
-                                                src="/class31.mp4"                                          
+                                                src="https://res.cloudinary.com/dutglmj02/video/upload/v1773173800/class31_zi5lsz.mp4"                                          
                                                 controls={false}
                                                 onLoadedData={() => setVideoLoading(false)}
                                                 onLoadStart={() => setVideoLoading(true)}
