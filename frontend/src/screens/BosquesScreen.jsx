@@ -11,10 +11,12 @@ function BosquesScreen() {
     const [audioLoading, setAudioLoading] = useState(true);
     const [videoLoading, setVideoLoading] = useState(true);
     const [isClassVideoPlaying, setIsClassVideoPlaying] = useState(false);
+    const [questionText, setQuestionText] = useState('');
     
     const audioRef = useRef(null);
     const contentRef = useRef(null);
     const classVideoRef = useRef(null);
+    const questionTextareaRef = useRef(null);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -139,6 +141,19 @@ function BosquesScreen() {
         }
     };
 
+    const adjustQuestionTextareaHeight = (el) => {
+        if (!el) return;
+        el.style.height = 'auto';
+        const minH = 52;
+        const maxH = 200;
+        el.style.height = Math.min(Math.max(el.scrollHeight, minH), maxH) + 'px';
+    };
+
+    const handleQuestionChange = (e) => {
+        setQuestionText(e.target.value);
+        adjustQuestionTextareaHeight(e.target);
+    };
+
     return (
         <div className="chat-app">
             <div className="main-container">
@@ -175,6 +190,26 @@ function BosquesScreen() {
                 
 
                                     <div className="fixed-video-bottom-right">
+
+                                        <div className="fixed-video-controls">
+                                            <button 
+                                                type="button" 
+                                                className="fixed-video-button"
+                                                onClick={handleClassVideoToggle}
+                                                title={isClassVideoPlaying ? "Pause video" : "Play video"}
+                                            >
+                                                {isClassVideoPlaying ? (
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <rect x="6" y="4" width="4" height="16" />
+                                                        <rect x="14" y="4" width="4" height="16" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polygon points="5 3 19 12 5 21 5 3" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        </div>
                                         <div className="fixed-video-wrapper">
                                             {videoLoading && (
                                                 <div className="fixed-video-loading-overlay">
@@ -212,26 +247,69 @@ function BosquesScreen() {
                                                 onPause={() => setIsClassVideoPlaying(false)}
                                                 onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
                                             />
-                                        </div>
-                                        <div className="fixed-video-controls">
-                                            <button 
-                                                type="button" 
-                                                className="fixed-video-button"
-                                                onClick={handleClassVideoToggle}
-                                                title={isClassVideoPlaying ? "Pause video" : "Play video"}
+                                            <div 
+                                                style={{ 
+                                                    marginTop: '12px',
+                                                    position: 'relative',
+                                                    width: '100%',
+                                                    marginLeft: '-6px',
+                                                }}
                                             >
-                                                {isClassVideoPlaying ? (
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <rect x="6" y="4" width="4" height="16" />
-                                                        <rect x="14" y="4" width="4" height="16" />
+                                                <textarea
+                                                    ref={questionTextareaRef}
+                                                    rows={2}
+                                                    placeholder="hazme una pregunta"
+                                                    value={questionText}
+                                                    onChange={handleQuestionChange}
+                                                    style={{
+                                                        width: '100%',
+                                                        minWidth: '160px',
+                                                        minHeight: '52px',
+                                                        maxHeight: '200px',
+                                                        padding: '8px 56px 8px 14px',
+                                                        borderRadius: '12px',
+                                                        border: '1px solid #d1d5db',
+                                                        fontSize: '14px',
+                                                        outline: 'none',
+                                                        resize: 'none',
+                                                        overflow: 'hidden',
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        right: '-5px',
+                                                        bottom: '8px',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        width: '32px',
+                                                        height: '32px',
+                                                        borderRadius: '999px',
+                                                        border: 'none',
+                                                        backgroundColor: '#3b82f6',
+                                                        color: '#ffffff',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    <svg
+                                                        width="16"
+                                                        height="16"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
+                                                        <line x1="22" y1="2" x2="11" y2="13" />
+                                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
                                                     </svg>
-                                                ) : (
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <polygon points="5 3 19 12 5 21 5 3" />
-                                                    </svg>
-                                                )}
-                                            </button>
+                                                </button>
+                                            </div>
                                         </div>
+                                        
                                     </div>
 
                                         <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '20px' }}>Los bosques: importancia y clasificación</h3>
