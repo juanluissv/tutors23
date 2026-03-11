@@ -356,7 +356,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
 
 
 
-        <Link to="/subjects/langchain-docs" className="nav-button-link">
+        {/* <Link to="/subjects/langchain-docs" className="nav-button-link">
         <button className={`nav-button ${location.pathname === '/subjects/langchain-docs' ? 'menu2' : ''}`}>
            <IconNewTutor /> Warren Buffett <br />  Shareholder Report
           </button>          
@@ -364,7 +364,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
 
           <a href="https://www.berkshirehathaway.com/letters/2023ltr.pdf" target="_blank" className="navButton22  ">
             Report Link
-          </a> <br /><br />
+          </a> <br /><br /> */}
 
           {/* <Link to="/subjects/ciencias1" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/subjects/ciencias1' ? 'menu2' : ''}`}>

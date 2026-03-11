@@ -2043,9 +2043,9 @@
 .karaoke-active {
   background: linear-gradient(120deg, #fff59d 0%, #ffeb3b 100%) !important;
   box-shadow: 0 6px 20px rgba(255, 235, 59, 0.4) !important;
-  transform: scale(1.02) !important;
+  transform: scale(1.05) !important;
   font-weight: 600 !important;
-  color: #1a1a1a !important;
+  color: #0f558e !important;
   border-left: 5px solid #fbc02d !important;
   animation: karaoke-glow 2s ease-in-out infinite;
 }

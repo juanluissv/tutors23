@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import '../App.css';
@@ -9,12 +9,140 @@ import { Link } from 'react-router-dom';
 
 function ForestScreen() {
 
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);const [activeText, setActiveText] = useState('');
+    const [allCues, setAllCues] = useState([]);
+    const [audioLoading, setAudioLoading] = useState(true);
+    const [videoLoading, setVideoLoading] = useState(true);
+    const [isClassVideoPlaying, setIsClassVideoPlaying] = useState(false);
 
-    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
+    const audioRef = useRef(null);
+    const contentRef = useRef(null);
+    const classVideoRef = useRef(null);
+
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+
+    useEffect(() => {
+        const loadVTT = async () => {
+            try {
+                const response = await fetch('/class4.vtt');
+                const vttText = await response.text();
+                const cues = parseVTT(vttText);
+                
+                const filteredCues = cues.filter(cue => 
+                    !cue.text.includes('TurboScribe') && 
+                    !cue.text.includes('Go Unlimited')
+                );
+                
+                setAllCues(filteredCues);
+                console.log(`Loaded ${filteredCues.length} subtitle cues`);
+            } catch (error) {
+                console.error('Error loading VTT:', error);
+            }
+        };
+
+        loadVTT();
+    }, []);
+
+
+    const parseVTT = (vttText) => {
+        const lines = vttText.split('\n');
+        const cues = [];
+        let i = 0;
+
+        while (i < lines.length) {
+            const line = lines[i].trim();
+            
+            if (line === 'WEBVTT' || line === '' || /^\d+$/.test(line)) {
+                i++;
+                continue;
+            }
+
+            if (line.includes('-->')) {
+                const [startTime, endTime] = line.split('-->').map(t => t.trim());
+                const start = parseTime(startTime);
+                const end = parseTime(endTime);
+                
+                i++;
+                let text = '';
+                while (i < lines.length && lines[i].trim() !== '' && !lines[i].includes('-->')) {
+                    text += lines[i].trim() + ' ';
+                    i++;
+                }
+                
+                cues.push({ start, end, text: text.trim() });
+            } else {
+                i++;
+            }
+        }
+
+        return cues;
+    };
+
+    const parseTime = (timeString) => {
+        const parts = timeString.split(':');
+        if (parts.length === 3) {
+            const hours = parseFloat(parts[0]);
+            const minutes = parseFloat(parts[1]);
+            const seconds = parseFloat(parts[2]);
+            return hours * 3600 + minutes * 60 + seconds;
+        }
+        return 0;
+    };
+
+    const handleTimeUpdate = (currentTime) => {
+        if (allCues.length === 0) return;
+
+        const currentCue = allCues.find(
+            cue => currentTime >= cue.start && currentTime < cue.end
+        );
+
+        if (currentCue && currentCue.text !== activeText) {
+            setActiveText(currentCue.text);
+            highlightMatchingText(currentCue.text);
+        } else if (!currentCue && activeText) {
+            setActiveText('');
+            clearHighlights();
+        }
+    };
+
+    const highlightMatchingText = (cueText) => {
+        clearHighlights();
+        
+        if (!contentRef.current) return;
+        
+        const textElements = contentRef.current.querySelectorAll('p, h2, h3, h4');
+        const searchText = cueText.toLowerCase().trim();
+        
+        textElements.forEach(element => {
+            const elementText = element.textContent.toLowerCase();
+            
+            if (searchText.length > 20 && elementText.includes(searchText.substring(0, 30))) {
+                element.classList.add('karaoke-active');
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    };
+
+    const clearHighlights = () => {
+        if (!contentRef.current) return;
+        const highlighted = contentRef.current.querySelectorAll('.karaoke-active');
+        highlighted.forEach(el => el.classList.remove('karaoke-active'));
+    };
+
+    const handleClassVideoToggle = () => {
+        if (!classVideoRef.current) return;
+
+        if (classVideoRef.current.paused || classVideoRef.current.ended) {
+            classVideoRef.current.play();
+            setIsClassVideoPlaying(true);
+        } else {
+            classVideoRef.current.pause();
+            setIsClassVideoPlaying(false);
+        }
+    };
 
 
     return (
@@ -24,7 +152,7 @@ function ForestScreen() {
                 <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                 <div className="main-content">
                     <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-                    <div className="content-area">
+                    <div className="content-area" ref={contentRef}>
                         <div className="center-content2">
                             {/* content goes here */}
                             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
@@ -36,7 +164,65 @@ function ForestScreen() {
                                 </div>
                                 <Link to="/bosques" className='link25' >Spanish Version</Link>
 
-                               
+                                <div className="fixed-video-bottom-right">
+                                        <div className="fixed-video-wrapper">
+                                            {videoLoading && (
+                                                <div className="fixed-video-loading-overlay">
+                                                    <svg 
+                                                        width="28" 
+                                                        height="28" 
+                                                        viewBox="0 0 24 24" 
+                                                        fill="none" 
+                                                        stroke="#ffffff" 
+                                                        strokeWidth="2" 
+                                                        className="audio-loading-spinner"
+                                                    >
+                                                        <circle 
+                                                            cx="12" 
+                                                            cy="12" 
+                                                            r="10" 
+                                                            strokeOpacity="0.25" 
+                                                        />
+                                                        <path 
+                                                            d="M12 2a10 10 0 0 1 10 10" 
+                                                            strokeLinecap="round" 
+                                                        />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            <video 
+                                                ref={classVideoRef}
+                                                src="https://res.cloudinary.com/dutglmj02/video/upload/v1773249808/class4_l7lce0.mp4"                                          
+                                                //src="class4.mp4"                                          
+                                                controls={false}
+                                                onLoadedData={() => setVideoLoading(false)}
+                                                onLoadStart={() => setVideoLoading(true)}
+                                                onError={() => setVideoLoading(false)}
+                                                onPlay={() => setIsClassVideoPlaying(true)}
+                                                onPause={() => setIsClassVideoPlaying(false)}
+                                                onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
+                                            />
+                                        </div>
+                                        <div className="fixed-video-controls">
+                                            <button 
+                                                type="button" 
+                                                className="fixed-video-button"
+                                                onClick={handleClassVideoToggle}
+                                                title={isClassVideoPlaying ? "Pause video" : "Play video"}
+                                            >
+                                                {isClassVideoPlaying ? (
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <rect x="6" y="4" width="4" height="16" />
+                                                        <rect x="14" y="4" width="4" height="16" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polygon points="5 3 19 12 5 21 5 3" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
 
                                 {/* Deepening */}
                                 <div style={{ marginBottom: '60px' }}>
@@ -197,10 +383,10 @@ function ForestScreen() {
 
                                 {/* Consolidation */}
                                 <div style={{ marginBottom: '40px' }}>
-                                    <h2 style={{ fontSize: '30px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '32px' }}>Consolidation</h2>
+                                    {/* <h2 style={{ fontSize: '30px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '32px' }}>Consolidation</h2> */}
 
                                     {/* Activity 6 */}
-                                    <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
+                                    {/* <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
                                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
                                             <div style={{ backgroundColor: '#1976d2', color: 'white', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', flexShrink: 0 }}>6</div>
                                             <div style={{ flex: 1 }}>
@@ -211,10 +397,10 @@ function ForestScreen() {
                                                 </p>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     {/* Activity 8 */}
-                                    <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
+                                    {/* <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
                                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
                                             <div style={{ backgroundColor: '#1976d2', color: 'white', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', flexShrink: 0 }}>8</div>
                                             <div style={{ flex: 1 }}>
@@ -244,8 +430,12 @@ function ForestScreen() {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
+
                                 </div>
+
+
+
                             </div>
                             
                         </div>
