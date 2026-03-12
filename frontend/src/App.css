@@ -326,12 +326,14 @@
 }
 
 .subLink33{
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
   color: #0078d7;
   margin-bottom: 10px;
   text-decoration: none;
   font-weight: 500;
-  margin-left: 30px;
   cursor: pointer;
   margin-top: 5px;
 }
