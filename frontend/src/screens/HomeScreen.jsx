@@ -1,6 +1,6 @@
 import '../App.css';
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useGetChatMutation } from '../slices/chatSlice';
@@ -32,6 +32,7 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
 
 
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
 
 
 
@@ -49,6 +50,8 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
     const [predefinedQuestion, setPredefinedQuestion] = useState("");
     const [learningMaterial, setLearningMaterial] = useState("");
     const [showQuestions, setShowQuestions] = useState(false);
+    const [hasSentQueryFromUrl, setHasSentQueryFromUrl] = useState(false);
+    const hasMountedRef = useRef(false);
 
     const [getChat, { isLoading }] = useGetChatMutation();
 
@@ -122,6 +125,43 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
         return () => clearTimeout(timer); // Cleanup on unmount
     }, []);
 
+    // When there is a query in the URL, prefill and auto-send it once
+    useEffect(() => {
+        const queryFromUrl = searchParams.get('query');
+        const trimmedQuery = queryFromUrl ? queryFromUrl.trim() : "";
+
+        if (trimmedQuery && !hasSentQueryFromUrl) {
+            setQuestion(trimmedQuery);
+
+            const sendFromUrl = async () => {
+                const userMessage = { type: 'question', content: trimmedQuery };
+                setMessages(prev => [...prev, userMessage]);
+
+                let res;
+                try {
+                    if (id == undefined) {
+                        res = await getChat({ question: trimmedQuery, 'id': 'unidad1' });
+                    }
+                    if (id != undefined) {
+                        res = await getChat({ question: trimmedQuery, id });
+                    }
+
+                    const aiMessage = { type: 'answer', content: res.data.message };
+                    setMessages(prev => [...prev, aiMessage]);
+                } catch (error) {
+                    console.error(error);
+                    const errorMessage = { type: 'answer', content: 'Sorry, there was an error processing your question.' };
+                    setMessages(prev => [...prev, errorMessage]);
+                } finally {
+                    setQuestion("");
+                    setHasSentQueryFromUrl(true);
+                }
+            };
+
+            sendFromUrl();
+        }
+    }, [searchParams, hasSentQueryFromUrl, id, getChat]);
+
 
     // Cleanup audio on component unmount
     useEffect(() => {
@@ -147,12 +187,18 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
 
 
 
-    // Clear chat history and cleanup audio when switching subjects
+    // Clear chat history and cleanup audio when switching subjects (but not on first mount)
     useEffect(() => {
+      if (!hasMountedRef.current) {
+        hasMountedRef.current = true;
+        return;
+      }
+
       cleanupAudio();
       setMessages([]);
       setShowSubheading(false);
       setShowQuestions(false);
+      setHasSentQueryFromUrl(false);
       
       // Reset subheading timer
       const timer = setTimeout(() => {

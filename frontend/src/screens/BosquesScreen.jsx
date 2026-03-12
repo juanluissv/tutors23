@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../App.css';
 
 function BosquesScreen() {
@@ -17,6 +17,7 @@ function BosquesScreen() {
     const contentRef = useRef(null);
     const classVideoRef = useRef(null);
     const questionTextareaRef = useRef(null);
+    const navigate = useNavigate();
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -154,6 +155,26 @@ function BosquesScreen() {
         adjustQuestionTextareaHeight(e.target);
     };
 
+    const handleSendQuestion = () => {
+        if (!questionText.trim()) {
+            return;
+        }
+
+        if (classVideoRef.current) {
+            classVideoRef.current.pause();
+            setIsClassVideoPlaying(false);
+        }
+
+        const params = new URLSearchParams();
+        params.set('query', questionText.trim());
+
+        window.open(`/?${params.toString()}`, '_blank');
+        setQuestionText('');
+        if (questionTextareaRef.current) {
+            questionTextareaRef.current.style.height = '52px';
+        }
+    };
+
     return (
         <div className="chat-app">
             <div className="main-container">
@@ -277,6 +298,7 @@ function BosquesScreen() {
                                                 />
                                                 <button
                                                     type="button"
+                                                    onClick={handleSendQuestion}
                                                     style={{
                                                         position: 'absolute',
                                                         right: '-5px',
