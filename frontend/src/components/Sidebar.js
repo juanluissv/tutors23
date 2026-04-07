@@ -326,13 +326,16 @@ function Sidebar({ isOpen, toggleSidebar }) {
             <IconTeacherAnswers />
             <span>Teacher Answers</span>
           </button>
-          </Link>        
+          </Link>       
+          <Link to="/9/valores/unidad1/semana1" className="nav-button-link"> 
           <button className="nav-button">
             <IconSubjects />
             <span>Your Subjects:</span>            
-          </button>                    
+          </button>    
+          </Link>      
         </nav>
 
+        <Link to="/9/valores/unidad1/semana1" className="nav-button-link">
         <button className={`nav-button nav23`} type="button">
           <IconNewTutor2 />
           <span>
@@ -341,6 +344,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
             9 grado El Salvador
           </span>
         </button>    
+        </Link>        
 
           {/* <Link to="/subjects/unidad1" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/subjects/unidad1' ? 'menu2' : ''}`}>

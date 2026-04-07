@@ -307,6 +307,10 @@
   transform: translateX(-30%);
 }
 
+.chat-app.ask-screen .header-logo {
+  transform: none;
+}
+
 .logo-text {
   font-size: 18px;
   font-weight: 600;

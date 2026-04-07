@@ -340,7 +340,7 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
 console.log(question1);
 
   return (
-    <div className="chat-app">
+    <div className="chat-app ask-screen">
       {/* Get Plus Button */}
       {/* <button className="get-plus-button">
         <img src={imgIcon10} alt="" />

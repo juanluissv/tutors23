@@ -35,7 +35,7 @@ function AnswersScreen() {
     ];
 
     return (
-        <div className="chat-app">
+        <div className="chat-app ask-screen">
             <div className="main-container">     
   
               <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
