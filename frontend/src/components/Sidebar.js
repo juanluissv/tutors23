@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom'
+import { VALORES_SECTIONS } from '../screens/9/valores/valoresNavData'
 
 // Hamburger menu icon
 const imgIcon = "/burg.svg";
@@ -257,6 +258,13 @@ const IconTeacherAnswers = () => (
   </svg>
 );
 
+function getActiveValoresUnit (pathname) {
+  const section = VALORES_SECTIONS.find((s) =>
+    s.weeks.some((w) => w.to === pathname)
+  );
+  return section ? section.unit : null;
+}
+
 const IconSubjects = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
     <path d="M4 6h16v12H4V6z" stroke="url(#book-stroke)" strokeWidth="2" strokeLinejoin="round" fill="url(#book-fill)"/>
@@ -276,7 +284,21 @@ const IconSubjects = () => (
 
 function Sidebar({ isOpen, toggleSidebar }) {
   const location = useLocation();
-  
+  const [expandedValoresUnit, setExpandedValoresUnit] = useState(1);
+
+  useEffect(() => {
+    const active = getActiveValoresUnit(location.pathname);
+    if (active !== null) {
+      setExpandedValoresUnit(active);
+    } else if (location.pathname === '/9/valores') {
+      setExpandedValoresUnit(1);
+    }
+  }, [location.pathname]);
+
+  const handleValoresUnitToggle = (unit) => {
+    setExpandedValoresUnit((prev) => (prev === unit ? null : unit));
+  };
+
   return (
     <div className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <div className="sidebar-header">
@@ -311,39 +333,107 @@ function Sidebar({ isOpen, toggleSidebar }) {
           </button>                    
         </nav>
 
-        {/* <h3 className="section-heading">Your Subjects</h3> */}
+        <button className={`nav-button nav23`} type="button">
+          <IconNewTutor2 />
+          <span>
+            Ciudadania y Valores
+            <br />
+            9 grado El Salvador
+          </span>
+        </button>    
 
-
-        {/* <Link to="/subjects/unidad1" className="nav-button-link"> */}
-        <button className={`nav-button nav23`}>
-          
-
-          
-          
-        <IconNewTutor2 />
-       Ciudadania y Valores  <br />  9 grado El Salvador 
-          </button>    
-          {/* </Link> */}
-
-          {/*  small subheading to bosques */}
-
-          <Link to="/subjects/unidad1" className="nav-button-link">
+          {/* <Link to="/subjects/unidad1" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/subjects/unidad1' ? 'menu2' : ''}`}>
           <p className='subLink33' >
              <IconNewTutor3  /> Ask AI Tutor
           </p>
           </button>
-          </Link>
+          </Link> */}
 
 
 
-          <Link to="/bosques" className="nav-button-link">
+          {/* <Link to="/bosques" className="nav-button-link">
           <button className={`nav-button ${location.pathname === '/bosques' ? 'menu2' : ''}`}>
           <p className='subLink33' >
           <IconNewTutor3 /> Clase Bosques  tropicales
           </p>
           </button>
-          </Link> <br />
+          </Link> <br /> */}
+
+          <div
+            className="sidebar-valores-accordion"
+            aria-label="Ciudadanía y Valores — unidades y semanas"
+          >
+            {/* <p className="sidebar-valores-accordion-title">
+              Ciudadanía y Valores
+            </p> */}
+            {/* <Link
+              to="/9/valores"
+              className={`sidebar-valores-index-link${
+                location.pathname === '/9/valores'
+                  ? ' sidebar-valores-link-active'
+                  : ''
+              }`}
+            >
+              Índice de lecciones
+            </Link> */}
+            {VALORES_SECTIONS.map((section) => (
+              <div key={section.unit} className="sidebar-valores-unit">
+                <button
+                  type="button"
+                  className="sidebar-valores-toggle"
+                  aria-expanded={expandedValoresUnit === section.unit}
+                  aria-controls={`sidebar-valores-panel-${section.unit}`}
+                  id={`sidebar-valores-head-${section.unit}`}
+                  onClick={() => handleValoresUnitToggle(section.unit)}
+                >
+                  <span className="sidebar-valores-unit-badge">
+                    {section.unit}
+                  </span>
+                  <span className="sidebar-valores-unit-label">
+                    {section.label}
+                  </span>
+                  <span className="sidebar-valores-chevron" aria-hidden="true">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </span>
+                </button>
+                {expandedValoresUnit === section.unit && (
+                  <ul
+                    className="sidebar-valores-weeks"
+                    id={`sidebar-valores-panel-${section.unit}`}
+                    role="region"
+                    aria-labelledby={`sidebar-valores-head-${section.unit}`}
+                  >
+                    {section.weeks.map((w) => (
+                      <li key={w.to}>
+                        <Link
+                          to={w.to}
+                          className={`sidebar-valores-week-link${
+                            location.pathname === w.to
+                              ? ' sidebar-valores-link-active'
+                              : ''
+                          }`}
+                        >
+                          {w.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
 
 
 

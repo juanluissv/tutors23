@@ -11,7 +11,9 @@
         "client": "npm start --prefix frontend",
         "dev": "concurrently \"npm run server\" \"npm run client\"",
         "data:import": "node src/seeder.js",
-        "data:destroy": "node src/seeder.js -d"
+        "data:destroy": "node src/seeder.js -d",
+        "valores:split": "node scripts/splitValoresPdf.mjs",
+        "valores:unidad4-assemble": "node scripts/assembleUnidad4Screens.mjs"
     },
     "author": "",
     "license": "MIT",
@@ -32,5 +34,9 @@
         "multer": "^1.4.5-lts.1",
         "nodemon": "^3.0.3",
         "openai": "^6.21.0"
+    },
+    "devDependencies": {
+        "pdf-lib": "^1.17.1",
+        "pdf-parse": "^2.4.5"
     }
 }

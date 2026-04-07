@@ -3,7 +3,7 @@ import React from 'react';
 // Icon URLs from Figma
 const imgIcon = "https://www.figma.com/api/mcp/asset/0af1f7fd-f3b0-447c-85f2-11ecd9f8aa71";
 const imgIcon7 = "https://www.figma.com/api/mcp/asset/34081ae6-9743-48f6-89b6-b8e08cae2713";
-const imgIcon8 = "./user.svg";
+const imgIcon8 = "/user.svg";
 
 function Header({ isSidebarOpen, toggleSidebar }) {
 

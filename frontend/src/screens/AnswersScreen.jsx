@@ -46,20 +46,9 @@ function AnswersScreen() {
                         <h3 className="main-heading-answers answers-heading">2 new answers from teachers</h3>
                         
                         <div className="answers-container">
-                            <div className="answers-timeline">
-                                <div className={`timeline-badge timeline-badge-${answers[0].categoryColor}`}>
-                                    <span className="badge-icon">?</span>
-                                </div>
-                                <div className="timeline-line"></div>
-                                <div className={`timeline-badge timeline-badge-${answers[1].categoryColor}`}>
-                                    <span className="badge-icon">?</span>
-                                </div>
-                                <div className="timeline-spacer"></div>
-                            </div>
-                            
                             <div className="answers-cards">
-                                {answers.map((answer, index) => (
-                                    <div key={answer.id} className={`answer-card-wrapper ${index === 0 ? 'left' : 'right'}`}>
+                                {answers.map((answer) => (
+                                    <div key={answer.id} className="answer-card-wrapper">
                                         <div className="answer-card">
                                             <span className={`answer-category answer-category-${answer.categoryColor}`}>
                                                 {answer.category}

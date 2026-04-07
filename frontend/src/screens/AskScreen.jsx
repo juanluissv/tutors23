@@ -23,7 +23,7 @@ function AskScreen() {
                 <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                 <div className="content-area">
                     <div className="center-content2">
-                        <h1 className="main-heading">Ask Your Class Teacher</h1>
+                        <h1 className="main-heading">Ask your class teacher</h1>
                         
                         <p className="upload-subtitle">Record your screen or camera to ask your question</p>
                         

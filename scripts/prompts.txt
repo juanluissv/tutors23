@@ -1,0 +1,623 @@
+
+I want to extract the text from 
+@frontend/public/valores-partes/unidad5/unidad5Semana3.pdf 
+and create a react web version into 
+@frontend/src/screens/9/valores/unidad5/Semana3Unidad5Screen.jsx 
+use @frontend/src/screens/9/valores/unidad1/semanaTScreen.jsx 
+as a reference for the css and styles, include all the text and not summarize 
+any text from the pdf files, and no inline styles
+
+I want to extract the text from 
+@frontend/public/valores-partes/unidad5/unidad5Semana4.pdf 
+and create a react web version into 
+@frontend/src/screens/9/valores/unidad5/Semana4Unidad5Screen.jsx 
+use @frontend/src/screens/9/valores/unidad1/semanaTScreen.jsx 
+as a reference for the css and styles, include all the text and not summarize 
+any text from the pdf files, and no inline styles
+
+I want to extract the text from 
+@frontend/public/valores-partes/unidad5/unidad5Semana5.pdf 
+and create a react web version into 
+@frontend/src/screens/9/valores/unidad5/Semana5Unidad5Screen.jsx 
+use @frontend/src/screens/9/valores/unidad1/semanaTScreen.jsx 
+as a reference for the css and styles, include all the text and not summarize 
+any text from the pdf files, and no inline styles
+
+
+
+
+
+unidad6
+
+
+
+I want to extract the text from 
+@frontend/public/valores-partes/unidad6/unidad6Semana1.pdf 
+and create a react web version into 
+@frontend/src/screens/9/valores/unidad6/Semana1Unidad6Screen.jsx 
+use @frontend/src/screens/9/valores/unidad1/semanaTScreen.jsx 
+as a reference for the css and styles, include all the text and not summarize 
+any text from the pdf files, and no inline styles
+
+/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/fe6aaf4a-6657-4c34-91f1-520d2066631a/fe6aaf4a-6657-4c34-91f1-520d2066631a.jsonl 
+I want to extract the text from 
+@frontend/public/valores-partes/unidad6/unidad6Semana2.pdf 
+and create a react web version into 
+@frontend/src/screens/9/valores/unidad6/Semana2Unidad6Screen.jsx 
+use @frontend/src/screens/9/valores/unidad1/semanaTScreen.jsx 
+as a reference for the css and styles, include all the text and not summarize 
+any text from the pdf files, and no inline styles
+
+
+
+/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/fe6aaf4a-6657-4c34-91f1-520d2066631a/fe6aaf4a-6657-4c34-91f1-520d2066631a.jsonl 
+I want to extract the text from 
+@frontend/public/valores-partes/unidad6/unidad6Semana3.pdf 
+and create a react web version into 
+@frontend/src/screens/9/valores/unidad6/Semana3Unidad6Screen.jsx 
+use @frontend/src/screens/9/valores/unidad1/semanaTScreen.jsx 
+as a reference for the css and styles, include all the text and not summarize 
+any text from the pdf files, and no inline styles
+
+
+/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/fe6aaf4a-6657-4c34-91f1-520d2066631a/fe6aaf4a-6657-4c34-91f1-520d2066631a.jsonl 
+I want to extract the text from 
+@frontend/public/valores-partes/unidad6/unidad6Semana4.pdf 
+and create a react web version into 
+@frontend/src/screens/9/valores/unidad6/Semana4Unidad6Screen.jsx 
+use @frontend/src/screens/9/valores/unidad1/semanaTScreen.jsx 
+as a reference for the css and styles, include all the text and not summarize 
+any text from the pdf files, and no inline styles
+
+
+/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/fe6aaf4a-6657-4c34-91f1-520d2066631a/fe6aaf4a-6657-4c34-91f1-520d2066631a.jsonl 
+I want to extract the text from 
+@frontend/public/valores-partes/unidad6/unidad6Semana5.pdf 
+and create a react web version into 
+@frontend/src/screens/9/valores/unidad6/Semana5Unidad6Screen.jsx 
+use @frontend/src/screens/9/valores/unidad1/semanaTScreen.jsx 
+as a reference for the css and styles, include all the text and not summarize 
+any text from the pdf files, and no inline styles
+
+
+
+
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad2/semana1Unidad2Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad2/semana2Unidad2Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad2/semana3Unidad2Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad2/semana4Unidad2Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad2/semana5Unidad2Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+unidad3
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad3/semana1Unidad3Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad3/semana2Unidad3Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad3/semana3Unidad3Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad3/semana4Unidad3Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad3/semana5Unidad3Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+please remove from 
+@frontend/src/screens/9/valores/unidad3/semana6Unidad3Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+
+
+
+
+
+unidad4
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad4/semana1Unidad4Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad4/semana2Unidad4Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad4/semana3Unidad4Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad4/semana4Unidad4Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad4/semana5Unidad4Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad4/semana6Unidad4Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+unidad5
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad5/semana1Unidad5Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad5/semana2Unidad5Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad5/semana3Unidad5Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad5/semana4Unidad5Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad5/semana5Unidad5Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+
+
+
+unidad6
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad6/semana1Unidad6Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad6/semana2Unidad6Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad6/semana3Unidad6Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad6/semana4Unidad6Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+@/Users/juanluissv/.cursor/projects/Users-juanluissv-Desktop-tutors23/agent-transcripts/a01280f8-2f2a-45a2-850e-64d0ffa76ad1/a01280f8-2f2a-45a2-850e-64d0ffa76ad1.jsonl 
+please remove from 
+@frontend/src/screens/9/valores/unidad6/semana5Unidad6Screen.jsx 
+all the content related to Actividad individual, Actividad con docente, 
+Actividad en equipo, Actividad en pares, Actividades en equipo
+
+
+
+unidad2
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad2/Semana2Unidad2Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad2/Semana3Unidad2Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad2/Semana4Unidad2Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad2/Semana5Unidad2Screen.jsx  
+and put in separate .txt file
+
+
+
+unidad3
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad3/Semana1Unidad3Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad3/Semana2Unidad3Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad3/Semana3Unidad3Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad3/Semana4Unidad3Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad3/Semana5Unidad3Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad3/Semana6Unidad3Screen.jsx  
+and put in separate .txt file
+
+
+unidad4
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad4/Semana1Unidad4Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad4/Semana2Unidad4Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad4/Semana3Unidad4Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad4/Semana4Unidad4Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad4/Semana5Unidad4Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad4/Semana6Unidad4Screen.jsx  
+and put in separate .txt file
+
+
+
+unidad5
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad5/Semana1Unidad5Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad5/Semana2Unidad5Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad5/Semana3Unidad5Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad5/Semana4Unidad5Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad5/Semana5Unidad5Screen.jsx  
+and put in separate .txt file
+
+
+unidad6
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad6/Semana1Unidad6Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad6/Semana2Unidad6Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad6/Semana3Unidad6Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad6/Semana4Unidad6Screen.jsx  
+and put in separate .txt file
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad6/Semana5Unidad6Screen.jsx  
+and put in separate .txt file
+
+
+
+
+
+
+convert @frontend/public/unidad2Semana1.srt  to .vtt 
+ffmpeg -i unidad2Semana2.mp4 -vf "scale=-2:360" -c:v libx264 -crf 23 -c:a copy unidad2Semana22.mp4
+
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad2/Semana3Unidad2Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad2/Semana4Unidad2Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad2/Semana5Unidad2Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+
+unidad 3
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad3/Semana1Unidad3Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad3/Semana2Unidad3Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad3/Semana3Unidad3Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad3/Semana4Unidad3Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad3/Semana5Unidad3Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad3/Semana6Unidad3Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+
+unidad 4
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad4/Semana1Unidad4Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad4/Semana2Unidad4Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad4/Semana3Unidad4Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad4/Semana4Unidad4Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad4/Semana5Unidad4Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad4/Semana6Unidad4Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+
+unidad 5
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad5/Semana1Unidad5Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad5/Semana2Unidad5Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad5/Semana3Unidad5Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad5/Semana4Unidad5Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad5/Semana5Unidad5Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+unidad 6
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad6/Semana1Unidad6Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad6/Semana2Unidad6Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad6/Semana3Unidad6Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad6/Semana4Unidad6Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please  add the karaoke like functionality where the text gets highlighted in synch with the video to 
+@frontend/src/screens/9/valores/unidad6/Semana5Unidad6Screen.jsx and the video block,
+use @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx as a reference @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:8-176 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:187-188 @frontend/src/screens/9/valores/unidad2/Semana1Unidad2Screen.jsx:200-323 
+
+
+please extract the main text content from 
+@frontend/src/screens/9/valores/unidad4/Semana5Unidad4Screen.jsx  
+and put in separate .txt file
+
+
+unidad2
+
+
+@frontend/src/screens/9/valores/unidad2/Semana2Unidad2Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+@frontend/src/screens/9/valores/unidad2/Semana3Unidad2Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+@frontend/src/screens/9/valores/unidad2/Semana4Unidad2Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+@frontend/src/screens/9/valores/unidad2/Semana5Unidad2Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+unidad3
+
+
+@frontend/src/screens/9/valores/unidad3/Semana1Unidad3Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+@frontend/src/screens/9/valores/unidad3/Semana2Unidad3Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+@frontend/src/screens/9/valores/unidad3/Semana3Unidad3Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+@frontend/src/screens/9/valores/unidad3/Semana4Unidad3Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+@frontend/src/screens/9/valores/unidad3/Semana5Unidad3Screen.jsx 
+move all the text to the left 10% do not move the video just the text 
+
+
+@frontend/src/screens/9/valores/unidad3/Semana6Unidad3Screen.jsx 
+move all the text to the left 10% do not move the video just the text 

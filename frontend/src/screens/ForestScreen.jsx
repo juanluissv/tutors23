@@ -191,13 +191,32 @@ function ForestScreen() {
                         <div className="center-content2">
                             {/* content goes here */}
                             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
-                                {/* Header */}
-                                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                                    <div style={{ display: 'inline-block', backgroundColor: '#e8f5e9', padding: '8px 24px', borderRadius: '20px', marginBottom: '16px' }}>
-                                        <span style={{ color: '#2e7d32', fontSize: '14px', fontWeight: '500' }}>English Version</span>                                        
-                                    </div>                                    
+                                <div className='valores-english-version-wrap'>
+                                    <div className='valores-english-version-pill'>
+                                        <Link
+                                            to='/9/valores/unidad1/semana1'
+                                            className='valores-english-version-link'
+                                        >
+                                            Spanish Version
+                                        </Link>
+                                    </div>
+                                    <div className='valores-english-version-pill'>
+                                        <Link
+                                            to='/french'
+                                            className='valores-english-version-link'
+                                        >
+                                            French Version
+                                        </Link>
+							        </div>
                                 </div>
-                                <Link to="/bosques" className='link25' >Spanish Version</Link>
+                                <div className='unidad-header'>									
+									<h1 className='unidad-title'>
+										Unidad 1 · Semana 1
+									</h1>
+									<h2 className='unidad-subtitle'>
+										Los bosques tropicales en el mundo
+									</h2>																	
+								</div>
 
                                 <div className="fixed-video-bottom-right">
 
@@ -250,7 +269,7 @@ function ForestScreen() {
                                             )}
                                             <video 
                                                 ref={classVideoRef}
-                                                src="https://res.cloudinary.com/dutglmj02/video/upload/v1773249808/class4_l7lce0.mp4"                                          
+                                                src="https://res.cloudinary.com/dutglmj02/video/upload/v1775580777/forest_fnhwrz.mp4"                                          
                                                 //src="class4.mp4"                                          
                                                 controls={false}
                                                 onLoadedData={() => setVideoLoading(false)}
