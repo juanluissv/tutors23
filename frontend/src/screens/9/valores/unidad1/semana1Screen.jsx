@@ -743,6 +743,23 @@ function Semana1Screen () {
 
 						</div>
 
+						<video 
+                                        src="https://res.cloudinary.com/dutglmj02/video/upload/v1775596686/bosques1_ne7opd.mp4"                                          
+                                        controls 
+                                        onLoadedData={() => setVideoLoading(false)}
+                                        onLoadStart={() => setVideoLoading(true)}
+                                        onError={() => setVideoLoading(false)}
+                                        style={{ 
+                                            width: '100%', 
+                                            height: 'auto', 
+                                            borderRadius: '12px',
+                                            display: videoLoading ? 'none' : 'block'
+                                        }} 
+                        />
+
+
+
+
 						</div>
 					</div>
 				</div>
