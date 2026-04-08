@@ -324,7 +324,7 @@ function FrenchScreen () {
 										>
 											<textarea
 												ref={questionTextareaRef}
-												rows={2}
+												rows={3}
 												placeholder='Posez-moi une question'
 												value={questionText}
 												onChange={handleQuestionChange}
@@ -685,6 +685,19 @@ function FrenchScreen () {
 											</p>
 										</div>
 									</div>
+									<video 
+										src="https://res.cloudinary.com/dutglmj02/video/upload/v1775672377/frenchLesson_gfwazs.mp4"                                          
+										controls 
+										onLoadedData={() => setVideoLoading(false)}
+										onLoadStart={() => setVideoLoading(true)}
+										onError={() => setVideoLoading(false)}
+										style={{ 
+										width: '100%', 
+										height: 'auto', 
+										borderRadius: '12px',
+										display: videoLoading ? 'none' : 'block'
+										}} 
+									/>
 								</section>
 							</div>
 						</div>

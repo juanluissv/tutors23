@@ -502,58 +502,19 @@ function ForestScreen() {
                                     </div>
                                 </div>
 
-                                {/* Consolidation */}
-                                <div style={{ marginBottom: '40px' }}>
-                                    {/* <h2 style={{ fontSize: '30px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '32px' }}>Consolidation</h2> */}
-
-                                    {/* Activity 6 */}
-                                    {/* <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
-                                            <div style={{ backgroundColor: '#1976d2', color: 'white', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', flexShrink: 0 }}>6</div>
-                                            <div style={{ flex: 1 }}>
-                                                <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '12px' }}>Pair activity</h4>
-                                                <p style={{ fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '16px' }}>Conservation proposals</p>
-                                                <p style={{ color: '#555', fontSize: '15px', marginBottom: 0 }}>
-                                                    Establish three actions that can be carried out by different entities for the conservation of tropical forests worldwide, considering the main issues.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div> */}
-
-                                    {/* Activity 8 */}
-                                    {/* <div style={{ backgroundColor: '#fff', border: '2px solid #e0e0e0', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
-                                            <div style={{ backgroundColor: '#1976d2', color: 'white', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', flexShrink: 0 }}>8</div>
-                                            <div style={{ flex: 1 }}>
-                                                <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '12px' }}>Team activity</h4>
-                                                <p style={{ fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '16px' }}>Research and presentation</p>
-                                                <p style={{ color: '#555', fontSize: '15px', marginBottom: '16px' }}>
-                                                    Identify and explain the issues facing tropical forests. Select one of the following forests:
-                                                </p>
-
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-                                                    <div style={{ backgroundColor: '#f5f5f5', padding: '16px', borderRadius: '8px' }}>
-                                                        <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' }}>Amazon</h5>
-                                                        <p style={{ fontSize: '14px', color: '#555', marginBottom: 0 }}>The largest tropical forest in the world.</p>
-                                                    </div>
-                                                    <div style={{ backgroundColor: '#f5f5f5', padding: '16px', borderRadius: '8px' }}>
-                                                        <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' }}>The Congo</h5>
-                                                        <p style={{ fontSize: '14px', color: '#555', marginBottom: 0 }}>Second largest tropical zone.</p>
-                                                    </div>
-                                                    <div style={{ backgroundColor: '#f5f5f5', padding: '16px', borderRadius: '8px' }}>
-                                                        <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' }}>The Daintree</h5>
-                                                        <p style={{ fontSize: '14px', color: '#555', marginBottom: 0 }}>Tropical rainforest of Australia.</p>
-                                                    </div>
-                                                    <div style={{ backgroundColor: '#f5f5f5', padding: '16px', borderRadius: '8px' }}>
-                                                        <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' }}>Monteverde</h5>
-                                                        <p style={{ fontSize: '14px', color: '#555', marginBottom: 0 }}>Cloud forest of Costa Rica.</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div> */}
-
-                                </div>
+                                <video 
+                                    src="https://res.cloudinary.com/dutglmj02/video/upload/v1775672380/EnglishLesson_j7x8zl.mp4"                                          
+                                    controls 
+                                    onLoadedData={() => setVideoLoading(false)}
+                                    onLoadStart={() => setVideoLoading(true)}
+                                    onError={() => setVideoLoading(false)}
+                                    style={{ 
+                                    width: '100%', 
+                                    height: 'auto', 
+                                    borderRadius: '12px',
+                                    display: videoLoading ? 'none' : 'block'
+                                    }} 
+                                />
 
 
 
