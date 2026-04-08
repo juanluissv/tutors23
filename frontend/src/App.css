@@ -305,6 +305,7 @@
   padding: 2px 16px;
   border-radius: 12px;
   transform: translateX(-30%);
+  cursor: pointer;
 }
 
 .chat-app.ask-screen .header-logo {
@@ -441,7 +442,258 @@
   flex: 1;
 }
 
+/* —— Login screen —— */
+.content-area--login {
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px 32px;
+  background: linear-gradient(
+    165deg,
+    #f8fafc 0%,
+    #f1f5f9 45%,
+    #eef2ff 100%
+  );
+}
 
+.login-screen {
+  margin-top: 0;
+  width: 100%;
+  max-width: 420px;
+  justify-content: center;
+}
+
+.login-card {
+  position: relative;
+  width: 100%;
+  padding: 32px 28px 28px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 12px 40px -12px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.login-card__accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    #ad46ff 0%,
+    #e879f9 45%,
+    #f6339a 100%
+  );
+}
+
+.login-card__header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.login-card__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e2939;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 8px;
+}
+
+.login-card__subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.5;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-field--row {
+  gap: 0;
+  margin-top: -4px;
+}
+
+.login-field-error {
+  margin: -12px 0 0;
+  font-size: 0.8125rem;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
+.login-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #475569;
+  letter-spacing: 0.01em;
+}
+
+.login-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 0.9375rem;
+  font-family: 'Inter', sans-serif;
+  color: #1e293b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.login-input::placeholder {
+  color: #94a3b8;
+}
+
+.login-input:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.login-input:focus {
+  border-color: #c084fc;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+
+.login-remember {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.login-checkbox {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  flex-shrink: 0;
+  accent-color: #ad46ff;
+  cursor: pointer;
+}
+
+.login-remember__text {
+  font-size: 0.8125rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.login-submit {
+  margin-top: 4px;
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: linear-gradient(
+    135deg,
+    #ad46ff 0%,
+    #d946ef 50%,
+    #f6339a 100%
+  );
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.08),
+    0 4px 14px -2px rgba(173, 70, 255, 0.45);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+  touch-action: manipulation;
+}
+
+.login-submit:hover {
+  filter: brightness(1.05);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.1),
+    0 8px 20px -4px rgba(173, 70, 255, 0.5);
+}
+
+.login-submit:active {
+  transform: scale(0.98);
+}
+
+.login-card__footer {
+  margin: 20px 0 0;
+  font-size: 0.875rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.login-card__link {
+  color: #7c3aed;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.login-card__link:hover {
+  color: #5b21b6;
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 28px 20px 24px;
+    border-radius: 14px;
+  }
+
+  .login-card__title {
+    font-size: 1.375rem;
+  }
+}
+
+/* Login: sidebar shows icons but nav is inert (no routing / accordion) */
+.chat-app--login .sidebar .nav-button-link,
+.chat-app--login .sidebar .sidebar-valores-week-link,
+.chat-app--login .sidebar .sidebar-valores-toggle {
+  pointer-events: none;
+  cursor: default;
+}
+
+.chat-app--login .sidebar .menu-button {
+  pointer-events: none;
+  cursor: default;
+}
+
+.chat-app--login .sidebar .nav-button:hover,
+.chat-app--login .sidebar .nav-button:active {
+  background: transparent;
+}
+
+.chat-app--login .sidebar .sidebar-valores-toggle:hover,
+.chat-app--login .sidebar .sidebar-valores-toggle:active {
+  background: #fff;
+}
+
+.chat-app--login .sidebar .sidebar-valores-toggle[aria-expanded='true'] {
+  background: #fff;
+  border-bottom: none;
+}
 
 .center-content3 {
   max-width: 768px;
@@ -1199,10 +1451,24 @@
     margin-left: 0;
   }
 
+  /* Login: keep collapsed rail visible; toggle is a no-op in LoginScreen */
+  .chat-app--login .sidebar.sidebar-closed {
+    transform: translateX(0);
+    width: 72px;
+    min-width: 72px;
+    max-width: 72px;
+  }
+
   /* Main content takes full width */
   .main-content {
     width: 100%;
     margin-left: 0 !important;
+  }
+
+  .chat-app--login .main-content {
+    margin-left: 72px !important;
+    width: calc(100% - 72px) !important;
+    max-width: none;
   }
 
   /* Header adjustments */
