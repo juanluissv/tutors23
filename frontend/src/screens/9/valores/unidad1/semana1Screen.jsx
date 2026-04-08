@@ -741,25 +741,33 @@ function Semana1Screen () {
 								</div>
 							</div>
 
+						<button
+							type="button"
+							className='valores-semana1-exam-btn'
+						>							
+						<Link
+							to="/examen"
+							className="valores-semana1-exam-btn-link"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							examen <br /> de practica <br />
+						</Link>
+						</button>
 						</div>
-
 						<video 
-                                        src="https://res.cloudinary.com/dutglmj02/video/upload/v1775596686/bosques1_ne7opd.mp4"                                          
-                                        controls 
-                                        onLoadedData={() => setVideoLoading(false)}
-                                        onLoadStart={() => setVideoLoading(true)}
-                                        onError={() => setVideoLoading(false)}
-                                        style={{ 
-                                            width: '100%', 
-                                            height: 'auto', 
-                                            borderRadius: '12px',
-                                            display: videoLoading ? 'none' : 'block'
-                                        }} 
+                            src="https://res.cloudinary.com/dutglmj02/video/upload/v1775596686/bosques1_ne7opd.mp4"                                          
+                            controls 
+                            onLoadedData={() => setVideoLoading(false)}
+                            onLoadStart={() => setVideoLoading(true)}
+                            onError={() => setVideoLoading(false)}
+                            style={{ 
+                            width: '100%', 
+                            height: 'auto', 
+                            borderRadius: '12px',
+                            display: videoLoading ? 'none' : 'block'
+                            }} 
                         />
-
-
-
-
 						</div>
 					</div>
 				</div>

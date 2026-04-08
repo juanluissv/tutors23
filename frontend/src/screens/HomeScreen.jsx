@@ -1,6 +1,6 @@
 import '../App.css';
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useGetChatMutation } from '../slices/chatSlice';
@@ -33,6 +33,9 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
 
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const isExamRoute =
+    location.pathname === '/exam' || location.pathname === '/examen';
 
 
 
@@ -337,8 +340,6 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
 
 
 
-console.log(question1);
-
   return (
     <div className="chat-app ask-screen">
       {/* Get Plus Button */}
@@ -363,7 +364,7 @@ console.log(question1);
             {messages.length === 0 ? (
               <div className="center-content">
                 <h1 className="main-heading">{learningMaterial}</h1>
-                {showSubheading && !showQuestions && (
+                {showSubheading && !showQuestions && !isExamRoute && (
                   <small 
                     className="main-subheading animate-fade-in clickable-subheading" 
                     onClick={() => setShowQuestions(true)}
@@ -371,7 +372,7 @@ console.log(question1);
                     {predefinedQuestion}
                   </small>
                 )}
-                {showQuestions && (
+                {(showQuestions || isExamRoute) && (
                   <div className="predefined-questions-container animate-fade-in">
                     <small 
                       className="main-subheading clickable-subheading" 

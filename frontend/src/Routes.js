@@ -53,7 +53,9 @@ import Semana5Unidad6Screen from './screens/9/valores/unidad6/Semana5Unidad6Scre
 const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />} >
-            <Route index={true} path="/" element={<HomeScreen />} />    
+            <Route index={true} path="/" element={<HomeScreen />} />   
+            <Route path="/exam" element={<HomeScreen />} />
+            <Route path="/examen" element={<HomeScreen />} />
             <Route  path="/subjects/:id" element={<HomeScreen />} />
             <Route  path="/ask" element={<AskScreen />} />
             <Route  path="/answers" element={<AnswersScreen />} />
