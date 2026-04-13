@@ -21,14 +21,14 @@ function AnswersScreen() {
         {
             id: 1,
             category: 'Email Marketing',
-            categoryColor: 'blue',
+            categoryColor: 'teal',
             question: 'How do I export emails from Mailchimp',
             thumbnail: '/api/placeholder/340/190'
         },
         {
             id: 2,
             category: 'Linkedin Marketing',
-            categoryColor: 'purple',
+            categoryColor: 'indigo',
             question: 'How do I target corporations ?',
             thumbnail: '/api/placeholder/340/190'
         }
@@ -49,7 +49,9 @@ function AnswersScreen() {
                             <div className="answers-cards">
                                 {answers.map((answer) => (
                                     <div key={answer.id} className="answer-card-wrapper">
-                                        <div className="answer-card">
+                                        <div
+                                            className={`answer-card answer-card--theme-${answer.categoryColor}`}
+                                        >
                                             <span className={`answer-category answer-category-${answer.categoryColor}`}>
                                                 {answer.category}
                                             </span>
@@ -87,7 +89,7 @@ function AnswersScreen() {
                             
                         </div>
                         
-                        <div className="pagination">
+                        <div className="pagination pagination--answers">
                             <button 
                                 className={`pagination-btn ${currentPage === 1 ? 'active' : ''}`}
                                 onClick={() => setCurrentPage(1)}

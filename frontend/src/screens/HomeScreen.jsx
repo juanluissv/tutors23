@@ -193,8 +193,9 @@ function HomeScreen() {
         setPredefinedQuestion("suggest me some questions to ask about Warren Buffett Shareholder Report");
         setLearningMaterial("What would you like to learn today?")
       } else {
-        //put a  line break after the text "Soy un Tutor de AI especializado en el libro de Ciudadania y Valores 9 grado El Salvador, "   
-        setPredefinedQuestion("Soy un Tutor de AI especializado en el libro de Ciudadania y Valores 9 grado El Salvador,   Sugiereme algo que preguntar ");
+        setPredefinedQuestion(
+          'Soy un Tutor de AI especializado \n En el libro de Ciudadania y Valores 9 grado El Salvador,\n Sugiereme algo que preguntar '
+        );
         setLearningMaterial("Que vas a aprender hoy?")
       }
 

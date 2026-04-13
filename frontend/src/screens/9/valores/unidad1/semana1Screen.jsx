@@ -176,7 +176,7 @@ function Semana1Screen () {
     };
 
 	return (
-		<div className='chat-app'>
+		<div className='chat-app chat-app--valores-semana1'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 				<div className='main-content'>
@@ -184,35 +184,45 @@ function Semana1Screen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area' ref={contentRef}>
-						<div className='center-content2 '>
-						<div className='semana1-text-shift'>
-							<div className='valores-english-version-wrap'>
-								<div className='valores-english-version-pill'>
+					<div
+						className='content-area content-area--valores-semana1'
+						ref={contentRef}
+					>
+						<div className='center-content2 valores-semana1-center'>
+							<div className='valores-semana1-lang-row'>
+								<div className='valores-semana1-lang-pill'>
 									<Link
 										to='/forest'
-										className='valores-english-version-link'
+										className='valores-semana1-lang-link'
 									>
 										English Version
 									</Link>
 								</div>
-								<div className='valores-english-version-pill2'>
+								<div className='valores-semana1-lang-pill'>
 									<Link
 										to='/french'
-										className='valores-english-version-link'
+										className='valores-semana1-lang-link'
 									>
 										French Version
 									</Link>
 								</div>
-							</div>							
-							<div className='unidad-wrapper'>
-								<div className='unidad-header'>									
-									<h1 className='unidad-title'>
+							</div>
+							<article className='valores-semana1-article-card'>
+								<div
+									className='valores-semana1-article-accent'
+									aria-hidden
+								/>
+								<div className='unidad-wrapper valores-semana1-unidad-inner'>
+								<div className='unidad-header valores-semana1-hero'>
+									<p className='valores-semana1-eyebrow'>
+										Ciudadanía y valores · 9.° grado
+									</p>
+									<h1 className='unidad-title valores-semana1-title heading-gradient'>
 										Unidad 1 · Semana 1
 									</h1>
-									<h2 className='unidad-subtitle'>
+									<h2 className='unidad-subtitle valores-semana1-subtitle'>
 										Los bosques tropicales en el mundo
-									</h2>																	
+									</h2>
 								</div>
 
 								<section>
@@ -617,10 +627,10 @@ function Semana1Screen () {
 									</div>
 								</section> */}
 
-							</div>
-						</div>
+								</div>
+							</article>
 
-						<div className="fixed-video-bottom-right">
+						<div className="fixed-video-bottom-right valores-semana1-fixed-video">
 
 							<div className="fixed-video-controls">
 								<button 
@@ -677,52 +687,20 @@ function Semana1Screen () {
 									onPause={() => setIsClassVideoPlaying(false)}
 									onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
 								/>
-								<div 
-									style={{ 
-										marginTop: '12px',
-										position: 'relative',
-										width: '100%',
-										marginLeft: '-6px',
-									}}
-								>
+								<div className="fixed-video-question-wrap valores-semana1-question-wrap">
 									<textarea
 										ref={questionTextareaRef}
 										rows={2}
-										placeholder="hazme una pregunta"
+										className="fixed-video-question-input valores-semana1-question-input"
+										placeholder="Hazme una pregunta"
 										value={questionText}
 										onChange={handleQuestionChange}
-										style={{
-											width: '100%',
-											minWidth: '160px',
-											minHeight: '52px',
-											maxHeight: '200px',
-											padding: '8px 56px 8px 14px',
-											borderRadius: '12px',
-											border: '1px solid #d1d5db',
-											fontSize: '14px',
-											outline: 'none',
-											resize: 'none',
-											overflow: 'hidden',
-										}}
 									/>
 									<button
 										type="button"
+										className="fixed-video-question-send valores-semana1-question-send"
 										onClick={handleSendQuestion}
-										style={{
-											position: 'absolute',
-											right: '-5px',
-											bottom: '8px',
-											display: 'inline-flex',
-											alignItems: 'center',
-											justifyContent: 'center',
-											width: '32px',
-											height: '32px',
-											borderRadius: '999px',
-											border: 'none',
-											backgroundColor: '#3b82f6',
-											color: '#ffffff',
-											cursor: 'pointer',
-										}}
+										aria-label="Enviar pregunta"
 									>
 										<svg
 											width="16"
@@ -741,33 +719,35 @@ function Semana1Screen () {
 								</div>
 							</div>
 
-						<button
-							type="button"
-							className='valores-semana1-exam-btn'
-						>							
-						<Link
-							to="/examen"
-							className="valores-semana1-exam-btn-link"
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							examen <br /> de practica <br />
-						</Link>
-						</button>
+							<button
+								type="button"
+								className='valores-semana1-exam-btn'
+							>
+							<Link
+								to="/examen"
+								className="valores-semana1-exam-btn-link"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Examen <br /> de práctica
+							</Link>
+							</button>
 						</div>
-						<video 
-                            src="https://res.cloudinary.com/dutglmj02/video/upload/v1775596686/bosques1_ne7opd.mp4"                                          
-                            controls 
+						<div className="valores-semana1-feature-wrap">
+						<video
+							className="valores-semana1-feature-video unidad-video"
+                            src="https://res.cloudinary.com/dutglmj02/video/upload/v1775596686/bosques1_ne7opd.mp4"
+                            controls
                             onLoadedData={() => setVideoLoading(false)}
                             onLoadStart={() => setVideoLoading(true)}
                             onError={() => setVideoLoading(false)}
-                            style={{ 
-                            width: '100%', 
-                            height: 'auto', 
-                            borderRadius: '12px',
+                            style={{
+                            width: '100%',
+                            height: 'auto',
                             display: videoLoading ? 'none' : 'block'
-                            }} 
+                            }}
                         />
+						</div>
 						</div>
 					</div>
 				</div>
