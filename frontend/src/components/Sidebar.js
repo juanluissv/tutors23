@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { NavLink, Link, useLocation } from 'react-router-dom'
 import { VALORES_SECTIONS } from '../screens/9/valores/valoresNavData'
 
-// Hamburger menu icon
-const imgIcon = "/burg.svg";
+const imgIcon = `${process.env.PUBLIC_URL}/burg.svg`
 
 // Colorful inline SVG icons
 const IconNewTutor = () => (
@@ -106,119 +105,6 @@ const IconNewTutor2 = () => (
   </svg>
 );
 
-
-const IconNewTutor3 = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="sidebar-nav-icon"
-  >
-    {/* Idea / learning lightbulb */}
-    <path
-      d="M12 3C9.238 3 7 5.239 7 8C7 9.657 7.803 11.125 9.047 12.047C9.856 12.641 10.25 13.46 10.25 14.31V15C10.25 15.966 11.067 16.75 12 16.75C12.933 16.75 13.75 15.966 13.75 15V14.31C13.75 13.46 14.144 12.641 14.953 12.047C16.197 11.125 17 9.657 17 8C17 5.239 14.762 3 12 3Z"
-      fill="url(#bulb-fill)"
-      stroke="url(#bulb-stroke)"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Bulb base */}
-    <rect
-      x="10"
-      y="16.75"
-      width="4"
-      height="2.3"
-      rx="0.9"
-      fill="url(#base-fill)"
-    />
-    <path
-      d="M10 19.6H14"
-      stroke="url(#base-stroke)"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-    />
-    {/* Little rays */}
-    <path
-      d="M12 1.8V3"
-      stroke="url(#ray-stroke)"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M5.8 5.2L6.7 6.1"
-      stroke="url(#ray-stroke)"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M18.2 5.2L17.3 6.1"
-      stroke="url(#ray-stroke)"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-    />
-    <defs>
-      <linearGradient
-        id="bulb-fill"
-        x1="7"
-        y1="3"
-        x2="17"
-        y2="16"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stopColor="#FDE68A" stopOpacity="0.85" />
-        <stop offset="1" stopColor="#FDBA74" stopOpacity="0.95" />
-      </linearGradient>
-      <linearGradient
-        id="bulb-stroke"
-        x1="7"
-        y1="3"
-        x2="17"
-        y2="16"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stopColor="#F59E0B" />
-        <stop offset="1" stopColor="#EA580C" />
-      </linearGradient>
-      <linearGradient
-        id="base-fill"
-        x1="10"
-        y1="16.75"
-        x2="14"
-        y2="19.05"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stopColor="#4B5563" />
-        <stop offset="1" stopColor="#111827" />
-      </linearGradient>
-      <linearGradient
-        id="base-stroke"
-        x1="10"
-        y1="19.6"
-        x2="14"
-        y2="19.6"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stopColor="#9CA3AF" />
-        <stop offset="1" stopColor="#E5E7EB" />
-      </linearGradient>
-      <linearGradient
-        id="ray-stroke"
-        x1="5.8"
-        y1="1.8"
-        x2="18.2"
-        y2="6.1"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stopColor="#FBBF24" />
-        <stop offset="1" stopColor="#F97316" />
-      </linearGradient>
-    </defs>
-  </svg>
-);
-
 const IconAskTeacher = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
     <circle cx="12" cy="12" r="10" stroke="url(#chat-stroke)" strokeWidth="2" fill="url(#chat-fill)"/>
@@ -283,104 +169,111 @@ const IconSubjects = () => (
 );
 
 function Sidebar({ isOpen, toggleSidebar }) {
-  const location = useLocation();
-  const [expandedValoresUnit, setExpandedValoresUnit] = useState(1);
+  const location = useLocation()
+  const [expandedValoresUnit, setExpandedValoresUnit] = useState(1)
 
   useEffect(() => {
-    const active = getActiveValoresUnit(location.pathname);
+    const active = getActiveValoresUnit(location.pathname)
     if (active !== null) {
-      setExpandedValoresUnit(active);
+      setExpandedValoresUnit(active)
     } else if (location.pathname === '/9/valores') {
-      setExpandedValoresUnit(1);
+      setExpandedValoresUnit(1)
     }
-  }, [location.pathname]);
+  }, [location.pathname])
 
   const handleValoresUnitToggle = (unit) => {
-    setExpandedValoresUnit((prev) => (prev === unit ? null : unit));
-  };
+    setExpandedValoresUnit((prev) => (prev === unit ? null : unit))
+  }
+
+  const navClass = ({ isActive }) =>
+    `sidebar-nav-link${isActive ? ' sidebar-nav-link--active' : ''}`
+
+  const isAskTeacherRecording =
+    location.pathname === '/studentscreen' ||
+    location.pathname === '/studentcamera'
+
+  const askTeacherNavClass = ({ isActive }) =>
+    `sidebar-nav-link${
+      isActive || isAskTeacherRecording ? ' sidebar-nav-link--active' : ''
+    }`
 
   return (
-    <div className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+    <aside
+      className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
+      aria-label="Main navigation"
+    >
       <div className="sidebar-header">
-        <button className="menu-button" onClick={toggleSidebar}>
-          <img src={imgIcon} alt="Menu" className="icon" />
+        <button
+          type="button"
+          className="menu-button"
+          onClick={toggleSidebar}
+          aria-expanded={isOpen}
+          aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+        >
+          <img src={imgIcon} alt="" className="icon" />
         </button>
       </div>
 
       <div className="sidebar-content">
-        <nav className="navigation">
-        <Link to="/" className="nav-button-link">
-          <button className="nav-button">
-            <IconNewTutor />
-            <span>AI Tutor</span>
-          </button>
-          </Link>
-          <Link to="/ask" className="nav-button-link">
-          <button className="nav-button">
-            <IconAskTeacher />
-            <span>Ask Your Class Teacher</span>
-          </button>
-          </Link>     
-          <Link to="/answers" className="nav-button-link">
-          <button className="nav-button">
-            <IconTeacherAnswers />
-            <span>Teacher Answers</span>
-          </button>
-          </Link>       
-          <Link to="/9/valores/unidad1/semana1" className="nav-button-link"> 
-          <button className="nav-button">
-            <IconSubjects />
-            <span>Your Subjects:</span>            
-          </button>    
-          </Link>      
+        <nav className="navigation" aria-label="Primary">
+          <NavLink to="/" end className={navClass}>
+            <span className="sidebar-nav-link__icon-well" aria-hidden="true">
+              <IconNewTutor />
+            </span>
+            <span className="sidebar-nav-link__label">AI Tutor</span>
+          </NavLink>
+          <NavLink to="/ask" className={askTeacherNavClass}>
+            <span className="sidebar-nav-link__icon-well" aria-hidden="true">
+              <IconAskTeacher />
+            </span>
+            <span className="sidebar-nav-link__label">
+              Ask Your Class Teacher
+            </span>
+          </NavLink>
+          <NavLink to="/answers" className={navClass}>
+            <span className="sidebar-nav-link__icon-well" aria-hidden="true">
+              <IconTeacherAnswers />
+            </span>
+            <span className="sidebar-nav-link__label">Teacher Answers</span>
+          </NavLink>
+          <NavLink
+            to="/9/valores/unidad1/semana1"
+            className={navClass}
+          >
+            <span className="sidebar-nav-link__icon-well" aria-hidden="true">
+              <IconSubjects />
+            </span>
+            <span className="sidebar-nav-link__label">Your Subjects</span>
+          </NavLink>
         </nav>
 
-        <Link to="/9/valores/unidad1/semana1" className="nav-button-link">
-        <button className={`nav-button nav23`} type="button">
-          <IconNewTutor2 />
-          <span>
-            Ciudadania y Valores
-            <br />
-            9 grado El Salvador
+        <NavLink
+          to="/9/valores/unidad1/semana1"
+          className={({ isActive }) =>
+            `sidebar-nav-link sidebar-nav-link--valores-hub${
+              isActive
+                ? ' sidebar-nav-link--active sidebar-nav-link--subject'
+                : ''
+            }`
+          }
+        >
+          <span className="sidebar-nav-link__icon-well" aria-hidden="true">
+            <IconNewTutor2 />
           </span>
-        </button>    
-        </Link>        
+          <span className="sidebar-nav-link__body">
+            <span className="sidebar-nav-link__title">
+              Ciudadania y Valores
+            </span>
+            <span className="sidebar-nav-link__meta">
+              9 grado El Salvador
+            </span>
+          </span>
+        </NavLink>
 
-          {/* <Link to="/subjects/unidad1" className="nav-button-link">
-          <button className={`nav-button ${location.pathname === '/subjects/unidad1' ? 'menu2' : ''}`}>
-          <p className='subLink33' >
-             <IconNewTutor3  /> Ask AI Tutor
-          </p>
-          </button>
-          </Link> */}
-
-
-
-          {/* <Link to="/bosques" className="nav-button-link">
-          <button className={`nav-button ${location.pathname === '/bosques' ? 'menu2' : ''}`}>
-          <p className='subLink33' >
-          <IconNewTutor3 /> Clase Bosques  tropicales
-          </p>
-          </button>
-          </Link> <br /> */}
-
-          <div
-            className="sidebar-valores-accordion"
-            aria-label="Ciudadanía y Valores — unidades y semanas"
-          >
-            {/* <p className="sidebar-valores-accordion-title">
-              Ciudadanía y Valores
-            </p> */}
-            {/* <Link
-              to="/9/valores"
-              className={`sidebar-valores-index-link${
-                location.pathname === '/9/valores'
-                  ? ' sidebar-valores-link-active'
-                  : ''
-              }`}
-            >
-              Índice de lecciones
-            </Link> */}
+        <div
+          className="sidebar-valores-accordion"
+          aria-label="Ciudadanía y Valores — unidades y semanas"
+        >
             {VALORES_SECTIONS.map((section) => (
               <div key={section.unit} className="sidebar-valores-unit">
                 <button
@@ -437,43 +330,11 @@ function Sidebar({ isOpen, toggleSidebar }) {
                 )}
               </div>
             ))}
-          </div>
-
-
-
-
-
-          
-
-
-
-
-
-
-        {/* <Link to="/subjects/langchain-docs" className="nav-button-link">
-        <button className={`nav-button ${location.pathname === '/subjects/langchain-docs' ? 'menu2' : ''}`}>
-           <IconNewTutor /> Warren Buffett <br />  Shareholder Report
-          </button>          
-          </Link>
-
-          <a href="https://www.berkshirehathaway.com/letters/2023ltr.pdf" target="_blank" className="navButton22  ">
-            Report Link
-          </a> <br /><br /> */}
-
-          {/* <Link to="/subjects/ciencias1" className="nav-button-link">
-          <button className={`nav-button ${location.pathname === '/subjects/ciencias1' ? 'menu2' : ''}`}>
-          &nbsp; - Ciencia y Tecnología <br /> &nbsp; &nbsp;  1 año bachillerato El Salvador
-          </button>
-          
-          </Link>
-          <a href="https://www.mined.gob.sv/materiales/2026/CIENCIA_Y_TECNOLOGIA/2.%20Libros%20de%20texto/Libro%20de%20texto%201.%C2%B0%20a%C3%B1o%20de%20bachillerato.pdf" target="_blank" className="navButton22  ">
-            Book Link
-          </a> */}
-
+        </div>
 
       </div>
-    </div>
-  );
+    </aside>
+  )
 }
 
 export default Sidebar;

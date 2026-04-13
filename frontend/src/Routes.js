@@ -20,6 +20,8 @@ import Semana5Screen from './screens/9/valores/unidad1/semana5Screen';
 import SemanaTScreen from './screens/9/valores/unidad1/semanaTScreen';
 import FrenchScreen from './screens/FrenchScreen';
 import ValoresIndex from './screens/9/valores/ValoresIndex';
+import StudentCamera from './screens/StudentCamera';
+import StudentScreen from './screens/StudentScreen';
 
 import Semana1Unidad2Screen from './screens/9/valores/unidad2/Semana1Unidad2Screen';
 import Semana2Unidad2Screen from './screens/9/valores/unidad2/Semana2Unidad2Screen';
@@ -106,6 +108,8 @@ const router = createBrowserRouter(
 
             <Route  path="/9/valores" element={<ValoresIndex />} />
             <Route  path="/french" element={<FrenchScreen />} />
+            <Route  path="/studentcamera" element={<StudentCamera />} />
+            <Route  path="/studentscreen" element={<StudentScreen />} />
         </Route>
     )
 );

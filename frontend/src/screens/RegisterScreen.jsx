@@ -1,26 +1,49 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, {useState, useEffect} from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import { setStudentCredentials } from '../slices/student/authStudentSlice';
+import { useRegisterMutation } from '../slices/student/studentApiSlice';
+import Loader from '../components/Loader';
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import '../App.css'
 
-function RegisterScreen () {
+function RegisterScreen () {	
+	const navigate = useNavigate();
+  	const dispatch = useDispatch();
+
+
 	const isSidebarOpen = false
-	const [passwordMismatchError, setPasswordMismatchError] = useState('')
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
+	const [register, { isLoading }] = useRegisterMutation();
+	const { studentInfo } = useSelector((state) => state.authStudent);
 
 	const handleToggleSidebar = () => {}
 
-	const handleSubmit = (e) => {
+	const { search } = useLocation();
+	const sp = new URLSearchParams(search);
+	const redirect = sp.get('redirect') || '/';
+
+	const handleSubmit = async (e) => {
 		e.preventDefault()
-		const form = e.target
-		const password = form.password?.value ?? ''
-		const confirmPassword = form['confirm-password']?.value ?? ''
+		if (email == '') { toast.error('Please enter  email'); return; }
+		if (password == '') { toast.error('Please enter  password'); return; }    
+		if (confirmPassword == '') { toast.error('Please enter  confirm password'); return; }
 		if (password !== confirmPassword) {
-			setPasswordMismatchError('Passwords do not match')
-			return
+		  toast.error('Passwords do not match');
+		} else {
+		  try {
+			const res = await register({ email, password }).unwrap();
+			dispatch(setStudentCredentials({ ...res }));
+			navigate(redirect);
+		  } catch (err) {
+			toast.error(err?.data?.message || err.error);
+		  }
 		}
-		setPasswordMismatchError('')
-	}
+	  }
 
 	return (
 		<div className='chat-app chat-app--login ask-screen'>
@@ -58,6 +81,8 @@ function RegisterScreen () {
 											className='login-input'
 											placeholder='you@example.com'
 											autoComplete='email'
+											onChange={(e) => setEmail(e.target.value)}
+											value={email}
 										/>
 									</div>
 									<div className='login-field'>
@@ -71,7 +96,8 @@ function RegisterScreen () {
 											className='login-input'
 											placeholder='••••••••'
 											autoComplete='new-password'
-											onChange={() => setPasswordMismatchError('')}
+											onChange={(e) => setPassword(e.target.value)}											
+											value={password}
 										/>
 									</div>
 									<div className='login-field'>
@@ -88,17 +114,11 @@ function RegisterScreen () {
 											className='login-input'
 											placeholder='••••••••'
 											autoComplete='new-password'
-											onChange={() => setPasswordMismatchError('')}
+											onChange={(e) => setConfirmPassword(e.target.value)}
+											value={confirmPassword}
 										/>
 									</div>
-									{passwordMismatchError ? (
-										<p
-											className='login-field-error'
-											role='alert'
-										>
-											{passwordMismatchError}
-										</p>
-									) : null}
+									
 									<button
 										type='submit'
 										id='register-button'

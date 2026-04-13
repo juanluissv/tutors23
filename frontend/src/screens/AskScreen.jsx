@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import '../App.css';
@@ -23,7 +24,7 @@ function AskScreen() {
                 <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                 <div className="content-area">
                     <div className="center-content2">
-                        <h1 className="main-heading">Ask your class teacher</h1>
+                        <h1 className="main-heading heading-gradient">Ask your class teacher</h1>
                         
                         <p className="upload-subtitle">Record your screen or camera to ask your question</p>
                         
@@ -52,7 +53,11 @@ function AskScreen() {
                                 <p className="upload-card-subtitle">↑ Upload up to a 5 minutes question</p>
                             </div> */}
                             
-                            <div className="upload-card upload-card-purple">
+                            <Link
+                                to="/studentscreen"
+                                className="upload-card upload-card-purple"
+                                aria-label="Record PC screen, up to 5 minutes"
+                            >
                                 <div className="upload-card-header">
                                     <h2>Record PC screen</h2>
                                     <div className="upload-card-icon">
@@ -63,9 +68,13 @@ function AskScreen() {
                                     </div>
                                 </div>
                                 <p className="upload-card-subtitle">✦ Record up to a 5 minutes question</p>
-                            </div>
+                            </Link>
                             
-                            <div className="upload-card upload-card-orange">
+                            <Link
+                                to="/studentcamera"
+                                className="upload-card upload-card-orange"
+                                aria-label="Record with camera, up to 5 minutes"
+                            >
                                 <div className="upload-card-header">
                                     <h2>Record <br />Camera</h2>
                                     <div className="upload-card-icon">
@@ -76,7 +85,7 @@ function AskScreen() {
                                     </div>
                                 </div>
                                 <p className="upload-card-subtitle">↑ Record up to a 5 minutes question</p>
-                            </div>
+                            </Link>
                         </div>
                     </div>
                 </div>

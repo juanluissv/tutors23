@@ -1,17 +1,50 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import  {useState, useEffect} from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from "react-toastify";
+import { useLoginMutation } from '../slices/student/studentApiSlice';
+import { setStudentCredentials } from '../slices/student/authStudentSlice';
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import '../App.css'
+import Loader from '../components/Loader';
 
 function LoginScreen () {
 	const isSidebarOpen = false
 
 	const handleToggleSidebar = () => {}
 
-	const handleSubmit = (e) => {
+	
+	const navigate = useNavigate();
+  	const dispatch = useDispatch();
+
+	// const [email, setEmail] = useState("");
+	// const [password, setPassword] = useState("");
+
+	const [email, setEmail] = useState("markbrown22@gmail.com");
+	const [password, setPassword] = useState("markbrown22");
+
+	const [login, { isLoading }] = useLoginMutation();
+	const { studentInfo } = useSelector((state) => state.authStudent);
+
+	const { search } = useLocation();
+	const sp = new URLSearchParams(search);
+	const redirect = sp.get('redirect') || '/';
+
+  	const handleSubmit = async (e) => {
 		e.preventDefault()
+		if (email == '') { toast.error('Please enter  email'); return; } 
+		if (password == '') { toast.error('Please enter  password'); return; }
+		try {
+			const res = await login({ email, password }).unwrap();
+			console.log(res)
+			dispatch(setStudentCredentials({ ...res }));
+			navigate(redirect);
+		} catch (err) {  
+			toast.error(err?.data?.message || err.error.message);
+		}
 	}
+
 
 	return (
 		<div className='chat-app chat-app--login ask-screen'>
@@ -49,6 +82,8 @@ function LoginScreen () {
 											className='login-input'
 											placeholder='you@example.com'
 											autoComplete='email'
+											onChange={(e) => setEmail(e.target.value)}
+											value={email}
 										/>
 									</div>
 									<div className='login-field'>
@@ -62,6 +97,8 @@ function LoginScreen () {
 											className='login-input'
 											placeholder='••••••••'
 											autoComplete='current-password'
+											onChange={(e) => setPassword(e.target.value)}
+											value={password}
 										/>
 									</div>
 									<div className='login-field login-field--row'>

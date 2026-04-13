@@ -28,7 +28,7 @@ function AnswersScreen() {
         {
             id: 2,
             category: 'Linkedin Marketing',
-            categoryColor: 'orange',
+            categoryColor: 'purple',
             question: 'How do I target corporations ?',
             thumbnail: '/api/placeholder/340/190'
         }
@@ -43,7 +43,7 @@ function AnswersScreen() {
                   <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                   <div className="content-area">
                     <div className="center-content3">
-                        <h3 className="main-heading-answers answers-heading">2 new answers from teachers</h3>
+                        <h3 className="main-heading-answers answers-heading heading-gradient">2 new answers from teachers</h3>
                         
                         <div className="answers-container">
                             <div className="answers-cards">

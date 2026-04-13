@@ -8,29 +8,43 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 
-// Send button icon from Figma design (node 1-67)
+// Arrow icon uses currentColor so the send button can style it (brand / disabled)
 const SendButtonIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="send-button-icon">
-    <path d="M10 4v12M4 10l6-6 6 6" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="send-button-icon"
+    aria-hidden
+  >
+    <path
+      d="M10 4v12M4 10l6-6 6 6"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
-);
+)
+
+const SUGGESTED_QUESTIONS = [
+  'Qué porcentaje de la superficie terrestre mundial está cubierto por bosques y cuál es su importancia vital?',
+  'Según la zona climática, ¿cuál es la distribución porcentual de los bosques en el mundo?',
+  'Qué características climáticas y biológicas definen a los bosques tropicales?',
+  'De acuerdo con la FAO, ¿qué actividad productiva es responsable de casi el 90 % de la deforestación en zonas tropicales entre 2000 y 2018?',
+  'Cuáles son las causas principales de la deforestación en el Sudeste Asiático?',
+  'Defina el concepto de tenencia de la tierra.',
+  'Explique la diferencia entre la propiedad comunal y la propiedad estatal de la tierra.',
+  'Cómo influyó la Guerra Fría en las políticas de tenencia de la tierra en América Latina?',
+  'Qué factores caracterizan el neocolonialismo actual y los conflictos de tierras en África?',
+  'En qué consiste la iniciativa de los bancos de tierras en el Caribe oriental?',
+]
 
 
 
 function HomeScreen() {
-
-const question1 = "Qué porcentaje de la superficie terrestre mundial está cubierto por bosques y cuál es su importancia vital?"
-const question2 = "Según la zona climática, ¿cuál es la distribución porcentual de los bosques en el mundo?"
-const question3 = "Qué características climáticas y biológicas definen a los bosques tropicales?"
-const question4 = "De acuerdo con la FAO, ¿qué actividad productiva es responsable de casi el 90 % de la deforestación en zonas tropicales entre 2000 y 2018?"
-const question5 = "Cuáles son las causas principales de la deforestación en el Sudeste Asiático?"
-const question6 = "Defina el concepto de tenencia de la tierra."
-const question7 = "Explique la diferencia entre la propiedad comunal y la propiedad estatal de la tierra."
-const question8 = "Cómo influyó la Guerra Fría en las políticas de tenencia de la tierra en América Latina?"
-const question9 = "Qué factores caracterizan el neocolonialismo actual y los conflictos de tierras en África?"
-const question10 = "En qué consiste la iniciativa de los bancos de tierras en el Caribe oriental?"
-
-
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const location = useLocation();
@@ -341,13 +355,7 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
 
 
   return (
-    <div className="chat-app ask-screen">
-      {/* Get Plus Button */}
-      {/* <button className="get-plus-button">
-        <img src={imgIcon10} alt="" />
-        <span>Get Plus</span>
-      </button> */}
-
+    <div className="chat-app ask-screen chat-app--home">
       <div className="main-container">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         
@@ -360,85 +368,47 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
         <div className="main-content">
           <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
-          <div className="content-area">
+          <div className="content-area content-area--home">
             {messages.length === 0 ? (
-              <div className="center-content">
-                <h1 className="main-heading">{learningMaterial}</h1>
-                {showSubheading && !showQuestions && !isExamRoute && (
-                  <small 
-                    className="main-subheading animate-fade-in clickable-subheading" 
-                    onClick={() => setShowQuestions(true)}
-                  >
-                    {predefinedQuestion}
-                  </small>
-                )}
-                {(showQuestions || isExamRoute) && (
-                  <div className="predefined-questions-container animate-fade-in">
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question1)}
-                    >
-                      {question1}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question2)}
-                    >
-                      {question2}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question3)}
-                    >
-                      {question3}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question4)}
-                    >
-                      {question4}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question5)}
-                    >
-                      {question5}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question6)}
-                    >
-                      {question6}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question7)}
-                    >
-                      {question7}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question8)}
-                    >
-                      {question8}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question9)}
-                    >
-                      {question9}
-                    </small>
-                    <small 
-                      className="main-subheading clickable-subheading" 
-                      onClick={() => handleQuestionClick(question10)}
-                    >
-                      {question10}
-                    </small>
+              <div className="home-hub">
+                <div className="home-hub__card">
+                  <div className="home-hub__accent" aria-hidden />
+                  <div className="home-hub__hero">
+                    <h1 className="home-hub__title heading-gradient">{learningMaterial}</h1>
+                    {showSubheading && !showQuestions && !isExamRoute && (
+                      <button
+                        type="button"
+                        className="home-hub__prompt animate-fade-in"
+                        onClick={() => setShowQuestions(true)}
+                      >
+                        {predefinedQuestion}
+                      </button>
+                    )}
+                    {(showQuestions || isExamRoute) && (
+                      <div className="home-suggested animate-fade-in">
+                        <p className="home-suggested__label">
+                          Preguntas sugeridas
+                        </p>
+                        <ul className="home-suggested__list" role="list">
+                          {SUGGESTED_QUESTIONS.map((q, i) => (
+                            <li key={i}>
+                              <button
+                                type="button"
+                                className="home-suggested__item"
+                                onClick={() => handleQuestionClick(q)}
+                              >
+                                {q}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             ) : (
-              <div className="chat-messages">
+              <div className="chat-messages chat-messages--home">
                 {messages.map((message, index) => (
                   <div 
                     key={index} 
@@ -513,33 +483,29 @@ const question10 = "En qué consiste la iniciativa de los bancos de tierras en e
             )}
           </div>
 
-          <div className="input-area">
-            <div className="input-container">
-              <button className="icon-button">
-                {/* <img src={imgVector} alt="Add" /> */}
-              </button>
+          <div className="input-area input-area--home">
+            <form
+              className="input-container input-container--home"
+              onSubmit={submitHandler}
+            >
               <input
                 type="text"
                 className="input-field"
-                placeholder="Ask anything"
+                name="home-chat-message"
+                placeholder="Ask anything…"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && submitHandler(e)}
+                aria-label="Your question"
               />
-              {/* <button className="icon-button">
-                <img src={imgVector2} alt="Attach" />
-              </button> */}
-              <button 
-                className="send-button" 
-                onClick={submitHandler}
+              <button
+                type="submit"
+                className="send-button send-button--home"
                 disabled={isLoading || !question.trim()}
+                aria-label="Send message"
               >
                 <SendButtonIcon />
               </button>
-            </div>
-            <p className="footer-text">
-              {/* AI can make mistakes. Check important info. */}
-            </p>
+            </form>
           </div>
         </div>
       </div>
