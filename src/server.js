@@ -2,19 +2,19 @@ import express from 'express';
 import path from 'path'
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-//import connectDB from './config/db.js';
+import connectDB from './config/db.js';
 //import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 // import products from './data/products.js';
 // import productRoutes from './routes/productRoutes.js';
 // import orderRoutes from './routes/orderRoutes.js';
 // import uploadRoutes from './routes/uploadRoutes.js';
-// import userRoutes from './routes/userRoutes.js';
+import studentRoutes from './routes/studentRoutes.js'
 import chatRoutes from './routes/chatRoutes.js';
 import ttsRoutes from './routes/ttsRoutes.js';
 
 dotenv.config()
 
-//connectDB()
+connectDB()
 
 
 const app = express()
@@ -27,10 +27,9 @@ const __dirname = path.resolve() //set  __dirname to current directory
 // app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
 
 
-// app.get('/', (req, res) => {
-//     res.send("API is running...")
-// })
 
+
+app.use('/api/students', studentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/tts', ttsRoutes);
 
