@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../../../components/Sidebar'
 import Header from '../../../../components/Header'
 import '../../../../App.css'
@@ -176,7 +176,7 @@ function Semana5Screen () {
     };
 
 	return (
-		<div className='chat-app'>
+		<div className='chat-app chat-app--valores-semana1'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 				<div className='main-content'>
@@ -184,15 +184,25 @@ function Semana5Screen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area' ref={contentRef}>
-						<div className='center-content2'>
-							<div className='semana1-text-shift'>
-							<div className='unidad-wrapper'>
-								<div className='unidad-header'>									
-									<h1 className='unidad-title'>
+					<div
+						className='content-area content-area--valores-semana1'
+						ref={contentRef}
+					>
+						<div className='center-content2 valores-semana1-center'>
+							<div className='valores-semana1-article-card'>
+								<div
+									className='valores-semana1-article-accent'
+									aria-hidden
+								/>
+								<div className='unidad-wrapper valores-semana1-unidad-inner'>
+								<div className='unidad-header valores-semana1-hero'>
+									<p className='valores-semana1-eyebrow'>
+										Ciudadanía y valores · 9.° grado
+									</p>
+									<h1 className='unidad-title valores-semana1-title heading-gradient'>
 										Unidad 1 · Semana 5
 									</h1>
-									<h2 className='unidad-subtitle'>
+									<h2 className='unidad-subtitle valores-semana1-subtitle'>
 										Estado nutricional y sustentabilidad
 										para una seguridad alimentaria mundial
 									</h2>
@@ -889,135 +899,101 @@ function Semana5Screen () {
 											</tbody>
 										</table>
 									</div>
-								</section>								
+								</section>
+								</div>
+							</div>
 
+						<div className="fixed-video-bottom-right valores-semana1-fixed-video">
+
+							<div className="fixed-video-controls">
+								<button 
+									type="button" 
+									className="fixed-video-button"
+									onClick={handleClassVideoToggle}
+									title={isClassVideoPlaying ? "Pause video" : "Play video"}
+								>
+									{isClassVideoPlaying ? (
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<rect x="6" y="4" width="4" height="16" />
+											<rect x="14" y="4" width="4" height="16" />
+										</svg>
+									) : (
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<polygon points="5 3 19 12 5 21 5 3" />
+										</svg>
+									)}
+								</button>
+							</div>
+							<div className="valores-semana1-circle-shell">
+								<div className="fixed-video-wrapper">
+									{videoLoading && (
+										<div className="fixed-video-loading-overlay">
+											<svg 
+												width="28" 
+												height="28" 
+												viewBox="0 0 24 24" 
+												fill="none" 
+												stroke="#ffffff" 
+												strokeWidth="2" 
+												className="audio-loading-spinner"
+											>
+												<circle 
+													cx="12" 
+													cy="12" 
+													r="10" 
+													strokeOpacity="0.25" 
+												/>
+												<path 
+													d="M12 2a10 10 0 0 1 10 10" 
+													strokeLinecap="round" 
+												/>
+											</svg>
+										</div>
+									)}
+									<video 
+										ref={classVideoRef}
+										src="https://res.cloudinary.com/dutglmj02/video/upload/v1775580622/unidad1semana5_ywz8da.mp4"
+										controls={false}
+										onLoadedData={() => setVideoLoading(false)}
+										onLoadStart={() => setVideoLoading(true)}
+										onError={() => setVideoLoading(false)}
+										onPlay={() => setIsClassVideoPlaying(true)}
+										onPause={() => setIsClassVideoPlaying(false)}
+										onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
+									/>
+								</div>
+							</div>
+							<div className="fixed-video-question-wrap valores-semana1-question-wrap">
+								<textarea
+									ref={questionTextareaRef}
+									rows={2}
+									className="fixed-video-question-input valores-semana1-question-input"
+									placeholder="Hazme una pregunta"
+									value={questionText}
+									onChange={handleQuestionChange}
+								/>
+								<button
+									type="button"
+									className="fixed-video-question-send valores-semana1-question-send"
+									onClick={handleSendQuestion}
+									aria-label="Enviar pregunta"
+								>
+									<svg
+										width="16"
+										height="16"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<line x1="22" y1="2" x2="11" y2="13" />
+										<polygon points="22 2 15 22 11 13 2 9 22 2" />
+									</svg>
+								</button>
 							</div>
 						</div>
-
-								<div className="fixed-video-bottom-right">
-
-									<div className="fixed-video-controls">
-										<button 
-											type="button" 
-											className="fixed-video-button"
-											onClick={handleClassVideoToggle}
-											title={isClassVideoPlaying ? "Pause video" : "Play video"}
-										>
-											{isClassVideoPlaying ? (
-												<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-													<rect x="6" y="4" width="4" height="16" />
-													<rect x="14" y="4" width="4" height="16" />
-												</svg>
-											) : (
-												<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-													<polygon points="5 3 19 12 5 21 5 3" />
-												</svg>
-											)}
-										</button>
-									</div>
-									<div className="fixed-video-wrapper">
-										{videoLoading && (
-											<div className="fixed-video-loading-overlay">
-												<svg 
-													width="28" 
-													height="28" 
-													viewBox="0 0 24 24" 
-													fill="none" 
-													stroke="#ffffff" 
-													strokeWidth="2" 
-													className="audio-loading-spinner"
-												>
-													<circle 
-														cx="12" 
-														cy="12" 
-														r="10" 
-														strokeOpacity="0.25" 
-													/>
-													<path 
-														d="M12 2a10 10 0 0 1 10 10" 
-														strokeLinecap="round" 
-													/>
-												</svg>
-											</div>
-										)}
-										<video 
-											ref={classVideoRef}
-											src="https://res.cloudinary.com/dutglmj02/video/upload/v1775580622/unidad1semana5_ywz8da.mp4"                                          
-											// src="/unidad1Semana5.mp4"     											                                     
-											controls={false}
-											onLoadedData={() => setVideoLoading(false)}
-											onLoadStart={() => setVideoLoading(true)}
-											onError={() => setVideoLoading(false)}
-											onPlay={() => setIsClassVideoPlaying(true)}
-											onPause={() => setIsClassVideoPlaying(false)}
-											onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
-										/>
-										<div 
-											style={{ 
-												marginTop: '12px',
-												position: 'relative',
-												width: '100%',
-												marginLeft: '-6px',
-											}}
-										>
-											<textarea
-												ref={questionTextareaRef}
-												rows={2}
-												placeholder="hazme una pregunta"
-												value={questionText}
-												onChange={handleQuestionChange}
-												style={{
-													width: '100%',
-													minWidth: '160px',
-													minHeight: '52px',
-													maxHeight: '200px',
-													padding: '8px 56px 8px 14px',
-													borderRadius: '12px',
-													border: '1px solid #d1d5db',
-													fontSize: '14px',
-													outline: 'none',
-													resize: 'none',
-													overflow: 'hidden',
-												}}
-											/>
-											<button
-												type="button"
-												onClick={handleSendQuestion}
-												style={{
-													position: 'absolute',
-													right: '-5px',
-													bottom: '8px',
-													display: 'inline-flex',
-													alignItems: 'center',
-													justifyContent: 'center',
-													width: '32px',
-													height: '32px',
-													borderRadius: '999px',
-													border: 'none',
-													backgroundColor: '#3b82f6',
-													color: '#ffffff',
-													cursor: 'pointer',
-												}}
-											>
-												<svg
-													width="16"
-													height="16"
-													viewBox="0 0 24 24"
-													fill="none"
-													stroke="currentColor"
-													strokeWidth="2"
-													strokeLinecap="round"
-													strokeLinejoin="round"
-												>
-													<line x1="22" y1="2" x2="11" y2="13" />
-													<polygon points="22 2 15 22 11 13 2 9 22 2" />
-												</svg>
-											</button>
-										</div>
-									</div>
-
-								</div>
-
 						</div>
 					</div>
 				</div>

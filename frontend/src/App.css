@@ -532,7 +532,7 @@
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.75);
   box-shadow: var(--shadow-soft-sm);
-  transform: translateX(-30%);
+  transform: translateX(-40%);
   cursor: pointer;
   font-family: 'Inter', sans-serif;
   transition:
@@ -3086,10 +3086,10 @@ a.upload-card {
 }
 
 .valores-semana1-center {
-  max-width: 890px;
+  max-width: 910px;
   padding: 20px 18px 28px;
   width: 110%;
-  margin-left: 8%;
+  margin-left: 6%;
 }
 
 .valores-semana1-lang-row {

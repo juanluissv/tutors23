@@ -185,7 +185,7 @@ function FrenchScreen () {
 	}
 
 	return (
-		<div className='chat-app'>
+		<div className='chat-app chat-app--valores-semana1'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 				<div className='main-content'>
@@ -193,190 +193,53 @@ function FrenchScreen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area' ref={contentRef}>
-						<div className='center-content2'>
-							<div className='valores-english-version-wrap'>
-								<div className='valores-english-version-pill'>
+					<div
+						className='content-area content-area--valores-semana1'
+						ref={contentRef}
+					>
+						<div className='center-content2 valores-semana1-center'>
+							<div className='valores-semana1-lang-row'>
+								<div className='valores-semana1-lang-pill'>
 									<Link
 										to='/9/valores/unidad1/semana1'
-										className='valores-english-version-link'
+										className='valores-semana1-lang-link'
 									>
 										Version espagnole
 									</Link>
 								</div>
-								<div className='valores-english-version-pill'>
+								<div className='valores-semana1-lang-pill'>
 									<Link
-										to='/9/valores/unidad1/semana1'
-										className='valores-english-version-link'
+										to='/forest'
+										className='valores-semana1-lang-link'
 									>
 										English Version
 									</Link>
 								</div>
+								{/* <div className='valores-semana1-lang-pill'>
+									<Link
+										to='/chinese'
+										className='valores-semana1-lang-link'
+									>
+										Chinese Version
+									</Link>
+								</div> */}
 							</div>
-							<div className='unidad-wrapper'>
-								<div className='unidad-header'>
-									<h1 className='unidad-title'>
+							<article className='valores-semana1-article-card'>
+								<div
+									className='valores-semana1-article-accent'
+									aria-hidden
+								/>
+								<div className='unidad-wrapper valores-semana1-unidad-inner'>
+								<div className='unidad-header valores-semana1-hero'>
+									<p className='valores-semana1-eyebrow'>
+										Citoyenneté et valeurs · 9e année
+									</p>
+									<h1 className='unidad-title valores-semana1-title heading-gradient'>
 										Unité 1 · Semaine 1
 									</h1>
-									<h2 className='unidad-subtitle'>
+									<h2 className='unidad-subtitle valores-semana1-subtitle'>
 										Les forêts tropicales dans le monde
 									</h2>
-								</div>
-
-								<div className='fixed-video-bottom-right'>
-									<div className='fixed-video-controls'>
-										<button
-											type='button'
-											className='fixed-video-button'
-											onClick={handleClassVideoToggle}
-											title={
-												isClassVideoPlaying
-													? 'Mettre la vidéo en pause'
-													: 'Lire la vidéo'
-											}
-										>
-											{isClassVideoPlaying ? (
-												<svg
-													width='20'
-													height='20'
-													viewBox='0 0 24 24'
-													fill='none'
-													stroke='currentColor'
-													strokeWidth='2'
-													strokeLinecap='round'
-													strokeLinejoin='round'
-												>
-													<rect
-														x='6'
-														y='4'
-														width='4'
-														height='16'
-													/>
-													<rect
-														x='14'
-														y='4'
-														width='4'
-														height='16'
-													/>
-												</svg>
-											) : (
-												<svg
-													width='20'
-													height='20'
-													viewBox='0 0 24 24'
-													fill='none'
-													stroke='currentColor'
-													strokeWidth='2'
-													strokeLinecap='round'
-													strokeLinejoin='round'
-												>
-													<polygon points='5 3 19 12 5 21 5 3' />
-												</svg>
-											)}
-										</button>
-									</div>
-									<div className='fixed-video-wrapper'>
-										{videoLoading && (
-											<div className='fixed-video-loading-overlay'>
-												<svg
-													width='28'
-													height='28'
-													viewBox='0 0 24 24'
-													fill='none'
-													stroke='#ffffff'
-													strokeWidth='2'
-													className='audio-loading-spinner'
-												>
-													<circle
-														cx='12'
-														cy='12'
-														r='10'
-														strokeOpacity='0.25'
-													/>
-													<path
-														d='M12 2a10 10 0 0 1 10 10'
-														strokeLinecap='round'
-													/>
-												</svg>
-											</div>
-										)}
-										<video
-											ref={classVideoRef}
-											// src='/french1.mp4'
-											src='https://res.cloudinary.com/dutglmj02/video/upload/v1775580777/french1_qnvkes.mp4'
-											controls={false}
-											onLoadedData={() => setVideoLoading(false)}
-											onLoadStart={() => setVideoLoading(true)}
-											onError={() => setVideoLoading(false)}
-											onPlay={() => setIsClassVideoPlaying(true)}
-											onPause={() => setIsClassVideoPlaying(false)}
-											onTimeUpdate={e =>
-												handleTimeUpdate(e.target.currentTime)
-											}
-										/>
-										<div
-											style={{
-												marginTop: '12px',
-												position: 'relative',
-												width: '100%',
-												marginLeft: '-6px',
-											}}
-										>
-											<textarea
-												ref={questionTextareaRef}
-												rows={3}
-												placeholder='Posez-moi une question'
-												value={questionText}
-												onChange={handleQuestionChange}
-												style={{
-													width: '100%',
-													minWidth: '160px',
-													minHeight: '52px',
-													maxHeight: '200px',
-													padding: '8px 56px 8px 14px',
-													borderRadius: '12px',
-													border: '1px solid #d1d5db',
-													fontSize: '14px',
-													outline: 'none',
-													resize: 'none',
-													overflow: 'hidden',
-												}}
-											/>
-											<button
-												type='button'
-												onClick={handleSendQuestion}
-												style={{
-													position: 'absolute',
-													right: '-5px',
-													bottom: '8px',
-													display: 'inline-flex',
-													alignItems: 'center',
-													justifyContent: 'center',
-													width: '32px',
-													height: '32px',
-													borderRadius: '999px',
-													border: 'none',
-													backgroundColor: '#3b82f6',
-													color: '#ffffff',
-													cursor: 'pointer',
-												}}
-											>
-												<svg
-													width='16'
-													height='16'
-													viewBox='0 0 24 24'
-													fill='none'
-													stroke='currentColor'
-													strokeWidth='2'
-													strokeLinecap='round'
-													strokeLinejoin='round'
-												>
-													<line x1='22' y1='2' x2='11' y2='13' />
-													<polygon points='22 2 15 22 11 13 2 9 22 2' />
-												</svg>
-											</button>
-										</div>
-									</div>
 								</div>
 
 								<section>
@@ -685,21 +548,164 @@ function FrenchScreen () {
 											</p>
 										</div>
 									</div>
-									<video 
-										src="https://res.cloudinary.com/dutglmj02/video/upload/v1775672377/frenchLesson_gfwazs.mp4"                                          
-										controls 
+								</section>
+								</div>
+							</article>
+
+						<div className='fixed-video-bottom-right valores-semana1-fixed-video'>
+							<div className='fixed-video-controls'>
+								<button
+									type='button'
+									className='fixed-video-button'
+									onClick={handleClassVideoToggle}
+									title={
+										isClassVideoPlaying
+											? 'Mettre la vidéo en pause'
+											: 'Lire la vidéo'
+									}
+								>
+									{isClassVideoPlaying ? (
+										<svg
+											width='20'
+											height='20'
+											viewBox='0 0 24 24'
+											fill='none'
+											stroke='currentColor'
+											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
+										>
+											<rect
+												x='6'
+												y='4'
+												width='4'
+												height='16'
+											/>
+											<rect
+												x='14'
+												y='4'
+												width='4'
+												height='16'
+											/>
+										</svg>
+									) : (
+										<svg
+											width='20'
+											height='20'
+											viewBox='0 0 24 24'
+											fill='none'
+											stroke='currentColor'
+											strokeWidth='2'
+											strokeLinecap='round'
+											strokeLinejoin='round'
+										>
+											<polygon points='5 3 19 12 5 21 5 3' />
+										</svg>
+									)}
+								</button>
+							</div>
+							<div className='valores-semana1-circle-shell'>
+								<div className='fixed-video-wrapper'>
+									{videoLoading && (
+										<div className='fixed-video-loading-overlay'>
+											<svg
+												width='28'
+												height='28'
+												viewBox='0 0 24 24'
+												fill='none'
+												stroke='#ffffff'
+												strokeWidth='2'
+												className='audio-loading-spinner'
+											>
+												<circle
+													cx='12'
+													cy='12'
+													r='10'
+													strokeOpacity='0.25'
+												/>
+												<path
+													d='M12 2a10 10 0 0 1 10 10'
+													strokeLinecap='round'
+												/>
+											</svg>
+										</div>
+									)}
+									<video
+										ref={classVideoRef}
+										src='https://res.cloudinary.com/dutglmj02/video/upload/v1775580777/french1_qnvkes.mp4'
+										controls={false}
 										onLoadedData={() => setVideoLoading(false)}
 										onLoadStart={() => setVideoLoading(true)}
 										onError={() => setVideoLoading(false)}
-										style={{ 
-										width: '100%', 
-										height: 'auto', 
-										borderRadius: '12px',
-										display: videoLoading ? 'none' : 'block'
-										}} 
+										onPlay={() => setIsClassVideoPlaying(true)}
+										onPause={() => setIsClassVideoPlaying(false)}
+										onTimeUpdate={e =>
+											handleTimeUpdate(e.target.currentTime)
+										}
 									/>
-								</section>
+									<div className='fixed-video-question-wrap valores-semana1-question-wrap'>
+										<textarea
+											ref={questionTextareaRef}
+											rows={3}
+											className='fixed-video-question-input valores-semana1-question-input'
+											placeholder='Posez-moi une question'
+											value={questionText}
+											onChange={handleQuestionChange}
+										/>
+										<button
+											type='button'
+											className='fixed-video-question-send valores-semana1-question-send'
+											onClick={handleSendQuestion}
+											aria-label='Envoyer la question'
+										>
+											<svg
+												width='16'
+												height='16'
+												viewBox='0 0 24 24'
+												fill='none'
+												stroke='currentColor'
+												strokeWidth='2'
+												strokeLinecap='round'
+												strokeLinejoin='round'
+											>
+												<line x1='22' y1='2' x2='11' y2='13' />
+												<polygon points='22 2 15 22 11 13 2 9 22 2' />
+											</svg>
+										</button>
+									</div>
+								</div>
 							</div>
+
+							{/* <button
+								type='button'
+								className='valores-semana1-exam-btn'
+							>
+								<Link
+									to='/examen'
+									className='valores-semana1-exam-btn-link'
+									target='_blank'
+									rel='noopener noreferrer'
+								>
+									Examen <br /> blanc
+								</Link>
+							</button> */}
+						</div>
+						<div className='valores-semana1-feature-wrap'>
+							<video
+								className='valores-semana1-feature-video unidad-video'
+								src='https://res.cloudinary.com/dutglmj02/video/upload/v1775672377/frenchLesson_gfwazs.mp4'
+								controls
+								onLoadedData={() => setVideoLoading(false)}
+								onLoadStart={() => setVideoLoading(true)}
+								onError={() => setVideoLoading(false)}
+								style={{
+									width: '100%',
+									height: 'auto',
+									borderRadius: '12px',
+									display: videoLoading ? 'none' : 'block',
+								}}
+							/>
+						</div>
 						</div>
 					</div>
 				</div>

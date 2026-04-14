@@ -22,6 +22,7 @@ import FrenchScreen from './screens/FrenchScreen';
 import ValoresIndex from './screens/9/valores/ValoresIndex';
 import StudentCamera from './screens/StudentCamera';
 import StudentScreen from './screens/StudentScreen';
+import ChineseScreen from './screens/ChineseScreen';
 
 import Semana1Unidad2Screen from './screens/9/valores/unidad2/Semana1Unidad2Screen';
 import Semana2Unidad2Screen from './screens/9/valores/unidad2/Semana2Unidad2Screen';
@@ -110,6 +111,7 @@ const router = createBrowserRouter(
             <Route  path="/french" element={<FrenchScreen />} />
             <Route  path="/studentcamera" element={<StudentCamera />} />
             <Route  path="/studentscreen" element={<StudentScreen />} />
+            <Route  path="/chinese" element={<ChineseScreen />} />
         </Route>
     )
 );

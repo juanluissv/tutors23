@@ -428,6 +428,7 @@ and put in separate .txt file
 
 
 convert @frontend/public/unidad2Semana1.srt  to .vtt 
+
 ffmpeg -i unidad2Semana2.mp4 -vf "scale=-2:360" -c:v libx264 -crf 23 -c:a copy unidad2Semana22.mp4
 
 

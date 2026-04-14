@@ -9,7 +9,8 @@ import { Link } from 'react-router-dom';
 
 function ForestScreen() {
 
-    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);const [activeText, setActiveText] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
+    const [activeText, setActiveText] = useState('');
     const [allCues, setAllCues] = useState([]);
     const [audioLoading, setAudioLoading] = useState(true);
     const [videoLoading, setVideoLoading] = useState(true);
@@ -181,169 +182,57 @@ function ForestScreen() {
 
 
     return (
-        <div className="chat-app">
+        <div className="chat-app chat-app--valores-semana1">
             <div className="main-container">     
 
                 <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                 <div className="main-content">
                     <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-                    <div className="content-area" ref={contentRef}>
-                        <div className="center-content2">
-                            {/* content goes here */}
-                            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
-                                <div className='valores-english-version-wrap'>
-                                    <div className='valores-english-version-pill'>
-                                        <Link
-                                            to='/9/valores/unidad1/semana1'
-                                            className='valores-english-version-link'
-                                        >
-                                            Spanish Version
-                                        </Link>
-                                    </div>
-                                    <div className='valores-english-version-pill'>
-                                        <Link
-                                            to='/french'
-                                            className='valores-english-version-link'
-                                        >
-                                            French Version
-                                        </Link>
-							        </div>
+                    <div className="content-area content-area--valores-semana1" ref={contentRef}>
+                        <div className="center-content2 valores-semana1-center">
+                            <div className="valores-semana1-lang-row">
+                                <div className="valores-semana1-lang-pill">
+                                    <Link
+                                        to="/9/valores/unidad1/semana1"
+                                        className="valores-semana1-lang-link"
+                                    >
+                                        Spanish Version
+                                    </Link>
                                 </div>
-                                <div className='unidad-header'>									
-									<h1 className='unidad-title'>
-										Unidad 1 · Semana 1
-									</h1>
-									<h2 className='unidad-subtitle'>
-										Los bosques tropicales en el mundo
-									</h2>																	
-								</div>
-
-                                <div className="fixed-video-bottom-right">
-
-                                    <div className="fixed-video-controls">
-                                            <button 
-                                                type="button" 
-                                                className="fixed-video-button"
-                                                onClick={handleClassVideoToggle}
-                                                title={isClassVideoPlaying ? "Pause video" : "Play video"}
-                                            >
-                                                {isClassVideoPlaying ? (
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <rect x="6" y="4" width="4" height="16" />
-                                                        <rect x="14" y="4" width="4" height="16" />
-                                                    </svg>
-                                                ) : (
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <polygon points="5 3 19 12 5 21 5 3" />
-                                                    </svg>
-                                                )}
-                                            </button>
-                                        </div>
-
-
-
-                                        <div className="fixed-video-wrapper">
-                                            {videoLoading && (
-                                                <div className="fixed-video-loading-overlay">
-                                                    <svg 
-                                                        width="28" 
-                                                        height="28" 
-                                                        viewBox="0 0 24 24" 
-                                                        fill="none" 
-                                                        stroke="#ffffff" 
-                                                        strokeWidth="2" 
-                                                        className="audio-loading-spinner"
-                                                    >
-                                                        <circle 
-                                                            cx="12" 
-                                                            cy="12" 
-                                                            r="10" 
-                                                            strokeOpacity="0.25" 
-                                                        />
-                                                        <path 
-                                                            d="M12 2a10 10 0 0 1 10 10" 
-                                                            strokeLinecap="round" 
-                                                        />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                            <video 
-                                                ref={classVideoRef}
-                                                src="https://res.cloudinary.com/dutglmj02/video/upload/v1775580777/forest_fnhwrz.mp4"                                          
-                                                //src="class4.mp4"                                          
-                                                controls={false}
-                                                onLoadedData={() => setVideoLoading(false)}
-                                                onLoadStart={() => setVideoLoading(true)}
-                                                onError={() => setVideoLoading(false)}
-                                                onPlay={() => setIsClassVideoPlaying(true)}
-                                                onPause={() => setIsClassVideoPlaying(false)}
-                                                onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
-                                            />
-                                            <div 
-                                                style={{ 
-                                                    marginTop: '12px',
-                                                    position: 'relative',
-                                                    width: '100%',
-                                                    marginLeft: '-6px',
-                                                }}
-                                            >
-                                                <textarea
-                                                    ref={questionTextareaRef}
-                                                    rows={2}
-                                                    placeholder="ask me a question"
-                                                    value={questionText}
-                                                    onChange={handleQuestionChange}
-                                                    style={{
-                                                        width: '100%',
-                                                        minWidth: '160px',
-                                                        minHeight: '52px',
-                                                        maxHeight: '200px',
-                                                        padding: '8px 56px 8px 14px',
-                                                        borderRadius: '12px',
-                                                        border: '1px solid #d1d5db',
-                                                        fontSize: '14px',
-                                                        outline: 'none',
-                                                        resize: 'none',
-                                                        overflow: 'hidden',
-                                                    }}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={handleSendQuestion}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        right: '-5px',
-                                                        bottom: '8px',
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        width: '32px',
-                                                        height: '32px',
-                                                        borderRadius: '999px',
-                                                        border: 'none',
-                                                        backgroundColor: '#3b82f6',
-                                                        color: '#ffffff',
-                                                        cursor: 'pointer',
-                                                    }}
-                                                >
-                                                    <svg
-                                                        width="16"
-                                                        height="16"
-                                                        viewBox="0 0 24 24"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="2"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                    >
-                                                        <line x1="22" y1="2" x2="11" y2="13" />
-                                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
+                                <div className="valores-semana1-lang-pill">
+                                    <Link
+                                        to="/french"
+                                        className="valores-semana1-lang-link"
+                                    >
+                                        French Version
+                                    </Link>
+                                </div>
+                                {/* <div className='valores-semana1-lang-pill'>
+									<Link
+										to='/chinese'
+										className='valores-semana1-lang-link'
+									>
+										Chinese Version
+									</Link>
+								</div> */}
+                            </div>
+                            <article className="valores-semana1-article-card">
+                                <div
+                                    className="valores-semana1-article-accent"
+                                    aria-hidden
+                                />
+                                <div className="unidad-wrapper valores-semana1-unidad-inner">
+                                <div className="unidad-header valores-semana1-hero">
+                                    <p className="valores-semana1-eyebrow">
+                                        Citizenship & values · Grade 9
+                                    </p>
+                                    <h1 className="unidad-title valores-semana1-title heading-gradient">
+                                        Unidad 1 · Semana 1
+                                    </h1>
+                                    <h2 className="unidad-subtitle valores-semana1-subtitle">
+                                        Los bosques tropicales en el mundo
+                                    </h2>
+                                </div>
 
                                 {/* Deepening */}
                                 <div style={{ marginBottom: '60px' }}>
@@ -502,24 +391,130 @@ function ForestScreen() {
                                     </div>
                                 </div>
 
-                                <video 
-                                    src="https://res.cloudinary.com/dutglmj02/video/upload/v1775672380/EnglishLesson_j7x8zl.mp4"                                          
-                                    controls 
-                                    onLoadedData={() => setVideoLoading(false)}
-                                    onLoadStart={() => setVideoLoading(true)}
-                                    onError={() => setVideoLoading(false)}
-                                    style={{ 
-                                    width: '100%', 
-                                    height: 'auto', 
+                                </div>
+                            </article>
+
+                        <div className="fixed-video-bottom-right valores-semana1-fixed-video">
+
+                            <div className="fixed-video-controls">
+                                <button 
+                                    type="button" 
+                                    className="fixed-video-button"
+                                    onClick={handleClassVideoToggle}
+                                    title={isClassVideoPlaying ? "Pause video" : "Play video"}
+                                >
+                                    {isClassVideoPlaying ? (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="6" y="4" width="4" height="16" />
+                                            <rect x="14" y="4" width="4" height="16" />
+                                        </svg>
+                                    ) : (
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polygon points="5 3 19 12 5 21 5 3" />
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
+                            <div className="valores-semana1-circle-shell">
+                                <div className="fixed-video-wrapper">
+                                    {videoLoading && (
+                                        <div className="fixed-video-loading-overlay">
+                                            <svg 
+                                                width="28" 
+                                                height="28" 
+                                                viewBox="0 0 24 24" 
+                                                fill="none" 
+                                                stroke="#ffffff" 
+                                                strokeWidth="2" 
+                                                className="audio-loading-spinner"
+                                            >
+                                                <circle 
+                                                    cx="12" 
+                                                    cy="12" 
+                                                    r="10" 
+                                                    strokeOpacity="0.25" 
+                                                />
+                                                <path 
+                                                    d="M12 2a10 10 0 0 1 10 10" 
+                                                    strokeLinecap="round" 
+                                                />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    <video 
+                                        ref={classVideoRef}
+                                        src="https://res.cloudinary.com/dutglmj02/video/upload/v1775580777/forest_fnhwrz.mp4"
+                                        controls={false}
+                                        onLoadedData={() => setVideoLoading(false)}
+                                        onLoadStart={() => setVideoLoading(true)}
+                                        onError={() => setVideoLoading(false)}
+                                        onPlay={() => setIsClassVideoPlaying(true)}
+                                        onPause={() => setIsClassVideoPlaying(false)}
+                                        onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
+                                    />
+                                    <div className="fixed-video-question-wrap valores-semana1-question-wrap">
+                                        <textarea
+                                            ref={questionTextareaRef}
+                                            rows={2}
+                                            className="fixed-video-question-input valores-semana1-question-input"
+                                            placeholder="Ask me a question"
+                                            value={questionText}
+                                            onChange={handleQuestionChange}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="fixed-video-question-send valores-semana1-question-send"
+                                            onClick={handleSendQuestion}
+                                            aria-label="Send question"
+                                        >
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <line x1="22" y1="2" x2="11" y2="13" />
+                                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* <button
+                                type="button"
+                                className="valores-semana1-exam-btn"
+                            >
+                                <Link
+                                    to="/examen"
+                                    className="valores-semana1-exam-btn-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Practice <br /> exam
+                                </Link>
+                            </button> */}
+                        </div>
+                        <div className="valores-semana1-feature-wrap">
+                            <video
+                                className="valores-semana1-feature-video unidad-video"
+                                src="https://res.cloudinary.com/dutglmj02/video/upload/v1775672380/EnglishLesson_j7x8zl.mp4"
+                                controls
+                                onLoadedData={() => setVideoLoading(false)}
+                                onLoadStart={() => setVideoLoading(true)}
+                                onError={() => setVideoLoading(false)}
+                                style={{
+                                    width: '100%',
+                                    height: 'auto',
                                     borderRadius: '12px',
                                     display: videoLoading ? 'none' : 'block'
-                                    }} 
-                                />
-
-
-
-                            </div>
-                            
+                                }}
+                            />
+                        </div>
                         </div>
                     </div>        
                 </div>

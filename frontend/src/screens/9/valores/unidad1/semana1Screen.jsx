@@ -206,6 +206,14 @@ function Semana1Screen () {
 										French Version
 									</Link>
 								</div>
+								{/* <div className='valores-semana1-lang-pill'>
+									<Link
+										to='/chinese'
+										className='valores-semana1-lang-link'
+									>
+										Chinese Version
+									</Link>
+								</div> */}
 							</div>
 							<article className='valores-semana1-article-card'>
 								<div
@@ -539,94 +547,7 @@ function Semana1Screen () {
 											</p>
 										</div>
 									</div>
-								</section>
-
-								{/* <section>
-									<h3 className='unidad-consolidation-title'>
-										Consolidación
-									</h3>
-
-									<div className='unidad-consolidation-card'>
-										<h4 className='unidad-consolidation-heading'>
-											6. Actividad en pares
-										</h4>
-										<p className='unidad-consolidation-text'>
-											Establezcan tres acciones que se
-											pueden realizar desde diferentes
-											entidades para la conservación de
-											los bosques tropicales en el mundo,
-											considerando las principales
-											problemáticas a las que se
-											enfrentan.
-										</p>
-										<ul className='unidad-consolidation-list'>
-											<li>
-												Anótenlas en su cuaderno.
-											</li>
-											<li>
-												Comparen sus respuestas con
-												otros pares y seleccionen las
-												mejores propuestas.
-											</li>
-											<li>
-												Compartan en pleno su selección
-												final.
-											</li>
-										</ul>
-									</div>
-
-									<div className='unidad-consolidation-card'>
-										<h4 className='unidad-consolidation-heading'>
-											7 y 8. Actividad con docente / en
-											equipo
-										</h4>
-										<p className='unidad-consolidation-text'>
-											Formen equipos de trabajo y:
-										</p>
-										<ul className='unidad-consolidation-list'>
-											<li>
-												Seleccionen uno de los
-												siguientes bosques tropicales:
-												Amazonas, el Congo, el Daintree
-												o el Bosque Nuboso de
-												Monteverde.
-											</li>
-											<li>
-												Investiguen datos sobre el
-												bosque seleccionado y organicen
-												la información en una tabla con:
-												ubicación, biodiversidad,
-												clima, amenazas ambientales,
-												comunidades indígenas y
-												esfuerzos de conservación.
-											</li>
-											<li>
-												Describan la zona en la que se
-												ubica, las causas de la
-												deforestación y otras
-												problemáticas.
-											</li>
-											<li>
-												Analicen los impactos en la
-												biodiversidad y el
-												medioambiente, los efectos para
-												las comunidades locales y las
-												medidas de conservación
-												existentes.
-											</li>
-											<li>
-												Preparen una presentación
-												creativa (pósters, maquetas,
-												videos o dramatizaciones) y
-												presenten sus hallazgos al resto
-												de la clase, organizando una
-												plenaria para comparar
-												regiones.
-											</li>
-										</ul>
-									</div>
-								</section> */}
-
+								</section>							
 								</div>
 							</article>
 
@@ -651,6 +572,7 @@ function Semana1Screen () {
 									)}
 								</button>
 							</div>
+							<div className="valores-semana1-circle-shell">
 							<div className="fixed-video-wrapper">
 								{videoLoading && (
 									<div className="fixed-video-loading-overlay">
@@ -717,6 +639,7 @@ function Semana1Screen () {
 										</svg>
 									</button>
 								</div>
+							</div>
 							</div>
 
 							<button
