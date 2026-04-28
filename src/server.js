@@ -4,13 +4,16 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/db.js';
 //import { notFound, errorHandler } from './middleware/errorMiddleware.js';
-// import products from './data/products.js';
-// import productRoutes from './routes/productRoutes.js';
-// import orderRoutes from './routes/orderRoutes.js';
-// import uploadRoutes from './routes/uploadRoutes.js';
+import teacherRoutes from './routes/teacherRoutes.js'
 import studentRoutes from './routes/studentRoutes.js'
 import chatRoutes from './routes/chatRoutes.js';
 import ttsRoutes from './routes/ttsRoutes.js';
+import schoolAdminRoutes from './routes/schoolAdminRoutes.js';
+import schoolRoutes from './routes/schoolRoutes.js';
+import subjectRoutes from './routes/subjectRoutes.js';
+import multer  from 'multer'; 
+import {fileURLToPath} from 'url';
+
 
 dotenv.config()
 
@@ -23,22 +26,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.resolve() //set  __dirname to current directory
 // app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
 
 
+// var upload = multer({ dest: path.dirname(__filename) + '/public/uploads/' });
+// var type = upload.single('upl');
 
 
+
+app.use('/api/schooladmins', schoolAdminRoutes);
+app.use('/api/schools', schoolRoutes);
+app.use('/api/subjects', subjectRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/tts', ttsRoutes);
+app.use('/api/teachers', teacherRoutes);
 
-
-
-// app.use('/api/products', productRoutes);
-// app.use('/api/users', userRoutes);
-// app.use('/api/orders', orderRoutes);
-// app.use('/api/upload', uploadRoutes);
 
 
 

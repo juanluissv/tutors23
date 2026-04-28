@@ -35,8 +35,8 @@ export const studentApiSlice = apiSlice.injectEndpoints({
               method: 'PUT',
               body: data,
             }),
+            invalidatesTags: ['Students'],
           }),
-          invalidatesTags: ['Students'], // Invalidate 'Profile' cache upon success
     }),
 })
 

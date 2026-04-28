@@ -622,3 +622,17 @@ move all the text to the left 10% do not move the video just the text
 
 @frontend/src/screens/9/valores/unidad3/Semana6Unidad3Screen.jsx 
 move all the text to the left 10% do not move the video just the text 
+
+
+
+create a function to create new schools in the database (mongo) in @src/controllers/schoolController.js that is connected to @src/models/schoolAdminModel.js, look at the other controllers as a reference and coding style
+
+ok now create a route in  @src/routes/schoolRoutes.js to create new schools 
+
+now create a slice in @frontend/src/slices/admin/schoolAdminApiSlice.js to create new schools 
+
+now create a form in @frontend/src/screens/schoolAdmin/SchoolAdminRegisterSchoolScreen.jsx using the slice @frontend/src/slices/admin/schoolAdminApiSlice.js to create a school, you can use @frontend/src/screens/schoolAdmin/SchoolAdminProfileScreen.jsx as a reference for the UI design 
+
+
+
+

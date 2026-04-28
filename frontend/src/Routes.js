@@ -55,6 +55,29 @@ import Semana3Unidad6Screen from './screens/9/valores/unidad6/Semana3Unidad6Scre
 import Semana4Unidad6Screen from './screens/9/valores/unidad6/Semana4Unidad6Screen';
 import Semana5Unidad6Screen from './screens/9/valores/unidad6/Semana5Unidad6Screen';
 
+import TeacherLoginScreen from './screens/teachers/TeacherLoginScreen';
+import TeacherRegisterScreen from './screens/teachers/TeacherRegisterScreen';
+import TeacherBookUploadScreen from './screens/teachers/TeacherBookUploadScreen';
+import TeacherNewQuestionsScreen from './screens/teachers/TeacherNewQuestionsScreen';
+import TeacherSubjectsScreen from './screens/teachers/TeacherSubjectsScreen';
+import TeacherEditSubjectScreen from './screens/teachers/TeacherEditSubjectScreen';
+import TeacherOldQuestionsScreen from './screens/teachers/TeacherOldQuestionsScreen';
+import TeacherWatchNewScreen from './screens/teachers/TeacherWatchNewScreen';
+import TeacherAnswerDetailsScreen from './screens/teachers/TeacherAnswerDetailsScreen';
+import TeacherAnswerScreen from './screens/teachers/TeacherAnswerScreen';
+import TeacherStudentsScreen from './screens/teachers/TeacherStudentsScreen';
+import TeacherProfileScreen from './screens/teachers/TeacherProfileScreen';
+
+import SchoolAdminLoginScreen from './screens/schoolAdmin/SchoolAdminLoginScreen';
+import SchoolAdminRegisterScreen from './screens/schoolAdmin/SchoolAdminRegisterScreen';
+import SchoolAdminProfileScreen from './screens/schoolAdmin/SchoolAdminProfileScreen';
+import SchoolAdminRegisterSchoolScreen from './screens/schoolAdmin/SchoolAdminRegisterSchoolScreen';
+import SchoolAdminMySchoolsScreen from './screens/schoolAdmin/SchoolAdminMySchoolsScreen';
+import SchoolAdminCreateSubjectScreen from './screens/schoolAdmin/SchoolAdminCreateSubjectScreen';
+import SchoolAdminMySubjectsScreen from './screens/schoolAdmin/SchoolAdminMySubjectsScreen';
+import SchoolAdminEditSubjectScreen from './screens/schoolAdmin/SchoolAdminEditSubjectScreen';
+import SchoolAdminTeacherInviteScreen from './screens/schoolAdmin/SchoolAdminTeacherInviteScreen';
+
 const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />} >
@@ -112,6 +135,36 @@ const router = createBrowserRouter(
             <Route  path="/studentcamera" element={<StudentCamera />} />
             <Route  path="/studentscreen" element={<StudentScreen />} />
             <Route  path="/chinese" element={<ChineseScreen />} />
+
+
+
+
+
+            <Route  path="/teachers/login" element={<TeacherLoginScreen />} />
+            <Route  path="/teachers/register" element={<TeacherRegisterScreen />} />
+            <Route  path="/teachers/bookupload" element={<TeacherBookUploadScreen />} />
+            <Route  path="/teachers/newquestions" element={<TeacherNewQuestionsScreen />} />
+            <Route  path="/teachers/subjects" element={<TeacherSubjectsScreen />} />
+            <Route  path="/teachers/subjects/:id/edit" element={<TeacherEditSubjectScreen />} />
+            <Route  path="/teachers/oldquestions" element={<TeacherOldQuestionsScreen />} />
+            <Route  path="/teachers/watchnew" element={<TeacherWatchNewScreen />} />
+            <Route  path="/teachers/answerdetails" element={<TeacherAnswerDetailsScreen />} />
+            <Route  path="/teachers/answer" element={<TeacherAnswerScreen />} />
+            <Route  path="/teachers/students" element={<TeacherStudentsScreen />} />
+            <Route  path="/teachers/profile" element={<TeacherProfileScreen />} />
+
+            <Route  path="/schooladmins/login" element={<SchoolAdminLoginScreen />} />
+            <Route  path="/schooladmins/register" element={<SchoolAdminRegisterScreen />} />
+            <Route  path="/schooladmins/profile" element={<SchoolAdminProfileScreen />} />
+            <Route  path="/schooladmins/registerschool" element={<SchoolAdminRegisterSchoolScreen />} />
+            <Route  path="/schooladmins/myschools" element={<SchoolAdminMySchoolsScreen />} />
+            <Route  path="/schooladmins/createsubject" element={<SchoolAdminCreateSubjectScreen />} />
+            <Route  path="/schooladmins/mysubjects" element={<SchoolAdminMySubjectsScreen />} />
+            <Route  path="/schooladmins/editsubject/:id" element={<SchoolAdminEditSubjectScreen />} />
+            <Route
+                path="/schooladmins/teacherinvite/:id"
+                element={<SchoolAdminTeacherInviteScreen />}
+            />
         </Route>
     )
 );

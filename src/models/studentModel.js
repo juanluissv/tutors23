@@ -4,11 +4,11 @@ import bcrypt from 'bcryptjs';
 const studentSchema = mongoose.Schema({
     firstname: {
         type: String,
-        required: false
+        required: true
     },
     lastname: {
         type: String,
-        required: false
+        required: true
     },
     email: {
         type: String,
@@ -53,22 +53,31 @@ const studentSchema = mongoose.Schema({
         required: false
     },
     stripeSession: {},
-    plan: [
+    school: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'School'
+    },
+    plan: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Plan'
+    },
+    courses: [
         {
             type: mongoose.Schema.Types.ObjectId,
             required: false,
-            ref: 'Plan'
+            ref: 'Course'
+        },        
+    ],  
+    subjects: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'Subject'
         },
     ],
-    courseActive: [{
-        course: {
-            type: mongoose.Schema.Types.ObjectId,
-            required: false,
-            ref: 'Course'
-        },
-        activeLesson: { 
-        },
-    }],
+
     numberOfQuestion: [
 
         {
@@ -108,13 +117,6 @@ const studentSchema = mongoose.Schema({
             stripe_subscription_id: { type: String, required: false },
 
 
-        },
-    ],
-    question: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            required: false,
-            ref: 'Question'
         },
     ],
 }, {
