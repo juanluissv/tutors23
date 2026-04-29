@@ -6,8 +6,10 @@ import {
     getSubjectsBySchool,
     getSubjectsByTeacherId,
     getSubjectBookForTeacher,
+    getSubjectStudentsForTeacher,
     updateSubjectById,
     updateSubjectByTeacher,
+    addSubjectStudentEmailForTeacher,
     setSubjectTeacherEmail,
 } from '../controllers/subjectController.js';
 
@@ -31,6 +33,18 @@ router
         protectTeacher,
         getSubjectBookForTeacher,
     );
+
+router.get(
+    '/:id/teacher/students',
+    protectTeacher,
+    getSubjectStudentsForTeacher,
+);
+
+router.put(
+    '/:id/teacher/student-email',
+    protectTeacher,
+    addSubjectStudentEmailForTeacher,
+);
 
 router
     .route('/:id/teacher')

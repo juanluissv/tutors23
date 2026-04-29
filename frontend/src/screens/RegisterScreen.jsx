@@ -1,49 +1,73 @@
-import React, {useState, useEffect} from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
-import { setStudentCredentials } from '../slices/student/authStudentSlice';
-import { useRegisterMutation } from '../slices/student/studentApiSlice';
-import Loader from '../components/Loader';
+import React, { useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { toast } from 'react-toastify'
+import { setStudentCredentials } from '../slices/student/authStudentSlice'
+import { useRegisterMutation } from '../slices/student/studentApiSlice'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import '../App.css'
 
-function RegisterScreen () {	
-	const navigate = useNavigate();
-  	const dispatch = useDispatch();
-
+function RegisterScreen () {
+	const navigate = useNavigate()
+	const dispatch = useDispatch()
 
 	const isSidebarOpen = false
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
-	const [confirmPassword, setConfirmPassword] = useState('');
-	const [register, { isLoading }] = useRegisterMutation();
-	const { studentInfo } = useSelector((state) => state.authStudent);
+	const [firstname, setFirstname] = useState('')
+	const [lastname, setLastname] = useState('')
+	const [email, setEmail] = useState('')
+	const [password, setPassword] = useState('')
+	const [confirmPassword, setConfirmPassword] = useState('')
+	const [register, { isLoading }] = useRegisterMutation()
 
 	const handleToggleSidebar = () => {}
 
-	const { search } = useLocation();
-	const sp = new URLSearchParams(search);
-	const redirect = sp.get('redirect') || '/';
+	const { search } = useLocation()
+	const sp = new URLSearchParams(search)
+	const redirect = sp.get('redirect') || '/'
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-		if (email == '') { toast.error('Please enter  email'); return; }
-		if (password == '') { toast.error('Please enter  password'); return; }    
-		if (confirmPassword == '') { toast.error('Please enter  confirm password'); return; }
-		if (password !== confirmPassword) {
-		  toast.error('Passwords do not match');
-		} else {
-		  try {
-			const res = await register({ email, password }).unwrap();
-			dispatch(setStudentCredentials({ ...res }));
-			navigate(redirect);
-		  } catch (err) {
-			toast.error(err?.data?.message || err.error);
-		  }
+		const fn = firstname.trim()
+		const ln = lastname.trim()
+		if (fn === '') {
+			toast.error('Please enter your first name')
+			return
 		}
-	  }
+		if (ln === '') {
+			toast.error('Please enter your last name')
+			return
+		}
+		if (email.trim() === '') {
+			toast.error('Please enter email')
+			return
+		}
+		if (password === '') {
+			toast.error('Please enter password')
+			return
+		}
+		if (confirmPassword === '') {
+			toast.error('Please enter confirm password')
+			return
+		}
+		if (password !== confirmPassword) {
+			toast.error('Passwords do not match')
+			return
+		}
+		try {
+			const res = await register({
+				firstname: fn,
+				lastname: ln,
+				email: email.trim(),
+				password,
+			}).unwrap()
+			dispatch(setStudentCredentials({ ...res }))
+			toast.success('Account created')
+			navigate(redirect)
+		} catch (err) {
+			toast.error(err?.data?.message || err?.error || 'Registration failed')
+		}
+	}
 
 	return (
 		<div className='chat-app chat-app--login ask-screen'>
@@ -66,10 +90,42 @@ function RegisterScreen () {
 								</div>
 								<form
 									className='login-form'
-									id='login-form'
-									name='login-form'
+									id='register-form'
+									name='register-form'
 									onSubmit={handleSubmit}
 								>
+									<div className='login-field'>
+										<label className='login-label' htmlFor='register-firstname'>
+											First name
+										</label>
+										<input
+											type='text'
+											id='register-firstname'
+											name='firstname'
+											className='login-input'
+											placeholder='First name'
+											autoComplete='given-name'
+											value={firstname}
+											disabled={isLoading}
+											onChange={(e) => setFirstname(e.target.value)}
+										/>
+									</div>
+									<div className='login-field'>
+										<label className='login-label' htmlFor='register-lastname'>
+											Last name
+										</label>
+										<input
+											type='text'
+											id='register-lastname'
+											name='lastname'
+											className='login-input'
+											placeholder='Last name'
+											autoComplete='family-name'
+											value={lastname}
+											disabled={isLoading}
+											onChange={(e) => setLastname(e.target.value)}
+										/>
+									</div>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='email'>
 											Email
@@ -81,8 +137,9 @@ function RegisterScreen () {
 											className='login-input'
 											placeholder='you@example.com'
 											autoComplete='email'
-											onChange={(e) => setEmail(e.target.value)}
 											value={email}
+											disabled={isLoading}
+											onChange={(e) => setEmail(e.target.value)}
 										/>
 									</div>
 									<div className='login-field'>
@@ -96,8 +153,9 @@ function RegisterScreen () {
 											className='login-input'
 											placeholder='••••••••'
 											autoComplete='new-password'
-											onChange={(e) => setPassword(e.target.value)}											
 											value={password}
+											disabled={isLoading}
+											onChange={(e) => setPassword(e.target.value)}
 										/>
 									</div>
 									<div className='login-field'>
@@ -114,18 +172,21 @@ function RegisterScreen () {
 											className='login-input'
 											placeholder='••••••••'
 											autoComplete='new-password'
-											onChange={(e) => setConfirmPassword(e.target.value)}
 											value={confirmPassword}
+											disabled={isLoading}
+											onChange={(e) =>
+												setConfirmPassword(e.target.value)}
 										/>
 									</div>
-									
+
 									<button
 										type='submit'
 										id='register-button'
 										name='register-button'
 										className='login-submit'
+										disabled={isLoading}
 									>
-										Sign up
+										{isLoading ? 'Signing up…' : 'Sign up'}
 									</button>
 								</form>
 								<p className='login-card__footer'>
@@ -143,4 +204,4 @@ function RegisterScreen () {
 	)
 }
 
-export default RegisterScreen; 
+export default RegisterScreen

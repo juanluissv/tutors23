@@ -67,6 +67,8 @@ import TeacherAnswerDetailsScreen from './screens/teachers/TeacherAnswerDetailsS
 import TeacherAnswerScreen from './screens/teachers/TeacherAnswerScreen';
 import TeacherStudentsScreen from './screens/teachers/TeacherStudentsScreen';
 import TeacherProfileScreen from './screens/teachers/TeacherProfileScreen';
+import TeacherStudentsBySubjectScreen from './screens/teachers/TeacherStudentsBySubjectScreen';
+import TeacherAddStudentToSubjectScreen from './screens/teachers/TeacherAddStudentToSubjectScreen';
 
 import SchoolAdminLoginScreen from './screens/schoolAdmin/SchoolAdminLoginScreen';
 import SchoolAdminRegisterScreen from './screens/schoolAdmin/SchoolAdminRegisterScreen';
@@ -150,8 +152,10 @@ const router = createBrowserRouter(
             <Route  path="/teachers/watchnew" element={<TeacherWatchNewScreen />} />
             <Route  path="/teachers/answerdetails" element={<TeacherAnswerDetailsScreen />} />
             <Route  path="/teachers/answer" element={<TeacherAnswerScreen />} />
-            <Route  path="/teachers/students" element={<TeacherStudentsScreen />} />
             <Route  path="/teachers/profile" element={<TeacherProfileScreen />} />
+            <Route  path="/teachers/students/:id" element={<TeacherStudentsScreen />} />
+            <Route  path="/teachers/students" element={<TeacherStudentsBySubjectScreen />} />
+            <Route  path="/teachers/students/:id/addstudent" element={<TeacherAddStudentToSubjectScreen />} />
 
             <Route  path="/schooladmins/login" element={<SchoolAdminLoginScreen />} />
             <Route  path="/schooladmins/register" element={<SchoolAdminRegisterScreen />} />

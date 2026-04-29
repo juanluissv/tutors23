@@ -76,11 +76,16 @@ function SchoolAdminTeacherInviteScreen () {
 		if (!currentSubject) {
 			return
 		}
-		setEmail(
-			currentSubject.teacherEmail != null
-				? String(currentSubject.teacherEmail)
-				: '',
-		)
+		const te = currentSubject.teacherEmail
+		if (te == null) {
+			setEmail('')
+			return
+		}
+		if (Array.isArray(te)) {
+			setEmail(te.length > 0 ? String(te[0]) : '')
+			return
+		}
+		setEmail(String(te))
 	}, [currentSubject])
 
 	const handleSubmit = async (e) => {

@@ -13,10 +13,18 @@ const subjectSchema = mongoose.Schema({
         type: Number,
         required: false
     },
-    teacherEmail: {
+    teacherEmail: [
+        {
         type: String,
         required: false
     },
+    ],
+    studentsEmail: [
+        {
+            type: String,
+            required: false,
+        },
+    ],
     bookId: {
         type: String,
         required: false,

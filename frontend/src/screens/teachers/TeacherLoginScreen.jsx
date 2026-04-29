@@ -16,8 +16,8 @@ function TeacherLoginScreen () {
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
 
-	const [email, setEmail] = useState("ana22@gmail.com");
-    const [password, setPassword] = useState("anaSmith22");
+	const [email, setEmail] = useState("mark@gmail.com");
+    const [password, setPassword] = useState("mark");
 
 	const [loginTeacher, { isLoading }] = useLoginTeacherMutation()
 

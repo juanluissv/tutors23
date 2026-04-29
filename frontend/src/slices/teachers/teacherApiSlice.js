@@ -25,12 +25,34 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Questions'],
         }),
+        getTeacherProfile: builder.query({
+            query: () => ({
+                url: `${TEACHERS_URL}/profile`,
+            }),
+            providesTags: [{ type: 'Teachers', id: 'PROFILE' }],
+        }),
+        updateTeacherProfile: builder.mutation({
+            query: (body) => ({
+                url: `${TEACHERS_URL}/profile`,
+                method: 'PUT',
+                body,
+            }),
+            invalidatesTags: [{ type: 'Teachers', id: 'PROFILE' }],
+        }),
         getSubjectsByTeacherId: builder.query({
             query: (teacherId) => ({
               url: `${SUBJECTS_URL}/teacher/${teacherId}`,
             }),
             providesTags: (result, error, teacherId) => [
                 { type: 'Subject', id: `TEACHER_LIST_${teacherId}` },
+            ],
+        }),
+        getSubjectStudentsForTeacher: builder.query({
+            query: (subjectId) => ({
+              url: `${SUBJECTS_URL}/${subjectId}/teacher/students`,
+            }),
+            providesTags: (result, error, subjectId) => [
+                { type: 'Subject', id: `STUDENTS_${subjectId}` },
             ],
         }),
         updateSubjectByTeacher: builder.mutation({
@@ -79,6 +101,27 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
                 return tags;
             },
         }),
+        addStudentEmailToSubject: builder.mutation({
+            query: ({ subjectId, email }) => ({
+                url: `${SUBJECTS_URL}/${subjectId}/teacher/student-email`,
+                method: 'PUT',
+                body: { email },
+            }),
+            invalidatesTags: (result, error, { teacherId, subjectId }) => {
+                const tags = [];
+                if (teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${teacherId}`,
+                    });
+                }
+                if (subjectId) {
+                    tags.push({ type: 'Subject', id: subjectId });
+                    tags.push({ type: 'Subject', id: `STUDENTS_${subjectId}` });
+                }
+                return tags;
+            },
+        }),
     }),
 });
 
@@ -86,6 +129,10 @@ export const {
     useLoginTeacherMutation,
     useRegisterTeacherMutation,
     useLogoutTeacherMutation,
+    useGetTeacherProfileQuery,
+    useUpdateTeacherProfileMutation,
     useGetSubjectsByTeacherIdQuery,
     useUpdateSubjectByTeacherMutation,
+    useAddStudentEmailToSubjectMutation,
+    useGetSubjectStudentsForTeacherQuery,
 } = teacherApiSlice;

@@ -6,6 +6,17 @@ import School from '../models/schoolModel.js';
 import SchoolAdmin from '../models/schoolAdminModel.js';
 import { getS3, getBookBucketName, getBookKeyPrefix, getPublicBookUrlFromKey } from '../config/s3Client.js';
 
+/** Always return [] or string[] for API (handles legacy single-string docs). */
+function normalizeTeacherEmailsForJson (val) {
+    if (val == null || val === '') {
+        return [];
+    }
+    if (Array.isArray(val)) {
+        return val.map((e) => String(e));
+    }
+    return [String(val)];
+}
+
 const subjectToJson = (subject) => {
     const bookId = subject.bookId;
     const bookUrl = bookId
@@ -16,7 +27,7 @@ const subjectToJson = (subject) => {
         title: subject.title,
         description: subject.description,
         grade: subject.grade,
-        teacherEmail: subject.teacherEmail,
+        teacherEmail: normalizeTeacherEmailsForJson(subject.teacherEmail),
         isCoursePublish: subject.isCoursePublish,
         bookId,
         bookUrl,
@@ -28,6 +39,9 @@ const subjectToJson = (subject) => {
         teacherCount: Array.isArray(subject.teachers)
             ? subject.teachers.length
             : 0,
+        studentsEmail: Array.isArray(subject.studentsEmail)
+            ? subject.studentsEmail
+            : [],
     };
 };
 
@@ -161,6 +175,78 @@ const getSubjectBookForTeacher = asyncHandler(async (req, res) => {
         ResponseContentType: 'application/pdf',
     });
     return res.redirect(302, url);
+});
+
+// GET /api/subjects/:id/teacher/students — assigned teacher only; enrolled
+// students ObjectIds only (populate)
+const getSubjectStudentsForTeacher = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400);
+        throw new Error('Invalid subject id');
+    }
+
+    const subject = await Subject.findById(id)
+        .populate({
+            path: 'students',
+            select: 'firstname lastname email signInDate createdAt subscriptions',
+        })
+        .lean();
+
+    if (!subject) {
+        res.status(404);
+        throw new Error('Subject not found');
+    }
+
+    const teacherId = req.teacher._id;
+    const isAssigned = (subject.teachers || []).some(
+        (t) => String(t) === String(teacherId),
+    );
+
+    if (!isAssigned) {
+        res.status(403);
+        throw new Error('Not authorized to view students for this subject');
+    }
+
+    const rawStudents = subject.students || [];
+    const studentsOut = rawStudents
+        .filter((s) => s != null)
+        .map((student) => {
+            const subs = student.subscriptions || [];
+            const forSub = subs.find(
+                (sub) =>
+                    sub.subject != null && String(sub.subject) === String(id),
+            );
+            const joined = student.signInDate || student.createdAt || null;
+            const name = [student.firstname, student.lastname]
+                .filter(Boolean)
+                .join(' ')
+                .trim();
+            return {
+                _id: student._id,
+                firstname: student.firstname,
+                lastname: student.lastname,
+                name: name || student.email || 'Student',
+                email: student.email,
+                questionsAsked:
+                    typeof forSub?.questionsAsked === 'number'
+                        ? forSub.questionsAsked
+                        : 0,
+                isActive: forSub ? forSub.active === true : false,
+                joinedDate: joined
+                    ? new Date(joined).toISOString().slice(0, 10)
+                    : '',
+            };
+        });
+
+    res.status(200).json({
+        subject: {
+            _id: subject._id,
+            title: subject.title,
+        },
+        students: studentsOut,
+    });
 });
 
 // POST /api/subjects — use with protectSchoolAdmin
@@ -318,13 +404,27 @@ const updateSubjectById = asyncHandler(async (req, res) => {
     if (req.body.teacherEmail !== undefined) {
         if (req.body.teacherEmail === null || req.body.teacherEmail === '') {
             subject.set('teacherEmail', undefined);
+        } else if (Array.isArray(req.body.teacherEmail)) {
+            const cleaned = [];
+            for (const raw of req.body.teacherEmail) {
+                if (raw == null || String(raw).trim() === '') {
+                    continue;
+                }
+                const t = String(raw).trim().toLowerCase();
+                if (!/^\S+@\S+\.\S+$/.test(t)) {
+                    res.status(400);
+                    throw new Error('Invalid teacher email');
+                }
+                cleaned.push(t);
+            }
+            subject.teacherEmail = [...new Set(cleaned)];
         } else {
             const trimmed = String(req.body.teacherEmail).trim().toLowerCase();
             if (!/^\S+@\S+\.\S+$/.test(trimmed)) {
                 res.status(400);
                 throw new Error('Invalid teacher email');
             }
-            subject.teacherEmail = trimmed;
+            subject.teacherEmail = [trimmed];
         }
     }
 
@@ -448,6 +548,54 @@ const updateSubjectByTeacher = asyncHandler(async (req, res) => {
     res.status(200).json(subjectToJson(updated));
 });
 
+// PUT /api/subjects/:id/teacher/student-email — assigned teacher only;
+// body: { email } — adds to subject studentsEmail list (deduped)
+const addSubjectStudentEmailForTeacher = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { email } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400);
+        throw new Error('Invalid subject id');
+    }
+
+    if (email === undefined || String(email).trim() === '') {
+        res.status(400);
+        throw new Error('Student email is required');
+    }
+
+    const subject = await Subject.findById(id);
+
+    if (!subject) {
+        res.status(404);
+        throw new Error('Subject not found');
+    }
+
+    const teacherId = req.teacher._id;
+    const isAssigned = (subject.teachers || []).some(
+        (t) => String(t) === String(teacherId),
+    );
+
+    if (!isAssigned) {
+        res.status(403);
+        throw new Error('Not authorized to update this subject');
+    }
+
+    const trimmed = String(email).trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(trimmed)) {
+        res.status(400);
+        throw new Error('Invalid student email address');
+    }
+
+    await Subject.updateOne(
+        { _id: id },
+        { $addToSet: { studentsEmail: trimmed } },
+    );
+
+    const updated = await Subject.findById(id);
+    res.status(200).json(subjectToJson(updated));
+});
+
 // PUT /api/subjects/:id/teacher-email — use with protectSchoolAdmin; body: { email }
 const setSubjectTeacherEmail = asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -503,8 +651,12 @@ const setSubjectTeacherEmail = asyncHandler(async (req, res) => {
         throw new Error('Invalid email address');
     }
 
-    subject.teacherEmail = trimmed;
-    const updated = await subject.save();
+    await Subject.updateOne(
+        { _id: id },
+        { $addToSet: { teacherEmail: trimmed } },
+    );
+
+    const updated = await Subject.findById(id);
     res.status(200).json(subjectToJson(updated));
 });
 
@@ -513,7 +665,9 @@ export {
     getSubjectsBySchool,
     getSubjectsByTeacherId,
     getSubjectBookForTeacher,
+    getSubjectStudentsForTeacher,
     updateSubjectById,
     updateSubjectByTeacher,
+    addSubjectStudentEmailForTeacher,
     setSubjectTeacherEmail,
 };

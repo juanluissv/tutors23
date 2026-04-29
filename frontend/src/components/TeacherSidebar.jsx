@@ -248,7 +248,7 @@ function TeacherSidebar ({ isOpen, toggleSidebar }) {
 						</span>
 						<span className="sidebar-nav-link__label">My  Students</span>
 					</NavLink>
-					<NavLink to="/9/valores/unidad1/semana1" className={navClass}>
+					<NavLink to="/teachers/profile" className={navClass}>
 						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
 							<IconSubjects />
 						</span>

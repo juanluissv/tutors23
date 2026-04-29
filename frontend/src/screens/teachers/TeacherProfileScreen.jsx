@@ -1,53 +1,115 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
+import {
+	useGetTeacherProfileQuery,
+	useUpdateTeacherProfileMutation,
+} from '../../slices/teachers/teacherApiSlice'
+import { setTeacherCredentials } from '../../slices/teachers/authTeacherSlice'
 import '../../App.css'
 
-const demoProfile = {
-	firstName: 'Ana',
-	lastName: 'Smith',
-	email: 'ana.smith@school.edu',
-	phone: '+1 (555) 234-5678',
-	subject: 'LinkedIn Marketing',
-	bio: 'Passionate educator with 8 years of experience in digital marketing and social media strategy.',
-}
-
 function TeacherProfileScreen () {
+	const dispatch = useDispatch()
+	const { teacherInfo } = useSelector((state) => state.authTeacher)
+
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
 	)
-	const [firstName, setFirstName] = useState(demoProfile.firstName)
-	const [lastName, setLastName] = useState(demoProfile.lastName)
-	const [email, setEmail] = useState(demoProfile.email)
-	const [phone, setPhone] = useState(demoProfile.phone)
-	const [subject, setSubject] = useState(demoProfile.subject)
-	const [bio, setBio] = useState(demoProfile.bio)
-	const [isSaving, setIsSaving] = useState(false)
+	const [firstname, setFirstname] = useState('')
+	const [lastname, setLastname] = useState('')
+	const [email, setEmail] = useState('')
+	const [image, setImage] = useState('')
+	const [newPassword, setNewPassword] = useState('')
+	const [confirmPassword, setConfirmPassword] = useState('')
+
+	const {
+		data: profile,
+		isLoading,
+		isError,
+		error,
+	} = useGetTeacherProfileQuery(undefined, {
+		skip: !teacherInfo,
+	})
+
+	const [updateTeacherProfile, { isLoading: isSaving }] =
+		useUpdateTeacherProfileMutation()
+
+	useEffect(() => {
+		if (!profile) {
+			return
+		}
+		setFirstname(profile.firstname ?? '')
+		setLastname(profile.lastname ?? '')
+		setEmail(profile.email ?? '')
+		setImage(
+			profile.image && profile.image !== 'none' ? profile.image : '',
+		)
+	}, [profile])
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
 	}
 
-	const initials = `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase()
+	const fn = firstname?.trim() || ''
+	const ln = lastname?.trim() || ''
+	const initials = `${fn[0] ?? ''}${ln[0] ?? ''}`.toUpperCase()
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-		if (firstName.trim() === '' || lastName.trim() === '') {
+		if (fn === '' || ln === '') {
 			toast.error('First and last name are required')
 			return
 		}
-		setIsSaving(true)
+		if (newPassword !== '' || confirmPassword !== '') {
+			if (newPassword.length < 6) {
+				toast.error('New password must be at least 6 characters')
+				return
+			}
+			if (newPassword !== confirmPassword) {
+				toast.error('Passwords do not match')
+				return
+			}
+		}
+
+		const body = {
+			firstname: fn,
+			lastname: ln,
+			email: email.trim(),
+		}
+		const imageTrim = image.trim()
+		body.image = imageTrim === '' ? 'none' : imageTrim
+		if (newPassword.trim() !== '') {
+			body.password = newPassword
+		}
+
 		try {
-			await new Promise((r) => setTimeout(r, 500))
+			const updated = await updateTeacherProfile(body).unwrap()
+			dispatch(
+				setTeacherCredentials({
+					...teacherInfo,
+					_id: updated._id,
+					firstname: updated.firstname,
+					lastname: updated.lastname,
+					email: updated.email,
+					image: updated.image,
+				}),
+			)
+			setNewPassword('')
+			setConfirmPassword('')
 			toast.success('Profile updated successfully')
-		} finally {
-			setIsSaving(false)
+		} catch (err) {
+			toast.error(err?.data?.message || err?.error || 'Update failed')
 		}
 	}
 
+	const subjects = profile?.subjects ?? []
+	const isBusy = isSaving
+	const showForm = !isLoading && !isError && profile
+
 	return (
-		<div className='chat-app chat-app--login chat-app--teacher-login ask-screen'>
+		<div className='chat-app chat-app--teacher-login ask-screen'>
 			<div className='main-container'>
 				<TeacherSidebar
 					isOpen={isSidebarOpen}
@@ -59,8 +121,8 @@ function TeacherProfileScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login'>
-						<div className='center-content2 login-screen login-screen--wide'>
-							<div className='login-card'>
+						<div className='center-content2 login-screen login-screen--wide'><br /><br /><br />
+							<div className='login-card'><br /><br /><br />
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<div className='tp-avatar-wrapper'>
@@ -72,11 +134,31 @@ function TeacherProfileScreen () {
 										My Profile
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Update your personal information and
-										preferences.
+										View and update your account details.
 									</p>
 								</div>
 
+								{!teacherInfo && (
+									<p className='login-card__subtitle'>
+										Sign in to manage your profile.
+									</p>
+								)}
+
+								{teacherInfo && isLoading && (
+									<p className='login-card__subtitle'>
+										Loading profile…
+									</p>
+								)}
+
+								{teacherInfo && isError && (
+									<p className='login-card__subtitle' role='alert'>
+										{error?.data?.message
+											|| error?.error
+											|| 'Could not load profile.'}
+									</p>
+								)}
+
+								{showForm && (
 								<form
 									className='login-form'
 									id='teacher-profile-form'
@@ -94,14 +176,14 @@ function TeacherProfileScreen () {
 											<input
 												type='text'
 												id='profile-first-name'
-												name='firstName'
+												name='firstname'
 												className='login-input'
 												placeholder='First name'
 												autoComplete='given-name'
-												value={firstName}
-												disabled={isSaving}
+												value={firstname}
+												disabled={isBusy}
 												onChange={(e) =>
-													setFirstName(e.target.value)}
+													setFirstname(e.target.value)}
 											/>
 										</div>
 										<div className='login-field'>
@@ -114,14 +196,14 @@ function TeacherProfileScreen () {
 											<input
 												type='text'
 												id='profile-last-name'
-												name='lastName'
+												name='lastname'
 												className='login-input'
 												placeholder='Last name'
 												autoComplete='family-name'
-												value={lastName}
-												disabled={isSaving}
+												value={lastname}
+												disabled={isBusy}
 												onChange={(e) =>
-													setLastName(e.target.value)}
+													setLastname(e.target.value)}
 											/>
 										</div>
 									</div>
@@ -141,7 +223,7 @@ function TeacherProfileScreen () {
 											placeholder='you@school.edu'
 											autoComplete='email'
 											value={email}
-											disabled={isSaving}
+											disabled={isBusy}
 											onChange={(e) =>
 												setEmail(e.target.value)}
 										/>
@@ -150,75 +232,100 @@ function TeacherProfileScreen () {
 									<div className='login-field'>
 										<label
 											className='login-label'
-											htmlFor='profile-phone'
+											htmlFor='profile-image'
 										>
-											Phone number
+											Profile image URL
 										</label>
 										<input
-											type='tel'
-											id='profile-phone'
-											name='phone'
+											type='url'
+											id='profile-image'
+											name='image'
 											className='login-input'
-											placeholder='+1 (555) 000-0000'
-											autoComplete='tel'
-											value={phone}
-											disabled={isSaving}
-											onChange={(e) =>
-												setPhone(e.target.value)}
-										/>
-									</div>
-
-									<div className='login-field'>
-										<label
-											className='login-label'
-											htmlFor='profile-subject'
-										>
-											Primary subject
-										</label>
-										<input
-											type='text'
-											id='profile-subject'
-											name='subject'
-											className='login-input'
-											placeholder='e.g. Algebra I'
+											placeholder='https://…'
 											autoComplete='off'
-											value={subject}
-											disabled={isSaving}
+											value={image}
+											disabled={isBusy}
 											onChange={(e) =>
-												setSubject(e.target.value)}
+												setImage(e.target.value)}
 										/>
 									</div>
 
-									<div className='login-field'>
-										<label
-											className='login-label'
-											htmlFor='profile-bio'
-										>
-											Bio
-										</label>
-										<textarea
-											id='profile-bio'
-											name='bio'
-											className='login-input login-textarea'
-											placeholder='Tell students a bit about yourself...'
-											rows={4}
-											value={bio}
-											disabled={isSaving}
-											onChange={(e) =>
-												setBio(e.target.value)}
-										/>
+									<div className='tp-row'>
+										<div className='login-field'>
+											<label
+												className='login-label'
+												htmlFor='profile-new-password'
+											>
+												New password
+											</label>
+											<input
+												type='password'
+												id='profile-new-password'
+												name='newPassword'
+												className='login-input'
+												placeholder='Leave blank to keep current'
+												autoComplete='new-password'
+												value={newPassword}
+												disabled={isBusy}
+												onChange={(e) =>
+													setNewPassword(e.target.value)}
+											/>
+										</div>
+										<div className='login-field'>
+											<label
+												className='login-label'
+												htmlFor='profile-confirm-password'
+											>
+												Confirm new password
+											</label>
+											<input
+												type='password'
+												id='profile-confirm-password'
+												name='confirmPassword'
+												className='login-input'
+												placeholder='Confirm'
+												autoComplete='new-password'
+												value={confirmPassword}
+												disabled={isBusy}
+												onChange={(e) =>
+													setConfirmPassword(
+														e.target.value,
+													)}
+											/>
+										</div>
 									</div>
+
+									{subjects.length > 0 && (
+										<div className='login-field'>
+											<span className='login-label'>
+												Your subjects
+											</span>
+											<ul
+												className='login-card__subtitle'
+												style={{
+													margin: '0.5rem 0 0',
+													paddingLeft: '1.25rem',
+												}}
+											>
+												{subjects.map((sub) => (
+													<li key={sub._id}>
+														{sub.title
+															|| 'Untitled subject'}
+													</li>
+												))}
+											</ul>
+										</div>
+									)}
 
 									<button
 										type='submit'
 										className='login-submit'
-										disabled={isSaving}
+										disabled={isBusy}
 									>
-										{isSaving
-											? 'Saving…'
-											: 'Save changes'}
+										{isBusy ? 'Saving…' : 'Save changes'}
 									</button>
 								</form>
+								)}
 							</div>
 						</div>
 					</div>

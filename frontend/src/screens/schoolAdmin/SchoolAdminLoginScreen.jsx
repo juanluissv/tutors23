@@ -16,8 +16,8 @@ function SchoolAdminLoginScreen () {
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
 
-	const [email, setEmail] = useState('')
-	const [password, setPassword] = useState('')
+	const [email, setEmail] = useState('jane@gmail.com')
+	const [password, setPassword] = useState('jane')
 
 	const [loginSchoolAdmin, { isLoading }] = useLoginSchoolAdminMutation()
 

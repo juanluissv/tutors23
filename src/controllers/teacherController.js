@@ -15,31 +15,127 @@ function buildEmailExactRegex (rawEmail) {
     );
 }
 
+/**
+ * If this email appears in subject.teacherEmail (invite list), attach this
+ * teacher to those subjects and vice versa. Idempotent via $addToSet.
+ */
+async function ensureTeacherSubjectsLinkedFromInviteEmail (teacherDoc, rawEmail) {
+    const emailRegex = buildEmailExactRegex(rawEmail);
+    if (!emailRegex) {
+        return;
+    }
+
+    const linkedSubjects = await Subject.find({ teacherEmail: emailRegex })
+        .select('_id')
+        .lean();
+
+    if (!linkedSubjects.length) {
+        return;
+    }
+
+    const subjectIds = linkedSubjects.map((s) => s._id);
+
+    await Subject.updateMany(
+        { _id: { $in: subjectIds } },
+        { $addToSet: { teachers: teacherDoc._id } },
+    );
+
+    await Teacher.updateOne(
+        { _id: teacherDoc._id },
+        { $addToSet: { subjects: { $each: subjectIds } } },
+    );
+}
+
+function teacherProfileResponse (teacherDoc) {
+    return {
+        _id: teacherDoc._id,
+        firstname: teacherDoc.firstname,
+        lastname: teacherDoc.lastname,
+        email: teacherDoc.email,
+        image: teacherDoc.image,
+        subjects: teacherDoc.subjects ?? [],
+    };
+}
+
+// GET /api/teachers/profile
+const getTeacherProfile = asyncHandler(async (req, res) => {
+    const teacher = await Teacher.findById(req.teacher._id)
+        .select('-password')
+        .populate('subjects', 'title description grade school');
+
+    if (!teacher) {
+        res.status(404);
+        throw new Error('Teacher not found');
+    }
+
+    res.json(teacherProfileResponse(teacher));
+});
+
+// PUT /api/teachers/profile
+const updateTeacherProfile = asyncHandler(async (req, res) => {
+    const teacher = await Teacher.findById(req.teacher._id);
+
+    if (!teacher) {
+        res.status(404);
+        throw new Error('Teacher not found');
+    }
+
+    if (req.body.firstname !== undefined && req.body.firstname !== '') {
+        teacher.firstname = String(req.body.firstname).toLowerCase();
+    }
+    if (req.body.lastname !== undefined && req.body.lastname !== '') {
+        teacher.lastname = String(req.body.lastname).toLowerCase();
+    }
+    if (req.body.email !== undefined && req.body.email !== '') {
+        const nextEmail = String(req.body.email).trim();
+        const taken = await Teacher.findOne({
+            email: nextEmail,
+            _id: { $ne: teacher._id },
+        });
+        if (taken) {
+            res.status(400);
+            throw new Error('Email already in use');
+        }
+        teacher.email = nextEmail;
+    }
+    if (req.body.image !== undefined) {
+        teacher.image = String(req.body.image).trim();
+    }
+
+    if (req.body.password && String(req.body.password).trim() !== '') {
+        teacher.password = req.body.password;
+    }
+
+    const updated = await teacher.save();
+    const withSubjects = await Teacher.findById(updated._id)
+        .select('-password')
+        .populate('subjects', 'title description grade school');
+
+    res.json(teacherProfileResponse(withSubjects));
+});
 
 // POST /api/teachers/login
 const authTeacher = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-    
-    const teacher = await Teacher.findOne({ email })
+    const { email: rawEmail, password } = req.body;
+    const emailRegex = buildEmailExactRegex(rawEmail);
+    const teacher = emailRegex
+        ? await Teacher.findOne({ email: emailRegex })
+        : null;
 
-    if(teacher && (await teacher.matchPassword(password))) {
-        generateToken(res, teacher._id);
+    if (teacher && (await teacher.matchPassword(password))) {
+        await ensureTeacherSubjectsLinkedFromInviteEmail(teacher, rawEmail);
+
+        const fresh = await Teacher.findById(teacher._id).select('-password');
+
+        generateToken(res, fresh._id);
 
         res.json({
-            _id: teacher._id,
-            firstname: teacher.firstname,
-            lastname: teacher.lastname,
-            email: teacher.email,
-            about: teacher.about,
-            jobtitle: teacher.jobtitle,
-            image: teacher.image,
-            user: teacher.user,
-            isPaymentSetup: teacher.isPaymentSetup,
-            birthdate: teacher.birthdate,
-            country: teacher.country,
-            city: teacher.city,
-            zipcode: teacher.zipcode,
-
+            _id: fresh._id,
+            firstname: fresh.firstname,
+            lastname: fresh.lastname,
+            email: fresh.email,
+            image: fresh.image,
+            subjects: fresh.subjects ?? [],
         })
     } else {
         res.status(401)
@@ -52,72 +148,40 @@ const authTeacher = asyncHandler(async (req, res) => {
 // POST /api/teachers/register
 const registerTeacher = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    
-    const teacherExist = await Teacher.findOne({ email })
 
-    if(teacherExist) {
-        res.status(400)
-        throw new Error('teacher already exists')
+    const dupRegex = buildEmailExactRegex(email);
+    if (dupRegex) {
+        const teacherExist = await Teacher.findOne({ email: dupRegex });
+        if (teacherExist) {
+            res.status(400)
+            throw new Error('teacher already exists')
+        }
     }
-
-    const users = await Teacher.countDocuments({})
-
-    const emailRegex = buildEmailExactRegex(email);
-    const linkedSubjects = emailRegex
-        ? await Subject.find({ teacherEmail: emailRegex }).select('_id').lean()
-        : [];
-    const subjectIdsFromInvites = linkedSubjects.map((s) => s._id);
 
     const teacher = await Teacher.create({
         firstname: req.body.firstname.toLowerCase(),
         lastname: req.body.lastname.toLowerCase(),
         role: 'teacher',
         email,
-        jobtitle: '',
-        about: '',
-        birthdate: '',
         image: 'none',
-        isPaymentSetup: false,
-        country: '',
-        city: '',
         signInDate : new Date(),
-        user: req.body.firstname.toLowerCase() + req.body.lastname.toLowerCase() + users,
         password,
-        ...(subjectIdsFromInvites.length > 0
-            ? { subjects: subjectIdsFromInvites }
-            : {}),
     })
 
-    if (subjectIdsFromInvites.length > 0) {
-        await Subject.updateMany(
-            { _id: { $in: subjectIdsFromInvites } },
-            { $addToSet: { teachers: teacher._id } },
-        );
-    }
+    await ensureTeacherSubjectsLinkedFromInviteEmail(teacher, email);
 
-    if(teacher) {
+    const saved = await Teacher.findById(teacher._id).select('-password');
 
-        generateToken(res, teacher._id);
+    generateToken(res, saved._id);
 
-        res.status(201).json({
-            _id: teacher._id,
-            firstname: teacher.firstname,
-            lastname: teacher.lastname,
-            email: teacher.email,
-            about: teacher.about,
-            jobtitle: teacher.jobtitle,
-            isPaymentSetup: teacher.isPaymentSetup,
-            image: teacher.image,
-            user: teacher.user,
-            birthdate: teacher.birthdate,
-            country: teacher.country,
-            city: teacher.city,
-            subjects: teacher.subjects ?? [],
-        })
-    } else{
-        res.status(400)
-        throw new Error('Invalid teacher data')
-    }
+    res.status(201).json({
+        _id: saved._id,
+        firstname: saved.firstname,
+        lastname: saved.lastname,
+        email: saved.email,
+        image: saved.image,
+        subjects: saved.subjects ?? [],
+    })
 })
 
 // POST /api/teacher/logout
@@ -129,8 +193,10 @@ const logoutTeacher = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Logged out' });
 });
 
-export { 
-    authTeacher, 
+export {
+    authTeacher,
     registerTeacher,
-    logoutTeacher    
+    logoutTeacher,
+    getTeacherProfile,
+    updateTeacherProfile,
 }

@@ -35,34 +35,16 @@ const studentSchema = mongoose.Schema({
     city: {
         type: String,
         required: false
-    },  
-    zipcode: {
-        type: String,
-        required: false
-    },    
+    },     
     signInDate: {
         type: Date,
         required: false
     },        
-    status: {
-        type: String,
-        required: false
-    },  
-    stripe_customer_id: {
-        type: String,
-        required: false
-    },
-    stripeSession: {},
     school: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: 'School'
-    },
-    plan: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Plan'
-    },
+    },    
     courses: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -73,13 +55,11 @@ const studentSchema = mongoose.Schema({
     subjects: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
+            required: false,
             ref: 'Subject'
         },
     ],
-
-    numberOfQuestion: [
-
+    subscriptions: [
         {
             plan: {
                 type: mongoose.Schema.Types.ObjectId,
@@ -92,7 +72,7 @@ const studentSchema = mongoose.Schema({
                 ref: 'Subject'
             },
             startDate: {
-                type: String,
+                type: Date,
                 required: false
             },
             subProcessing: {
@@ -100,7 +80,7 @@ const studentSchema = mongoose.Schema({
                 required: false
             },
             endDate: {
-                type: String,
+                type: Date,
                 required: false
             },
             name: {
@@ -114,9 +94,6 @@ const studentSchema = mongoose.Schema({
             active: { type: Boolean, required: false },
             renewal: { type: Boolean, required: false },
             pastDue: { type: Boolean, required: false },
-            stripe_subscription_id: { type: String, required: false },
-
-
         },
     ],
 }, {
