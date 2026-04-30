@@ -27,7 +27,7 @@ export const studentApiSlice = apiSlice.injectEndpoints({
             query: () => ({
               url: `${STUDENTS_URL}/profile`,
             }),
-            invalidatesTags: ['Students'], // Invalidate 'Profile' cache upon success
+            providesTags: ['Students'],
           }),
           updateProfile: builder.mutation({
             query: (data) => ({
@@ -37,8 +37,21 @@ export const studentApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Students'],
           }),
+          getMySubjects: builder.query({
+            query: () => ({
+              url: `${STUDENTS_URL}/mysubjects`,
+            }),
+            providesTags: ['Students'],
+          }),
     }),
 })
 
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetProfileQuery, useUpdateProfileMutation } = studentApiSlice;   
+export const {
+    useLoginMutation,
+    useRegisterMutation,
+    useLogoutMutation,
+    useGetProfileQuery,
+    useUpdateProfileMutation,
+    useGetMySubjectsQuery,
+} = studentApiSlice;

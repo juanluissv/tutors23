@@ -670,4 +670,5 @@ export {
     updateSubjectByTeacher,
     addSubjectStudentEmailForTeacher,
     setSubjectTeacherEmail,
+    subjectToJson,
 };

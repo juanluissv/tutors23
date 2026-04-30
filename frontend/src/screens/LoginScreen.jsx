@@ -21,8 +21,8 @@ function LoginScreen () {
 	// const [email, setEmail] = useState("");
 	// const [password, setPassword] = useState("");
 
-	const [email, setEmail] = useState("markbrown22@gmail.com");
-	const [password, setPassword] = useState("markbrown22");
+	const [email, setEmail] = useState("juanluissv@gmail.com");
+	const [password, setPassword] = useState("juan");
 
 	const [login, { isLoading }] = useLoginMutation();
 	const { studentInfo } = useSelector((state) => state.authStudent);

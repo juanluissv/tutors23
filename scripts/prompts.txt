@@ -633,6 +633,16 @@ now create a slice in @frontend/src/slices/admin/schoolAdminApiSlice.js to creat
 
 now create a form in @frontend/src/screens/schoolAdmin/SchoolAdminRegisterSchoolScreen.jsx using the slice @frontend/src/slices/admin/schoolAdminApiSlice.js to create a school, you can use @frontend/src/screens/schoolAdmin/SchoolAdminProfileScreen.jsx as a reference for the UI design 
 
+help me do @frontend/src/screens/students/StudentProfileScreen.jsx 
+is a screen with a form where the student will be able to view and edit their profile information, 
+help me do this screen end to end (controller function, route, slice) 
+@src/controllers/studentController.js @src/routes/studentRoutes.js @src/models/studentModel.js 
+and keep the design consistent with the other student screens 
 
 
-
+help me do @frontend/src/screens/students/StudentMySubjects.jsx 
+is a screen where the student will be able to view their subjects, 
+help me do this screen end to end (controller function, route, slice) 
+@src/controllers/studentController.js @src/routes/studentRoutes.js 
+you can use @frontend/src/screens/teachers/TeacherSubjectsScreen.jsx  as reference for the ui design
+and keep the design consistent with the other student screens 

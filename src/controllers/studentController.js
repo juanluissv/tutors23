@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Student from '../models/studentModel.js';
 import Subject from '../models/subjectModel.js';
 import generateToken from '../utils/generateToken.js';
+import { subjectToJson } from './subjectController.js';
 
 
 
@@ -177,63 +178,151 @@ const logoutStudent = asyncHandler(async (req, res) => {
 });
 
 
+function studentProfileResponse (doc) {
+    const birth =
+        doc.birthDate instanceof Date && !Number.isNaN(doc.birthDate.getTime())
+            ? doc.birthDate.toISOString().slice(0, 10)
+            : null
+
+    return {
+        _id: doc._id,
+        firstname: doc.firstname,
+        lastname: doc.lastname,
+        email: doc.email,
+        subscriptions: doc.subscriptions ?? [],
+        city: doc.city ?? '',
+        country: doc.country ?? '',
+        birthDate: birth,
+        subjects: doc.subjects ?? [],
+    }
+}
+
 // GET /api/students/profile
 const GetStudentProfile = asyncHandler(async (req, res) => {
-
     const student = await Student.findById(req.student._id)
+        .select('-password')
+        .populate('subjects', 'title description grade')
 
-    if(student) {
-        res.json({
-            _id: student._id,
-            firstname: student.firstname,
-            lastname: student.lastname,
-            email: student.email,
-            subscriptions: student.subscriptions,
-            city: student.city,
-            country: student.country,
-        })
-    } else {
+    if (!student) {
         res.status(404)
         throw new Error('Student not found')
     }
-});
+
+    res.json(studentProfileResponse(student))
+})
 
 
-// PUT /api/student/profile
+// PUT /api/students/profile
 const updateStudentProfile = asyncHandler(async (req, res) => {
     const student = await Student.findById(req.student._id)
 
-    if(student) {
-        student.firstname = req.body.firstname || student.firstname
-        student.lastname = req.body.lastname || student.lastname
-        student.email = req.body.email || student.email
-        student.city = req.body.city || student.city
-        student.country = req.body.country || student.country
-        student.subscriptions = req.body.subscriptions || student.subscriptions
-
-        if(req.body.password) {
-            student.password = req.body.password
-        }
-
-        const updatedStudent = await student.save()
-
-        res.json({
-            _id: updatedStudent._id,
-            firstname: updatedStudent.firstname,
-            lastname: updatedStudent.lastname,
-            email: updatedStudent.email,
-            city: updatedStudent.city,
-            country: updatedStudent.country,
-            subscriptions: updatedStudent.subscriptions,          
-
-
-        })
-    } else {
+    if (!student) {
         res.status(404)
         throw new Error('Student not found')
     }
-});
+
+    if (req.body.firstname !== undefined) {
+        const t = String(req.body.firstname).trim().toLowerCase()
+        if (t === '') {
+            res.status(400)
+            throw new Error('First name is required')
+        }
+        student.firstname = t
+    }
+    if (req.body.lastname !== undefined) {
+        const t = String(req.body.lastname).trim().toLowerCase()
+        if (t === '') {
+            res.status(400)
+            throw new Error('Last name is required')
+        }
+        student.lastname = t
+    }
+
+    if (req.body.email !== undefined) {
+        const nextEmail = normalizeStudentEmail(req.body.email)
+        if (!nextEmail) {
+            res.status(400)
+            throw new Error('Email is required')
+        }
+        if (!looksLikeEmail(nextEmail)) {
+            res.status(400)
+            throw new Error('Please enter a valid email address')
+        }
+        const dupRegex = buildEmailExactRegex(nextEmail)
+        if (dupRegex) {
+            const taken = await Student.findOne({
+                email: dupRegex,
+                _id: { $ne: student._id },
+            })
+            if (taken) {
+                res.status(400)
+                throw new Error('A student with this email already exists')
+            }
+        }
+        student.email = nextEmail
+    }
+
+    if (req.body.city !== undefined) {
+        const t = String(req.body.city).trim()
+        student.city = t === '' ? null : t
+    }
+    if (req.body.country !== undefined) {
+        const t = String(req.body.country).trim()
+        student.country = t === '' ? null : t
+    }
+
+    if (req.body.birthDate !== undefined) {
+        const raw = req.body.birthDate
+        if (raw === null || raw === '') {
+            student.set('birthDate', null)
+        } else {
+            const d = new Date(raw)
+            if (Number.isNaN(d.getTime())) {
+                res.status(400)
+                throw new Error('Invalid birth date')
+            }
+            student.birthDate = d
+        }
+    }
+
+    if (req.body.subscriptions !== undefined) {
+        student.subscriptions = req.body.subscriptions
+    }
+
+    const pwd = req.body.password != null ? String(req.body.password) : ''
+    if (pwd.trim() !== '') {
+        if (pwd.length < 6) {
+            res.status(400)
+            throw new Error('Password must be at least 6 characters')
+        }
+        student.password = pwd
+    }
+
+    await student.save()
+
+    const updated = await Student.findById(student._id)
+        .select('-password')
+        .populate('subjects', 'title description grade')
+
+    res.json(studentProfileResponse(updated))
+})
+
+// GET /api/students/mysubjects
+const getMySubjects = asyncHandler(async (req, res) => {
+    const studentId = req.student._id
+    const subjects = await Subject.find({ students: studentId })
+        .sort({ dateCreated: -1, createdAt: -1 })
+        .lean()
+    res.status(200).json(subjects.map(subjectToJson))
+})
 
 
 
-export { authStudent, registerStudent, logoutStudent, GetStudentProfile, updateStudentProfile };
+export {
+    authStudent,
+    registerStudent,
+    logoutStudent,
+    GetStudentProfile,
+    updateStudentProfile,
+    getMySubjects,
+};

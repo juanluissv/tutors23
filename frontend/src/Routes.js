@@ -23,6 +23,8 @@ import ValoresIndex from './screens/9/valores/ValoresIndex';
 import StudentCamera from './screens/StudentCamera';
 import StudentScreen from './screens/StudentScreen';
 import ChineseScreen from './screens/ChineseScreen';
+import StudentProfileScreen from './screens/students/StudentProfileScreen';
+import StudentMySubjects from './screens/students/StudentMySubjects';
 
 import Semana1Unidad2Screen from './screens/9/valores/unidad2/Semana1Unidad2Screen';
 import Semana2Unidad2Screen from './screens/9/valores/unidad2/Semana2Unidad2Screen';
@@ -138,7 +140,8 @@ const router = createBrowserRouter(
             <Route  path="/studentscreen" element={<StudentScreen />} />
             <Route  path="/chinese" element={<ChineseScreen />} />
 
-
+            <Route  path="/students/profile" element={<StudentProfileScreen />} />
+            <Route  path="/students/mysubjects" element={<StudentMySubjects />} />
 
 
 

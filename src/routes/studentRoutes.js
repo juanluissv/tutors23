@@ -6,6 +6,7 @@ import {
         logoutStudent,
         GetStudentProfile,
         updateStudentProfile,
+        getMySubjects,
 } from '../controllers/studentController.js';
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.route('/logout').post(logoutStudent);
 
 router.route('/profile').get(protectStudent, GetStudentProfile);
 router.route('/profile').put(protectStudent, updateStudentProfile);
+router.route('/mysubjects').get(protectStudent, getMySubjects);
 
 export default router;
