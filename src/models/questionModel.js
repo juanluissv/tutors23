@@ -1,14 +1,10 @@
 import mongoose from 'mongoose';
 
 const questionSchema = mongoose.Schema({    
-    tittle: {
+    title: {
         type: String,
         required: true
-    },
-    color: {
-        type: String,
-        required: true
-    },
+    },   
     description: {
         type: String,
         required: false
@@ -16,25 +12,9 @@ const questionSchema = mongoose.Schema({
     aiAnswer: {
         type: String,
         required: false
-    }, 
-    subjectname: {
-        type: String,
-        required: false
     },   
-    studentname: {
-        type: String,
-        required: false
-    },  
     mediaId: {
         type: String,
-        required: false,
-    },
-    playlist: {
-        type: String,
-        required: false,
-    },
-    isWatched: {
-        type: Boolean,
         required: false,
     },
     isAnswer: {
@@ -59,7 +39,12 @@ const questionSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Subject'
-    },             
+    }, 
+    answer:{
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'Answer'
+        },
 }, {
     timestamps: true
 })

@@ -16,7 +16,10 @@ function StudentSubjectCardActions ({ subjectId }) {
 			>
 				Open subject
 			</Link>
-			<Link to='/ask' className='teacher-subject-card__btn'>
+			<Link
+				to={`/students/asknewquestion?subject=${subjectId}`}
+				className='teacher-subject-card__btn'
+			>
 				Ask a question
 			</Link>
 		</div>

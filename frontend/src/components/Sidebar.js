@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { VALORES_SECTIONS } from '../screens/9/valores/valoresNavData'
+import { useGetStudentNewAnswersQuery } from '../slices/student/studentAnswersSlice'
 
 const imgIcon = `${process.env.PUBLIC_URL}/burg.svg`
 
@@ -168,9 +170,30 @@ const IconSubjects = () => (
   </svg>
 );
 
-function Sidebar({ isOpen, toggleSidebar }) {
+function answerHasVideo (answer) {
+  return answer?.mediaId != null && String(answer.mediaId).trim() !== ''
+}
+
+function Sidebar ({ isOpen, toggleSidebar }) {
   const location = useLocation()
+  const { studentInfo } = useSelector((state) => state.authStudent)
+  const studentId = studentInfo?._id ? String(studentInfo._id) : null
+
+  const { data: studentNewAnswers = [] } = useGetStudentNewAnswersQuery(
+    studentId,
+    { skip: !studentId },
+  )
+
+  const newAnswersCount = useMemo(
+    () =>
+      Array.isArray(studentNewAnswers)
+        ? studentNewAnswers.filter(answerHasVideo).length
+        : 0,
+    [studentNewAnswers],
+  )
+
   const [expandedValoresUnit, setExpandedValoresUnit] = useState(1)
+  const [isValoresAccordionOpen, setIsValoresAccordionOpen] = useState(true)
 
   useEffect(() => {
     const active = getActiveValoresUnit(location.pathname)
@@ -185,6 +208,10 @@ function Sidebar({ isOpen, toggleSidebar }) {
     setExpandedValoresUnit((prev) => (prev === unit ? null : unit))
   }
 
+  const handleValoresAccordionToggle = () => {
+    setIsValoresAccordionOpen((prev) => !prev)
+  }
+
   const navClass = ({ isActive }) =>
     `sidebar-nav-link${isActive ? ' sidebar-nav-link--active' : ''}`
 
@@ -192,9 +219,32 @@ function Sidebar({ isOpen, toggleSidebar }) {
     location.pathname === '/studentscreen' ||
     location.pathname === '/studentcamera'
 
+  /** Ask flow: pick subject, compose question, chat, or record question video */
+  const isAskTeacherFlow =
+    /^\/students\/askteacher\/?$/.test(location.pathname)
+    || /^\/students\/asknewquestion\/?$/.test(location.pathname)
+    || /^\/students\/ask\/[^/]+\/?$/.test(location.pathname)
+    || /^\/students\/recordscreen\/[^/]+\/?$/.test(location.pathname)
+    || /^\/students\/recordcamera\/[^/]+\/?$/.test(location.pathname)
+    || location.pathname.startsWith('/students/previousquestions')
+    || location.pathname.startsWith('/students/watchquestion')
+
+  const isNewAnswersSection =
+    location.pathname === '/students/newanswers' ||
+    location.pathname.startsWith('/students/watchanswer')
+
   const askTeacherNavClass = ({ isActive }) =>
     `sidebar-nav-link${
-      isActive || isAskTeacherRecording ? ' sidebar-nav-link--active' : ''
+      isActive
+      || isAskTeacherRecording
+      || isAskTeacherFlow
+        ? ' sidebar-nav-link--active'
+        : ''
+    }`
+
+  const newAnswersNavClass = ({ isActive }) =>
+    `sidebar-nav-link${
+      isActive || isNewAnswersSection ? ' sidebar-nav-link--active' : ''
     }`
 
   return (
@@ -222,19 +272,31 @@ function Sidebar({ isOpen, toggleSidebar }) {
             </span>
             <span className="sidebar-nav-link__label">AI Tutor</span>
           </NavLink>
-          <NavLink to="/ask" className={askTeacherNavClass}>
+          <NavLink to="/students/askteacher" className={askTeacherNavClass}>
             <span className="sidebar-nav-link__icon-well" aria-hidden="true">
               <IconAskTeacher />
             </span>
             <span className="sidebar-nav-link__label">
-              Ask Your Class Teacher
+              Ask Your Teacher
             </span>
           </NavLink>
-          <NavLink to="/answers" className={navClass}>
+          <NavLink to="/students/newanswers" className={newAnswersNavClass}>
             <span className="sidebar-nav-link__icon-well" aria-hidden="true">
               <IconTeacherAnswers />
             </span>
-            <span className="sidebar-nav-link__label">Teacher Answers</span>
+            <span className="sidebar-nav-link__label-wrap">
+              <span className="sidebar-nav-link__label">
+                New Answers <br /> from Teachers
+              </span>
+              {newAnswersCount > 0 ? (
+                <span
+                  className="sidebar-new-answers-badge"
+                  aria-hidden="true"
+                >
+                  {newAnswersCount > 99 ? '99+' : String(newAnswersCount)}
+                </span>
+              ) : null}
+            </span>
           </NavLink>
           <NavLink
             to="/students/mysubjects"
@@ -247,33 +309,76 @@ function Sidebar({ isOpen, toggleSidebar }) {
           </NavLink>
         </nav>
 
-        <NavLink
-          to="/9/valores/unidad1/semana1"
-          className={({ isActive }) =>
-            `sidebar-nav-link sidebar-nav-link--valores-hub${
-              isActive
-                ? ' sidebar-nav-link--active sidebar-nav-link--subject'
-                : ''
-            }`
-          }
-        >
-          <span className="sidebar-nav-link__icon-well" aria-hidden="true">
-            <IconNewTutor2 />
-          </span>
-          <span className="sidebar-nav-link__body">
-            <span className="sidebar-nav-link__title">
-              Ciudadania y Valores
-            </span>
-            <span className="sidebar-nav-link__meta">
-              9 grado El Salvador
-            </span>
-          </span>
-        </NavLink>
+        <div className="sidebar-valores-hub-block">
+          <div className="sidebar-valores-hub-row">
+            <NavLink
+              to="/9/valores/unidad1/semana1"
+              className={({ isActive }) =>
+                `sidebar-nav-link sidebar-nav-link--valores-hub${isActive
+                  ? ' sidebar-nav-link--active sidebar-nav-link--subject'
+                  : ''
+                }`
+              }
+            >
+              <span className="sidebar-nav-link__icon-well" aria-hidden="true">
+                <IconNewTutor2 />
+              </span>
+              <span className="sidebar-nav-link__body">
+                <span className="sidebar-nav-link__title">
+                  Ciudadania y Valores
+                </span>
+                <span className="sidebar-nav-link__meta">
+                  9 grado 
+                </span>
+              </span>
+            </NavLink>
+            <button
+              type="button"
+              className={`sidebar-valores-hub-expand${
+                isValoresAccordionOpen
+                  ? ' sidebar-valores-hub-expand--open'
+                  : ''
+              }`}
+              aria-expanded={isValoresAccordionOpen}
+              aria-controls="sidebar-valores-accordion"
+              id="sidebar-valores-hub-expand"
+              onClick={handleValoresAccordionToggle}
+              aria-label={
+                isValoresAccordionOpen
+                  ? 'Hide Ciudadanía y Valores units and weeks'
+                  : 'Show Ciudadanía y Valores units and weeks'
+              }
+              title={
+                isValoresAccordionOpen
+                  ? 'Hide units and weeks'
+                  : 'Show units and weeks'
+              }
+            >
+              <span className="sidebar-valores-hub-expand__icon" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </span>
+            </button>
+          </div>
 
-        <div
-          className="sidebar-valores-accordion"
-          aria-label="Ciudadanía y Valores — unidades y semanas"
-        >
+          <div
+            className="sidebar-valores-accordion"
+            id="sidebar-valores-accordion"
+            role="region"
+            aria-labelledby="sidebar-valores-hub-expand"
+            aria-label="Ciudadanía y Valores — unidades y semanas"
+            hidden={!isValoresAccordionOpen}
+          >
             {VALORES_SECTIONS.map((section) => (
               <div key={section.unit} className="sidebar-valores-unit">
                 <button
@@ -330,6 +435,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
                 )}
               </div>
             ))}
+          </div>
         </div>
 
       </div>

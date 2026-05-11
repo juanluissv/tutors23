@@ -1,8 +1,15 @@
-import React, { useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useEffect, useMemo, useState } from 'react'
+import {
+	Link,
+	useNavigate,
+	useSearchParams,
+} from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
+import { useGetQuestionByIdForTeacherQuery } from '../../slices/teachers/teacherQuestionsSlice'
+import { useCreateTeacherAnswerMutation } from '../../slices/teachers/teacherAnswersSlice'
 import '../../App.css'
 
 const TagIcon = () => (
@@ -74,103 +81,109 @@ const DescriptionIcon = () => (
 	</svg>
 )
 
-const VideoUploadIcon = () => (
-	<svg
-		width='36'
-		height='36'
-		viewBox='0 0 24 24'
-		fill='none'
-		xmlns='http://www.w3.org/2000/svg'
-		aria-hidden
-	>
-		<rect
-			x='2'
-			y='5'
-			width='15'
-			height='14'
-			rx='3'
-			fill='url(#ans-vid-fill)'
-		/>
-		<path
-			d='M17 9l4-2v10l-4-2V9z'
-			fill='url(#ans-vid-lens)'
-		/>
-		<path
-			d='M9.5 9v6M6.5 12h6'
-			stroke='white'
-			strokeWidth='1.6'
-			strokeLinecap='round'
-		/>
-		<defs>
-			<linearGradient
-				id='ans-vid-fill'
-				x1='2'
-				y1='5'
-				x2='17'
-				y2='19'
-				gradientUnits='userSpaceOnUse'
-			>
-				<stop stopColor='#7dd3fc' />
-				<stop offset='1' stopColor='#0ea5e9' />
-			</linearGradient>
-			<linearGradient
-				id='ans-vid-lens'
-				x1='17'
-				y1='7'
-				x2='21'
-				y2='17'
-				gradientUnits='userSpaceOnUse'
-			>
-				<stop stopColor='#38bdf8' />
-				<stop offset='1' stopColor='#0284c7' />
-			</linearGradient>
-		</defs>
-	</svg>
-)
-
-const demoQuestion = {
-	title: 'how to create Custom audience ?',
+function isLikelyMongoId (value) {
+	return typeof value === 'string' && /^[a-f\d]{24}$/i.test(value)
 }
 
 function TeacherAnswerDetailsScreen () {
-	const videoInputRef = useRef(null)
 	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
+	const questionIdRaw = searchParams.get('questionId')
+	const questionId = questionIdRaw ? String(questionIdRaw).trim() : ''
+
+	const { teacherInfo } = useSelector((state) => state.authTeacher)
+	const teacherId = teacherInfo?._id ? String(teacherInfo._id) : null
+
+	const canFetch = isLikelyMongoId(questionId)
+
+	const {
+		data: question,
+		isLoading: isLoadingQuestion,
+		isError: isQuestionError,
+		error: questionError,
+	} = useGetQuestionByIdForTeacherQuery(questionId, {
+		skip: !canFetch,
+	})
+
+	const [description, setDescription] = useState('')
+	const [createAnswer, { isLoading: isSubmitting }] =
+		useCreateTeacherAnswerMutation()
+
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
 	)
-	const [title] = useState(demoQuestion.title)
-	const [description, setDescription] = useState('')
-	const [videoFile, setVideoFile] = useState(null)
-	const [isUploading, setIsUploading] = useState(false)
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
 	}
 
-	const handleVideoChange = (e) => {
-		const file = e.target.files?.[0] ?? null
-		setVideoFile(file)
-	}
+	useEffect(() => {
+		if (!teacherInfo) {
+			navigate('/teachers/login', { replace: true })
+		}
+	}, [teacherInfo, navigate])
 
-	const handleClearVideo = () => {
-		setVideoFile(null)
-		if (videoInputRef.current) {
-			videoInputRef.current.value = ''
+	useEffect(() => {
+		if (!question) {
+			return
+		}
+		const ans = question.answer
+		const text =
+			ans && typeof ans === 'object' && typeof ans.description === 'string'
+				? ans.description
+				: ''
+		setDescription(text)
+	}, [question])
+
+	const titleDisplay = useMemo(() => {
+		if (!question?.title) {
+			return ''
+		}
+		return String(question.title)
+	}, [question])
+
+	const watchBackHref = questionId
+		? `/teachers/watchnew?questionId=${encodeURIComponent(questionId)}`
+		: '/teachers/watchnew'
+
+	const questionErrorMessage =
+		questionError?.data?.message
+		|| questionError?.error
+		|| 'Could not load this question.'
+
+	const handleSubmit = async (e) => {
+		e.preventDefault()
+		if (!canFetch) {
+			toast.error('Missing or invalid question.')
+			return
+		}
+		const body = String(description ?? '').trim()
+		if (!body) {
+			toast.error('Please enter a description for your answer.')
+			return
+		}
+		try {
+			const saved = await createAnswer({
+				questionId,
+				description: body,
+				teacherId,
+			}).unwrap()
+			const answerId = saved?._id
+			toast.success('Answer saved.')
+			if (answerId != null && String(answerId).trim() !== '') {
+				navigate(`/teachers/answer/${String(answerId)}`)
+			} else {
+				navigate('/teachers/newquestions')
+			}
+		} catch (err) {
+			const msg =
+				err?.data?.message || err?.error || 'Could not save the answer.'
+			toast.error(msg)
 		}
 	}
 
-	const handleSubmit = async (e) => {
-		e.preventDefault()		
-		setIsUploading(true)
-		navigate('/teachers/answer')
-		// try {
-		// 	await new Promise((r) => setTimeout(r, 600))
-		// 	toast.success(
-		// 		'Answer saved — video will upload when the API is wired.',
-		// 	)
-		// } finally {
-		// 	setIsUploading(false)
-		// }
+	if (!teacherInfo) {
+		return null
 	}
 
 	return (
@@ -192,7 +205,7 @@ function TeacherAnswerDetailsScreen () {
 								<div className='login-card__header'>
 									<div className='login-card__back'>
 										<Link
-											to='/teachers/watchnew'
+											to={watchBackHref}
 											className='login-card__link'
 										>
 											&#8592; Back to question
@@ -203,54 +216,71 @@ function TeacherAnswerDetailsScreen () {
 									</h1>
 								</div>
 
-								<form
-									className='login-form'
-									id='teacher-answer-form'
-									name='teacher-answer-form'
-									onSubmit={handleSubmit}
-								>
-									<div className='answer-details__field'>
-										<div className='answer-details__icon answer-details__icon--purple'>
-											<TagIcon />
-										</div>
-										<input
-											type='text'
-											id='answer-title'
-											name='title'
-											className='answer-details__input'
-											value={title}
-											readOnly
-										/>
-									</div>
+								{!canFetch && (
+									<p className='login-card__subtitle'>
+										Open this page from a question using the link from your
+										list (missing question id).
+									</p>
+								)}
 
-									<div className='answer-details__field'>
-										<div className='answer-details__icon answer-details__icon--orange'>
-											<DescriptionIcon />
-										</div>
-										<textarea
-											id='answer-description'
-											name='description'
-											className='answer-details__input answer-details__textarea'
-											placeholder='Description'
-											rows={4}
-											value={description}
-											disabled={isUploading}
-											onChange={(e) =>
-												setDescription(e.target.value)}
-										/>
-									</div>
-									
+								{canFetch && isLoadingQuestion && (
+									<p className='login-card__subtitle'>Loading question…</p>
+								)}
 
-									<button
-										type='submit'
-										className='answer-details__submit'
-										disabled={isUploading}
+								{canFetch && isQuestionError && (
+									<p className='login-card__subtitle'>
+										{questionErrorMessage}
+									</p>
+								)}
+
+								{canFetch && !isLoadingQuestion && !isQuestionError && (
+									<form
+										className='login-form'
+										id='teacher-answer-form'
+										name='teacher-answer-form'
+										onSubmit={handleSubmit}
 									>
-										{isUploading
-											? 'Uploading…'
-											: 'Upload Video'}
-									</button>
-								</form>
+										<div className='answer-details__field'>
+											<div className='answer-details__icon answer-details__icon--purple'>
+												<TagIcon />
+											</div>
+											<input
+												type='text'
+												id='answer-title'
+												name='title'
+												className='answer-details__input'
+												value={titleDisplay}
+												readOnly
+												aria-readonly='true'
+											/>
+										</div>
+
+										<div className='answer-details__field'>
+											<div className='answer-details__icon answer-details__icon--orange'>
+												<DescriptionIcon />
+											</div>
+											<textarea
+												id='answer-description'
+												name='description'
+												className='answer-details__input answer-details__textarea'
+												placeholder='Write your answer…'
+												rows={4}
+												value={description}
+												disabled={isSubmitting}
+												onChange={(e) =>
+													setDescription(e.target.value)}
+											/>
+										</div>
+
+										<button
+											type='submit'
+											className='answer-details__submit'
+											disabled={isSubmitting || !titleDisplay}
+										>
+											{isSubmitting ? 'Saving…' : 'Upload a Video'}
+										</button>
+									</form>
+								)}
 							</div>
 						</div>
 					</div>

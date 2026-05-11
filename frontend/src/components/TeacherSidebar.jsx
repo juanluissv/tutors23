@@ -1,5 +1,7 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { useMemo } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useGetQuestionsByTeacherIdQuery } from '../slices/teachers/teacherQuestionsSlice'
 
 const imgIcon = `${process.env.PUBLIC_URL}/burg.svg`
 
@@ -205,9 +207,80 @@ const IconSubjects = () => (
 	</svg>
 )
 
+function questionHasVideo (question) {
+	return question?.mediaId != null && String(question.mediaId).trim() !== ''
+}
+
+function teacherAnswerHasVideo (question) {
+	const ans = question?.answer
+	if (ans == null || ans === '') return false
+	if (typeof ans === 'object') {
+		const mid = ans.mediaId
+		return mid != null && String(mid).trim() !== ''
+	}
+	return false
+}
+
+function isAwaitingTeacherAnswerVideo (question) {
+	return questionHasVideo(question) && !teacherAnswerHasVideo(question)
+}
+
 function TeacherSidebar ({ isOpen, toggleSidebar }) {
+	const location = useLocation()
+	const { teacherInfo } = useSelector((state) => state.authTeacher)
+	const teacherId = teacherInfo?._id ? String(teacherInfo._id) : null
+
+	const { data: questionsFromApi = [] } = useGetQuestionsByTeacherIdQuery(
+		teacherId,
+		{ skip: !teacherId },
+	)
+
+	const newQuestionsCount = useMemo(() => {
+		const list = Array.isArray(questionsFromApi) ? questionsFromApi : []
+		return list.filter((q) => isAwaitingTeacherAnswerVideo(q)).length
+	}, [questionsFromApi])
+
 	const navClass = ({ isActive }) =>
 		`sidebar-nav-link${isActive ? ' sidebar-nav-link--active' : ''}`
+
+	const isAnswerDetailsSection =
+		location.pathname.startsWith('/teachers/answerdetails')
+
+	const isTeacherAnswerComposeSection =
+		location.pathname.startsWith('/teachers/answer/')
+
+	const isTeacherAnswerRecordSection =
+		location.pathname.startsWith('/teachers/recordscreen/')
+		|| location.pathname.startsWith('/teachers/recordcamera/')
+
+	const newQuestionsNavClass = ({ isActive }) =>
+		`sidebar-nav-link${
+			isActive
+			|| isAnswerDetailsSection
+			|| isTeacherAnswerComposeSection
+			|| isTeacherAnswerRecordSection
+				? ' sidebar-nav-link--active'
+				: ''
+		}`
+
+	const isOldQuestionsSection =
+		location.pathname.startsWith('/teachers/oldquestions')
+
+	const isWatchNewSection =
+		location.pathname.startsWith('/teachers/watchnew')
+
+	const isWatchAnswerSection =
+		location.pathname.startsWith('/teachers/watchanswer')
+
+	const mySubjectsNavClass = ({ isActive }) =>
+		`sidebar-nav-link${
+			isActive
+			|| isOldQuestionsSection
+			|| isWatchNewSection
+			|| isWatchAnswerSection
+				? ' sidebar-nav-link--active'
+				: ''
+		}`
 
 	return (
 		<aside
@@ -230,13 +303,27 @@ function TeacherSidebar ({ isOpen, toggleSidebar }) {
 
 			<div className="sidebar-content">
 				<nav className="navigation" aria-label="Primary">
-					<NavLink to="/teachers/newquestions"  className={navClass}>
+					<NavLink to="/teachers/newquestions" className={newQuestionsNavClass}>
 						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
 							<IconNewTutor />
 						</span>
-						<span className="sidebar-nav-link__label">New Questions</span>
+						<span className="sidebar-nav-link__label-wrap">
+							<span className="sidebar-nav-link__label">
+								New Questions
+							</span>
+							{newQuestionsCount > 0 ? (
+								<span
+									className="sidebar-new-answers-badge"
+									aria-hidden="true"
+								>
+									{newQuestionsCount > 99
+										? '99+'
+										: String(newQuestionsCount)}
+								</span>
+							) : null}
+						</span>
 					</NavLink>
-					<NavLink to="/teachers/subjects" className={navClass}>
+					<NavLink to="/teachers/subjects" className={mySubjectsNavClass}>
 						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
 							<IconAskTeacher />
 						</span>

@@ -5,26 +5,14 @@ const answerSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    color: {
-        type: String,
-        required: true
-    },
     description: {
         type: String,
         required: false
-    },  
-    subjectname: {
-        type: String,
-        required: false
-    },   
+    },       
     mediaId: {
         type: String,
         required: false,
-    },
-    playlist: {
-        type: String,
-        required: false,
-    },
+    },    
     isWatched: {
         type: Boolean,
         required: false,

@@ -1,10 +1,19 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import '../../App.css'
 
 function TeacherAnswerScreen () {
+	const { id } = useParams()
+	const recordScreenPath =
+		id != null && String(id).trim() !== ''
+			? `/teachers/recordscreen/${String(id).trim()}`
+			: '/teachers/newquestions'
+	const recordCameraPath =
+		id != null && String(id).trim() !== ''
+			? `/teachers/recordcamera/${String(id).trim()}`
+			: '/teachers/newquestions'
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
 	)
@@ -37,12 +46,12 @@ function TeacherAnswerScreen () {
 
 							<div className='upload-cards-container'>
 								<Link
-									to='/teachers/answerscreen'
+									to={recordScreenPath}
 									className='upload-card upload-card-sky'
 									aria-label='Record PC screen, up to 5 minutes'
 								>
 									<div className='upload-card-header'>
-										<h2>Record PC screen</h2>
+										<h2>Record computer screen</h2>
 										<div className='upload-card-icon'>
 											<svg
 												width='24'
@@ -72,7 +81,7 @@ function TeacherAnswerScreen () {
 								</Link>
 
 								<Link
-									to='/teachers/answercamera'
+									to={recordCameraPath}
 									className='upload-card upload-card-deepsky'
 									aria-label='Record with camera, up to 5 minutes'
 								>

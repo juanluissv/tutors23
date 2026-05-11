@@ -187,7 +187,7 @@ export function SubjectCardActionsDefault ({ subjectId }) {
 				to='/teachers/oldquestions'
 				className='teacher-subject-card__btn'
 			>
-				Questions
+				Previous Questions
 			</Link>
 		</div>
 	)

@@ -646,3 +646,10 @@ help me do this screen end to end (controller function, route, slice)
 @src/controllers/studentController.js @src/routes/studentRoutes.js 
 you can use @frontend/src/screens/teachers/TeacherSubjectsScreen.jsx  as reference for the ui design
 and keep the design consistent with the other student screens 
+
+
+
+help me with 
+@frontend/src/screens/students/StudentRecordScreen.jsx 
+is a screen where the student will record their computer screen and then the video will get uploaded to aws and after is uploaded to aws the video id gets save in the database 
+@src/models/questionModel.js:16-19 , take a look at @src/controllers/subjectController.js:436-549 how the pdf get saved in the subject and use that as a reference, please do the function controller @src/controllers/subjectController.js , route @src/routes/questionsRoutes.js , slice @frontend/src/slices/student/questionsSlice.js and connect with the screen @frontend/src/screens/students/StudentRecordScreen.jsx 

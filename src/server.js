@@ -11,6 +11,8 @@ import ttsRoutes from './routes/ttsRoutes.js';
 import schoolAdminRoutes from './routes/schoolAdminRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
+import questionsRoutes from './routes/questionsRoutes.js';
+import answerRoutes from './routes/answerRoute.js';
 import multer  from 'multer'; 
 import {fileURLToPath} from 'url';
 
@@ -43,6 +45,8 @@ app.use('/api/students', studentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/tts', ttsRoutes);
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/questions', questionsRoutes);
+app.use('/api/answers', answerRoutes);
 
 
 
