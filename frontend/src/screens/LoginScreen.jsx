@@ -113,7 +113,7 @@ function LoginScreen () {
 												className='login-checkbox'
 											/>
 											<span className='login-remember__text'>
-												Remember me on this device
+												Click Sign in for demo
 											</span>
 										</label>
 									</div>
