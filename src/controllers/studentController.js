@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Student from '../models/studentModel.js';
 import Subject from '../models/subjectModel.js';
+import Course from '../models/courseModel.js';
 import generateToken from '../utils/generateToken.js';
 import { subjectToJson } from './subjectController.js';
 
@@ -313,7 +314,38 @@ const getMySubjects = asyncHandler(async (req, res) => {
     const subjects = await Subject.find({ students: studentId })
         .sort({ dateCreated: -1, createdAt: -1 })
         .lean()
-    res.status(200).json(subjects.map(subjectToJson))
+
+    const subjectIds = subjects.map((s) => s._id)
+    const publishedCourses = subjectIds.length === 0
+        ? []
+        : await Course.find({
+            subject: { $in: subjectIds },
+            isPublish: true,
+        })
+            .select('title description isPublish subject')
+            .sort({ createdAt: -1 })
+            .lean()
+
+    const coursesBySubjectId = new Map()
+    for (const c of publishedCourses) {
+        const sid = String(c.subject)
+        if (!coursesBySubjectId.has(sid)) {
+            coursesBySubjectId.set(sid, [])
+        }
+        coursesBySubjectId.get(sid).push({
+            _id: c._id,
+            title: c.title,
+            description: c.description,
+            isPublish: c.isPublish,
+        })
+    }
+
+    res.status(200).json(
+        subjects.map((subj) => ({
+            ...subjectToJson(subj),
+            courses: coursesBySubjectId.get(String(subj._id)) ?? [],
+        })),
+    )
 })
 
 

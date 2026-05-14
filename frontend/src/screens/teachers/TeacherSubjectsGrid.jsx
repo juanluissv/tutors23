@@ -178,6 +178,12 @@ export function SubjectCardActionsDefault ({ subjectId }) {
 	return (
 		<div className='teacher-subject-card__row'>
 			<Link
+				to={`/teachers/courses/${subjectId}`}
+				className='teacher-subject-card__btn'
+			>
+				Courses
+			</Link>
+			<Link
 				to={`/teachers/subjects/${subjectId}/edit`}
 				className='teacher-subject-card__btn'
 			>

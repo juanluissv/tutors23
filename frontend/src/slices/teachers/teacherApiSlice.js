@@ -1,5 +1,5 @@
 import { apiSlice } from "../apiSlice";
-import { SUBJECTS_URL, TEACHERS_URL } from "../../constants";
+import { COURSES_URL, SUBJECTS_URL, TEACHERS_URL } from "../../constants";
 
 export const teacherApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -46,6 +46,55 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
             providesTags: (result, error, teacherId) => [
                 { type: 'Subject', id: `TEACHER_LIST_${teacherId}` },
             ],
+        }),
+        getCoursesBySubjectForTeacher: builder.query({
+            query: (subjectId) => ({
+                url: `${COURSES_URL}/subject/${subjectId}`,
+            }),
+            providesTags: (result, error, subjectId) => [
+                { type: 'Course', id: `SUBJECT_${subjectId}` },
+            ],
+        }),
+        getCourseByIdForTeacher: builder.query({
+            query: (courseId) => ({
+              url: `${COURSES_URL}/${courseId}`,
+            }),
+            providesTags: (result, error, courseId) => [
+                { type: 'Course', id: courseId },
+            ],
+        }),
+        getCoursePreviewForTeacher: builder.query({
+            query: (courseId) => ({
+              url: `${COURSES_URL}/${courseId}/preview`,
+            }),
+            providesTags: (result, error, courseId) => [
+                { type: 'Course', id: `${courseId}_PREVIEW` },
+                { type: 'Course', id: courseId },
+            ],
+        }),
+        updateCoursePublish: builder.mutation({
+            query: ({ courseId, isPublish }) => ({
+              url: `${COURSES_URL}/${courseId}/publish`,
+              method: 'PATCH',
+              body: { isPublish },
+            }),
+            invalidatesTags: (result, error, { courseId, subjectId }) => {
+              const tags = [
+                { type: 'Course', id: courseId },
+                { type: 'Course', id: `${courseId}_PREVIEW` },
+              ];
+              if (subjectId) {
+                tags.push({
+                  type: 'Course',
+                  id: `SUBJECT_${subjectId}`,
+                });
+                tags.push({
+                  type: 'Course',
+                  id: `STUDENT_PUBLISHED_${subjectId}`,
+                });
+              }
+              return tags;
+            },
         }),
         getSubjectStudentsForTeacher: builder.query({
             query: (subjectId) => ({
@@ -122,6 +171,70 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
                 return tags;
             },
         }),
+        createCourse: builder.mutation({
+            query: ({ teacherId, ...body }) => ({
+                url: COURSES_URL,
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: (result, error, arg) => {
+                const tags = [{ type: 'Course', id: 'LIST' }];
+                if (arg?.teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${arg.teacherId}`,
+                    });
+                }
+                if (arg?.subject) {
+                    tags.push({
+                        type: 'Course',
+                        id: `SUBJECT_${arg.subject}`,
+                    });
+                    tags.push({
+                        type: 'Course',
+                        id: `STUDENT_PUBLISHED_${arg.subject}`,
+                    });
+                }
+                return tags;
+            },
+        }),
+        addCourseSection: builder.mutation({
+            query: ({ courseId, sectionTitle }) => ({
+              url: `${COURSES_URL}/${courseId}/sections`,
+              method: 'POST',
+              body: { sectionTitle },
+            }),
+            invalidatesTags: (result, error, { courseId, subjectId }) => {
+              const tags = [{ type: 'Course', id: courseId }];
+              if (subjectId) {
+                  tags.push({ type: 'Course', id: `SUBJECT_${subjectId}` });
+              }
+              return tags;
+            },
+        }),
+        addCourseLesson: builder.mutation({
+            query: ({ courseId, title, sectionNumber, description, video }) => {
+              const fd = new FormData();
+              fd.append('title', title);
+              fd.append('sectionNumber', sectionNumber);
+              if (description !== undefined && description !== '') {
+                  fd.append('description', description);
+              }
+              fd.append('video', video);
+              return {
+                url: `${COURSES_URL}/${courseId}/lessons`,
+                method: 'POST',
+                body: fd,
+              };
+            },
+            invalidatesTags: (result, error, { courseId, subjectId }) => {
+              const tags = [{ type: 'Course', id: courseId }];
+              if (subjectId) {
+                  tags.push({ type: 'Course', id: `SUBJECT_${subjectId}` });
+              }
+              return tags;
+            },
+        }),
     }),
 });
 
@@ -135,4 +248,11 @@ export const {
     useUpdateSubjectByTeacherMutation,
     useAddStudentEmailToSubjectMutation,
     useGetSubjectStudentsForTeacherQuery,
+    useGetCoursesBySubjectForTeacherQuery,
+    useGetCourseByIdForTeacherQuery,
+    useGetCoursePreviewForTeacherQuery,
+    useUpdateCoursePublishMutation,
+    useCreateCourseMutation,
+    useAddCourseSectionMutation,
+    useAddCourseLessonMutation,
 } = teacherApiSlice;

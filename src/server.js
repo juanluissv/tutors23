@@ -11,6 +11,7 @@ import ttsRoutes from './routes/ttsRoutes.js';
 import schoolAdminRoutes from './routes/schoolAdminRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
+import courseRoutes from './routes/courseRoutes.js';
 import questionsRoutes from './routes/questionsRoutes.js';
 import answerRoutes from './routes/answerRoute.js';
 import multer  from 'multer'; 
@@ -41,6 +42,7 @@ const __dirname = path.resolve() //set  __dirname to current directory
 app.use('/api/schooladmins', schoolAdminRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/subjects', subjectRoutes);
+app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/tts', ttsRoutes);

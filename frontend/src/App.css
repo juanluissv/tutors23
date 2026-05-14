@@ -96,7 +96,7 @@
 }
 
 .sidebar-closed .sidebar-nav-link--active {
-  background: rgba(168, 85, 247, 0.12);
+  background: rgba(168, 85, 247, 0.145);
 }
 
 .sidebar-closed .navigation {
@@ -309,19 +309,19 @@
 .sidebar-nav-link--active {
   background: linear-gradient(
     145deg,
-    rgba(250, 245, 255, 0.98) 0%,
-    rgba(245, 243, 255, 0.92) 100%
+    rgba(246, 238, 255, 0.98) 0%,
+    rgba(238, 232, 255, 0.94) 100%
   );
   border: none;
-  /* box-shadow: 0 2px 6px -8px rgba(124, 58, 237, 0.2); */
-  box-shadow: 0 1px 4px -6px rgba(124, 58, 237, 0.15);
-
+  box-shadow:
+    0 2px 10px -8px rgba(124, 58, 237, 0.24),
+    0 0 0 1px rgba(167, 139, 250, 0.14);
 }
 
 .sidebar-nav-link--active .sidebar-nav-link__label,
 .sidebar-nav-link--active .sidebar-nav-link__title {
   color: #5b21b6;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .sidebar-nav-link__icon-well {
@@ -338,7 +338,8 @@
 }
 
 .sidebar-nav-link--active .sidebar-nav-link__icon-well {
-  box-shadow: 0 2px 8px -6px rgba(124, 58, 237, 0.2);
+  background: linear-gradient(160deg, #ffffff 0%, #faf5ff 72%, #f3e8ff 100%);
+  box-shadow: 0 2px 9px -6px rgba(124, 58, 237, 0.24);
 }
 
 .sidebar-nav-link__icon-well .sidebar-nav-icon {
@@ -416,6 +417,12 @@
   min-width: 0;
   margin-top: 0;
   margin-bottom: 0;
+}
+
+.sidebar-nav-link--valores-hub .sidebar-nav-link__title,
+.sidebar-nav-link--valores-hub.sidebar-nav-link--active
+  .sidebar-nav-link__title {
+  font-weight: 500;
 }
 
 .sidebar-valores-hub-expand {
@@ -7576,5 +7583,40 @@ a.upload-card {
   .home-suggested__list {
     max-height: min(48vh, 380px);
   }
+}
+
+/* Student my subjects — course links on subject card */
+.student-subject-courses {
+  margin-bottom: 12px;
+}
+
+.student-subject-courses__label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 8px;
+}
+
+.student-subject-courses ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.student-subject-courses a {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.student-subject-courses a:hover {
+  color: rgba(255, 255, 255, 0.92);
 }
 

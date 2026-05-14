@@ -207,6 +207,56 @@ const IconSubjects = () => (
 	</svg>
 )
 
+/* Book icon for “Create course” — separate gradient ids from IconSubjects */
+const IconCreateCourse = () => (
+	<svg
+		width="20"
+		height="20"
+		viewBox="0 0 24 24"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+		className="sidebar-nav-icon"
+	>
+		<path
+			d="M4 6h16v12H4V6z"
+			stroke="url(#tcc-book-stroke)"
+			strokeWidth="2"
+			strokeLinejoin="round"
+			fill="url(#tcc-book-fill)"
+		/>
+		<path
+			d="M12 8v8M9 11h6"
+			stroke="url(#tcc-book-stroke)"
+			strokeWidth="1.5"
+			strokeLinecap="round"
+		/>
+		<defs>
+			<linearGradient
+				id="tcc-book-stroke"
+				x1="4"
+				y1="6"
+				x2="20"
+				y2="18"
+				gradientUnits="userSpaceOnUse"
+			>
+				<stop stopColor="#0EA5E9" />
+				<stop offset="1" stopColor="#7C3AED" />
+			</linearGradient>
+			<linearGradient
+				id="tcc-book-fill"
+				x1="4"
+				y1="6"
+				x2="20"
+				y2="18"
+				gradientUnits="userSpaceOnUse"
+			>
+				<stop stopColor="#38BDF8" stopOpacity="0.4" />
+				<stop offset="1" stopColor="#A78BFA" stopOpacity="0.45" />
+			</linearGradient>
+		</defs>
+	</svg>
+)
+
 function questionHasVideo (question) {
 	return question?.mediaId != null && String(question.mediaId).trim() !== ''
 }
@@ -272,12 +322,16 @@ function TeacherSidebar ({ isOpen, toggleSidebar }) {
 	const isWatchAnswerSection =
 		location.pathname.startsWith('/teachers/watchanswer')
 
+	const isTeacherCoursesSection =
+		location.pathname.startsWith('/teachers/courses')
+
 	const mySubjectsNavClass = ({ isActive }) =>
 		`sidebar-nav-link${
 			isActive
 			|| isOldQuestionsSection
 			|| isWatchNewSection
 			|| isWatchAnswerSection
+			|| isTeacherCoursesSection
 				? ' sidebar-nav-link--active'
 				: ''
 		}`
@@ -328,6 +382,12 @@ function TeacherSidebar ({ isOpen, toggleSidebar }) {
 							<IconAskTeacher />
 						</span>
 						<span className="sidebar-nav-link__label">My  Subjects</span>
+					</NavLink>
+					<NavLink to="/teachers/createcourse" className={navClass}>
+						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
+							<IconCreateCourse />
+						</span>
+						<span className="sidebar-nav-link__label">Create course</span>
 					</NavLink>
 					<NavLink to="/teachers/students" className={navClass}>
 						<span className="sidebar-nav-link__icon-well" aria-hidden="true">

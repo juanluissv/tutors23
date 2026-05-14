@@ -1,5 +1,5 @@
 import { apiSlice } from "../apiSlice";
-import { STUDENTS_URL } from "../../constants"
+import { COURSES_URL, STUDENTS_URL } from "../../constants"
 
 export const studentApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -43,6 +43,22 @@ export const studentApiSlice = apiSlice.injectEndpoints({
             }),
             providesTags: ['Students'],
           }),
+          getCourseWatchForStudent: builder.query({
+            query: (courseId) => ({
+              url: `${COURSES_URL}/${courseId}/watch`,
+            }),
+            providesTags: (result, error, courseId) => [
+              { type: 'Course', id: `STUDENT_WATCH_${courseId}` },
+            ],
+          }),
+          getStudentSubjectCourses: builder.query({
+            query: (subjectId) => ({
+              url: `${COURSES_URL}/student/subject/${subjectId}`,
+            }),
+            providesTags: (result, error, subjectId) => [
+              { type: 'Course', id: `STUDENT_PUBLISHED_${subjectId}` },
+            ],
+          }),
     }),
 })
 
@@ -54,4 +70,6 @@ export const {
     useGetProfileQuery,
     useUpdateProfileMutation,
     useGetMySubjectsQuery,
+    useGetCourseWatchForStudentQuery,
+    useGetStudentSubjectCoursesQuery,
 } = studentApiSlice;

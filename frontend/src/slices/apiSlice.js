@@ -26,6 +26,7 @@ export const apiSlice = createApi({
         'SchoolAdmins',
         'School',
         'Subject',
+        'Course',
         'Questions',
         'StudentAnswers',
     ],

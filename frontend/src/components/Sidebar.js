@@ -247,6 +247,15 @@ function Sidebar ({ isOpen, toggleSidebar }) {
       isActive || isNewAnswersSection ? ' sidebar-nav-link--active' : ''
     }`
 
+  const isStudentSubjectsSection =
+    location.pathname.startsWith('/students/courses/')
+    || location.pathname.startsWith('/students/watchcourse/')
+
+  const subjectsNavClass = ({ isActive }) =>
+    `sidebar-nav-link${
+      isActive || isStudentSubjectsSection ? ' sidebar-nav-link--active' : ''
+    }`
+
   return (
     <aside
       className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
@@ -298,10 +307,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
               ) : null}
             </span>
           </NavLink>
-          <NavLink
-            to="/students/mysubjects"
-            className={navClass}
-          >
+          <NavLink to="/students/mysubjects" className={subjectsNavClass}>
             <span className="sidebar-nav-link__icon-well" aria-hidden="true">
               <IconSubjects />
             </span>

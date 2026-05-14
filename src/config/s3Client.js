@@ -92,6 +92,15 @@ function getAnswerVideoKeyPrefix () {
     return p;
 }
 
+/** Prefix for course lesson uploads (videos) */
+function getCourseLessonVideoKeyPrefix () {
+    const p = (
+        readEnv('AWS_S3_COURSE_LESSON_VIDEO_PREFIX')
+        || 'public/course-lesson-videos'
+    ).replace(/^\/+|\/+$/g, '');
+    return p;
+}
+
 /**
  * Public GET URL for an object key when objects are readable anonymously
  * (e.g. Bucketeer public bucket). Set AWS_S3_PUBLIC_BASE_URL with no trailing
@@ -117,11 +126,59 @@ function getPublicBookUrlFromKey (objectKey) {
     return `${base}/${path}`;
 }
 
+/** Optional override for lesson video TTL (seconds), default one hour */
+function readLessonVideoSignedUrlExpiresSeconds () {
+    const raw = readEnv('AWS_S3_COURSE_LESSON_VIDEO_SIGNED_URL_SECONDS');
+    if (!raw) {
+        return 3600;
+    }
+    const n = parseInt(raw, 10);
+    return !Number.isNaN(n) && n > 0 ? n : 3600;
+}
+
+/**
+ * Playback URL for a stored lesson video (S3 object key).
+ * Uses public URL when AWS_S3_PUBLIC_BASE_URL is set; otherwise signing.
+ */
+function getLessonPlaybackUrl (objectKey) {
+    const keyTrim = typeof objectKey === 'string'
+        ? objectKey.trim()
+        : '';
+    if (!keyTrim) {
+        return null;
+    }
+
+    const publicUrl = getPublicBookUrlFromKey(keyTrim);
+    if (publicUrl) {
+        return publicUrl;
+    }
+
+    const client = getS3();
+    const bucket = getBookBucketName();
+    if (!client || !bucket) {
+        return null;
+    }
+
+    try {
+        return client.getSignedUrl('getObject', {
+            Bucket: bucket,
+            Key: keyTrim,
+            Expires: readLessonVideoSignedUrlExpiresSeconds(),
+        });
+    }
+    catch (err) {
+        console.error('getLessonPlaybackUrl:', err.message);
+        return null;
+    }
+}
+
 export {
     getS3,
     getBookBucketName,
     getBookKeyPrefix,
     getQuestionVideoKeyPrefix,
     getAnswerVideoKeyPrefix,
+    getCourseLessonVideoKeyPrefix,
     getPublicBookUrlFromKey,
+    getLessonPlaybackUrl,
 };

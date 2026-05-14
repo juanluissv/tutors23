@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
-const courseSchema = mongoose.Schema({       
-    name: {
+const courseSchema = mongoose.Schema({
+    title: {
         type: String,
         required: true
     },
@@ -11,8 +11,8 @@ const courseSchema = mongoose.Schema({
     }, 
     description: {
         type: String,
-        required: true
-    },      
+        required: false
+    },         
     sections: [
         {
             sectionNumber: {
@@ -60,13 +60,8 @@ const courseSchema = mongoose.Schema({
     },  
     subject:{
         type: mongoose.Schema.Types.ObjectId,
-        required: false,
+        required: true,
         ref: 'Subject'
-    },
-    school:{
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
-        ref: 'School'
     },
 }, {
     timestamps: true

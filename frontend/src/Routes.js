@@ -30,7 +30,11 @@ import StudentWatchAnswerScreen from './screens/students/StudentWatchAnswerScree
 import StudentAskTeacherScreen from './screens/students/StudentAskTeacherScreen';
 import StudentPreviousQuestionsScreen from './screens/students/StudentPreviousQuestionsScreen';
 import StudentWatchQuestionScreen from './screens/students/StudentWatchQuestionScreen';
-import TeacherWatchAnswerScreen from './screens/teachers/TeacherWatchAnswerScreen';
+import StudentWatchCourseSreen from './screens/students/StudentWatchCourseSreen';
+import StudentCoursesScreen from './screens/students/StudentCoursesScreen';
+
+
+
 
 
 import Semana1Unidad2Screen from './screens/9/valores/unidad2/Semana1Unidad2Screen';
@@ -80,7 +84,11 @@ import TeacherStudentsBySubjectScreen from './screens/teachers/TeacherStudentsBy
 import TeacherAddStudentToSubjectScreen from './screens/teachers/TeacherAddStudentToSubjectScreen';
 import TeacherRecordScreen from './screens/teachers/TeacherRecordScreen';
 import TeacherRecordCameraScreen from './screens/teachers/TeacherRecordCameraScreen';
-
+import TeacherCreateCourseScreen from './screens/teachers/TeacherCreateCourseScreen';
+import TeacherAddLessonsScreen from './screens/teachers/TeacherAddLessonsScreen';
+import TeacherPreviewCourseScreen from './screens/teachers/TeacherPreviewCourseScreen';
+import TeacherWatchAnswerScreen from './screens/teachers/TeacherWatchAnswerScreen';
+import TeacherCoursesScreen from './screens/teachers/TeacherCoursesScreen';
 
 import SchoolAdminLoginScreen from './screens/schoolAdmin/SchoolAdminLoginScreen';
 import SchoolAdminRegisterScreen from './screens/schoolAdmin/SchoolAdminRegisterScreen';
@@ -157,12 +165,19 @@ const router = createBrowserRouter(
             <Route path="/students/askteacher" element={<StudentAskTeacherScreen />} />
             <Route path="/students/previousquestions/:subjectId" element={<StudentPreviousQuestionsScreen />} />
             <Route path="/students/watchquestion/:questionId" element={<StudentWatchQuestionScreen />} />
-            
+            <Route path="/students/watchcourse/:courseId" element={<StudentWatchCourseSreen />} />
+            <Route path="/students/courses/:subjectId" element={<StudentCoursesScreen />} />
+
+
             <Route  path="/teachers/login" element={<TeacherLoginScreen />} />
             <Route  path="/teachers/register" element={<TeacherRegisterScreen />} />
             <Route  path="/teachers/bookupload" element={<TeacherBookUploadScreen />} />
             <Route  path="/teachers/newquestions" element={<TeacherNewQuestionsScreen />} />
             <Route  path="/teachers/subjects" element={<TeacherSubjectsScreen />} />
+            <Route
+                path="/teachers/createcourse"
+                element={<TeacherCreateCourseScreen />}
+            />
             <Route  path="/teachers/subjects/:id/edit" element={<TeacherEditSubjectScreen />} />
             <Route  path="/teachers/oldquestions" element={<TeacherOldQuestionsScreen />} />
             <Route  path="/teachers/watchnew" element={<TeacherWatchNewScreen />} />
@@ -175,6 +190,12 @@ const router = createBrowserRouter(
             <Route  path="/teachers/recordscreen/:id" element={<TeacherRecordScreen />} />
             <Route  path="/teachers/recordcamera/:id" element={<TeacherRecordCameraScreen />} />
             <Route  path="/teachers/watchanswer/:answerId" element={<TeacherWatchAnswerScreen />} />
+            <Route
+                path="/teachers/courses/:id/addlessons"
+                element={<TeacherAddLessonsScreen />}
+            />
+            <Route path="/teachers/courses/:id" element={<TeacherCoursesScreen />} />
+            <Route path="/teachers/courses/:id/preview" element={<TeacherPreviewCourseScreen />} />
             
             <Route  path="/schooladmins/login" element={<SchoolAdminLoginScreen />} />
             <Route  path="/schooladmins/register" element={<SchoolAdminRegisterScreen />} />

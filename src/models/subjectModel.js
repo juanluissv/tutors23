@@ -28,11 +28,7 @@ const subjectSchema = mongoose.Schema({
     bookId: {
         type: String,
         required: false,
-    },
-    isCoursePublish: {
-        type: Boolean,
-        required: false
-    },    
+    },        
     dateCreated: {
         type: Date,
         required: false
@@ -42,11 +38,13 @@ const subjectSchema = mongoose.Schema({
         required: true,
         ref: 'School'
     },  
-    course:{
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
-        ref: 'Course'
-    },     
+    courses: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'Course'
+        },
+    ],     
     teachers: [
         {
             type: mongoose.Schema.Types.ObjectId,

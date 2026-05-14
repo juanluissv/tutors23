@@ -7,22 +7,50 @@ import { useGetMySubjectsQuery } from '../../slices/student/studentApiSlice'
 import { TeacherSubjectsGrid } from '../teachers/TeacherSubjectsGrid'
 import '../../App.css'
 
-function StudentSubjectCardActions ({ subjectId }) {
+function StudentSubjectCardActions ({ subject }) {
+	const subjectId = String(subject._id)
+	const courses = Array.isArray(subject.courses) ? subject.courses : []
 	return (
-		<div className='teacher-subject-card__row'>
-			<Link
-				to={`/9/valores/unidad1/semana1`}
-				className='teacher-subject-card__btn'
-			>
-				Open subject
-			</Link>
-			<Link
-				to={`/students/asknewquestion?subject=${subjectId}`}
-				className='teacher-subject-card__btn'
-			>
-				Ask a question
-			</Link>
-		</div>
+		<>
+			{courses.length > 0 ? (
+				<div className=''>
+					{/* <p className='student-subject-courses__label'>
+						Courses to watch
+					</p>
+					<ul>
+						{courses.map((c) => (
+							<li key={String(c._id)}>
+								<Link
+									to={`/students/watchcourse/${String(c._id)}`}
+								>
+									{c.title || 'Course'}
+								</Link>
+							</li>
+						))}
+					</ul> */}
+				</div>
+			) : null}
+			<div className='teacher-subject-card__row'>
+				<Link
+					to={`/students/courses/${subjectId}`}
+					className='teacher-subject-card__btn'
+				>
+					Browse courses
+				</Link>
+				<Link
+					to={`/9/valores/unidad1/semana1`}
+					className='teacher-subject-card__btn'
+				>
+					Open subject
+				</Link>
+				{/* <Link
+					to={`/students/asknewquestion?subject=${subjectId}`}
+					className='teacher-subject-card__btn'
+				>
+					Ask a question
+				</Link> */}
+			</div>
+		</>
 	)
 }
 
@@ -85,9 +113,7 @@ function StudentMySubjects () {
 							isError={isError}
 							refetch={refetch}
 							renderCardActions={(subject) => (
-								<StudentSubjectCardActions
-									subjectId={String(subject._id)}
-								/>
+								<StudentSubjectCardActions subject={subject} />
 							)}
 						/>
 					</div>
