@@ -41,7 +41,7 @@ function StudentSubjectCardActions ({ subject }) {
 					to={`/9/valores/unidad1/semana1`}
 					className='teacher-subject-card__btn'
 				>
-					Open subject
+					Open book
 				</Link>
 				{/* <Link
 					to={`/students/asknewquestion?subject=${subjectId}`}
