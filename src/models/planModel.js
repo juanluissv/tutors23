@@ -4,49 +4,39 @@ const planSchema = mongoose.Schema({
     price: {
         type: Number,
         required: true
-    },
-    teacherName: {
-        type: String,
-        required: false
-    },
-    subjectName: {
-        type: String,
-        required: false
-    },
+    },        
     totalQuestions: {
         type: Number,
         required: true
-    },  
+    },      
     active: {
         type: Boolean,
         required: false
-    }, 
-    deactive: {
-        type: Boolean,
-        required: false
-    }, 
-    school:{
+    },    
+    gradesLevel: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'GradeLevel',
+        },
+    subjects: [
+        {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'School'
-    },
-    teacher:{
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Teacher'
-    },
-    subject:{
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Subject'
-    },
+            required: false,
+            ref: 'Subject'
+        },
+    ],  
     students: [
         {
-            type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
             required: false,
             ref: 'Student'
         },
-    ],       
+    ],   
+    school: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        ref: 'School'
+    },      
 }, {
     timestamps: true
 })

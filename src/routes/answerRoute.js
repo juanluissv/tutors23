@@ -1,5 +1,5 @@
 import express from 'express'
-import { protectTeacher, protectStudent } from '../middleware/authMiddleware.js'
+import { protectTeacher, protectStudent, protectSchoolAdmin } from '../middleware/authMiddleware.js'
 import { parseTeacherAnswerVideo } from '../middleware/teacherAnswerVideoUpload.js'
 import {
     createTeacherAnswerForQuestion,
@@ -8,6 +8,8 @@ import {
     getAnswerByIdForTeacher,
     getAnswerVideoForStudent,
     getAnswerVideoForTeacher,
+    getAnswerByIdForSchoolAdmin,
+    getAnswerVideoForSchoolAdmin,
     getStudentNewAnswers,
 } from '../controllers/answersController.js'
 
@@ -16,6 +18,14 @@ const router = express.Router()
 router
     .route('/student/:studentId/new')
     .get(protectStudent, getStudentNewAnswers)
+
+router
+    .route('/schooladmin/:answerId/video')
+    .get(protectSchoolAdmin, getAnswerVideoForSchoolAdmin)
+
+router
+    .route('/schooladmin/:answerId')
+    .get(protectSchoolAdmin, getAnswerByIdForSchoolAdmin)
 
 router
     .route('/student/:answerId/video')

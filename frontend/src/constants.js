@@ -5,6 +5,7 @@ export const TEACHERS_URL = '/api/teachers';
 export const SCHOOL_ADMINS_URL = '/api/schooladmins';
 export const SCHOOLS_URL = '/api/schools';
 export const SUBJECTS_URL = '/api/subjects';
+export const PLANS_URL = '/api/plans';
 export const COURSES_URL = '/api/courses';
 export const QUESTIONS_URL = '/api/questions';
 export const ANSWERS_URL = '/api/answers';

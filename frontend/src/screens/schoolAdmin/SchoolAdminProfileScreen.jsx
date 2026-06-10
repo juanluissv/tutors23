@@ -118,12 +118,12 @@ function SchoolAdminProfileScreen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area content-area--login'>
+					<div className='content-area content-area--login content-area--login-scroll'>
 						<div className='center-content2 login-screen login-screen--wide'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
-									<h1 className='login-card__title'><br /><br /><br /><br />
+									<h1 className='login-card__title'>
 										Your profile
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>

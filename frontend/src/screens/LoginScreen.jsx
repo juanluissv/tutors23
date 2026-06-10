@@ -18,11 +18,8 @@ function LoginScreen () {
 	const navigate = useNavigate();
   	const dispatch = useDispatch();
 
-	// const [email, setEmail] = useState("");
-	// const [password, setPassword] = useState("");
-
-	const [email, setEmail] = useState("juanluissv@gmail.com");
-	const [password, setPassword] = useState("juan");
+	const [username, setUsername] = useState('alex.rivera.2832');
+	const [password, setPassword] = useState('alex');
 
 	const [login, { isLoading }] = useLoginMutation();
 	const { studentInfo } = useSelector((state) => state.authStudent);
@@ -33,10 +30,17 @@ function LoginScreen () {
 
   	const handleSubmit = async (e) => {
 		e.preventDefault()
-		if (email == '') { toast.error('Please enter  email'); return; } 
-		if (password == '') { toast.error('Please enter  password'); return; }
+		const un = username.trim().toLowerCase()
+		if (un === '') {
+			toast.error('Please enter your username')
+			return
+		}
+		if (password === '') {
+			toast.error('Please enter password')
+			return
+		}
 		try {
-			const res = await login({ email, password }).unwrap();
+			const res = await login({ username: un, password }).unwrap();
 			console.log(res)
 			dispatch(setStudentCredentials({ ...res }));
 			navigate(redirect);
@@ -72,18 +76,18 @@ function LoginScreen () {
 									onSubmit={handleSubmit}
 								>
 									<div className='login-field'>
-										<label className='login-label' htmlFor='email'>
-											Email
+										<label className='login-label' htmlFor='username'>
+											Username
 										</label>
 										<input
-											type='email'
-											id='email'
-											name='email'
+											type='text'
+											id='username'
+											name='username'
 											className='login-input'
-											placeholder='you@example.com'
-											autoComplete='email'
-											onChange={(e) => setEmail(e.target.value)}
-											value={email}
+											placeholder='e.g. alex.rivera.4821'
+											autoComplete='username'
+											onChange={(e) => setUsername(e.target.value)}
+											value={username}
 										/>
 									</div>
 									<div className='login-field'>
@@ -106,14 +110,14 @@ function LoginScreen () {
 											className='login-remember'
 											htmlFor='remember'
 										>
-											<input
+											{/* <input
 												type='checkbox'
 												id='remember'
 												name='remember'
 												className='login-checkbox'
-											/>
+											/> */}
 											<span className='login-remember__text'>
-												Click Sign in for demo
+												Please click Sign in to enter demo 
 											</span>
 										</label>
 									</div>

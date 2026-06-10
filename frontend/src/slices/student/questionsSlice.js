@@ -64,7 +64,7 @@ export const questionsApiSlice = apiSlice.injectEndpoints({
                 return { data: result.data }
             },
             invalidatesTags: (result, error, arg) => {
-                const tags = ['Questions']
+                const tags = ['Questions', 'Students']
                 if (arg?.questionId != null) {
                     tags.push({
                         type: 'Questions',

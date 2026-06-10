@@ -1,5 +1,5 @@
 import express from 'express';
-import { protectStudent, protectTeacher } from '../middleware/authMiddleware.js';
+import { protectStudent, protectSchoolAdmin, protectTeacher } from '../middleware/authMiddleware.js';
 import { parseTeacherAnswerVideo } from '../middleware/teacherAnswerVideoUpload.js';
 import {
 	addLessonToCourse,
@@ -8,8 +8,10 @@ import {
 	getPublishedCoursesBySubjectForStudent,
 	getCourseByIdForTeacher,
 	getCoursePreviewForTeacher,
+	getCoursePreviewForSchoolAdmin,
 	getCourseWatchForStudent,
 	getCoursesBySubjectForTeacher,
+	getCoursesBySubjectForSchoolAdmin,
 	setCoursePublishForTeacher,
 } from '../controllers/courseController.js';
 
@@ -19,6 +21,12 @@ router.get(
 	'/student/subject/:subjectId',
 	protectStudent,
 	getPublishedCoursesBySubjectForStudent,
+);
+
+router.get(
+	'/school-admin/subject/:subjectId',
+	protectSchoolAdmin,
+	getCoursesBySubjectForSchoolAdmin,
 );
 
 router.get(
@@ -38,6 +46,12 @@ router
 		parseTeacherAnswerVideo,
 		addLessonToCourse,
 	);
+
+router.get(
+	'/:courseId/school-admin/preview',
+	protectSchoolAdmin,
+	getCoursePreviewForSchoolAdmin,
+);
 
 router.get('/:courseId/preview', protectTeacher, getCoursePreviewForTeacher);
 

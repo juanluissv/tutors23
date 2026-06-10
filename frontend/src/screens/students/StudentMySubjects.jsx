@@ -1,13 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
-import { useGetMySubjectsQuery } from '../../slices/student/studentApiSlice'
+import {
+	useGetMySubjectsQuery,
+	useGetProfileQuery,
+} from '../../slices/student/studentApiSlice'
 import { TeacherSubjectsGrid } from '../teachers/TeacherSubjectsGrid'
+import {
+	resolveCurrentSubscription,
+	canViewQuestions,
+	getSubscriptionBlockReason,
+} from '../../utils/subscriptionAccess'
 import '../../App.css'
 
-function StudentSubjectCardActions ({ subject }) {
+function StudentSubjectCardActions ({
+	subject,
+	canViewCourses,
+	viewBlockReason,
+}) {
 	const subjectId = String(subject._id)
 	const courses = Array.isArray(subject.courses) ? subject.courses : []
 	return (
@@ -31,12 +43,24 @@ function StudentSubjectCardActions ({ subject }) {
 				</div>
 			) : null}
 			<div className='teacher-subject-card__row'>
-				<Link
-					to={`/students/courses/${subjectId}`}
-					className='teacher-subject-card__btn'
-				>
-					Browse courses
-				</Link>
+				{canViewCourses ? (
+					<Link
+						to={`/students/courses/${subjectId}`}
+						className='teacher-subject-card__btn'
+					>
+						Browse courses
+					</Link>
+				) : (
+					<span
+						className={
+							'teacher-subject-card__btn ' +
+							'teacher-subject-card__btn--disabled'
+						}
+						title={viewBlockReason || undefined}
+					>
+						Browse courses
+					</span>
+				)}
 				<Link
 					to={`/9/valores/unidad1/semana1`}
 					className='teacher-subject-card__btn'
@@ -57,6 +81,23 @@ function StudentSubjectCardActions ({ subject }) {
 function StudentMySubjects () {
 	const navigate = useNavigate()
 	const { studentInfo } = useSelector((state) => state.authStudent)
+
+	const {
+		data: profile,
+		isLoading: isLoadingProfile,
+	} = useGetProfileQuery(undefined, {
+		skip: !studentInfo,
+	})
+
+	const currentSubscription = useMemo(
+		() => resolveCurrentSubscription(profile?.subscriptions),
+		[profile?.subscriptions],
+	)
+	const canViewCourses = canViewQuestions(currentSubscription)
+	const viewBlockReason = getSubscriptionBlockReason(
+		currentSubscription,
+		'view',
+	)
 
 	const {
 		data: subjects = [],
@@ -86,6 +127,9 @@ function StudentMySubjects () {
 		return null
 	}
 
+	const showSubscriptionNotice =
+		!isLoadingProfile && !canViewCourses
+
 	return (
 		<div className='chat-app ask-screen'>
 			<div className='main-container'>
@@ -96,6 +140,22 @@ function StudentMySubjects () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area'>
+						{showSubscriptionNotice ? (
+							<div className='ask-subscription-notice'>
+								<p className='ask-subscription-notice__title'>
+									Subscription required
+								</p>
+								<p className='ask-subscription-notice__text'>
+									{viewBlockReason}
+								</p>
+								<Link
+									to='/students/subscription'
+									className='ask-subscription-notice__link'
+								>
+									View plans & subscribe
+								</Link>
+							</div>
+						) : null}
 						<TeacherSubjectsGrid
 							pageTitle='My subjects'
 							pageSubtitle={
@@ -109,11 +169,15 @@ function StudentMySubjects () {
 								'your subjects will appear here after you sign in.'
 							}
 							subjects={subjects}
-							isLoading={isLoading}
+							isLoading={isLoading || isLoadingProfile}
 							isError={isError}
 							refetch={refetch}
 							renderCardActions={(subject) => (
-								<StudentSubjectCardActions subject={subject} />
+								<StudentSubjectCardActions
+									subject={subject}
+									canViewCourses={canViewCourses}
+									viewBlockReason={viewBlockReason}
+								/>
 							)}
 						/>
 					</div>

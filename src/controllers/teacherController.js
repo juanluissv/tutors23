@@ -3,6 +3,15 @@ import Subject from '../models/subjectModel.js';
 import Teacher from '../models/teacherModel.js';
 import generateToken from '../utils/generateToken.js';
 
+const subjectWithGradeLevelPopulate = {
+    path: 'subjects',
+    select: 'title description gradesLevel school',
+    populate: {
+        path: 'gradesLevel',
+        select: 'name',
+    },
+};
+
 // Case-insensitive exact match (teacherEmail in DB is usually trimmed + lowercased)
 function buildEmailExactRegex (rawEmail) {
     const t = String(rawEmail).trim();
@@ -61,7 +70,7 @@ function teacherProfileResponse (teacherDoc) {
 const getTeacherProfile = asyncHandler(async (req, res) => {
     const teacher = await Teacher.findById(req.teacher._id)
         .select('-password')
-        .populate('subjects', 'title description grade school');
+        .populate(subjectWithGradeLevelPopulate);
 
     if (!teacher) {
         res.status(404);
@@ -109,7 +118,7 @@ const updateTeacherProfile = asyncHandler(async (req, res) => {
     const updated = await teacher.save();
     const withSubjects = await Teacher.findById(updated._id)
         .select('-password')
-        .populate('subjects', 'title description grade school');
+        .populate(subjectWithGradeLevelPopulate);
 
     res.json(teacherProfileResponse(withSubjects));
 });
@@ -145,44 +154,84 @@ const authTeacher = asyncHandler(async (req, res) => {
 
 
 
+function isTeacherRegistrationComplete (teacherDoc) {
+    const pwd = teacherDoc?.password;
+    return typeof pwd === 'string' && pwd.trim() !== '';
+}
+
 // POST /api/teachers/register
 const registerTeacher = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const { email: rawEmail, password } = req.body;
 
-    const dupRegex = buildEmailExactRegex(email);
-    if (dupRegex) {
-        const teacherExist = await Teacher.findOne({ email: dupRegex });
-        if (teacherExist) {
-            res.status(400)
-            throw new Error('teacher already exists')
-        }
+    if (!rawEmail || String(rawEmail).trim() === '') {
+        res.status(400);
+        throw new Error('Email is required');
     }
 
-    const teacher = await Teacher.create({
-        firstname: req.body.firstname.toLowerCase(),
-        lastname: req.body.lastname.toLowerCase(),
-        role: 'teacher',
-        email,
-        image: 'none',
-        signInDate : new Date(),
-        password,
-    })
+    if (!password || String(password).trim() === '') {
+        res.status(400);
+        throw new Error('Password is required');
+    }
 
-    await ensureTeacherSubjectsLinkedFromInviteEmail(teacher, email);
+    const trimmedEmail = String(rawEmail).trim().toLowerCase();
+    const emailRegex = buildEmailExactRegex(trimmedEmail);
+    const existingTeacher = emailRegex
+        ? await Teacher.findOne({ email: emailRegex })
+        : null;
+
+    let teacher;
+    let completedPendingAccount = false;
+
+    if (existingTeacher) {
+        if (isTeacherRegistrationComplete(existingTeacher)) {
+            res.status(400);
+            throw new Error(
+                'An account with this email already exists. Please sign in.',
+            );
+        }
+
+        existingTeacher.firstname = String(req.body.firstname).trim().toLowerCase();
+        existingTeacher.lastname = String(req.body.lastname).trim().toLowerCase();
+        existingTeacher.email = trimmedEmail;
+        existingTeacher.password = password;
+        existingTeacher.signInDate = new Date();
+        if (!existingTeacher.role) {
+            existingTeacher.role = 'teacher';
+        }
+        if (!existingTeacher.image || String(existingTeacher.image).trim() === '') {
+            existingTeacher.image = 'none';
+        }
+
+        teacher = await existingTeacher.save();
+        completedPendingAccount = true;
+    } else {
+        teacher = await Teacher.create({
+            firstname: String(req.body.firstname).trim().toLowerCase(),
+            lastname: String(req.body.lastname).trim().toLowerCase(),
+            role: 'teacher',
+            email: trimmedEmail,
+            image: 'none',
+            signInDate: new Date(),
+            password,
+        });
+    }
+
+    await ensureTeacherSubjectsLinkedFromInviteEmail(teacher, trimmedEmail);
 
     const saved = await Teacher.findById(teacher._id).select('-password');
 
     generateToken(res, saved._id);
 
-    res.status(201).json({
+    res.status(completedPendingAccount ? 200 : 201).json({
         _id: saved._id,
         firstname: saved.firstname,
         lastname: saved.lastname,
         email: saved.email,
         image: saved.image,
         subjects: saved.subjects ?? [],
-    })
-})
+        accountCompleted: completedPendingAccount,
+    });
+});
 
 // POST /api/teacher/logout
 const logoutTeacher = asyncHandler(async (req, res) => {

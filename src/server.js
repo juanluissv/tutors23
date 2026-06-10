@@ -3,7 +3,7 @@ import path from 'path'
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/db.js';
-//import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import teacherRoutes from './routes/teacherRoutes.js'
 import studentRoutes from './routes/studentRoutes.js'
 import chatRoutes from './routes/chatRoutes.js';
@@ -11,6 +11,7 @@ import ttsRoutes from './routes/ttsRoutes.js';
 import schoolAdminRoutes from './routes/schoolAdminRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
+import planRoutes from './routes/planRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import questionsRoutes from './routes/questionsRoutes.js';
 import answerRoutes from './routes/answerRoute.js';
@@ -42,6 +43,7 @@ const __dirname = path.resolve() //set  __dirname to current directory
 app.use('/api/schooladmins', schoolAdminRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/subjects', subjectRoutes);
+app.use('/api/plans', planRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/chat', chatRoutes);
@@ -69,8 +71,8 @@ if (process.env.NODE_ENV === 'production') {
 }
   
 
-// app.use(notFound)
-// app.use(errorHandler)
+app.use(notFound)
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 8100
 

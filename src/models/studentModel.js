@@ -12,12 +12,18 @@ const studentSchema = mongoose.Schema({
     },
     email: {
         type: String,
+        required: false,
+        unique: false,
+        sparse: true,
+    },
+    username: {
+        type: String,
         required: true,
         unique: true
     },
     password: {
         type: String,
-        required: true
+        required: false
     },
     role: {
         type: String,
@@ -44,14 +50,13 @@ const studentSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: false,
         ref: 'School'
-    },    
-    courses: [
+    },      
+    gradesLevel: 
         {
             type: mongoose.Schema.Types.ObjectId,
             required: false,
-            ref: 'Course'
-        },        
-    ],  
+            ref: 'GradeLevel',
+        },
     subjects: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -59,42 +64,40 @@ const studentSchema = mongoose.Schema({
             ref: 'Subject'
         },
     ],
-    subscriptions: [
+    plans: [
         {
-            plan: {
-                type: mongoose.Schema.Types.ObjectId,
-                required: false,
-                ref: 'Plan',
-            },
-            subject:{
-                type: mongoose.Schema.Types.ObjectId,
-                required: false,
-                ref: 'Subject'
-            },
-            startDate: {
-                type: Date,
-                required: false
-            },
-            subProcessing: {
-                type: Boolean,
-                required: false
-            },
-            endDate: {
-                type: Date,
-                required: false
-            },
-            name: {
-                type: String,
-                required: false
-            },            
-            questionsAsked: { type: Number, required: false },
-            questionsLeft: { type: Number, required: false },
-            totalQuestions: { type: Number, required: false },
-            planTotalQuestions: { type: Number, required: false },
-            active: { type: Boolean, required: false },
-            renewal: { type: Boolean, required: false },
-            pastDue: { type: Boolean, required: false },
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'Plan'
         },
+    ],
+    subscriptions: [        
+             {
+                type: mongoose.Schema.Types.ObjectId,
+                required: false,
+                ref: 'Subscription',
+            }                              
+    ],
+    courses: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'Course'
+        },        
+    ],
+    questions: [        
+        {
+           type: mongoose.Schema.Types.ObjectId,
+           required: false,
+           ref: 'Question', 
+       }                              
+    ],
+    answers: [        
+        {
+           type: mongoose.Schema.Types.ObjectId,
+           required: false,
+           ref: 'Answer', 
+       }                              
     ],
 }, {
     timestamps: true

@@ -8,6 +8,7 @@ import {
         updateStudentProfile,
         getMySubjects,
 } from '../controllers/studentController.js';
+import { subscribeStudent } from '../controllers/subscriptionController.js';
 
 const router = express.Router();
 
@@ -19,5 +20,6 @@ router.route('/logout').post(logoutStudent);
 router.route('/profile').get(protectStudent, GetStudentProfile);
 router.route('/profile').put(protectStudent, updateStudentProfile);
 router.route('/mysubjects').get(protectStudent, getMySubjects);
+router.route('/subscribe').post(protectStudent, subscribeStudent);
 
 export default router;

@@ -8,11 +8,7 @@ const subjectSchema = mongoose.Schema({
     description: {
         type: String,
         required: false
-    },
-    grade: {
-        type: Number,
-        required: false
-    },
+    },    
     teacherEmail: [
         {
         type: String,
@@ -38,6 +34,13 @@ const subjectSchema = mongoose.Schema({
         required: true,
         ref: 'School'
     },  
+    gradesLevel: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'GradeLevel',
+        },
+    ],
     courses: [
         {
             type: mongoose.Schema.Types.ObjectId,

@@ -13,6 +13,12 @@ import { useSelector } from 'react-redux'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useGetStudentAnswerByIdQuery } from '../../slices/student/studentAnswersSlice'
+import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
+import {
+	resolveCurrentSubscription,
+	canViewQuestions,
+	getSubscriptionBlockReason,
+} from '../../utils/subscriptionAccess'
 import { ANSWERS_URL } from '../../constants'
 import '../../App.css'
 
@@ -141,6 +147,22 @@ function StudentWatchAnswerScreen () {
 
 	const { studentInfo } = useSelector((state) => state.authStudent)
 
+	const {
+		data: profile,
+		isLoading: isLoadingProfile,
+	} = useGetProfileQuery(undefined, {
+		skip: !studentInfo,
+	})
+
+	const currentSubscription = resolveCurrentSubscription(
+		profile?.subscriptions,
+	)
+	const canView = canViewQuestions(currentSubscription)
+	const viewBlockReason = getSubscriptionBlockReason(
+		currentSubscription,
+		'view',
+	)
+
 	const canFetch = isLikelyMongoId(answerId)
 	const {
 		data: answer,
@@ -149,7 +171,7 @@ function StudentWatchAnswerScreen () {
 		error,
 		refetch,
 	} = useGetStudentAnswerByIdQuery(answerId, {
-		skip: !canFetch,
+		skip: !canFetch || isLoadingProfile || !canView,
 	})
 
 	const videoSrc =
@@ -387,11 +409,28 @@ function StudentWatchAnswerScreen () {
 								</>
 							)}
 
-							{canFetch && isLoading && (
+							{canFetch && !isLoadingProfile && !canView ? (
+								<div className='ask-subscription-notice'>
+									<p className='ask-subscription-notice__title'>
+										Subscription required
+									</p>
+									<p className='ask-subscription-notice__text'>
+										{viewBlockReason}
+									</p>
+									<Link
+										to='/students/subscription'
+										className='ask-subscription-notice__link'
+									>
+										View plans & subscribe
+									</Link>
+								</div>
+							) : null}
+
+							{canFetch && canView && isLoading && (
 								<p className='watch-new__description'>Loading answer…</p>
 							)}
 
-							{canFetch && isError && (
+							{canFetch && canView && isError && (
 								<div style={{ marginBottom: '1rem' }}>
 									<p className='watch-new__description'>{errorMessage}</p>
 									<button
@@ -405,7 +444,7 @@ function StudentWatchAnswerScreen () {
 								</div>
 							)}
 
-							{canFetch && answer && (
+							{canFetch && canView && answer && (
 								<>
 									<h1
 										className={`watch-new__subject watch-new__subject--${subjectColor}`}

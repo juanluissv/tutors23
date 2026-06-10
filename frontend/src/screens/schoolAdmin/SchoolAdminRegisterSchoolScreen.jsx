@@ -8,6 +8,11 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import '../../App.css'
 
+const SCHOOL_TYPE_OPTIONS = [
+	{ value: 'high school', label: 'High school' },
+	{ value: 'university', label: 'University' },
+]
+
 function SchoolAdminRegisterSchoolScreen () {
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
@@ -17,6 +22,7 @@ function SchoolAdminRegisterSchoolScreen () {
 		window.innerWidth > 768,
 	)
 	const [name, setName] = useState('')
+	const [schoolType, setSchoolType] = useState('')
 	const [country, setCountry] = useState('')
 	const [city, setCity] = useState('')
 	const [address, setAddress] = useState('')
@@ -39,9 +45,22 @@ function SchoolAdminRegisterSchoolScreen () {
 			toast.error('Please enter the school name')
 			return
 		}
+		if (country.trim() === '') {
+			toast.error('Please enter the country')
+			return
+		}
+		if (city.trim() === '') {
+			toast.error('Please enter the city')
+			return
+		}
+		if (schoolType.trim() === '') {
+			toast.error('Please select a school type')
+			return
+		}
 
 		const body = {
 			name: name.trim(),
+			schoolType,
 			country: country.trim(),
 			city: city.trim(),
 			address: address.trim(),
@@ -56,7 +75,7 @@ function SchoolAdminRegisterSchoolScreen () {
 				}),
 			)
 			toast.success('School created')
-			navigate('/schooladmins/profile', { replace: true })
+			navigate('/schooladmins/myschools', { replace: true })
 		} catch (err) {
 			toast.error(
 				err?.data?.message || err?.error?.message || 'Could not create school',
@@ -151,9 +170,40 @@ function SchoolAdminRegisterSchoolScreen () {
 											placeholder='e.g. Lincoln High School'
 											autoComplete='organization'
 											value={name}
+											required
 											disabled={isLoading}
 											onChange={(e) => setName(e.target.value)}
 										/>
+									</div>
+									<div className='login-field'>
+										<label
+											className='login-label'
+											htmlFor='schooladmin-register-school-type'
+										>
+											School type
+										</label>
+										<select
+											id='schooladmin-register-school-type'
+											name='schoolType'
+											className='login-input'
+											value={schoolType}
+											required
+											disabled={isLoading}
+											onChange={(e) =>
+												setSchoolType(e.target.value)}
+										>
+											<option value=''>
+												Select school type
+											</option>
+											{SCHOOL_TYPE_OPTIONS.map((opt) => (
+												<option
+													key={opt.value}
+													value={opt.value}
+												>
+													{opt.label}
+												</option>
+											))}
+										</select>
 									</div>
 									<div className='tp-row'>
 										<div className='login-field'>
@@ -171,6 +221,7 @@ function SchoolAdminRegisterSchoolScreen () {
 												placeholder='Country'
 												autoComplete='country-name'
 												value={country}
+												required
 												disabled={isLoading}
 												onChange={(e) =>
 													setCountry(e.target.value)}
@@ -191,6 +242,7 @@ function SchoolAdminRegisterSchoolScreen () {
 												placeholder='City'
 												autoComplete='address-level2'
 												value={city}
+												required
 												disabled={isLoading}
 												onChange={(e) =>
 													setCity(e.target.value)}

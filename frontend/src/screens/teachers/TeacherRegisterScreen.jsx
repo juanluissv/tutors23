@@ -62,8 +62,12 @@ function TeacherRegisterScreen () {
 				password,
 			}).unwrap()
 			dispatch(setTeacherCredentials({ ...res }))
-			toast.success('Registration successful')
-			navigate('/teachers/newquestions')
+			toast.success(
+				res?.accountCompleted
+					? 'Account completed — welcome to Ask to Learn'
+					: 'Registration successful',
+			)
+			navigate(redirect.startsWith('/teachers') ? redirect : '/teachers/newquestions')
 		} catch (err) {
 			toast.error(err?.data?.message || err?.error?.message)
 		}
@@ -88,7 +92,9 @@ function TeacherRegisterScreen () {
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>Create a teacher account</h1>
 									<p className='login-card__subtitle'>
-										Sign up to start teaching on Ask to Learn
+										Sign up to start teaching on Ask to Learn.
+										If your school admin already added you,
+										use the same email to finish your account.
 									</p>
 								</div>
 								<form

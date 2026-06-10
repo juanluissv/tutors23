@@ -15,7 +15,7 @@ function RegisterScreen () {
 	const isSidebarOpen = false
 	const [firstname, setFirstname] = useState('')
 	const [lastname, setLastname] = useState('')
-	const [email, setEmail] = useState('')
+	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [register, { isLoading }] = useRegisterMutation()
@@ -30,6 +30,7 @@ function RegisterScreen () {
 		e.preventDefault()
 		const fn = firstname.trim()
 		const ln = lastname.trim()
+		const un = username.trim().toLowerCase()
 		if (fn === '') {
 			toast.error('Please enter your first name')
 			return
@@ -38,8 +39,8 @@ function RegisterScreen () {
 			toast.error('Please enter your last name')
 			return
 		}
-		if (email.trim() === '') {
-			toast.error('Please enter email')
+		if (un === '') {
+			toast.error('Please enter your username')
 			return
 		}
 		if (password === '') {
@@ -58,12 +59,18 @@ function RegisterScreen () {
 			const res = await register({
 				firstname: fn,
 				lastname: ln,
-				email: email.trim(),
+				username: un,
 				password,
 			}).unwrap()
 			dispatch(setStudentCredentials({ ...res }))
-			toast.success('Account created')
-			navigate(redirect)
+			toast.success(
+				res?.accountCompleted
+					? 'Account completed — welcome to Ask to Learn'
+					: 'Account created',
+			)
+			navigate(
+				redirect === '/' ? '/students/mysubjects' : redirect,
+			)
 		} catch (err) {
 			toast.error(err?.data?.message || err?.error || 'Registration failed')
 		}
@@ -85,7 +92,10 @@ function RegisterScreen () {
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>Create an account</h1>
 									<p className='login-card__subtitle'>
-										Sign up to start learning
+										Your school admin must add you to their
+										school first. Then use the username they
+										gave you to set your password and finish
+										your account.
 									</p>
 								</div>
 								<form
@@ -127,19 +137,19 @@ function RegisterScreen () {
 										/>
 									</div>
 									<div className='login-field'>
-										<label className='login-label' htmlFor='email'>
-											Email
+										<label className='login-label' htmlFor='username'>
+											Username
 										</label>
 										<input
-											type='email'
-											id='email'
-											name='email'
+											type='text'
+											id='username'
+											name='username'
 											className='login-input'
-											placeholder='you@example.com'
-											autoComplete='email'
-											value={email}
+											placeholder='e.g. alex.rivera.4821'
+											autoComplete='username'
+											value={username}
 											disabled={isLoading}
-											onChange={(e) => setEmail(e.target.value)}
+											onChange={(e) => setUsername(e.target.value)}
 										/>
 									</div>
 									<div className='login-field'>

@@ -3,6 +3,10 @@ import { NavLink, Link, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { VALORES_SECTIONS } from '../screens/9/valores/valoresNavData'
 import { useGetStudentNewAnswersQuery } from '../slices/student/studentAnswersSlice'
+import {
+  resolveCurrentSubscription,
+  canViewQuestions,
+} from '../utils/subscriptionAccess'
 
 const imgIcon = `${process.env.PUBLIC_URL}/burg.svg`
 
@@ -179,9 +183,13 @@ function Sidebar ({ isOpen, toggleSidebar }) {
   const { studentInfo } = useSelector((state) => state.authStudent)
   const studentId = studentInfo?._id ? String(studentInfo._id) : null
 
+  const canViewNewAnswers = canViewQuestions(
+    resolveCurrentSubscription(studentInfo?.subscriptions),
+  )
+
   const { data: studentNewAnswers = [] } = useGetStudentNewAnswersQuery(
     studentId,
-    { skip: !studentId },
+    { skip: !studentId || !canViewNewAnswers },
   )
 
   const newAnswersCount = useMemo(
@@ -281,14 +289,6 @@ function Sidebar ({ isOpen, toggleSidebar }) {
             </span>
             <span className="sidebar-nav-link__label">AI Tutor</span>
           </NavLink>
-          <NavLink to="/students/askteacher" className={askTeacherNavClass}>
-            <span className="sidebar-nav-link__icon-well" aria-hidden="true">
-              <IconAskTeacher />
-            </span>
-            <span className="sidebar-nav-link__label">
-              Ask Your Teacher
-            </span>
-          </NavLink>
           <NavLink to="/students/newanswers" className={newAnswersNavClass}>
             <span className="sidebar-nav-link__icon-well" aria-hidden="true">
               <IconTeacherAnswers />
@@ -307,6 +307,15 @@ function Sidebar ({ isOpen, toggleSidebar }) {
               ) : null}
             </span>
           </NavLink>
+          <NavLink to="/students/askteacher" className={askTeacherNavClass}>
+            <span className="sidebar-nav-link__icon-well" aria-hidden="true">
+              <IconAskTeacher />
+            </span>
+            <span className="sidebar-nav-link__label">
+              Ask Your Teacher
+            </span>
+          </NavLink>
+          
           <NavLink to="/students/mysubjects" className={subjectsNavClass}>
             <span className="sidebar-nav-link__icon-well" aria-hidden="true">
               <IconSubjects />

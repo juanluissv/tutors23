@@ -4,12 +4,15 @@ import mongoose from 'mongoose'
 import Question from '../models/questionModel.js'
 import Answer from '../models/answerModel.js'
 import Subject from '../models/subjectModel.js'
+import School from '../models/schoolModel.js'
+import SchoolAdmin from '../models/schoolAdminModel.js'
 import {
     getS3,
     getBookBucketName,
     getQuestionVideoKeyPrefix,
     getPublicBookUrlFromKey,
 } from '../config/s3Client.js'
+import { getStudentActiveSubscription } from './subscriptionController.js'
 
 // POST /api/questions/student — enrolled student asks a question
 const createStudentQuestion = asyncHandler(async (req, res) => {
@@ -39,6 +42,14 @@ const createStudentQuestion = asyncHandler(async (req, res) => {
     if (!enrolled) {
         res.status(403)
         throw new Error('You are not enrolled in this subject')
+    }
+
+    const subscription = await getStudentActiveSubscription(req.student._id)
+    if (!subscription) {
+        res.status(403)
+        throw new Error(
+            'An active subscription is required to ask questions',
+        )
     }
 
     const teachers = subject.teachers || []
@@ -120,6 +131,26 @@ const uploadStudentQuestionVideo = asyncHandler(async (req, res) => {
         && String(question.mediaId).trim() !== ''
         ? String(question.mediaId).trim()
         : null
+    const isFirstVideoUpload = !previousKey
+
+    let subscription = null
+    if (isFirstVideoUpload) {
+        subscription = await getStudentActiveSubscription(req.student._id)
+        if (!subscription) {
+            res.status(403)
+            throw new Error(
+                'An active subscription is required to ask questions',
+            )
+        }
+
+        const questionsLeft = Number(subscription.questionsLeft) || 0
+        if (questionsLeft <= 0) {
+            res.status(403)
+            throw new Error(
+                'You have no questions remaining on your subscription',
+            )
+        }
+    }
 
     const contentType = req.file.mimetype
         && String(req.file.mimetype).trim() !== ''
@@ -136,6 +167,17 @@ const uploadStudentQuestionVideo = asyncHandler(async (req, res) => {
 
         question.mediaId = upload.Key
         await question.save()
+
+        if (isFirstVideoUpload && subscription) {
+            subscription.questionsAsked =
+                (subscription.questionsAsked ?? 0) + 1
+            subscription.questionsLeft = Math.max(
+                0,
+                (Number(subscription.totalQuestions) || 0)
+                    - subscription.questionsAsked,
+            )
+            await subscription.save()
+        }
 
         if (previousKey && previousKey !== upload.Key) {
             try {
@@ -268,9 +310,20 @@ const getQuestionsByTeacherId = asyncHandler(async (req, res) => {
     res.status(200).json(questions)
 })
 
-// GET /api/questions/student/previous?page=&limit= — answered Q&A for logged-in student
+// GET /api/questions/student/previous?page=&limit=
+// Student questions with video (answered or awaiting reply)
 const getStudentPreviousQuestionsWithAnswers = asyncHandler(
     async (req, res) => {
+        const subscription = await getStudentActiveSubscription(
+            req.student._id,
+        )
+        if (!subscription) {
+            res.status(403)
+            throw new Error(
+                'An active subscription is required to view questions',
+            )
+        }
+
         const rawPage = parseInt(String(req.query.page ?? '1'), 10)
         const rawLimit = parseInt(String(req.query.limit ?? '1'), 10)
         const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
@@ -288,7 +341,9 @@ const getStudentPreviousQuestionsWithAnswers = asyncHandler(
             subjectFilter = { subject: qSubject }
         }
 
-        const answersWithVideoIds = await Answer.find({
+        const filter = {
+            student: req.student._id,
+            ...subjectFilter,
             $expr: {
                 $gt: [
                     {
@@ -303,12 +358,6 @@ const getStudentPreviousQuestionsWithAnswers = asyncHandler(
                     0,
                 ],
             },
-        }).distinct('_id')
-
-        const filter = {
-            student: req.student._id,
-            answer: { $in: answersWithVideoIds },
-            ...subjectFilter,
         }
 
         const total = await Question.countDocuments(filter)
@@ -341,7 +390,8 @@ const getStudentPreviousQuestionsWithAnswers = asyncHandler(
     },
 )
 
-// GET /api/questions/teacher/previous?page=&limit= — answered Q&A for logged-in teacher
+// GET /api/questions/teacher/previous?subject=&page=&limit=
+// answered Q&A for logged-in teacher (optional subject filter)
 const getTeacherPreviousQuestionsWithAnswers = asyncHandler(
     async (req, res) => {
         const rawPage = parseInt(String(req.query.page ?? '1'), 10)
@@ -397,6 +447,226 @@ const getTeacherPreviousQuestionsWithAnswers = asyncHandler(
     },
 )
 
+// GET /api/questions/schooladmin/previous?subject=&page=&limit=
+const getSchoolAdminPreviousQuestionsWithAnswers = asyncHandler(
+    async (req, res) => {
+        const rawPage = parseInt(String(req.query.page ?? '1'), 10)
+        const rawLimit = parseInt(String(req.query.limit ?? '1'), 10)
+        const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
+        const limit = Number.isFinite(rawLimit)
+            ? Math.min(50, Math.max(1, rawLimit))
+            : 1
+        const skip = (page - 1) * limit
+
+        const qSubject = req.query.subject
+        if (
+            !qSubject
+            || !mongoose.Types.ObjectId.isValid(String(qSubject))
+        ) {
+            res.status(400)
+            throw new Error('A valid subject id is required')
+        }
+
+        const subject = await Subject.findById(qSubject)
+            .select('school')
+            .lean()
+
+        if (!subject) {
+            res.status(404)
+            throw new Error('Subject not found')
+        }
+
+        const schoolAdmin = await SchoolAdmin.findById(req.schoolAdmin._id)
+
+        if (!schoolAdmin) {
+            res.status(404)
+            throw new Error('School admin not found')
+        }
+
+        if (
+            schoolAdmin.school
+            && String(schoolAdmin.school) !== String(subject.school)
+        ) {
+            res.status(403)
+            throw new Error('Not authorized to view questions for this subject')
+        }
+
+        const school = await School.findById(subject.school)
+            .select('admin')
+            .lean()
+
+        if (!school) {
+            res.status(404)
+            throw new Error('School not found')
+        }
+
+        if (
+            !school.admin
+            || String(school.admin) !== String(req.schoolAdmin._id)
+        ) {
+            res.status(403)
+            throw new Error('Not authorized to view questions for this subject')
+        }
+
+        const filter = {
+            subject: qSubject,
+            answer: { $exists: true, $ne: null },
+        }
+
+        const total = await Question.countDocuments(filter)
+
+        const questions = await Question.find(filter)
+            .sort({ dateCreated: -1, createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('subject', 'title')
+            .populate('student', 'firstname lastname email')
+            .populate('teacher', 'firstname lastname')
+            .populate({
+                path: 'answer',
+                select: 'title description mediaId dateCreated teacher',
+                populate: {
+                    path: 'teacher',
+                    select: 'firstname lastname',
+                },
+            })
+            .lean()
+
+        const pages = total === 0 ? 0 : Math.ceil(total / limit)
+
+        res.status(200).json({
+            items: questions,
+            page,
+            pages,
+            total,
+            limit,
+        })
+    },
+)
+
+async function verifySchoolAdminSubjectAccess (req, res, subjectId) {
+    if (!subjectId || !mongoose.Types.ObjectId.isValid(String(subjectId))) {
+        res.status(400)
+        throw new Error('Invalid subject')
+    }
+
+    const subject = await Subject.findById(subjectId).select('school').lean()
+
+    if (!subject) {
+        res.status(404)
+        throw new Error('Subject not found')
+    }
+
+    const schoolAdmin = await SchoolAdmin.findById(req.schoolAdmin._id)
+
+    if (!schoolAdmin) {
+        res.status(404)
+        throw new Error('School admin not found')
+    }
+
+    if (
+        schoolAdmin.school
+        && String(schoolAdmin.school) !== String(subject.school)
+    ) {
+        res.status(403)
+        throw new Error('Not authorized to view content for this subject')
+    }
+
+    const school = await School.findById(subject.school)
+        .select('admin')
+        .lean()
+
+    if (!school) {
+        res.status(404)
+        throw new Error('School not found')
+    }
+
+    if (
+        !school.admin
+        || String(school.admin) !== String(req.schoolAdmin._id)
+    ) {
+        res.status(403)
+        throw new Error('Not authorized to view content for this subject')
+    }
+}
+
+// GET /api/questions/schooladmin/question/:questionId
+const getQuestionByIdForSchoolAdmin = asyncHandler(async (req, res) => {
+    const { questionId } = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(String(questionId))) {
+        res.status(400)
+        throw new Error('Invalid question id')
+    }
+
+    const question = await Question.findById(questionId)
+        .populate('subject', 'title')
+        .populate('student', 'firstname lastname')
+        .populate('teacher', 'firstname lastname')
+        .lean()
+
+    if (!question) {
+        res.status(404)
+        throw new Error('Question not found')
+    }
+
+    const subjectId = question.subject?._id ?? question.subject
+    await verifySchoolAdminSubjectAccess(req, res, subjectId)
+
+    res.status(200).json(question)
+})
+
+// GET /api/questions/schooladmin/question/:questionId/video
+const getQuestionVideoForSchoolAdmin = asyncHandler(async (req, res) => {
+    const { questionId } = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(String(questionId))) {
+        res.status(400)
+        throw new Error('Invalid question id')
+    }
+
+    const question = await Question.findById(questionId)
+
+    if (!question) {
+        res.status(404)
+        throw new Error('Question not found')
+    }
+
+    await verifySchoolAdminSubjectAccess(req, res, question.subject)
+
+    const key = question.mediaId && String(question.mediaId).trim() !== ''
+        ? String(question.mediaId).trim()
+        : ''
+
+    if (!key) {
+        res.status(404)
+        throw new Error('No video for this question')
+    }
+
+    const direct = getPublicBookUrlFromKey(key)
+    if (direct) {
+        return res.redirect(302, direct)
+    }
+
+    const s3 = getS3()
+    const bucket = getBookBucketName()
+    if (!s3 || !bucket) {
+        res.status(503)
+        throw new Error(
+            'File storage is not configured. Set AWS credentials and '
+            + 'AWS_S3_BUCKET.',
+        )
+    }
+
+    const url = s3.getSignedUrl('getObject', {
+        Bucket: bucket,
+        Key: key,
+        Expires: 60 * 60,
+        ResponseContentType: 'video/webm',
+    })
+    return res.redirect(302, url)
+})
+
 // GET /api/questions/student/question/:questionId — student's own question metadata
 const getQuestionByIdForStudent = asyncHandler(async (req, res) => {
     const { questionId } = req.params
@@ -421,6 +691,14 @@ const getQuestionByIdForStudent = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to view this question')
     }
 
+    const subscription = await getStudentActiveSubscription(req.student._id)
+    if (!subscription) {
+        res.status(403)
+        throw new Error(
+            'An active subscription is required to view questions',
+        )
+    }
+
     res.status(200).json(question)
 })
 
@@ -443,6 +721,14 @@ const getQuestionVideoForStudent = asyncHandler(async (req, res) => {
     if (String(question.student) !== String(req.student._id)) {
         res.status(403)
         throw new Error('Not authorized to view this video')
+    }
+
+    const subscription = await getStudentActiveSubscription(req.student._id)
+    if (!subscription) {
+        res.status(403)
+        throw new Error(
+            'An active subscription is required to view questions',
+        )
     }
 
     const key = question.mediaId && String(question.mediaId).trim() !== ''
@@ -486,6 +772,9 @@ export {
     getQuestionsByTeacherId,
     getStudentPreviousQuestionsWithAnswers,
     getTeacherPreviousQuestionsWithAnswers,
+    getSchoolAdminPreviousQuestionsWithAnswers,
+    getQuestionByIdForSchoolAdmin,
+    getQuestionVideoForSchoolAdmin,
     getQuestionByIdForStudent,
     getQuestionVideoForStudent,
 }

@@ -1,4 +1,5 @@
 import asyncHandler from '../middleware/asyncHandler.js';
+import { getStudentActiveSubscription } from './subscriptionController.js';
 import OpenAI from 'openai';
 import { playAudio } from "openai/helpers/audio";
 import dotenv from 'dotenv';
@@ -15,6 +16,14 @@ const generateSpeech = asyncHandler(async (req, res) => {
     if (!text) {
         res.status(400);
         throw new Error('Text is required');
+    }
+
+    const subscription = await getStudentActiveSubscription(req.student._id);
+    if (!subscription) {
+        res.status(403);
+        throw new Error(
+            'An active subscription is required to use the AI tutor',
+        );
     }
 
     try {

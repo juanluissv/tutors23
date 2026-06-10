@@ -139,7 +139,7 @@ function TeacherStudentsScreen () {
 									</>
 								)}
 								{studentsList.length} students enrolled &middot;{' '}
-								{activeCount} active
+								{activeCount} with active subscription
 							</p>
 
 							{isLoading && (
@@ -191,8 +191,8 @@ function TeacherStudentsScreen () {
 												<tr>
 													<th>Student</th>
 													<th>Subject</th>
-													<th>Questions</th>
-													<th>Status</th>
+													<th>Questions this month</th>
+													<th>Subscription</th>
 													<th>Joined</th>
 												</tr>
 											</thead>

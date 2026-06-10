@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
@@ -10,6 +10,343 @@ import {
 } from '../../slices/student/studentApiSlice'
 import { setStudentCredentials } from '../../slices/student/authStudentSlice'
 import '../../App.css'
+
+const PROFILE_TAB = 'profile'
+const SUBSCRIPTION_TAB = 'subscription'
+
+function resolveCurrentSubscription (subscriptions) {
+	const list = Array.isArray(subscriptions) ? subscriptions : []
+	if (list.length === 0) {
+		return null
+	}
+	const active = list.filter((sub) => sub?.active === true)
+	const pool = active.length > 0 ? active : list
+	return [...pool].sort((a, b) => {
+		const aTime = new Date(a?.createdAt || 0).getTime()
+		const bTime = new Date(b?.createdAt || 0).getTime()
+		return bTime - aTime
+	})[0]
+}
+
+function formatDisplayDate (value) {
+	if (!value) {
+		return '—'
+	}
+	const d = new Date(value)
+	if (Number.isNaN(d.getTime())) {
+		return '—'
+	}
+	return d.toLocaleDateString(undefined, {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	})
+}
+
+function computeDaysUntilRenewal (endDate) {
+	if (!endDate) {
+		return null
+	}
+	const end = new Date(endDate)
+	if (Number.isNaN(end.getTime())) {
+		return null
+	}
+	const startOfDay = (date) => {
+		const d = new Date(date)
+		d.setHours(0, 0, 0, 0)
+		return d
+	}
+	const msPerDay = 1000 * 60 * 60 * 24
+	const diff = Math.round(
+		(startOfDay(end).getTime() - startOfDay(new Date()).getTime())
+			/ msPerDay,
+	)
+	return Math.max(0, diff)
+}
+
+function formatRenewalDaysLabel (subscription) {
+	const days =
+		subscription?.daysUntilRenewal ?? computeDaysUntilRenewal(
+			subscription?.endDate,
+		)
+	if (days == null) {
+		return '—'
+	}
+	if (subscription?.pastDue) {
+		return 'Past due — renew now'
+	}
+	if (subscription?.renewal === false) {
+		if (days === 0) {
+			return 'Expires today'
+		}
+		if (days === 1) {
+			return '1 day until expiration'
+		}
+		return `${days} days until expiration`
+	}
+	if (days === 0) {
+		return 'Renews today'
+	}
+	if (days === 1) {
+		return '1 day until renewal'
+	}
+	return `${days} days until renewal`
+}
+
+function formatPlanCurrency (price) {
+	const n = Number(price)
+	if (Number.isNaN(n)) {
+		return '—'
+	}
+	try {
+		return new Intl.NumberFormat(undefined, {
+			style: 'currency',
+			currency: 'USD',
+			minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+			maximumFractionDigits: 2,
+		}).format(n)
+	} catch {
+		return `$${n}`
+	}
+}
+
+function getPlanDisplayName (plan) {
+	const gradeName = plan?.gradesLevel?.name
+	if (gradeName) {
+		return `${gradeName} Plan`
+	}
+	return 'Learning Plan'
+}
+
+function getSubjectTitles (plan) {
+	const subjects = Array.isArray(plan?.subjects) ? plan.subjects : []
+	return subjects
+		.map((subject) => {
+			if (subject != null && typeof subject === 'object') {
+				return String(subject.title || '').trim()
+			}
+			return ''
+		})
+		.filter(Boolean)
+}
+
+function SubscriptionDetailRow ({ label, value, highlight }) {
+	return (
+		<div className='student-profile-sub__row'>
+			<span className='student-profile-sub__label'>{label}</span>
+			<span
+				className={
+					'student-profile-sub__value' +
+					(highlight ? ' student-profile-sub__value--highlight' : '')
+				}
+			>
+				{value}
+			</span>
+		</div>
+	)
+}
+
+function StudentSubscriptionPanel ({ subscription, hasPlans }) {
+	if (!subscription) {
+		return (
+			<div className='student-profile-sub student-profile-sub--empty'>
+				<p className='student-profile-sub__empty-title'>
+					No active subscription
+				</p>
+				<p className='student-profile-sub__empty-text'>
+					{hasPlans
+						? 'Subscribe to your assigned plan to unlock full access.'
+						: 'Contact your school admin to get a plan assigned to your account.'}
+				</p>
+				{hasPlans ? (
+					<Link
+						to='/students/subscription'
+						className='student-profile-sub__cta'
+					>
+						Subscribe now
+					</Link>
+				) : null}
+			</div>
+		)
+	}
+
+	const plan = subscription.plan
+	const planName = plan ? getPlanDisplayName(plan) : '—'
+	const subjectTitles = plan ? getSubjectTitles(plan) : []
+	const asked = Number(subscription.questionsAsked) || 0
+	const total = Number(subscription.totalQuestions) || 0
+	const left = Number(subscription.questionsLeft) || 0
+	const usedPct =
+		total > 0 ? Math.min(100, Math.round((asked / total) * 100)) : 0
+	const daysUntilRenewal =
+		subscription.daysUntilRenewal
+		?? computeDaysUntilRenewal(subscription.endDate)
+	const renewalDaysLabel = formatRenewalDaysLabel(subscription)
+	const isRenewalUrgent =
+		subscription.pastDue
+		|| (daysUntilRenewal != null && daysUntilRenewal <= 3)
+
+	return (
+		<div className='student-profile-sub'>
+			<div className='student-profile-sub__hero'>
+				<div className='student-profile-sub__hero-top'>
+					<h2 className='student-profile-sub__plan-name'>
+						{planName}
+					</h2>
+					<span
+						className={
+							'student-profile-sub__status' +
+							(subscription.active
+								? ' student-profile-sub__status--active'
+								: ' student-profile-sub__status--inactive')
+						}
+					>
+						{subscription.active ? 'Active' : 'Inactive'}
+					</span>
+				</div>
+				{plan?.price != null && (
+					<p className='student-profile-sub__price'>
+						{formatPlanCurrency(plan.price)}
+						<span className='student-profile-sub__price-per'>
+							/month
+						</span>
+					</p>
+				)}
+				{daysUntilRenewal != null && (
+					<div
+						className={
+							'student-profile-sub__renewal' +
+							(isRenewalUrgent
+								? ' student-profile-sub__renewal--urgent'
+								: '')
+						}
+					>
+						<span className='student-profile-sub__renewal-value'>
+							{subscription.pastDue ? '0' : String(daysUntilRenewal)}
+						</span>
+						<span className='student-profile-sub__renewal-copy'>
+							<span className='student-profile-sub__renewal-label'>
+								{subscription.pastDue
+									? 'Renewal overdue'
+									: subscription.renewal === false
+										? 'Days until expiration'
+										: 'Days until renewal'}
+							</span>
+							<span className='student-profile-sub__renewal-detail'>
+								{renewalDaysLabel}
+								{subscription.endDate
+									? ` · ${formatDisplayDate(subscription.endDate)}`
+									: ''}
+							</span>
+						</span>
+					</div>
+				)}
+			</div>
+
+			{total > 0 && (
+				<div className='student-profile-sub__usage'>
+					<div className='student-profile-sub__usage-head'>
+						<span>Questions this period</span>
+						<span>
+							{asked} used · {left} left · {total} total
+						</span>
+					</div>
+					<div
+						className='student-profile-sub__usage-bar'
+						role='progressbar'
+						aria-valuenow={usedPct}
+						aria-valuemin={0}
+						aria-valuemax={100}
+						aria-label='Questions used'
+					>
+						<div
+							className='student-profile-sub__usage-fill'
+							style={{ width: `${usedPct}%` }}
+						/>
+					</div>
+				</div>
+			)}
+
+			<div className='student-profile-sub__grid'>
+				<SubscriptionDetailRow
+					label='Start date'
+					value={formatDisplayDate(subscription.startDate)}
+				/>
+				<SubscriptionDetailRow
+					label='End date'
+					value={formatDisplayDate(subscription.endDate)}
+				/>
+				<SubscriptionDetailRow
+					label={
+						subscription.renewal === false
+							? 'Days until expiration'
+							: 'Days until renewal'
+					}
+					value={renewalDaysLabel}
+					highlight={
+						daysUntilRenewal != null
+						&& daysUntilRenewal > 0
+						&& !subscription.pastDue
+					}
+				/>
+				<SubscriptionDetailRow
+					label='Questions asked'
+					value={String(asked)}
+				/>
+				<SubscriptionDetailRow
+					label='Questions left'
+					value={String(left)}
+					highlight={left > 0}
+				/>
+				<SubscriptionDetailRow
+					label='Total questions'
+					value={String(total)}
+				/>
+				<SubscriptionDetailRow
+					label='Auto-renewal'
+					value={subscription.renewal ? 'Enabled' : 'Disabled'}
+				/>
+				<SubscriptionDetailRow
+					label='Payment status'
+					value={subscription.pastDue ? 'Past due' : 'Up to date'}
+					highlight={!subscription.pastDue}
+				/>
+				<SubscriptionDetailRow
+					label='Subscribed on'
+					value={formatDisplayDate(subscription.createdAt)}
+				/>
+				{plan?.active !== undefined && (
+					<SubscriptionDetailRow
+						label='Plan status'
+						value={plan.active !== false ? 'Available' : 'Inactive'}
+					/>
+				)}
+			</div>
+
+			{subjectTitles.length > 0 && (
+				<div className='student-profile-sub__subjects'>
+					<span className='student-profile-sub__subjects-label'>
+						Included subjects
+					</span>
+					<ul className='student-profile-sub__subjects-list'>
+						{subjectTitles.map((title) => (
+							<li key={title}>{title}</li>
+						))}
+					</ul>
+				</div>
+			)}
+
+			{subscription.active && (
+				<Link
+					to='/students/subscription'
+					className='student-profile-sub__manage-link'
+				>
+					Manage subscription
+				</Link>
+			)}
+		</div>
+	)
+}
 
 function StudentProfileScreen () {
 	const dispatch = useDispatch()
@@ -26,6 +363,7 @@ function StudentProfileScreen () {
 	const [birthDate, setBirthDate] = useState('')
 	const [newPassword, setNewPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
+	const [activeTab, setActiveTab] = useState(PROFILE_TAB)
 
 	const {
 		data: profile,
@@ -95,6 +433,7 @@ function StudentProfileScreen () {
 					_id: updated._id,
 					firstname: updated.firstname,
 					lastname: updated.lastname,
+					username: updated.username ?? studentInfo?.username,
 					email: updated.email,
 					country: updated.country,
 					city: updated.city,
@@ -111,11 +450,16 @@ function StudentProfileScreen () {
 	}
 
 	const subjects = profile?.subjects ?? []
+	const plans = profile?.plans ?? []
+	const currentSubscription = useMemo(
+		() => resolveCurrentSubscription(profile?.subscriptions),
+		[profile?.subscriptions],
+	)
 	const isBusy = isSaving
-	const showForm = !isLoading && !isError && profile
+	const showContent = !isLoading && !isError && profile
 
 	return (
-		<div className='chat-app chat-app--login ask-screen'>
+		<div className='chat-app ask-screen'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 				<div className='main-content'>
@@ -123,15 +467,13 @@ function StudentProfileScreen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area content-area--login'>
+					<div className='content-area content-area--login content-area--login-scroll'>
 						<div
 							className={
 								'center-content2 login-screen login-screen--wide'
 							}
 						>
-							<br /><br /><br />
 							<div className='login-card'>
-								<br /><br /><br />
 								<div
 									className='login-card__accent'
 									aria-hidden
@@ -151,9 +493,58 @@ function StudentProfileScreen () {
 											'login-card__subtitle--wide'
 										}
 									>
-										View and update your account details.
+										{activeTab === PROFILE_TAB
+											? 'View and update your account details.'
+											: 'View your current subscription and usage.'}
 									</p>
 								</div>
+
+								{showContent && (
+									<nav
+										className='student-profile-tabs'
+										role='tablist'
+										aria-label='Profile sections'
+									>
+										<button
+											type='button'
+											role='tab'
+											id='student-profile-tab-profile'
+											aria-selected={activeTab === PROFILE_TAB}
+											aria-controls='student-profile-panel-profile'
+											className={
+												'student-profile-tabs__btn' +
+												(activeTab === PROFILE_TAB
+													? ' student-profile-tabs__btn--active'
+													: '')
+											}
+											onClick={() =>
+												setActiveTab(PROFILE_TAB)}
+										>
+											Profile
+										</button>
+										<button
+											type='button'
+											role='tab'
+											id='student-profile-tab-subscription'
+											aria-selected={
+												activeTab === SUBSCRIPTION_TAB
+											}
+											aria-controls={
+												'student-profile-panel-subscription'
+											}
+											className={
+												'student-profile-tabs__btn' +
+												(activeTab === SUBSCRIPTION_TAB
+													? ' student-profile-tabs__btn--active'
+													: '')
+											}
+											onClick={() =>
+												setActiveTab(SUBSCRIPTION_TAB)}
+										>
+											My subscription
+										</button>
+									</nav>
+								)}
 
 								{!studentInfo && (
 									<p className='login-card__subtitle'>
@@ -180,7 +571,12 @@ function StudentProfileScreen () {
 									</p>
 								)}
 
-								{showForm && (
+								{showContent && activeTab === PROFILE_TAB && (
+								<div
+									role='tabpanel'
+									id='student-profile-panel-profile'
+									aria-labelledby='student-profile-tab-profile'
+								>
 								<form
 									className='login-form'
 									id='student-profile-form'
@@ -228,6 +624,25 @@ function StudentProfileScreen () {
 													setLastname(e.target.value)}
 											/>
 										</div>
+									</div>
+
+									<div className='login-field'>
+										<label
+											className='login-label'
+											htmlFor='sp-username'
+										>
+											Username
+										</label>
+										<input
+											type='text'
+											id='sp-username'
+											name='username'
+											className='login-input'
+											value={profile?.username ?? ''}
+											readOnly
+											disabled
+											aria-readonly='true'
+										/>
 									</div>
 
 									<div className='login-field'>
@@ -393,6 +808,23 @@ function StudentProfileScreen () {
 										{isBusy ? 'Saving…' : 'Save changes'}
 									</button>
 								</form>
+								</div>
+								)}
+
+								{showContent && activeTab === SUBSCRIPTION_TAB && (
+									<div
+										role='tabpanel'
+										id='student-profile-panel-subscription'
+										aria-labelledby={
+											'student-profile-tab-subscription'
+										}
+										className='student-profile-sub-panel'
+									>
+										<StudentSubscriptionPanel
+											subscription={currentSubscription}
+											hasPlans={plans.length > 0}
+										/>
+									</div>
 								)}
 							</div>
 						</div>

@@ -1,9 +1,23 @@
 import '../App.css';
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useSearchParams, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+  useLocation,
+} from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useGetChatMutation } from '../slices/chatSlice';
+import { useGetProfileQuery } from '../slices/student/studentApiSlice';
+import {
+  resolveCurrentSubscription,
+  canViewQuestions,
+  getSubscriptionBlockReason,
+} from '../utils/subscriptionAccess';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -44,14 +58,39 @@ const SUGGESTED_QUESTIONS = [
 
 
 
+function getChatErrorMessage (error) {
+  return (
+    error?.data?.message
+    || error?.error
+    || 'Sorry, there was an error processing your question.'
+  );
+}
+
 function HomeScreen() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { studentInfo } = useSelector((state) => state.authStudent);
   const isExamRoute =
     location.pathname === '/exam' || location.pathname === '/examen';
 
+  const {
+    data: profile,
+    isLoading: isLoadingProfile,
+  } = useGetProfileQuery(undefined, {
+    skip: !studentInfo,
+  });
 
+  const currentSubscription = useMemo(
+    () => resolveCurrentSubscription(profile?.subscriptions),
+    [profile?.subscriptions],
+  );
+  const canUseAiTutor = canViewQuestions(currentSubscription);
+  const aiTutorBlockReason = getSubscriptionBlockReason(
+    currentSubscription,
+    'view',
+  );
 
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([]);
@@ -71,6 +110,15 @@ function HomeScreen() {
     const hasMountedRef = useRef(false);
 
     const [getChat, { isLoading }] = useGetChatMutation();
+
+    useEffect(() => {
+      if (!studentInfo) {
+        const next = encodeURIComponent(
+          location.pathname + location.search,
+        );
+        navigate(`/login?redirect=${next}`, { replace: true });
+      }
+    }, [studentInfo, navigate, location.pathname, location.search]);
 
     const cleanupAudio = () => {
         if (abortControllerRef.current) {
@@ -144,6 +192,10 @@ function HomeScreen() {
 
     // When there is a query in the URL, prefill and auto-send it once
     useEffect(() => {
+        if (isLoadingProfile || !canUseAiTutor) {
+          return;
+        }
+
         const queryFromUrl = searchParams.get('query');
         const trimmedQuery = queryFromUrl ? queryFromUrl.trim() : "";
 
@@ -167,7 +219,10 @@ function HomeScreen() {
                     setMessages(prev => [...prev, aiMessage]);
                 } catch (error) {
                     console.error(error);
-                    const errorMessage = { type: 'answer', content: 'Sorry, there was an error processing your question.' };
+                    const errorMessage = {
+                      type: 'answer',
+                      content: getChatErrorMessage(error),
+                    };
                     setMessages(prev => [...prev, errorMessage]);
                 } finally {
                     setQuestion("");
@@ -177,7 +232,14 @@ function HomeScreen() {
 
             sendFromUrl();
         }
-    }, [searchParams, hasSentQueryFromUrl, id, getChat]);
+    }, [
+      searchParams,
+      hasSentQueryFromUrl,
+      id,
+      getChat,
+      canUseAiTutor,
+      isLoadingProfile,
+    ]);
 
 
     // Cleanup audio on component unmount
@@ -230,6 +292,11 @@ function HomeScreen() {
         e.preventDefault();
         if (!question.trim()) return;
 
+        if (!canUseAiTutor) {
+          toast.error(aiTutorBlockReason);
+          return;
+        }
+
         // Add the question to messages immediately
         const userMessage = { type: 'question', content: question };
         setMessages(prev => [...prev, userMessage]);
@@ -252,18 +319,20 @@ function HomeScreen() {
             setMessages(prev => [...prev, aiMessage]);
         } catch (error) {
             console.error(error);
-            const errorMessage = { type: 'answer', content: 'Sorry, there was an error processing your question.' };
+            const errorMessage = {
+              type: 'answer',
+              content: getChatErrorMessage(error),
+            };
             setMessages(prev => [...prev, errorMessage]);
         }
     }
 
-
-
-    
-
-
-
     const handleQuestionClick = async (selectedQuestion) => {
+        if (!canUseAiTutor) {
+          toast.error(aiTutorBlockReason);
+          return;
+        }
+
         // Add the question to messages immediately
         const userMessage = { type: 'question', content: selectedQuestion };
         setMessages(prev => [...prev, userMessage]);
@@ -284,12 +353,20 @@ function HomeScreen() {
           }
         } catch (error) {
             console.error(error);
-            const errorMessage = { type: 'answer', content: 'Sorry, there was an error processing your question.' };
+            const errorMessage = {
+              type: 'answer',
+              content: getChatErrorMessage(error),
+            };
             setMessages(prev => [...prev, errorMessage]);
         }
     }
 
     const playAudio = async (text, messageIndex) => {
+        if (!canUseAiTutor) {
+          toast.error(aiTutorBlockReason);
+          return;
+        }
+
         try {
             // If clicking the same message that's playing or loading, just stop it
             if (playingAudio === messageIndex || loadingAudio === messageIndex) {
@@ -311,12 +388,23 @@ function HomeScreen() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ text }),
                 signal: abortControllerRef.current.signal,
             });
 
             if (!response.ok) {
-                throw new Error('Failed to generate speech');
+                let message = 'Failed to generate speech';
+                try {
+                    const errBody = await response.json();
+                    if (errBody?.message) {
+                        message = errBody.message;
+                    }
+                } catch {
+                    /* ignore parse errors */
+                }
+                toast.error(message);
+                throw new Error(message);
             }
 
             // Get the blob directly (MP3 format for better streaming)
@@ -355,6 +443,12 @@ function HomeScreen() {
 
 
 
+  if (!studentInfo) {
+    return null;
+  }
+
+  const inputDisabled = isLoading || isLoadingProfile || !canUseAiTutor;
+
   return (
     <div className="chat-app ask-screen chat-app--home">
       <div className="main-container">
@@ -370,13 +464,32 @@ function HomeScreen() {
           <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
           <div className="content-area content-area--home">
+            {!isLoadingProfile && !canUseAiTutor ? (
+              <div className="ask-subscription-notice ask-subscription-notice--home">
+                <p className="ask-subscription-notice__title">
+                  Subscription required
+                </p>
+                <p className="ask-subscription-notice__text">
+                  {aiTutorBlockReason}
+                  {' '}
+                  An active subscription unlocks the AI tutor on this page.
+                </p>
+                <Link
+                  to="/students/subscription"
+                  className="ask-subscription-notice__link"
+                >
+                  View plans & subscribe
+                </Link>
+              </div>
+            ) : null}
+
             {messages.length === 0 ? (
               <div className="home-hub">
                 <div className="home-hub__card">
                   <div className="home-hub__accent" aria-hidden />
                   <div className="home-hub__hero">
                     <h1 className="home-hub__title heading-gradient">{learningMaterial}</h1>
-                    {showSubheading && !showQuestions && !isExamRoute && (
+                    {canUseAiTutor && showSubheading && !showQuestions && !isExamRoute && (
                       <button
                         type="button"
                         className="home-hub__prompt animate-fade-in"
@@ -385,7 +498,7 @@ function HomeScreen() {
                         {predefinedQuestion}
                       </button>
                     )}
-                    {(showQuestions || isExamRoute) && (
+                    {canUseAiTutor && (showQuestions || isExamRoute) && (
                       <div className="home-suggested animate-fade-in">
                         <p className="home-suggested__label">
                           Preguntas sugeridas
@@ -445,7 +558,10 @@ function HomeScreen() {
                         onClick={() => playAudio(message.content, index)}
                         aria-label={loadingAudio === index ? "Loading audio" : playingAudio === index ? "Stop audio" : "Play audio"}
                         title={loadingAudio === index ? "Loading audio..." : playingAudio === index ? "Stop audio" : "Play audio"}
-                        disabled={loadingAudio !== null && loadingAudio !== index}
+                        disabled={
+                          !canUseAiTutor
+                          || (loadingAudio !== null && loadingAudio !== index)
+                        }
                       >
                         {loadingAudio === index ? (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="audio-loading-spinner">
@@ -493,15 +609,20 @@ function HomeScreen() {
                 type="text"
                 className="input-field"
                 name="home-chat-message"
-                placeholder="Ask anything…"
+                placeholder={
+                  canUseAiTutor
+                    ? 'Ask anything…'
+                    : 'Subscribe to use the AI tutor'
+                }
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 aria-label="Your question"
+                disabled={inputDisabled}
               />
               <button
                 type="submit"
                 className="send-button send-button--home"
-                disabled={isLoading || !question.trim()}
+                disabled={inputDisabled || !question.trim()}
                 aria-label="Send message"
               >
                 <SendButtonIcon />

@@ -6,7 +6,9 @@ import {
     getSubjectsBySchool,
     getSubjectsByTeacherId,
     getSubjectBookForTeacher,
+    getSubjectBookForSchoolAdmin,
     getSubjectStudentsForTeacher,
+    getSubjectStudentsForSchoolAdmin,
     updateSubjectById,
     updateSubjectByTeacher,
     addSubjectStudentEmailForTeacher,
@@ -35,9 +37,21 @@ router
     );
 
 router.get(
+    '/:id/school-admin/book',
+    protectSchoolAdmin,
+    getSubjectBookForSchoolAdmin,
+);
+
+router.get(
     '/:id/teacher/students',
     protectTeacher,
     getSubjectStudentsForTeacher,
+);
+
+router.get(
+    '/:id/school-admin/students',
+    protectSchoolAdmin,
+    getSubjectStudentsForSchoolAdmin,
 );
 
 router.put(
@@ -56,8 +70,16 @@ router
 
 router
     .route('/:id')
-    .put(protectSchoolAdmin, updateSubjectById);
+    .put(
+        protectSchoolAdmin,
+        parseTeacherSubjectMultipart,
+        updateSubjectById,
+    );
 
-router.route('/').post(protectSchoolAdmin, createSubject);
+router.route('/').post(
+    protectSchoolAdmin,
+    parseTeacherSubjectMultipart,
+    createSubject,
+);
 
 export default router;

@@ -8,11 +8,11 @@ const schoolSchema = mongoose.Schema({
     },
     country: {
         type: String,
-        required: false
+        required: true
     },
     city: {
         type: String,
-        required: false
+        required: true
     },
     address: {
         type: String,
@@ -21,12 +21,19 @@ const schoolSchema = mongoose.Schema({
     signInDate: {
         type: Date,
         required: false
-    },    
-    admin: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false,
-        ref: 'SchoolAdmin'
+    },       
+    schoolType: {
+        type: String,
+        enum: ['high school', 'university'],
+        required: true
     },
+    gradesLevels: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'GradeLevel',
+        },
+    ],
     subjects: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -41,18 +48,30 @@ const schoolSchema = mongoose.Schema({
             ref: 'Teacher'
         },
     ],
+    plans: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'Plan'
+        },
+    ],
     students: [
         {
             type: mongoose.Schema.Types.ObjectId,
             required: false,
             ref: 'Student'
         },
-    ],
-    plans: [
+    ],    
+    admin: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        ref: 'SchoolAdmin'
+    },
+    subscriptions: [
         {
             type: mongoose.Schema.Types.ObjectId,
             required: false,
-            ref: 'Plan'
+            ref: 'Subscription'
         },
     ],
                

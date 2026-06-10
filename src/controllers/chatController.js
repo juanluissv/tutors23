@@ -1,4 +1,5 @@
 import asyncHandler from '../middleware/asyncHandler.js';
+import { getStudentActiveSubscription } from './subscriptionController.js';
 import { VectorStoreIndex, Settings, storageContextFromDefaults } from 'llamaindex';
 import { PineconeVectorStore } from "@llamaindex/pinecone";
 
@@ -9,10 +10,21 @@ dotenv.config()
 
 //GET /api/chat
 const getChat = asyncHandler(async (req, res) => {
-
     const { question, id } = req.body;
 
-    
+    const questionTrim = String(question ?? '').trim();
+    if (!questionTrim) {
+        res.status(400);
+        throw new Error('Question is required');
+    }
+
+    const subscription = await getStudentActiveSubscription(req.student._id);
+    if (!subscription) {
+        res.status(403);
+        throw new Error(
+            'An active subscription is required to use the AI tutor',
+        );
+    }
 
     console.log(req.body);
     Settings.llm = openai({
@@ -50,7 +62,7 @@ const getChat = asyncHandler(async (req, res) => {
 
       const queryEngine = index.asQueryEngine();
   const result = await queryEngine.query({
-    query: question
+    query: questionTrim,
   });
     
   //console.log('Response:');

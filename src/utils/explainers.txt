@@ -1,0 +1,97 @@
+// GET /api/schools/:id/earnings — school admin revenue share dashboard
+getSchoolEarnings
+Reviewing the full controller for helper context, then explaining the handler.
+
+getSchoolEarnings is the API handler for GET /api/schools/:id/earnings. It aggregates every student subscription tied to that school’s plans, applies the 50% revenue share, and returns the numbers the earnings dashboard needs.
+
+What it does at a high level
+School ID
+Find school's plans
+Find subscriptions on those plans
+Match students to subscriptions
+Calculate 50% share per payment
+Group by month + build response
+Each subscription counts as one payment equal to the plan price. The school keeps 50% of that (REVENUE_SHARE = 0.5).
+
+Step by step
+1. Parse inputs and authorize (lines 127–142)
+Reads schoolId from the URL (/api/schools/:id/earnings).
+Reads optional ?months= query param (default 12, clamped between 1 and 24) for the chart period.
+Validates the school ID format.
+Calls assertSchoolAdminOwnsSchool so only the admin who owns that school can access the data.
+2. Load the school’s plans (lines 144–151)
+Plan.find({ school: schoolId }).select('_id price')
+Gets every plan belonging to the school and builds a lookup map: planId → price. That price is the gross payment amount per subscription.
+
+3. Early exit if no plans (lines 153–176)
+If the school has no plans, it returns zeros everywhere — empty chart buckets, no transactions, no activity. The frontend still gets a valid shape to render.
+
+4. Load subscriptions and students (lines 178–192)
+Subscription.find({ plan: { $in: planIds } })
+Finds all subscriptions on any of those plans, newest first.
+
+Then it loads students whose subscriptions array includes those subscription IDs, and builds studentBySubId — a map from subscription ID → student. That’s used to show who paid in the transactions/activity lists.
+
+5. Build the time buckets (lines 193–202)
+buildMonthBuckets(monthsCount) creates N month slots (e.g. last 12 months), each starting at { earnings: 0, payments: 0 }.
+periodStart is the first day of the oldest month in that range. It’s used to compute periodEarnings (the big number at the top of the chart for the selected period).
+6. Loop over every subscription (lines 209–235)
+For each subscription:
+
+Step	What happens
+Get price
+From populated plan.price, or fallback to planPriceById
+Calculate net
+net = planPrice × 0.5
+Total earnings
+Adds net to totalEarnings (all-time)
+Payment date
+Uses startDate, or createdAt if no start date
+Monthly chart
+If the payment falls in one of the N month buckets, adds net and increments payments
+Period earnings
+If payment date ≥ periodStart, adds to periodEarnings
+Transactions / activity
+Builds row objects with gross, net, status, student name, etc.
+Important assumption: one subscription = one payment. Renewals would be separate subscription records.
+
+7. Send the response (lines 237–256)
+{
+  revenueShare: 0.5,
+  summary: { ... },
+  monthlyEarnings: [ ... ],  // bar chart data
+  transactions: [ ... ],     // max 50, newest first
+  activity: [ ... ]          // max 8 recent events
+}
+Field	Meaning
+totalEarnings / totalBalance / availableToPayout
+Same value today — sum of all 50% shares, ever
+periodEarnings
+Sum of 50% shares within the selected month range
+totalPayments
+Count of subscriptions
+nextPayoutDate
+1st of next month (placeholder; no real payout system yet)
+monthlyEarnings
+One entry per month for the chart
+transactions
+Table rows: date, status, gross, net
+activity
+Short messages like “Jane Doe subscribed — $5.00 USD earned”
+Example
+School has a $20/month plan. Three students subscribe:
+
+Jan: 1 student → school earns $10
+Mar: 2 students → school earns $20
+With months=12:
+
+totalEarnings = $30
+periodEarnings = $30 (if all fall in the last 12 months)
+monthlyEarnings = Jan: $10, Mar: $20, other months: $0
+transactions = 3 rows, each gross $20 / net $10
+Design choices worth noting
+Revenue source — earnings come from subscriptions on the school’s plans, not from a separate payments table (because payments are simulated when students subscribe).
+50% is applied to plan price — not stored on the subscription; it’s computed at read time.
+All-time vs period — totalEarnings is lifetime; periodEarnings and monthlyEarnings respect the months filter.
+No payout logic yet — availableToPayout equals total balance; nothing is deducted or held.
+If you want, I can walk through how this connects to the frontend screen or suggest changes (e.g. counting renewals differently or storing historical plan prices).

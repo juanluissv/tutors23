@@ -12,8 +12,15 @@ import {
 import { useSelector } from 'react-redux'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
-import { useGetCourseWatchForStudentQuery } from
-	'../../slices/student/studentApiSlice'
+import {
+	useGetCourseWatchForStudentQuery,
+	useGetProfileQuery,
+} from '../../slices/student/studentApiSlice'
+import {
+	resolveCurrentSubscription,
+	canViewQuestions,
+	getSubscriptionBlockReason,
+} from '../../utils/subscriptionAccess'
 import { buildSectionGroups, lessonKey } from '../../utils/courseOutline'
 import '../teachers/TeacherPreviewCourseScreen.css'
 import '../../App.css'
@@ -71,13 +78,30 @@ function StudentWatchCourseSreen () {
 	const { studentInfo } = useSelector((state) => state.authStudent)
 
 	const {
+		data: profile,
+		isLoading: isLoadingProfile,
+	} = useGetProfileQuery(undefined, {
+		skip: !studentInfo,
+	})
+
+	const currentSubscription = useMemo(
+		() => resolveCurrentSubscription(profile?.subscriptions),
+		[profile?.subscriptions],
+	)
+	const canView = canViewQuestions(currentSubscription)
+	const viewBlockReason = getSubscriptionBlockReason(
+		currentSubscription,
+		'view',
+	)
+
+	const {
 		data: course,
 		isLoading,
 		isError,
 		error,
 		refetch,
 	} = useGetCourseWatchForStudentQuery(courseId, {
-		skip: !courseIdOk || !studentInfo,
+		skip: !courseIdOk || !studentInfo || isLoadingProfile || !canView,
 	})
 
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
@@ -189,12 +213,39 @@ function StudentWatchCourseSreen () {
 									Invalid course link.
 								</p>
 							)}
-							{courseIdOk && isLoading && (
+							{courseIdOk && !isLoadingProfile && !canView && (
+								<div className='ask-subscription-notice'>
+									<p className='ask-subscription-notice__title'>
+										Subscription required
+									</p>
+									<p className='ask-subscription-notice__text'>
+										{viewBlockReason}
+									</p>
+									<Link
+										to='/students/subscription'
+										className='ask-subscription-notice__link'
+									>
+										View plans & subscribe
+									</Link>
+									<div
+										className='course-preview__toolbar-row'
+										style={{ marginTop: '1rem' }}
+									>
+										<Link
+											to='/students/mysubjects'
+											className='course-preview__btn course-preview__btn--primary'
+										>
+											My subjects
+										</Link>
+									</div>
+								</div>
+							)}
+							{courseIdOk && canView && isLoading && (
 								<p className='course-preview__muted'>
 									Loading course…
 								</p>
 							)}
-							{courseIdOk && isError && (
+							{courseIdOk && canView && isError && (
 								<div className='course-preview__alert-block'>
 									<p>{errText}</p>
 									<div className='course-preview__toolbar-row'>
@@ -214,7 +265,7 @@ function StudentWatchCourseSreen () {
 									</div>
 								</div>
 							)}
-							{courseIdOk && !isLoading && !isError && course && (
+							{courseIdOk && canView && !isLoading && !isError && course && (
 								<div className='course-preview__shell'>
 									<header className='course-preview__toolbar'>
 										<div>

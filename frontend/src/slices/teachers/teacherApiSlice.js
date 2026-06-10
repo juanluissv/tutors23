@@ -114,15 +114,11 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
                     if (body.description != null) {
                         fd.append('description', String(body.description));
                     }
-                    if (body.grade == null) {
-                        fd.append('grade', '');
+                    if (body.gradesLevel == null) {
+                        fd.append('gradesLevel', '');
                     } else {
-                        fd.append('grade', String(body.grade));
+                        fd.append('gradesLevel', String(body.gradesLevel));
                     }
-                    fd.append(
-                        'isCoursePublish',
-                        body.isCoursePublish ? 'true' : 'false',
-                    );
                     fd.append('book', book);
                     return {
                         url: `${SUBJECTS_URL}/${id}/teacher`,

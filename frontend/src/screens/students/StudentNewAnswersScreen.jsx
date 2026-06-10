@@ -4,6 +4,12 @@ import { useSelector } from 'react-redux'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useGetStudentNewAnswersQuery } from '../../slices/student/studentAnswersSlice'
+import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
+import {
+	resolveCurrentSubscription,
+	canViewQuestions,
+	getSubscriptionBlockReason,
+} from '../../utils/subscriptionAccess'
 import '../../App.css'
 
 const PAGE_SIZE = 2
@@ -52,12 +58,30 @@ function StudentNewAnswersScreen () {
 	const studentId = studentInfo?._id ? String(studentInfo._id) : null
 
 	const {
+		data: profile,
+		isLoading: isLoadingProfile,
+	} = useGetProfileQuery(undefined, {
+		skip: !studentInfo,
+	})
+
+	const currentSubscription = resolveCurrentSubscription(
+		profile?.subscriptions,
+	)
+	const canView = canViewQuestions(currentSubscription)
+	const viewBlockReason = getSubscriptionBlockReason(
+		currentSubscription,
+		'view',
+	)
+
+	const {
 		data: answersFromApi = [],
 		isLoading,
 		isError,
 		error,
 		refetch,
-	} = useGetStudentNewAnswersQuery(studentId, { skip: !studentId })
+	} = useGetStudentNewAnswersQuery(studentId, {
+		skip: !studentId || isLoadingProfile || !canView,
+	})
 
 	const newAnswers = useMemo(() => {
 		const raw = Array.isArray(answersFromApi) ? answersFromApi : []
@@ -116,19 +140,44 @@ function StudentNewAnswersScreen () {
 					<div className='content-area'>
 						<div className='center-content3'>
 							<h3 className='main-heading-answers answers-heading heading-gradient'>
-								{newAnswers.length}{' '}
-								new{' '}
-								{newAnswers.length === 1 ? 'answer' : 'answers'}{' '}
-								from teachers
+								{canView ? (
+									<>
+										{newAnswers.length}{' '}
+										new{' '}
+										{newAnswers.length === 1
+											? 'answer'
+											: 'answers'}{' '}
+										from teachers
+									</>
+								) : (
+									'New answers from teachers'
+								)}
 							</h3>
 
-							{isLoading && (
+							{!isLoadingProfile && !canView ? (
+								<div className='ask-subscription-notice'>
+									<p className='ask-subscription-notice__title'>
+										Subscription required
+									</p>
+									<p className='ask-subscription-notice__text'>
+										{viewBlockReason}
+									</p>
+									<Link
+										to='/students/subscription'
+										className='ask-subscription-notice__link'
+									>
+										View plans & subscribe
+									</Link>
+								</div>
+							) : null}
+
+							{canView && isLoading && (
 								<p className='answers-heading' style={{ marginTop: '1rem' }}>
 									Loading answers…
 								</p>
 							)}
 
-							{isError && (
+							{canView && isError && (
 								<div style={{ marginTop: '1rem' }}>
 									<p className='answers-heading'>{errorMessage}</p>
 									<button
@@ -142,7 +191,7 @@ function StudentNewAnswersScreen () {
 								</div>
 							)}
 
-							{!isLoading && !isError && newAnswers.length === 0 && (
+							{canView && !isLoading && !isError && newAnswers.length === 0 && (
 								<p className='answers-heading' style={{ marginTop: '1rem' }}>
 									No new answers yet. When a teacher responds to your
 									questions, they will appear here until you watch them.
@@ -151,7 +200,7 @@ function StudentNewAnswersScreen () {
 
 							<div className='answers-container'>
 								<div className='answers-cards'>
-									{!isLoading && !isError
+									{canView && !isLoading && !isError
 										&& paginatedAnswers.map((item) => {
 											const category =
 												item.subject
@@ -212,7 +261,7 @@ function StudentNewAnswersScreen () {
 								</div>
 							</div>
 
-							{!isLoading && !isError && totalPages > 1 && (
+							{canView && !isLoading && !isError && totalPages > 1 && (
 								<div className='pagination pagination--answers'>
 									{Array.from(
 										{ length: totalPages },

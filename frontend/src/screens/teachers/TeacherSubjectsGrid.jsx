@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { subjectGradeLabel } from '../../utils/gradeLevel'
 import '../../App.css'
 
 const GradCapIcon = () => (
@@ -44,12 +45,6 @@ const StudentsIcon = () => (
 	</svg>
 )
 
-export function subjectGradeLabel (subject) {
-	if (subject.grade != null && !Number.isNaN(Number(subject.grade))) {
-		return `Grade ${subject.grade}`
-	}
-	return 'All grades'
-}
 
 /**
  * Shared subject cards grid (loading / error / empty / list).
@@ -62,10 +57,12 @@ export function subjectGradeLabel (subject) {
  * @param {boolean} props.isError
  * @param {() => void} props.refetch
  * @param {(subject: object, index: number) => import('react').ReactNode} props.renderCardActions
+ * @param {import('react').ReactNode} [props.afterSubtitle]
  */
 export function TeacherSubjectsGrid ({
 	pageTitle,
 	pageSubtitle,
+	afterSubtitle,
 	emptyMessage,
 	subjects = [],
 	isLoading,
@@ -81,6 +78,7 @@ export function TeacherSubjectsGrid ({
 			<p className='teacher-subjects-page__subtitle'>
 				{pageSubtitle}
 			</p>
+			{afterSubtitle ? afterSubtitle : null}
 
 			{isLoading ? (
 				<p className='teacher-subjects-page__subtitle'>
@@ -190,7 +188,7 @@ export function SubjectCardActionsDefault ({ subjectId }) {
 				Edit Subject
 			</Link>
 			<Link
-				to='/teachers/oldquestions'
+				to={`/teachers/previousquestions/${subjectId}`}
 				className='teacher-subject-card__btn'
 			>
 				Previous Questions
@@ -202,18 +200,40 @@ export function SubjectCardActionsDefault ({ subjectId }) {
 /** Action row for Students by subject picker */
 export function SubjectCardActionsStudents ({ subjectId }) {
 	return (
-		<div className='teacher-subject-card__row'>
+		<div className={
+			'teacher-subject-card__row '
+			+ 'teacher-subject-card__row--center'
+		}
+		>
 			<Link
 				to={`/teachers/students/${subjectId}`}
-				className='teacher-subject-card__btn'
+				className={
+					'teacher-subject-card__btn '
+					+ 'teacher-subject-card__btn--wide'
+				}
 			>
 				View students
 			</Link>
+		</div>
+	)
+}
+
+/** Action row for school admin Students by subject picker */
+export function SubjectCardActionsStudentsSchoolAdmin ({ subjectId }) {
+	return (
+		<div className={
+			'teacher-subject-card__row '
+			+ 'teacher-subject-card__row--center'
+		}
+		>
 			<Link
-				to={`/teachers/students/${subjectId}/addstudent`}
-				className='teacher-subject-card__btn'
+				to={`/schooladmins/students/${subjectId}`}
+				className={
+					'teacher-subject-card__btn '
+					+ 'teacher-subject-card__btn--wide'
+				}
 			>
-				Add Student
+				View students
 			</Link>
 		</div>
 	)

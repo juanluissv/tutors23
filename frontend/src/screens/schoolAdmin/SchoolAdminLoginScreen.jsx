@@ -17,7 +17,7 @@ function SchoolAdminLoginScreen () {
 	const dispatch = useDispatch()
 
 	const [email, setEmail] = useState('jane@gmail.com')
-	const [password, setPassword] = useState('jane')
+	const [password, setPassword] = useState('jane326')
 
 	const [loginSchoolAdmin, { isLoading }] = useLoginSchoolAdminMutation()
 
@@ -42,7 +42,7 @@ function SchoolAdminLoginScreen () {
 			if (redirect) {
 				navigate(redirect.startsWith('/') ? redirect : `/${redirect}`)
 			} else {
-				navigate('/schooladmins/profile')
+				navigate('/schooladmins/mysubjects')
 			}
 		} catch (err) {
 			toast.error(err?.data?.message || err?.error?.message)
@@ -117,15 +117,15 @@ function SchoolAdminLoginScreen () {
 											className='login-remember'
 											htmlFor='schooladmin-remember'
 										>
-											<input
+											{/* <input
 												type='checkbox'
 												id='schooladmin-remember'
 												name='remember'
 												className='login-checkbox'
 												disabled={isLoading}
-											/>
+											/> */}
 											<span className='login-remember__text'>
-												Remember me on this device
+											Please click Sign in to enter demo 
 											</span>
 										</label>
 									</div>

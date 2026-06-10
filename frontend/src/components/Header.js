@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logoutStudent } from '../slices/student/authStudentSlice'
 import { useLogoutMutation } from '../slices/student/studentApiSlice'
@@ -43,6 +43,19 @@ function Header({
 		} else {
 			navigate('/login')
 		}
+	}
+
+	const studentDisplayName = studentInfo
+		? [studentInfo.firstname, studentInfo.lastname]
+			.filter(Boolean)
+			.join(' ')
+			.trim()
+			|| studentInfo.name
+			|| 'Student'
+		: 'Student'
+
+	const handleCloseDropdown = () => {
+		setIsDropdownOpen(false)
 	}
 
 	const logoutHandler = async () => {
@@ -114,14 +127,23 @@ function Header({
 
 				{studentInfo && isDropdownOpen && (
 					<div className="user-dropdown" role="menu">
-						<div className="user-dropdown__header">
-							<span className="user-dropdown__name">
-								{studentInfo.name || 'Student'}
-							</span>
-							<span className="user-dropdown__email">
-								{studentInfo.email}
-							</span>
-						</div>
+						<Link
+							to="/students/profile"
+							className="user-dropdown__profile-link"
+							role="menuitem"
+							onClick={handleCloseDropdown}
+						>
+							<div className="user-dropdown__header">
+								<span className="user-dropdown__name">
+								Go to your account
+								</span>
+								<span className="user-dropdown__email">
+									{studentInfo.email}
+									{/* {studentDisplayName} */}
+
+								</span>
+							</div>
+						</Link>
 						<div className="user-dropdown__divider" />
 						<button
 							type="button"

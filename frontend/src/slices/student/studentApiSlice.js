@@ -59,6 +59,18 @@ export const studentApiSlice = apiSlice.injectEndpoints({
               { type: 'Course', id: `STUDENT_PUBLISHED_${subjectId}` },
             ],
           }),
+          subscribe: builder.mutation({
+            query: (data) => ({
+              url: `${STUDENTS_URL}/subscribe`,
+              method: 'POST',
+              body: data,
+            }),
+            invalidatesTags: [
+                'Students',
+                'Subscription',
+                'Earnings',
+            ],
+          }),
     }),
 })
 
@@ -72,4 +84,5 @@ export const {
     useGetMySubjectsQuery,
     useGetCourseWatchForStudentQuery,
     useGetStudentSubjectCoursesQuery,
+    useSubscribeMutation,
 } = studentApiSlice;

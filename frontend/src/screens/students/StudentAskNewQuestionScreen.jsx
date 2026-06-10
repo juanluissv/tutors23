@@ -5,6 +5,12 @@ import { toast } from 'react-toastify'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useCreateStudentQuestionMutation } from '../../slices/student/questionsSlice'
+import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
+import {
+	resolveCurrentSubscription,
+	canAskNewQuestion,
+	getSubscriptionBlockReason,
+} from '../../utils/subscriptionAccess'
 import '../../App.css'
 
 const TagIcon = () => (
@@ -92,6 +98,28 @@ function StudentAskNewQuestionScreen () {
 	const [createStudentQuestion, { isLoading: isSubmitting }] =
 		useCreateStudentQuestionMutation()
 
+	const {
+		data: profile,
+		isLoading: isLoadingProfile,
+	} = useGetProfileQuery(undefined, {
+		skip: !studentInfo,
+	})
+
+	const currentSubscription = resolveCurrentSubscription(
+		profile?.subscriptions,
+	)
+	const questionsAsked =
+		Number(currentSubscription?.questionsAsked) || 0
+	const totalQuestions =
+		Number(currentSubscription?.totalQuestions) || 0
+	const questionsLeft =
+		Number(currentSubscription?.questionsLeft) || 0
+	const canAsk = canAskNewQuestion(currentSubscription)
+	const askBlockReason = getSubscriptionBlockReason(
+		currentSubscription,
+		'ask',
+	)
+
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
 	}
@@ -137,7 +165,8 @@ function StudentAskNewQuestionScreen () {
 		return null
 	}
 
-	const canSubmit = Boolean(subjectId) && !isSubmitting
+	const canSubmit =
+		Boolean(subjectId) && !isSubmitting && canAsk && !isLoadingProfile
 
 	return (
 		<div
@@ -169,6 +198,29 @@ function StudentAskNewQuestionScreen () {
 											&#8592; Back to my subjects
 										</Link>
 									</div>
+									{!isLoadingProfile && currentSubscription ? (
+										<div className='ask-questions-left'>
+											<span className='ask-questions-left__label'>
+												Questions left
+											</span>
+											<span
+												className={
+													'ask-questions-left__value' +
+													(questionsLeft > 0
+														? ' ask-questions-left__value--available'
+														: ' ask-questions-left__value--empty')
+												}
+											>
+												{questionsLeft}
+											</span>
+											{totalQuestions > 0 ? (
+												<span className='ask-questions-left__meta'>
+													{questionsAsked} used ·{' '}
+													{totalQuestions} total
+												</span>
+											) : null}
+										</div>
+									) : null}
 									<h1
 										className={
 											'login-card__title answer-details__title'
@@ -189,6 +241,23 @@ function StudentAskNewQuestionScreen () {
 										course card so your question is routed to
 										the right class.
 									</p>
+								) : null}
+
+								{!isLoadingProfile && !canAsk ? (
+									<div className='ask-subscription-notice'>
+										<p className='ask-subscription-notice__title'>
+											Cannot ask a new question
+										</p>
+										<p className='ask-subscription-notice__text'>
+											{askBlockReason}
+										</p>
+										<Link
+											to='/students/subscription'
+											className='ask-subscription-notice__link'
+										>
+											View plans & subscribe
+										</Link>
+									</div>
 								) : null}
 
 								<form

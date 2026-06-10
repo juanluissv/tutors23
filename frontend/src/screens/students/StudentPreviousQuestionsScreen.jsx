@@ -9,6 +9,12 @@ import { useSelector } from 'react-redux'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useGetStudentPreviousQuestionsQuery } from '../../slices/student/studentPreviousQuestionsSlice'
+import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
+import {
+	resolveCurrentSubscription,
+	canViewQuestions,
+	getSubscriptionBlockReason,
+} from '../../utils/subscriptionAccess'
 import '../../App.css'
 
 const PAGE_SIZE = 1
@@ -200,6 +206,22 @@ function StudentPreviousQuestionsScreen () {
 	const [currentPage, setCurrentPage] = useState(1)
 
 	const {
+		data: profile,
+		isLoading: isLoadingProfile,
+	} = useGetProfileQuery(undefined, {
+		skip: !studentInfo,
+	})
+
+	const currentSubscription = resolveCurrentSubscription(
+		profile?.subscriptions,
+	)
+	const canView = canViewQuestions(currentSubscription)
+	const viewBlockReason = getSubscriptionBlockReason(
+		currentSubscription,
+		'view',
+	)
+
+	const {
 		data,
 		isLoading,
 		isError,
@@ -211,9 +233,10 @@ function StudentPreviousQuestionsScreen () {
 			limit: PAGE_SIZE,
 			subject: subjectQuery,
 		},
-		{ skip: !studentInfo },
+		{
+			skip: !studentInfo || isLoadingProfile || !canView,
+		},
 	)
-
 
 	const items = Array.isArray(data?.items) ? data.items : []
 	const totalPages =
@@ -225,7 +248,9 @@ function StudentPreviousQuestionsScreen () {
 			? convo.answer
 			: null
 	const showTimeline =
-		convo != null && answerDoc != null && answerHasVideo(answerDoc)
+		convo != null && questionHasVideo(convo)
+	const hasAnswerVideo =
+		answerDoc != null && answerHasVideo(answerDoc)
 
 	useEffect(() => {
 		if (!studentInfo) {
@@ -263,9 +288,6 @@ function StudentPreviousQuestionsScreen () {
 			? convo.subject.title
 			: null
 
-	const canWatchQuestionVideo =
-		convo != null && questionHasVideo(convo)
-
 	return (
 		<div className='chat-app ask-screen'>
 			<div className='main-container'>
@@ -284,19 +306,38 @@ function StudentPreviousQuestionsScreen () {
 								<p className='qa-timeline-page__subtitle'>
 									{subjectTitle != null ? (
 										<>
-											Past questions and teacher replies for{' '}
-											<strong>{subjectTitle}</strong>.
+											Your recorded questions for{' '}
+											<strong>{subjectTitle}</strong>,
+											including those still awaiting a reply.
 										</>
 									) : subjectQuery != null ? (
-										'Past questions and teacher replies for '
-										+ 'this subject.'
+										'Your recorded questions for this subject, '
+										+ 'including those still awaiting a reply.'
 									) : (
-										'Past questions you asked and answers '
-										+ 'from your teachers.'
+										'Your recorded questions and teacher '
+										+ 'replies, including those still '
+										+ 'awaiting an answer.'
 									)}
 								</p>
 
-								{isLoading && (
+								{!isLoadingProfile && !canView ? (
+									<div className='ask-subscription-notice'>
+										<p className='ask-subscription-notice__title'>
+											Subscription required
+										</p>
+										<p className='ask-subscription-notice__text'>
+											{viewBlockReason}
+										</p>
+										<Link
+											to='/students/subscription'
+											className='ask-subscription-notice__link'
+										>
+											View plans & subscribe
+										</Link>
+									</div>
+								) : null}
+
+								{canView && isLoading && (
 									<p className='answers-heading' style={{
 										marginTop: '1rem',
 										textAlign: 'center',
@@ -307,7 +348,7 @@ function StudentPreviousQuestionsScreen () {
 									</p>
 								)}
 
-								{isError && (
+								{canView && isError && (
 									<div style={{
 										marginTop: '1rem',
 										textAlign: 'center',
@@ -328,7 +369,7 @@ function StudentPreviousQuestionsScreen () {
 									</div>
 								)}
 
-								{!isLoading && !isError && total === 0 && (
+								{canView && !isLoading && !isError && total === 0 && (
 									<p className='answers-heading' style={{
 										marginTop: '1rem',
 										textAlign: 'center',
@@ -337,21 +378,22 @@ function StudentPreviousQuestionsScreen () {
 									>
 										{subjectQuery != null ? (
 											<>
-												No answered questions yet for this
-												subject. When your teacher replies,
-												it will show up here.
+												No recorded questions yet for this
+												subject. After you ask a question
+												and save your video, it will show
+												up here.
 											</>
 										) : (
 											<>
-												No answered questions yet. When your
-												teacher replies, conversations will
-												show up here.
+												No recorded questions yet. After you
+												ask a question and save your video,
+												it will show up here.
 											</>
 										)}
 									</p>
 								)}
 
-								{!isLoading && !isError && showTimeline && (
+								{canView && !isLoading && !isError && showTimeline && (
 									<div className='qa-timeline'>
 										<div className='qa-timeline__pair'>
 											<div className={
@@ -371,11 +413,9 @@ function StudentPreviousQuestionsScreen () {
 												</h3>
 												<QaTimelineVideoThumb
 													watchTo={
-														canWatchQuestionVideo
-															? `/students/watchquestion/${
-																String(convo._id)
-															}`
-															: null
+														`/students/watchquestion/${
+															String(convo._id)
+														}`
 													}
 													ariaLabel='Watch question video'
 												/>
@@ -395,38 +435,20 @@ function StudentPreviousQuestionsScreen () {
 														convo.dateCreated,
 													)}
 												</span>
-												{canWatchQuestionVideo ? (
-													<Link
-														to={
-															`/students/watchquestion/${
-																String(convo._id)
-															}`
-														}
-														className={
-															'qa-timeline__watch '
-															+ 'qa-timeline__watch--question'
-														}
-													>
-														Watch question
-														<PlayIconSmall />
-													</Link>
-												) : (
-													<button
-														type='button'
-														disabled
-														className={
-															'qa-timeline__watch '
-															+ 'qa-timeline__watch--question'
-														}
-														style={{
-															opacity: 0.55,
-															cursor: 'not-allowed',
-														}}
-														title='No question video'
-													>
-														No question video
-													</button>
-												)}
+												<Link
+													to={
+														`/students/watchquestion/${
+															String(convo._id)
+														}`
+													}
+													className={
+														'qa-timeline__watch '
+														+ 'qa-timeline__watch--question'
+													}
+												>
+													Watch question
+													<PlayIconSmall />
+												</Link>
 											</div>
 
 											<div className={
@@ -461,25 +483,23 @@ function StudentPreviousQuestionsScreen () {
 													+ 'qa-timeline__tag--answer'
 												}
 												>
-													Teacher answer
+													{hasAnswerVideo
+														? 'Teacher answer'
+														: 'Awaiting answer'}
 												</span>
-												<QaTimelineVideoThumb
-													watchTo={
-														answerDoc != null
-															&& answerDoc._id != null
-															&& answerHasVideo(
-																answerDoc,
-															)
-															? `/students/watchanswer/${
+												{hasAnswerVideo ? (
+													<QaTimelineVideoThumb
+														watchTo={
+															`/students/watchanswer/${
 																String(
 																	answerDoc._id,
 																)
 															}`
-															: null
-													}
-													ariaLabel='Watch answer video'
-												/>
-												{answerDoc != null ? (
+														}
+														ariaLabel='Watch answer video'
+													/>
+												) : null}
+												{hasAnswerVideo ? (
 													<>
 														{answerDoc.description
 															!= null
@@ -507,55 +527,31 @@ function StudentPreviousQuestionsScreen () {
 																answerDoc.dateCreated,
 															)}
 														</span>
-														{answerDoc._id
-															!= null
-															&& answerHasVideo(
-																answerDoc,
-															) && (
-															<Link
-																to={
-																	'/students/watchanswer/'
-																	+ String(
-																		answerDoc._id,
-																	)
-																}
-																className={
-																	'qa-timeline__watch '
-																	+ 'qa-timeline__watch--answer'
-																}
-															>
-																Watch answer
-																<PlayIconSmall />
-															</Link>
-														)}
-														{answerDoc._id
-															!= null
-															&& !answerHasVideo(
-																answerDoc,
-															) && (
-															<Link
-																to={
-																	'/students/watchanswer/'
-																	+ String(
-																		answerDoc._id,
-																	)
-																}
-																className={
-																	'qa-timeline__watch '
-																	+ 'qa-timeline__watch--answer'
-																}
-															>
-																View answer
-															</Link>
-														)}
+														<Link
+															to={
+																'/students/watchanswer/'
+																+ String(
+																	answerDoc._id,
+																)
+															}
+															className={
+																'qa-timeline__watch '
+																+ 'qa-timeline__watch--answer'
+															}
+														>
+															Watch answer
+															<PlayIconSmall />
+														</Link>
 													</>
 												) : (
 													<p className={
-														'qa-timeline__card-text'
+														'qa-timeline__card-text '
+														+ 'qa-timeline__card-text--pending'
 													}
 													>
-														Answer details are not
-														available.
+														Your teacher has not posted
+														a video answer yet. Check
+														back here once they do.
 													</p>
 												)}
 											</div>
@@ -563,7 +559,7 @@ function StudentPreviousQuestionsScreen () {
 									</div>
 								)}
 
-								{!isLoading && !isError && totalPages > 1 && (
+								{canView && !isLoading && !isError && totalPages > 1 && (
 									<div className={
 										'pagination pagination--answers'
 									}

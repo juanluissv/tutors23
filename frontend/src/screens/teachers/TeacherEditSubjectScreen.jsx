@@ -9,6 +9,7 @@ import {
 	useUpdateSubjectByTeacherMutation,
 } from '../../slices/teachers/teacherApiSlice'
 import { SUBJECTS_URL } from '../../constants'
+import { getSubjectGradeLevelNames } from '../../utils/gradeLevel'
 import '../../App.css'
 
 const BookUploadGlyph = () => (
@@ -120,8 +121,6 @@ function TeacherEditSubjectScreen () {
 	)
 	const [title, setTitle] = useState('')
 	const [description, setDescription] = useState('')
-	const [gradeInput, setGradeInput] = useState('')
-	const [isCoursePublish, setIsCoursePublish] = useState(false)
 	const [bookFile, setBookFile] = useState(null)
 
 	const toggleSidebar = () => {
@@ -144,13 +143,6 @@ function TeacherEditSubjectScreen () {
 		}
 		setTitle(currentSubject.title ?? '')
 		setDescription(currentSubject.description ?? '')
-		setGradeInput(
-			currentSubject.grade != null
-			&& !Number.isNaN(Number(currentSubject.grade))
-				? String(currentSubject.grade)
-				: '',
-		)
-		setIsCoursePublish(Boolean(currentSubject.isCoursePublish))
 		setBookFile(null)
 		if (bookInputRef.current) {
 			bookInputRef.current.value = ''
@@ -167,6 +159,10 @@ function TeacherEditSubjectScreen () {
 	const storedBookLabel = hasStoredBook
 		? bookDisplayName(String(currentSubject.bookId))
 		: ''
+
+	const gradeDisplayLabel = getSubjectGradeLevelNames(
+		currentSubject?.gradesLevel,
+	) || '—'
 
 	const openBookHref = hasStoredBook && currentSubject?.bookUrl
 		? String(currentSubject.bookUrl)
@@ -204,28 +200,16 @@ function TeacherEditSubjectScreen () {
 			toast.error('Please enter a subject name')
 			return
 		}
-		if (gradeInput.trim() !== '') {
-			const n = Number(gradeInput)
-			if (Number.isNaN(n)) {
-				toast.error('Grade must be a number')
-				return
-			}
-		}
 		if (!isValidParam || !teacherId || !subjectId) {
 			return
 		}
 
 		try {
-			const gradePayload = gradeInput.trim() === ''
-				? null
-				: Number(gradeInput)
 			const payload = {
 				id: String(subjectId),
 				teacherId,
 				title: title.trim(),
 				description: description.trim(),
-				grade: gradePayload,
-				isCoursePublish,
 			}
 			if (bookFile instanceof File) {
 				payload.book = bookFile
@@ -421,8 +405,9 @@ function TeacherEditSubjectScreen () {
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										Update how this course appears to students.
-										Attach an optional course book — PDF, up
-										to 25 MB.
+										Grade level is set by your school and
+										cannot be changed here. Attach an optional
+										course book — PDF, up to 25 MB.
 									</p>
 								</div>
 								<form
@@ -455,42 +440,17 @@ function TeacherEditSubjectScreen () {
 											className='login-label'
 											htmlFor='edit-subject-grade'
 										>
-											Grade (optional)
+											Grade level
 										</label>
 										<input
 											type='text'
 											id='edit-subject-grade'
-											name='grade'
 											className='login-input'
-											placeholder='e.g. 9'
-											autoComplete='off'
-											value={gradeInput}
-											disabled={isSaving}
-											onChange={(e) => setGradeInput(
-												e.target.value,
-											)}
+											value={gradeDisplayLabel}
+											readOnly
+											tabIndex={-1}
+											aria-readonly='true'
 										/>
-									</div>
-									<div className='login-field login-field--row'>
-										<label
-											className='login-remember'
-											htmlFor='teacher-edit-subject-publish'
-										>
-											<input
-												type='checkbox'
-												id='teacher-edit-subject-publish'
-												name='isCoursePublish'
-												className='login-checkbox'
-												checked={isCoursePublish}
-												disabled={isSaving}
-												onChange={(e) => setIsCoursePublish(
-													e.target.checked,
-												)}
-											/>
-											<span className='login-remember__text'>
-												Publish course to students
-											</span>
-										</label>
 									</div>
 									<div className='login-field'>
 										<label

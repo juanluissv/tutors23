@@ -1,5 +1,9 @@
 import express from 'express'
-import { protectStudent, protectTeacher } from '../middleware/authMiddleware.js'
+import {
+    protectStudent,
+    protectSchoolAdmin,
+    protectTeacher,
+} from '../middleware/authMiddleware.js'
 import { parseStudentQuestionVideo } from '../middleware/studentQuestionVideoUpload.js'
 import {
     createStudentQuestion,
@@ -9,6 +13,9 @@ import {
     getQuestionsByTeacherId,
     getStudentPreviousQuestionsWithAnswers,
     getTeacherPreviousQuestionsWithAnswers,
+    getSchoolAdminPreviousQuestionsWithAnswers,
+    getQuestionByIdForSchoolAdmin,
+    getQuestionVideoForSchoolAdmin,
     getQuestionByIdForStudent,
     getQuestionVideoForStudent,
 } from '../controllers/questionsController.js'
@@ -48,6 +55,18 @@ router
 router
     .route('/teacher/previous')
     .get(protectTeacher, getTeacherPreviousQuestionsWithAnswers)
+
+router
+    .route('/schooladmin/previous')
+    .get(protectSchoolAdmin, getSchoolAdminPreviousQuestionsWithAnswers)
+
+router
+    .route('/schooladmin/question/:questionId/video')
+    .get(protectSchoolAdmin, getQuestionVideoForSchoolAdmin)
+
+router
+    .route('/schooladmin/question/:questionId')
+    .get(protectSchoolAdmin, getQuestionByIdForSchoolAdmin)
 
 router
     .route('/teacher/:teacherId')

@@ -1,13 +1,53 @@
 import asyncHandler from 'express-async-handler';
 import Student from '../models/studentModel.js';
+import School from '../models/schoolModel.js';
 import Subject from '../models/subjectModel.js';
+import Plan from '../models/planModel.js';
 import Course from '../models/courseModel.js';
 import generateToken from '../utils/generateToken.js';
 import { subjectToJson } from './subjectController.js';
+import { planToJson } from './planController.js';
+import {
+    subscriptionToJson,
+    studentSubscriptionsPopulate,
+    refreshStudentSubscriptions,
+} from './subscriptionController.js';
+
+const subjectWithGradeLevelPopulate = {
+    path: 'subjects',
+    select: 'title description gradesLevel',
+    populate: {
+        path: 'gradesLevel',
+        select: 'name',
+    },
+};
+
+const studentPlanPopulate = {
+    path: 'plans',
+    select: 'price totalQuestions active gradesLevel subjects school createdAt',
+    populate: [
+        {
+            path: 'subjects',
+            select: 'title gradesLevel',
+            populate: {
+                path: 'gradesLevel',
+                select: 'name',
+            },
+        },
+        {
+            path: 'gradesLevel',
+            select: 'name',
+        },
+    ],
+};
 
 
 
 function normalizeStudentEmail (raw) {
+    return String(raw || '').trim().toLowerCase();
+}
+
+function normalizeStudentUsername (raw) {
     return String(raw || '').trim().toLowerCase();
 }
 
@@ -61,54 +101,158 @@ async function ensureStudentSubjectsLinkedFromInviteEmail (
     );
 }
 
+/**
+ * If the student was added by a school admin with plan(s), ensure plan
+ * subjects are linked on both sides (idempotent).
+ */
+async function ensureStudentSubjectsLinkedFromAssignedPlans (
+    studentDoc,
+    normalizedEmail,
+) {
+    const planIds = (studentDoc.plans ?? []).filter(Boolean);
+    if (planIds.length === 0) {
+        return;
+    }
+
+    const plans = await Plan.find({ _id: { $in: planIds } })
+        .select('subjects')
+        .lean();
+
+    const subjectIds = [
+        ...new Set(
+            plans.flatMap((p) =>
+                (p.subjects ?? []).map((id) => String(id)),
+            ),
+        ),
+    ].filter((id) => id !== 'undefined' && id !== 'null');
+
+    if (subjectIds.length === 0) {
+        return;
+    }
+
+    const subjectUpdate = {
+        $addToSet: { students: studentDoc._id },
+    };
+    if (normalizedEmail) {
+        subjectUpdate.$addToSet.studentsEmail = normalizedEmail;
+    }
+    await Subject.updateMany(
+        { _id: { $in: subjectIds } },
+        subjectUpdate,
+    );
+
+    await Student.updateOne(
+        { _id: studentDoc._id },
+        { $addToSet: { subjects: { $each: subjectIds } } },
+    );
+}
+
+function studentSubscriptionsToJson (doc) {
+    const raw = doc.subscriptions ?? [];
+    if (!Array.isArray(raw) || raw.length === 0) {
+        return [];
+    }
+    return raw.map((sub) => {
+        if (sub != null && typeof sub === 'object' && sub._id) {
+            return subscriptionToJson(sub);
+        }
+        return { _id: sub };
+    });
+}
+
+function studentPlansToJson (doc) {
+    const raw = doc.plans ?? [];
+    if (!Array.isArray(raw) || raw.length === 0) {
+        return [];
+    }
+    return raw.map((plan) => {
+        if (plan != null && typeof plan === 'object' && plan._id) {
+            return planToJson(plan);
+        }
+        return { _id: plan };
+    });
+}
+
 // POST /api/students/login
 const authStudent = asyncHandler(async (req, res) => {
-    const { email: rawEmail, password } = req.body;
-    const emailNorm = normalizeStudentEmail(rawEmail);
-    const emailRegex = buildEmailExactRegex(emailNorm);
-    const student = emailRegex
-        ? await Student.findOne({ email: emailRegex })
-        : null;
+    const { username: rawUsername, password } = req.body;
+    const username = normalizeStudentUsername(rawUsername);
+    if (!username) {
+        res.status(400);
+        throw new Error('Username is required');
+    }
 
-    if(student && (await student.matchPassword(password))) {
-        await ensureStudentSubjectsLinkedFromInviteEmail(student, emailNorm);
+    const student = await Student.findOne({ username });
 
-        const fresh = await Student.findById(student._id).select('-password');
+    if (student && (await student.matchPassword(password))) {
+        const emailNorm = student.email
+            ? normalizeStudentEmail(student.email)
+            : '';
+        if (emailNorm) {
+            await ensureStudentSubjectsLinkedFromInviteEmail(
+                student,
+                emailNorm,
+            );
+        }
+        await ensureStudentSubjectsLinkedFromAssignedPlans(
+            student,
+            emailNorm,
+        );
+        await refreshStudentSubscriptions(student._id);
+
+        const fresh = await Student.findById(student._id)
+            .select('-password')
+            .populate(studentPlanPopulate)
+            .populate(studentSubscriptionsPopulate);
 
         generateToken(res, fresh._id);
         res.json({
             _id: fresh._id,
             firstname: fresh.firstname,
             lastname: fresh.lastname,
-            email: fresh.email,
+            username: fresh.username,
+            email: fresh.email ?? null,
             country: fresh.country,
             city: fresh.city,
-            subscriptions: fresh.subscriptions,
+            subscriptions: studentSubscriptionsToJson(fresh),
             subjects: fresh.subjects ?? [],
-        })
+            plans: studentPlansToJson(fresh),
+        });
     } else {
-        res.status(401)
-        throw new Error('Invalid email or password')
+        res.status(401);
+        throw new Error('Invalid username or password');
     }
-})
+});
+
+function isStudentRegistrationComplete (studentDoc) {
+    const pwd = studentDoc?.password;
+    return typeof pwd === 'string' && pwd.trim() !== '';
+}
+
+async function assertStudentIsOnSchoolRoster (res, studentId) {
+    const listedOnSchool = await School.exists({ students: studentId });
+    if (!listedOnSchool) {
+        res.status(403);
+        throw new Error(
+            'You must be added to a school before you can register. '
+            + 'Contact your school admin for your username.',
+        );
+    }
+}
 
 // POST /api/students/register
 const registerStudent = asyncHandler(async (req, res) => {
     const {
-        email: rawEmail,
+        username: rawUsername,
         password,
         firstname: rawFirstname,
         lastname: rawLastname,
     } = req.body;
 
-    const email = normalizeStudentEmail(rawEmail);
-    if (!email) {
+    const username = normalizeStudentUsername(rawUsername);
+    if (!username) {
         res.status(400);
-        throw new Error('Email is required');
-    }
-    if (!looksLikeEmail(email)) {
-        res.status(400);
-        throw new Error('Please enter a valid email address');
+        throw new Error('Username is required');
     }
 
     const pwd = String(password ?? '');
@@ -116,57 +260,74 @@ const registerStudent = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Password is required');
     }
-   
-
-    const dupRegex = buildEmailExactRegex(email);
-    if (dupRegex) {
-        const existing = await Student.findOne({ email: dupRegex });
-        if (existing) {
-            res.status(400);
-            throw new Error('A student with this email already exists');
-        }
-    }
-    
 
     const firstTrim =
         rawFirstname != null ? String(rawFirstname).trim() : '';
     const lastTrim =
         rawLastname != null ? String(rawLastname).trim() : '';
-    const local = email.split('@')[0] || '';
-    const localParts = local.split(/[._-]+/).filter(Boolean);
-    const firstname = (
-        firstTrim
-        || localParts[0]
-        || 'student'
-    ).toLowerCase();
-    const lastname = (
-        lastTrim
-        || localParts.slice(1).join(' ')
-        || 'student'
-    ).toLowerCase();
+    if (firstTrim === '') {
+        res.status(400);
+        throw new Error('First name is required');
+    }
+    if (lastTrim === '') {
+        res.status(400);
+        throw new Error('Last name is required');
+    }
 
-    const student = await Student.create({
-        role: 'student',
-        firstname,
-        lastname,
-        email,
-        password: pwd,
-        signInDate: new Date(),
-    });
+    const firstname = firstTrim.toLowerCase();
+    const lastname = lastTrim.toLowerCase();
 
-    await ensureStudentSubjectsLinkedFromInviteEmail(student, email);
+    const existing = await Student.findOne({ username });
 
-    const saved = await Student.findById(student._id).select('-password');
+    if (!existing) {
+        res.status(403);
+        throw new Error(
+            'No account found for this username. Your school admin must '
+            + 'add you to the school before you can register.',
+        );
+    }
+
+    await assertStudentIsOnSchoolRoster(res, existing._id);
+
+    if (isStudentRegistrationComplete(existing)) {
+        res.status(400);
+        throw new Error(
+            'An account with this username already exists. Please sign in.',
+        );
+    }
+
+    existing.firstname = firstname;
+    existing.lastname = lastname;
+    existing.password = pwd;
+    existing.signInDate = new Date();
+    const student = await existing.save();
+    const completedPendingAccount = true;
+
+    const emailNorm = student.email
+        ? normalizeStudentEmail(student.email)
+        : '';
+    if (emailNorm) {
+        await ensureStudentSubjectsLinkedFromInviteEmail(student, emailNorm);
+    }
+    await ensureStudentSubjectsLinkedFromAssignedPlans(student, emailNorm);
+
+    const saved = await Student.findById(student._id)
+        .select('-password')
+        .populate(studentPlanPopulate);
 
     generateToken(res, saved._id);
-    res.status(201).json({
+    res.status(completedPendingAccount ? 200 : 201).json({
         _id: saved._id,
         firstname: saved.firstname,
         lastname: saved.lastname,
-        email: saved.email,
+        username: saved.username,
+        email: saved.email ?? null,
+        school: saved.school ?? null,
         subjects: saved.subjects ?? [],
+        plans: studentPlansToJson(saved),
+        accountCompleted: completedPendingAccount,
     });
-})
+});
 
 
 // POST /api/student/logout
@@ -189,8 +350,10 @@ function studentProfileResponse (doc) {
         _id: doc._id,
         firstname: doc.firstname,
         lastname: doc.lastname,
-        email: doc.email,
-        subscriptions: doc.subscriptions ?? [],
+        username: doc.username ?? null,
+        email: doc.email ?? null,
+        subscriptions: studentSubscriptionsToJson(doc),
+        plans: studentPlansToJson(doc),
         city: doc.city ?? '',
         country: doc.country ?? '',
         birthDate: birth,
@@ -200,9 +363,13 @@ function studentProfileResponse (doc) {
 
 // GET /api/students/profile
 const GetStudentProfile = asyncHandler(async (req, res) => {
+    await refreshStudentSubscriptions(req.student._id);
+
     const student = await Student.findById(req.student._id)
         .select('-password')
-        .populate('subjects', 'title description grade')
+        .populate(subjectWithGradeLevelPopulate)
+        .populate(studentPlanPopulate)
+        .populate(studentSubscriptionsPopulate)
 
     if (!student) {
         res.status(404)
@@ -290,6 +457,10 @@ const updateStudentProfile = asyncHandler(async (req, res) => {
         student.subscriptions = req.body.subscriptions
     }
 
+    if (req.body.plans !== undefined) {
+        student.plans = req.body.plans
+    }
+
     const pwd = req.body.password != null ? String(req.body.password) : ''
     if (pwd.trim() !== '') {
         if (pwd.length < 6) {
@@ -303,7 +474,8 @@ const updateStudentProfile = asyncHandler(async (req, res) => {
 
     const updated = await Student.findById(student._id)
         .select('-password')
-        .populate('subjects', 'title description grade')
+        .populate(subjectWithGradeLevelPopulate)
+        .populate(studentPlanPopulate)
 
     res.json(studentProfileResponse(updated))
 })

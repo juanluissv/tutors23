@@ -4,12 +4,14 @@ import mongoose from 'mongoose';
 import Course from '../models/courseModel.js';
 import Subject from '../models/subjectModel.js';
 import Teacher from '../models/teacherModel.js';
+import { assertSchoolAdminOwnsSchool } from './schoolController.js';
 import {
 	getBookBucketName,
 	getCourseLessonVideoKeyPrefix,
 	getLessonPlaybackUrl,
 	getS3,
 } from '../config/s3Client.js';
+import { getStudentActiveSubscription } from './subscriptionController.js';
 
 function toObjectIdString (val) {
 	if (!val && val !== 0) {
@@ -105,6 +107,42 @@ async function fetchCourseForEnrolledStudent (courseId, studentId, res) {
 		res.status(403);
 		throw new Error('You are not enrolled in this course');
 	}
+
+	return course;
+}
+
+async function fetchCourseForSchoolAdmin (courseId, schoolAdminId, res) {
+	if (!mongoose.Types.ObjectId.isValid(String(courseId))) {
+		res.status(400);
+		throw new Error('Invalid course id');
+	}
+
+	const course = await Course.findById(courseId);
+
+	if (!course) {
+		res.status(404);
+		throw new Error('Course not found');
+	}
+
+	const subject = await Subject.findById(course.subject)
+		.select('school')
+		.lean();
+
+	if (!subject) {
+		res.status(404);
+		throw new Error('Subject not found');
+	}
+
+	if (!subject.school) {
+		res.status(400);
+		throw new Error('Subject is not linked to a school');
+	}
+
+	await assertSchoolAdminOwnsSchool(
+		res,
+		schoolAdminId,
+		subject.school,
+	);
 
 	return course;
 }
@@ -222,6 +260,45 @@ const getCoursesBySubjectForTeacher = asyncHandler(
 	},
 );
 
+// GET /api/courses/school-admin/subject/:subjectId — protectSchoolAdmin
+const getCoursesBySubjectForSchoolAdmin = asyncHandler(
+	async (req, res) => {
+		const { subjectId } = req.params;
+
+		if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+			res.status(400);
+			throw new Error('Invalid subject id');
+		}
+
+		const subject = await Subject.findById(subjectId)
+			.select('school')
+			.lean();
+
+		if (!subject) {
+			res.status(404);
+			throw new Error('Subject not found');
+		}
+
+		if (!subject.school) {
+			res.status(400);
+			throw new Error('Subject is not linked to a school');
+		}
+
+		await assertSchoolAdminOwnsSchool(
+			res,
+			req.schoolAdmin._id,
+			subject.school,
+		);
+
+		const courses = await Course.find({ subject: subjectId })
+			.sort({ createdAt: -1 })
+			.populate('teacher', 'firstname lastname email')
+			.lean();
+
+		res.status(200).json(courses);
+	},
+);
+
 // GET /api/courses/student/subject/:subjectId — protectStudent — published only
 const getPublishedCoursesBySubjectForStudent = asyncHandler(
 	async (req, res) => {
@@ -249,6 +326,16 @@ const getPublishedCoursesBySubjectForStudent = asyncHandler(
 			res.status(403);
 			throw new Error(
 				'You are not enrolled in this subject',
+			);
+		}
+
+		const subscription = await getStudentActiveSubscription(
+			req.student._id,
+		);
+		if (!subscription) {
+			res.status(403);
+			throw new Error(
+				'An active subscription is required to view courses',
 			);
 		}
 
@@ -287,6 +374,34 @@ const getCoursePreviewForTeacher = asyncHandler(
 		const course = await fetchCourseOwnedByTeacher(
 			courseId,
 			req.teacher._id,
+			res,
+		);
+
+		const plain = typeof course.toObject === 'function'
+			? course.toObject()
+			: JSON.parse(JSON.stringify(course));
+
+		const lessonList = Array.isArray(plain.lessons)
+			? plain.lessons
+			: [];
+
+		plain.lessons = lessonList.map((lesson) => ({
+			...lesson,
+			videoUrl: getLessonPlaybackUrl(lesson?.mediaId),
+		}));
+
+		res.status(200).json(plain);
+	},
+);
+
+// GET /api/courses/:courseId/school-admin/preview — protectSchoolAdmin
+const getCoursePreviewForSchoolAdmin = asyncHandler(
+	async (req, res) => {
+		const { courseId } = req.params;
+
+		const course = await fetchCourseForSchoolAdmin(
+			courseId,
+			req.schoolAdmin._id,
 			res,
 		);
 
@@ -359,6 +474,14 @@ const setCoursePublishForTeacher = asyncHandler(async (req, res) => {
 // GET /api/courses/:courseId/watch — protectStudent — published + enrollment
 const getCourseWatchForStudent = asyncHandler(async (req, res) => {
 	const { courseId } = req.params;
+
+	const subscription = await getStudentActiveSubscription(req.student._id);
+	if (!subscription) {
+		res.status(403);
+		throw new Error(
+			'An active subscription is required to watch courses',
+		);
+	}
 
 	const course = await fetchCourseForEnrolledStudent(
 		courseId,
@@ -539,6 +662,8 @@ export {
 	getPublishedCoursesBySubjectForStudent,
 	getCourseByIdForTeacher,
 	getCoursePreviewForTeacher,
+	getCoursePreviewForSchoolAdmin,
 	getCourseWatchForStudent,
 	getCoursesBySubjectForTeacher,
+	getCoursesBySubjectForSchoolAdmin,
 };

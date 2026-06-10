@@ -6,8 +6,14 @@ import Header from '../../components/Header'
 import {
 	useGetMySubjectsQuery,
 	useGetStudentSubjectCoursesQuery,
+	useGetProfileQuery,
 } from '../../slices/student/studentApiSlice'
 import { TeacherCoursesGrid } from '../teachers/TeacherCoursesGrid'
+import {
+	resolveCurrentSubscription,
+	canViewQuestions,
+	getSubscriptionBlockReason,
+} from '../../utils/subscriptionAccess'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i
@@ -25,6 +31,23 @@ function StudentCoursesScreen () {
 	const subjectIdOk = isValidObjectId(subjectId)
 
 	const { studentInfo } = useSelector((state) => state.authStudent)
+
+	const {
+		data: profile,
+		isLoading: isLoadingProfile,
+	} = useGetProfileQuery(undefined, {
+		skip: !studentInfo,
+	})
+
+	const currentSubscription = useMemo(
+		() => resolveCurrentSubscription(profile?.subscriptions),
+		[profile?.subscriptions],
+	)
+	const canView = canViewQuestions(currentSubscription)
+	const viewBlockReason = getSubscriptionBlockReason(
+		currentSubscription,
+		'view',
+	)
 
 	const { data: subjects = [] } = useGetMySubjectsQuery(undefined, {
 		skip: !studentInfo,
@@ -44,7 +67,7 @@ function StudentCoursesScreen () {
 		isError,
 		refetch,
 	} = useGetStudentSubjectCoursesQuery(subjectId, {
-		skip: !studentInfo || !subjectIdOk,
+		skip: !studentInfo || !subjectIdOk || isLoadingProfile || !canView,
 	})
 
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
@@ -100,6 +123,9 @@ function StudentCoursesScreen () {
 		? `Courses · ${subjectTitle}`
 		: 'Courses'
 
+	const showSubscriptionNotice =
+		!isLoadingProfile && !canView
+
 	return (
 		<div className='chat-app ask-screen'>
 			<div className='main-container'>
@@ -110,6 +136,22 @@ function StudentCoursesScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area'>
+						{showSubscriptionNotice ? (
+							<div className='ask-subscription-notice'>
+								<p className='ask-subscription-notice__title'>
+									Subscription required
+								</p>
+								<p className='ask-subscription-notice__text'>
+									{viewBlockReason}
+								</p>
+								<Link
+									to='/students/subscription'
+									className='ask-subscription-notice__link'
+								>
+									View plans & subscribe
+								</Link>
+							</div>
+						) : null}
 						<TeacherCoursesGrid
 							pageTitle={pageTitle}
 							pageSubtitle={
@@ -122,23 +164,45 @@ function StudentCoursesScreen () {
 								label: '← Back to my subjects',
 							}}
 							emptyMessage={
-								'There are no published courses for this subject ' +
-								'yet. Check back later, or browse any links your ' +
-								'teacher shared with you.'
+								canView
+									? (
+										'There are no published courses for this subject ' +
+										'yet. Check back later, or browse any links your ' +
+										'teacher shared with you.'
+									)
+									: (
+										'Subscribe to unlock course access for this subject.'
+									)
 							}
 							courses={courses}
-							isLoading={isLoading}
+							isLoading={isLoading || isLoadingProfile}
 							isError={isError}
 							refetch={refetch}
 							renderCardActions={(course) => (
-								<Link
-									to={`/students/watchcourse/${String(
-										course._id,
-									)}`}
-									className='teacher-subject-card__btn teacher-subject-card__btn--wide'
-								>
-									Watch course
-								</Link>
+								canView ? (
+									<Link
+										to={`/students/watchcourse/${String(
+											course._id,
+										)}`}
+										className={
+											'teacher-subject-card__btn ' +
+											'teacher-subject-card__btn--wide'
+										}
+									>
+										Watch course
+									</Link>
+								) : (
+									<span
+										className={
+											'teacher-subject-card__btn ' +
+											'teacher-subject-card__btn--wide ' +
+											'teacher-subject-card__btn--disabled'
+										}
+										title={viewBlockReason || undefined}
+									>
+										Watch course
+									</span>
+								)
 							)}
 						/>
 					</div>

@@ -13,7 +13,8 @@
         "data:import": "node src/seeder.js",
         "data:destroy": "node src/seeder.js -d",
         "valores:split": "node scripts/splitValoresPdf.mjs",
-        "valores:unidad4-assemble": "node scripts/assembleUnidad4Screens.mjs"
+        "valores:unidad4-assemble": "node scripts/assembleUnidad4Screens.mjs",
+        "db:fix-student-email-index": "node scripts/dropStudentEmailUniqueIndex.js"
     },
     "author": "",
     "license": "MIT",

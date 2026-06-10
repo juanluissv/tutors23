@@ -16,8 +16,8 @@ function TeacherLoginScreen () {
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
 
-	const [email, setEmail] = useState("mark@gmail.com");
-    const [password, setPassword] = useState("mark");
+	const [email, setEmail] = useState("marco@gmail.com");
+    const [password, setPassword] = useState("marco326");
 
 	const [loginTeacher, { isLoading }] = useLoginTeacherMutation()
 
@@ -113,15 +113,15 @@ function TeacherLoginScreen () {
 											className='login-remember'
 											htmlFor='teacher-remember'
 										>
-											<input
+											{/* <input
 												type='checkbox'
 												id='teacher-remember'
 												name='remember'
 												className='login-checkbox'
 												disabled={isLoading}
-											/>
+											/> */}
 											<span className='login-remember__text'>
-												Remember me on this device
+											Please click Sign in to enter demo 
 											</span>
 										</label>
 									</div>
@@ -144,6 +144,56 @@ function TeacherLoginScreen () {
 										Register
 									</Link>
 								</p>
+								<div
+									className='login-card__teacher-gateway'
+									role='navigation'
+									aria-label='School admin sign-in'
+								>
+									<div
+										className='login-card__teacher-gateway-accent'
+										aria-hidden
+									/>{' '}
+									<br />
+									<p className='login-card__teacher-gateway-lead'>
+										Are you a school admin?
+									</p>
+									<Link
+										to='/schooladmins/login'
+										className='login-card__teacher-gateway-btn'
+									>
+										<span className='login-card__teacher-gateway-btn-icon'>
+											<svg
+												xmlns='http://www.w3.org/2000/svg'
+												width='18'
+												height='18'
+												viewBox='0 0 24 24'
+												fill='none'
+												stroke='currentColor'
+												strokeWidth='2'
+												strokeLinecap='round'
+												strokeLinejoin='round'
+												aria-hidden
+											>
+												<path d='M3 21h18' />
+												<path d='M5 21V7l8-4v18' />
+												<path d='M19 21V11l-6-4' />
+												<path d='M9 9v.01' />
+												<path d='M9 12v.01' />
+												<path d='M9 15v.01' />
+												<path d='M9 18v.01' />
+											</svg>
+										</span>
+										<span className='login-card__teacher-gateway-btn-label'>
+											School admin login
+										</span>
+										<span
+											className='login-card__teacher-gateway-btn-arrow'
+											aria-hidden
+										>
+											→
+										</span>
+									</Link>
+								</div>
 							</div>
 						</div>
 					</div>

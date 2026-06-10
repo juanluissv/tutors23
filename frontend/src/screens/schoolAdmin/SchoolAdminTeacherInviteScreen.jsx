@@ -25,6 +25,19 @@ function resolveSchoolId (school) {
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
 
+function normalizeTeacherEmails (teacherEmail) {
+	if (teacherEmail == null || teacherEmail === '') {
+		return []
+	}
+	if (Array.isArray(teacherEmail)) {
+		return teacherEmail
+			.map((e) => String(e).trim())
+			.filter((e) => e !== '')
+	}
+	const single = String(teacherEmail).trim()
+	return single !== '' ? [single] : []
+}
+
 function SchoolAdminTeacherInviteScreen () {
 	const { id: subjectId } = useParams()
 	const navigate = useNavigate()
@@ -60,6 +73,11 @@ function SchoolAdminTeacherInviteScreen () {
 		return subjects.find((s) => String(s._id) === String(subjectId))
 	}, [subjects, subjectId, isValidSubjectParam])
 
+	const savedTeacherEmails = useMemo(
+		() => normalizeTeacherEmails(currentSubject?.teacherEmail),
+		[currentSubject],
+	)
+
 	const isBusy = isLoadingList || isSaving
 
 	const toggleSidebar = () => {
@@ -72,36 +90,29 @@ function SchoolAdminTeacherInviteScreen () {
 		}
 	}, [schoolAdminInfo, navigate])
 
-	useEffect(() => {
-		if (!currentSubject) {
-			return
-		}
-		const te = currentSubject.teacherEmail
-		if (te == null) {
-			setEmail('')
-			return
-		}
-		if (Array.isArray(te)) {
-			setEmail(te.length > 0 ? String(te[0]) : '')
-			return
-		}
-		setEmail(String(te))
-	}, [currentSubject])
-
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-		if (email.trim() === '') {
+		const trimmed = email.trim().toLowerCase()
+		if (trimmed === '') {
 			toast.error('Please enter the teacher email')
 			return
 		}
 		if (!isValidSubjectParam) {
 			return
 		}
+		if (
+			savedTeacherEmails.some(
+				(saved) => saved.toLowerCase() === trimmed,
+			)
+		) {
+			toast.error('That email is already saved for this subject')
+			return
+		}
 
 		try {
 			await setSubjectTeacherEmail({
 				id: String(subjectId),
-				email: email.trim(),
+				email: trimmed,
 			}).unwrap()
 			toast.success('Teacher email saved')
 			navigate('/schooladmins/mysubjects', { replace: true })
@@ -297,12 +308,13 @@ function SchoolAdminTeacherInviteScreen () {
 										</Link>
 									</div>
 									<h1 className='login-card__title'>
-										Invite teacher
+										Add a teacher to this subject
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Add the email for the teacher linked to
+										Add teacher emails for
 										<strong> {currentSubject?.title || 'this subject'}</strong>
-										. You can change it at any time.
+										. Saved invites appear below; you can add
+										more at any time.
 									</p>
 								</div>
 								{isLoadingList && !currentSubject ? (
@@ -316,12 +328,39 @@ function SchoolAdminTeacherInviteScreen () {
 										name='schooladmin-teacher-invite-form'
 										onSubmit={handleSubmit}
 									>
+										<div className='subject-teacher-emails'>
+											<p className='subject-teacher-emails__label'>
+												Saved teacher emails
+											</p>
+											{savedTeacherEmails.length > 0 ? (
+												<ul
+													className='subject-teacher-emails__list'
+													aria-label='Saved teacher emails for this subject'
+												>
+													{savedTeacherEmails.map(
+														(savedEmail) => (
+															<li
+																key={savedEmail}
+																className='subject-teacher-emails__item'
+															>
+																{savedEmail}
+															</li>
+														),
+													)}
+												</ul>
+											) : (
+												<p className='subject-teacher-emails__empty'>
+													No teacher emails saved yet
+													for this subject.
+												</p>
+											)}
+										</div>
 										<div className='login-field'>
 											<label
 												className='login-label'
 												htmlFor='schooladmin-teacher-invite-email'
 											>
-												Teacher email
+												Add teacher email
 											</label>
 											<input
 												type='email'
@@ -341,7 +380,7 @@ function SchoolAdminTeacherInviteScreen () {
 											className='login-submit'
 											disabled={isBusy}
 										>
-											{isSaving ? 'Saving…' : 'Save email'}
+											{isSaving ? 'Saving…' : 'Add email'}
 										</button>
 									</form>
 								)}
