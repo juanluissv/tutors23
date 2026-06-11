@@ -14,28 +14,97 @@ import '../../App.css'
 
 const PAGE_SIZE = 2
 
-const CATEGORY_THEME_CYCLE = ['sky', 'purple', 'indigo', 'teal']
+// const CARD_THEME_CYCLE = ['amber', 'indigo', 'blue', 'sky', 'violet' ]
+const CARD_THEME_CYCLE = ['amber', 'sky', 'indigo', 'blue', 'violet' ]
 
-function themeColorForAnswerId (id) {
+function themeForAnswerId (id) {
 	const s = String(id ?? '')
 	let sum = 0
 	for (let i = 0; i < s.length; i += 1) {
 		sum += s.charCodeAt(i)
 	}
-	return CATEGORY_THEME_CYCLE[sum % CATEGORY_THEME_CYCLE.length]
+	return CARD_THEME_CYCLE[sum % CARD_THEME_CYCLE.length]
 }
 
 const PlayIcon = () => (
-	<svg width='24' height='24' viewBox='0 0 24 24' fill='#6b7280' aria-hidden>
+	<svg
+		width='22'
+		height='22'
+		viewBox='0 0 24 24'
+		fill='currentColor'
+		aria-hidden
+	>
 		<path d='M8 5v14l11-7z' />
 	</svg>
 )
 
 const PlayIconSmall = () => (
-	<svg width='16' height='16' viewBox='0 0 24 24' fill='currentColor' aria-hidden>
+	<svg
+		width='14'
+		height='14'
+		viewBox='0 0 24 24'
+		fill='currentColor'
+		aria-hidden
+	>
 		<path d='M8 5v14l11-7z' />
 	</svg>
 )
+
+const AnswerBadge = () => (
+	<svg
+		width='28'
+		height='28'
+		viewBox='0 0 28 28'
+		fill='none'
+		xmlns='http://www.w3.org/2000/svg'
+		className='new-answers__badge-svg'
+	>
+		<circle cx='14' cy='14' r='14' fill='url(#new-answers-badge)' />
+		<path
+			d='M9 14.5l3.5 3.5L19.5 11'
+			stroke='white'
+			strokeWidth='2.4'
+			strokeLinecap='round'
+			strokeLinejoin='round'
+		/>
+		<defs>
+			<linearGradient
+				id='new-answers-badge'
+				x1='0'
+				y1='0'
+				x2='28'
+				y2='28'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#0ea5e9' />
+				<stop offset='1' stopColor='#38bdf8' />
+			</linearGradient>
+		</defs>
+	</svg>
+)
+
+function teacherDisplayName (teacher) {
+	if (!teacher || typeof teacher !== 'object') {
+		return 'Teacher'
+	}
+	const parts = [teacher.firstname, teacher.lastname].filter(Boolean)
+	return parts.length > 0 ? parts.join(' ') : 'Teacher'
+}
+
+function formatQaDate (value) {
+	if (value == null) {
+		return ''
+	}
+	const d = value instanceof Date ? value : new Date(value)
+	if (Number.isNaN(d.getTime())) {
+		return ''
+	}
+	return d.toLocaleDateString(undefined, {
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric',
+	})
+}
 
 function answerQuestionTitle (answer) {
 	if (answer?.question && typeof answer.question === 'object') {
@@ -50,6 +119,31 @@ function answerQuestionTitle (answer) {
 
 function answerHasVideo (answer) {
 	return answer?.mediaId != null && String(answer.mediaId).trim() !== ''
+}
+
+function AnswerVideoThumb ({ watchTo, ariaLabel }) {
+	return (
+		<Link
+			to={watchTo}
+			className='new-answers__video'
+			aria-label={ariaLabel ?? 'Watch answer video'}
+		>
+			<div className='new-answers__video-glow' />
+			<div className='new-answers__video-placeholder'>
+				<div className='new-answers__video-lines'>
+					<div className='new-answers__video-line' />
+					<div className='new-answers__video-line new-answers__video-line--short' />
+					<div className='new-answers__video-line' />
+					<div className='new-answers__video-line new-answers__video-line--short' />
+				</div>
+			</div>
+			<div className='new-answers__play-overlay'>
+				<div className='new-answers__play-btn'>
+					<PlayIcon />
+				</div>
+			</div>
+		</Link>
+	)
 }
 
 function StudentNewAnswersScreen () {
@@ -139,145 +233,168 @@ function StudentNewAnswersScreen () {
 					/>
 					<div className='content-area'>
 						<div className='center-content3'>
-							<h3 className='main-heading-answers answers-heading heading-gradient'>
-								{canView ? (
-									<>
-										{newAnswers.length}{' '}
-										new{' '}
-										{newAnswers.length === 1
-											? 'answer'
-											: 'answers'}{' '}
-										from teachers
-									</>
-								) : (
-									'New answers from teachers'
+							<div className='new-answers-page'>
+								<h1 className='new-answers-page__title heading-gradient'>
+									New answers from teachers
+								</h1>
+								<p className='new-answers-page__subtitle'>
+									{canView ? (
+										<>
+											You have{' '}
+											<strong>{newAnswers.length}</strong>{' '}
+											new video{' '}
+											{newAnswers.length === 1
+												? 'answer'
+												: 'answers'}{' '}
+											waiting. Watch them before they move to
+											your previous questions.
+										</>
+									) : (
+										'Watch the video answers your teachers '
+										+ 'have recorded for your questions.'
+									)}
+								</p>
+
+								{!isLoadingProfile && !canView ? (
+									<div className='ask-subscription-notice'>
+										<p className='ask-subscription-notice__title'>
+											Subscription required
+										</p>
+										<p className='ask-subscription-notice__text'>
+											{viewBlockReason}
+										</p>
+										<Link
+											to='/students/subscription'
+											className='ask-subscription-notice__link'
+										>
+											View plans & subscribe
+										</Link>
+									</div>
+								) : null}
+
+								{canView && isLoading && (
+									<p className='new-answers__status'>
+										Loading answers…
+									</p>
 								)}
-							</h3>
 
-							{!isLoadingProfile && !canView ? (
-								<div className='ask-subscription-notice'>
-									<p className='ask-subscription-notice__title'>
-										Subscription required
-									</p>
-									<p className='ask-subscription-notice__text'>
-										{viewBlockReason}
-									</p>
-									<Link
-										to='/students/subscription'
-										className='ask-subscription-notice__link'
-									>
-										View plans & subscribe
-									</Link>
-								</div>
-							) : null}
+								{canView && isError && (
+									<div className='new-answers__status'>
+										<p>{errorMessage}</p>
+										<button
+											type='button'
+											className='pagination-btn active'
+											style={{ marginTop: '0.75rem' }}
+											onClick={() => refetch()}
+										>
+											Try again
+										</button>
+									</div>
+								)}
 
-							{canView && isLoading && (
-								<p className='answers-heading' style={{ marginTop: '1rem' }}>
-									Loading answers…
-								</p>
-							)}
+								{canView && !isLoading && !isError
+									&& newAnswers.length === 0 && (
+									<div className='new-answers__empty'>
+										<div className='new-answers__empty-icon'>
+											<AnswerBadge />
+										</div>
+										<p className='new-answers__empty-text'>
+											No new answers yet. When a teacher
+											responds to your questions, they will
+											appear here until you watch them.
+										</p>
+									</div>
+								)}
 
-							{canView && isError && (
-								<div style={{ marginTop: '1rem' }}>
-									<p className='answers-heading'>{errorMessage}</p>
-									<button
-										type='button'
-										className='pagination-btn active'
-										style={{ marginTop: '0.75rem' }}
-										onClick={() => refetch()}
-									>
-										Try again
-									</button>
-								</div>
-							)}
-
-							{canView && !isLoading && !isError && newAnswers.length === 0 && (
-								<p className='answers-heading' style={{ marginTop: '1rem' }}>
-									No new answers yet. When a teacher responds to your
-									questions, they will appear here until you watch them.
-								</p>
-							)}
-
-							<div className='answers-container'>
-								<div className='answers-cards'>
-									{canView && !isLoading && !isError
-										&& paginatedAnswers.map((item) => {
+								{canView && !isLoading && !isError
+									&& newAnswers.length > 0 && (
+									<div className='new-answers__grid'>
+										{paginatedAnswers.map((item) => {
 											const category =
 												item.subject
 												&& typeof item.subject === 'object'
 													? item.subject.title
 													: 'Subject'
-											const categoryColor = themeColorForAnswerId(
-												item._id,
-											)
 											const watchPath =
 												`/students/watchanswer/${String(item._id)}`
+											const theme = themeForAnswerId(item._id)
+											const hasDescription =
+												item.description != null
+												&& String(item.description)
+													.trim() !== ''
 
 											return (
 												<div
 													key={String(item._id)}
-													className='answer-card-wrapper'
+													className={`new-answers__card new-answers__card--${theme}`}
 												>
-													<div
-														className={`answer-card answer-card--theme-${categoryColor}`}
-													>
-														<span
-															className={`answer-category answer-category-${categoryColor}`}
-														>
+													<div className='new-answers__card-head'>
+														<span className='new-answers__tag'>
 															{category}
 														</span>
-
-														<div className='answer-thumbnail'>
-															<div className='thumbnail-placeholder'>
-																<div className='thumbnail-lines'>
-																	<div className='line' />
-																	<div className='line short' />
-																	<div className='line' />
-																	<div className='line short' />
-																</div>
-															</div>
-															<div className='play-overlay'>
-																<div className='play-button'>
-																	<PlayIcon />
-																</div>
-															</div>
-														</div>
-
-														<h3 className='answer-question'>
-															{answerQuestionTitle(item)}
-														</h3>
-
-														<Link
-															to={watchPath}
-															className={`watch-answer-btn watch-answer-${categoryColor}`}
-														>
-															Watch Answer
-															<PlayIconSmall />
-														</Link>
+														<span className='new-answers__pill'>
+															<span className='new-answers__pill-dot' />
+															New
+														</span>
 													</div>
+
+													<h3 className='new-answers__card-title'>
+														{answerQuestionTitle(item)}
+													</h3>
+
+													<AnswerVideoThumb
+														watchTo={watchPath}
+														ariaLabel='Watch answer video'
+													/>
+
+													{hasDescription && (
+														<p className='new-answers__card-text'>
+															{item.description}
+														</p>
+													)}
+
+													<span className='new-answers__meta'>
+														{teacherDisplayName(
+															item.teacher,
+														)}
+														{' · '}
+														{formatQaDate(
+															item.dateCreated,
+														)}
+													</span>
+
+													<Link
+														to={watchPath}
+														className='new-answers__watch'
+													>
+														Watch answer
+														<PlayIconSmall />
+													</Link>
 												</div>
 											)
 										})}
-								</div>
-							</div>
+									</div>
+								)}
 
-							{canView && !isLoading && !isError && totalPages > 1 && (
-								<div className='pagination pagination--answers'>
-									{Array.from(
-										{ length: totalPages },
-										(_, i) => i + 1,
-									).map((page) => (
-										<button
-											key={page}
-											type='button'
-											className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
-											onClick={() => setCurrentPage(page)}
-										>
-											{page}
-										</button>
-									))}
-								</div>
-							)}
+								{canView && !isLoading && !isError
+									&& totalPages > 1 && (
+									<div className='pagination pagination--answers new-answers__pagination'>
+										{Array.from(
+											{ length: totalPages },
+											(_, i) => i + 1,
+										).map((page) => (
+											<button
+												key={page}
+												type='button'
+												className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+												onClick={() => setCurrentPage(page)}
+											>
+												{page}
+											</button>
+										))}
+									</div>
+								)}
+							</div>
 						</div>
 					</div>
 				</div>
