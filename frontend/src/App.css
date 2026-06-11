@@ -7607,6 +7607,167 @@ a.upload-card {
     0 2px 12px rgba(13, 148, 136, 0.28);
 }
 
+/* Subject cards pagination (Ask teacher, etc.) */
+.subjects-pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: 36px;
+  padding: 22px 20px 8px;
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 250, 252, 0.88) 100%
+  );
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 32px -12px rgba(15, 23, 42, 0.12);
+}
+
+.subjects-pagination__summary {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #64748b;
+  letter-spacing: 0.01em;
+}
+
+.subjects-pagination__summary strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.subjects-pagination__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.subjects-pagination__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #475569;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.subjects-pagination__nav:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(13, 148, 136, 0.4);
+  color: #0f766e;
+  box-shadow:
+    0 2px 8px rgba(13, 148, 136, 0.12),
+    0 4px 14px rgba(79, 70, 229, 0.08);
+}
+
+.subjects-pagination__nav:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.subjects-pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(241, 245, 249, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.subjects-pagination__page {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.subjects-pagination__page:hover:not(.subjects-pagination__page--active) {
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f766e;
+  transform: scale(1.06);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.12);
+}
+
+.subjects-pagination__page--active {
+  background: linear-gradient(135deg, #14b8a6 0%, #6366f1 100%);
+  color: #fff;
+  box-shadow:
+    0 6px 22px rgba(79, 70, 229, 0.35),
+    0 2px 10px rgba(13, 148, 136, 0.2);
+}
+
+.subjects-pagination__page--active:hover {
+  box-shadow:
+    0 8px 28px rgba(79, 70, 229, 0.42),
+    0 2px 12px rgba(13, 148, 136, 0.26);
+}
+
+@media (max-width: 640px) {
+  .subjects-pagination {
+    padding: 18px 14px 6px;
+    margin-top: 28px;
+  }
+
+  .subjects-pagination__controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .subjects-pagination__nav span {
+    display: none;
+  }
+
+  .subjects-pagination__nav {
+    min-width: 42px;
+    padding: 0 12px;
+    justify-content: center;
+  }
+
+  .subjects-pagination__pages {
+    flex: 1;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: calc(100% - 96px);
+  }
+
+  .subjects-pagination__page {
+    width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+  }
+}
+
 /* Responsive design for upload cards */
 @media (max-width: 992px) {
   .upload-cards-container {

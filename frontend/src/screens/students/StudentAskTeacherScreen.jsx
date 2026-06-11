@@ -177,6 +177,7 @@ function StudentAskTeacherScreen () {
 						) : null}
 						<TeacherSubjectsGrid
 							pageTitle='Ask your teacher'
+							pageSize={5}
 							pageSubtitle={
 								'Pick a subject to record and send a ' +
 								'question to your tutor'

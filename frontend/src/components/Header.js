@@ -91,7 +91,7 @@ function Header({
 					aria-label="Ask to Learn — go to home"
 				>
 					<img
-						src="https://app.asktolearn.co/assets/img/log4.png"
+						src="/assets/img/log4.png"
 						alt=""
 						className="logo-image"
 						style={{ width: '37px', height: '37px' }}

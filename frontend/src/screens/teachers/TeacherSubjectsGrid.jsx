@@ -1,6 +1,110 @@
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { subjectGradeLabel } from '../../utils/gradeLevel'
 import '../../App.css'
+
+const ChevronLeftIcon = () => (
+	<svg
+		width='16'
+		height='16'
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2.5'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<path d='M15 18l-6-6 6-6' />
+	</svg>
+)
+
+const ChevronRightIcon = () => (
+	<svg
+		width='16'
+		height='16'
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2.5'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<path d='M9 18l6-6-6-6' />
+	</svg>
+)
+
+function SubjectsPagination ({
+	currentPage,
+	totalPages,
+	pageSize,
+	totalCount,
+	onPageChange,
+}) {
+	const start = (currentPage - 1) * pageSize + 1
+	const end = Math.min(currentPage * pageSize, totalCount)
+
+	return (
+		<nav
+			className='subjects-pagination'
+			aria-label='Subject pages'
+		>
+			<p className='subjects-pagination__summary'>
+				Showing{' '}
+				<strong>{start}–{end}</strong>
+				{' '}of{' '}
+				<strong>{totalCount}</strong>
+				{' '}subjects
+			</p>
+			<div className='subjects-pagination__controls'>
+				<button
+					type='button'
+					className='subjects-pagination__nav'
+					onClick={() => onPageChange(currentPage - 1)}
+					disabled={currentPage <= 1}
+					aria-label='Previous page'
+				>
+					<ChevronLeftIcon />
+					<span>Prev</span>
+				</button>
+				<div className='subjects-pagination__pages'>
+					{Array.from({ length: totalPages }, (_, i) => i + 1).map(
+						(page) => (
+							<button
+								key={page}
+								type='button'
+								className={
+									'subjects-pagination__page' +
+									(currentPage === page
+										? ' subjects-pagination__page--active'
+										: '')
+								}
+								onClick={() => onPageChange(page)}
+								aria-label={`Page ${page}`}
+								aria-current={
+									currentPage === page ? 'page' : undefined
+								}
+							>
+								{page}
+							</button>
+						),
+					)}
+				</div>
+				<button
+					type='button'
+					className='subjects-pagination__nav'
+					onClick={() => onPageChange(currentPage + 1)}
+					disabled={currentPage >= totalPages}
+					aria-label='Next page'
+				>
+					<span>Next</span>
+					<ChevronRightIcon />
+				</button>
+			</div>
+		</nav>
+	)
+}
 
 const GradCapIcon = () => (
 	<svg
@@ -58,6 +162,7 @@ const StudentsIcon = () => (
  * @param {() => void} props.refetch
  * @param {(subject: object, index: number) => import('react').ReactNode} props.renderCardActions
  * @param {import('react').ReactNode} [props.afterSubtitle]
+ * @param {number} [props.pageSize] — when set, paginate the grid
  */
 export function TeacherSubjectsGrid ({
 	pageTitle,
@@ -69,7 +174,41 @@ export function TeacherSubjectsGrid ({
 	isError,
 	refetch,
 	renderCardActions,
+	pageSize,
 }) {
+	const [currentPage, setCurrentPage] = useState(1)
+
+	const shouldPaginate = Boolean(
+		pageSize && pageSize > 0 && subjects.length > pageSize,
+	)
+
+	const totalPages = shouldPaginate
+		? Math.ceil(subjects.length / pageSize)
+		: 1
+
+	useEffect(() => {
+		if (currentPage > totalPages) {
+			setCurrentPage(totalPages)
+		}
+	}, [currentPage, totalPages])
+
+	useEffect(() => {
+		setCurrentPage(1)
+	}, [subjects.length, pageSize])
+
+	const displayedSubjects = useMemo(() => {
+		if (!shouldPaginate) {
+			return subjects
+		}
+		const start = (currentPage - 1) * pageSize
+		return subjects.slice(start, start + pageSize)
+	}, [subjects, currentPage, pageSize, shouldPaginate])
+
+	const handlePageChange = (page) => {
+		setCurrentPage(page)
+		window.scrollTo({ top: 0, behavior: 'smooth' })
+	}
+
 	return (
 		<div className='teacher-subjects-page'>
 			<h1 className='teacher-subjects-page__title heading-gradient'>
@@ -104,10 +243,14 @@ export function TeacherSubjectsGrid ({
 					{emptyMessage}
 				</p>
 			) : (
+				<>
 				<div className='teacher-subjects-grid'>
-					{subjects.map((subject, index) => {
+					{displayedSubjects.map((subject, index) => {
 						const id = String(subject._id)
-						const variant = (index % 5) + 1
+						const globalIndex = shouldPaginate
+							? (currentPage - 1) * pageSize + index
+							: index
+						const variant = (globalIndex % 5) + 1
 						const studentsCount = Number(subject.studentCount) || 0
 						const gradeLabel = subjectGradeLabel(subject)
 						return (
@@ -160,12 +303,22 @@ export function TeacherSubjectsGrid ({
 								<div className='teacher-subject-card__divider' />
 
 								<div className='teacher-subject-card__actions'>
-									{renderCardActions(subject, index)}
+									{renderCardActions(subject, globalIndex)}
 								</div>
 							</article>
 						)
 					})}
 				</div>
+				{shouldPaginate ? (
+					<SubjectsPagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						pageSize={pageSize}
+						totalCount={subjects.length}
+						onPageChange={handlePageChange}
+					/>
+				) : null}
+				</>
 			)}
 		</div>
 	)
