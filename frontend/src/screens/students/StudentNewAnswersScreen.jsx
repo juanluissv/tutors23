@@ -26,6 +26,15 @@ function themeForAnswerId (id) {
 	return CARD_THEME_CYCLE[sum % CARD_THEME_CYCLE.length]
 }
 
+const THEME_GRADIENTS = {
+	sky: { from: '#0369a1', to: '#38bdf8' },
+	violet: { from: '#6d28d9', to: '#c084fc' },
+	blue: { from: '#1d4ed8', to: '#60a5fa' },
+	amber: { from: '#d97706', to: '#fbbf24' },
+	rose: { from: '#be123c', to: '#fb7185' },
+	indigo: { from: '#4338ca', to: '#818cf8' },
+}
+
 const PlayIcon = () => (
 	<svg
 		width='22'
@@ -50,38 +59,43 @@ const PlayIconSmall = () => (
 	</svg>
 )
 
-const AnswerBadge = () => (
-	<svg
-		width='28'
-		height='28'
-		viewBox='0 0 28 28'
-		fill='none'
-		xmlns='http://www.w3.org/2000/svg'
-		className='new-answers__badge-svg'
-	>
-		<circle cx='14' cy='14' r='14' fill='url(#new-answers-badge)' />
-		<path
-			d='M9 14.5l3.5 3.5L19.5 11'
-			stroke='white'
-			strokeWidth='2.4'
-			strokeLinecap='round'
-			strokeLinejoin='round'
-		/>
-		<defs>
-			<linearGradient
-				id='new-answers-badge'
-				x1='0'
-				y1='0'
-				x2='28'
-				y2='28'
-				gradientUnits='userSpaceOnUse'
-			>
-				<stop stopColor='#0ea5e9' />
-				<stop offset='1' stopColor='#38bdf8' />
-			</linearGradient>
-		</defs>
-	</svg>
-)
+const AnswerBadge = ({ theme, gradientId }) => {
+	const colors = THEME_GRADIENTS[theme] ?? THEME_GRADIENTS.sky
+	const id = gradientId ?? `new-answers-badge-${theme}`
+
+	return (
+		<svg
+			width='28'
+			height='28'
+			viewBox='0 0 28 28'
+			fill='none'
+			xmlns='http://www.w3.org/2000/svg'
+			className='new-answers__badge-svg'
+		>
+			<circle cx='14' cy='14' r='14' fill={`url(#${id})`} />
+			<path
+				d='M9 14.5l3.5 3.5L19.5 11'
+				stroke='white'
+				strokeWidth='2.4'
+				strokeLinecap='round'
+				strokeLinejoin='round'
+			/>
+			<defs>
+				<linearGradient
+					id={id}
+					x1='0'
+					y1='0'
+					x2='28'
+					y2='28'
+					gradientUnits='userSpaceOnUse'
+				>
+					<stop stopColor={colors.from} />
+					<stop offset='1' stopColor={colors.to} />
+				</linearGradient>
+			</defs>
+		</svg>
+	)
+}
 
 function teacherDisplayName (teacher) {
 	if (!teacher || typeof teacher !== 'object') {
@@ -143,6 +157,73 @@ function AnswerVideoThumb ({ watchTo, ariaLabel }) {
 				</div>
 			</div>
 		</Link>
+	)
+}
+
+function AnswerCard ({ item }) {
+	const category =
+		item.subject && typeof item.subject === 'object'
+			? item.subject.title
+			: 'Subject'
+	const watchPath = `/students/watchanswer/${String(item._id)}`
+	const theme = themeForAnswerId(item._id)
+	const hasDescription =
+		item.description != null && String(item.description).trim() !== ''
+
+	return (
+		<div className={`new-answers__card new-answers__card--${theme}`}>
+			<div className='new-answers__card-head'>
+				<span className='new-answers__tag'>{category}</span>
+				<span className='new-answers__pill'>
+					<span className='new-answers__pill-dot' />
+					New
+				</span>
+			</div>
+
+			<h3 className='new-answers__card-title'>
+				{answerQuestionTitle(item)}
+			</h3>
+
+			<AnswerVideoThumb
+				watchTo={watchPath}
+				ariaLabel='Watch answer video'
+			/>
+
+			{hasDescription && (
+				<p className='new-answers__card-text'>{item.description}</p>
+			)}
+
+			<span className='new-answers__meta'>
+				{teacherDisplayName(item.teacher)}
+				{' · '}
+				{formatQaDate(item.dateCreated)}
+			</span>
+
+			<Link to={watchPath} className='new-answers__watch'>
+				Watch answer
+				<PlayIconSmall />
+			</Link>
+		</div>
+	)
+}
+
+function NewAnswersConnector ({ firstTheme, secondTheme }) {
+	return (
+		<div className='new-answers__connector'>
+			<div className='new-answers__badge'>
+				<AnswerBadge
+					theme={firstTheme}
+					gradientId={`na-badge-${firstTheme}-first`}
+				/>
+			</div>
+			<div className='new-answers__line' />
+			<div className='new-answers__badge'>
+				<AnswerBadge
+					theme={secondTheme}
+					gradientId={`na-badge-${secondTheme}-second`}
+				/>
+			</div>
+		</div>
 	)
 }
 
@@ -233,7 +314,7 @@ function StudentNewAnswersScreen () {
 					/>
 					<div className='content-area'>
 						<div className='center-content3'>
-							<div className='new-answers-page'>
+							<div className='new-answers-page new-answers-page--centered'>
 								<h1 className='new-answers-page__title heading-gradient'>
 									New answers from teachers
 								</h1>
@@ -308,71 +389,28 @@ function StudentNewAnswersScreen () {
 
 								{canView && !isLoading && !isError
 									&& newAnswers.length > 0 && (
-									<div className='new-answers__grid'>
-										{paginatedAnswers.map((item) => {
-											const category =
-												item.subject
-												&& typeof item.subject === 'object'
-													? item.subject.title
-													: 'Subject'
-											const watchPath =
-												`/students/watchanswer/${String(item._id)}`
-											const theme = themeForAnswerId(item._id)
-											const hasDescription =
-												item.description != null
-												&& String(item.description)
-													.trim() !== ''
+									<div className='new-answers__timeline'>
+										<div
+											className={`new-answers__pair ${paginatedAnswers.length === 1 ? 'new-answers__pair--single' : ''}`}
+										>
+											<AnswerCard item={paginatedAnswers[0]} />
 
-											return (
-												<div
-													key={String(item._id)}
-													className={`new-answers__card new-answers__card--${theme}`}
-												>
-													<div className='new-answers__card-head'>
-														<span className='new-answers__tag'>
-															{category}
-														</span>
-														<span className='new-answers__pill'>
-															<span className='new-answers__pill-dot' />
-															New
-														</span>
-													</div>
-
-													<h3 className='new-answers__card-title'>
-														{answerQuestionTitle(item)}
-													</h3>
-
-													<AnswerVideoThumb
-														watchTo={watchPath}
-														ariaLabel='Watch answer video'
+											{paginatedAnswers.length > 1 && (
+												<>
+													<NewAnswersConnector
+														firstTheme={themeForAnswerId(
+															paginatedAnswers[0]._id,
+														)}
+														secondTheme={themeForAnswerId(
+															paginatedAnswers[1]._id,
+														)}
 													/>
-
-													{hasDescription && (
-														<p className='new-answers__card-text'>
-															{item.description}
-														</p>
-													)}
-
-													<span className='new-answers__meta'>
-														{teacherDisplayName(
-															item.teacher,
-														)}
-														{' · '}
-														{formatQaDate(
-															item.dateCreated,
-														)}
-													</span>
-
-													<Link
-														to={watchPath}
-														className='new-answers__watch'
-													>
-														Watch answer
-														<PlayIconSmall />
-													</Link>
-												</div>
-											)
-										})}
+													<AnswerCard
+														item={paginatedAnswers[1]}
+													/>
+												</>
+											)}
+										</div>
 									</div>
 								)}
 

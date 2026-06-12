@@ -3750,10 +3750,77 @@ a.qa-timeline__video {
   font-size: 0.95rem;
 }
 
+/* Centered page header variant */
+.new-answers-page--centered .new-answers-page__title {
+  text-align: center;
+}
+
+.new-answers-page--centered .new-answers-page__subtitle {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .new-answers__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
+}
+
+/* Only one card on the page → center it */
+.new-answers__grid--single {
+  grid-template-columns: minmax(0, 480px);
+  justify-content: center;
+}
+
+/* ── Timeline layout (two cards joined by a dotted connector) ── */
+
+.new-answers__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.new-answers__pair {
+  display: grid;
+  grid-template-columns: 1fr 56px 1fr;
+  gap: 0;
+  align-items: start;
+}
+
+.new-answers__pair--single {
+  grid-template-columns: minmax(0, 480px);
+  justify-content: center;
+}
+
+.new-answers__connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-self: center;
+  gap: 0;
+  padding-top: 30px;
+}
+
+.new-answers__badge {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  line-height: 0;
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.12));
+}
+
+.new-answers__line {
+  width: 2px;
+  flex: 1;
+  min-height: 90px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    #cbd5e1 0,
+    #cbd5e1 6px,
+    transparent 6px,
+    transparent 12px
+  );
 }
 
 /* Base card — colors driven by per-theme CSS variables */
@@ -4173,6 +4240,35 @@ a.qa-timeline__video {
   .new-answers__grid {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+
+  .new-answers__pair {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .new-answers__connector {
+    flex-direction: row;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    align-items: center;
+    height: 56px;
+  }
+
+  .new-answers__line {
+    width: auto;
+    height: 2px;
+    min-height: unset;
+    min-width: 32px;
+    flex: 0 0 32px;
+    background-image: repeating-linear-gradient(
+      to right,
+      #cbd5e1 0,
+      #cbd5e1 6px,
+      transparent 6px,
+      transparent 12px
+    );
   }
 }
 
