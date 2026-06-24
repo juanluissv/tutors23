@@ -254,7 +254,7 @@ async function extractLessonFromPdfWithVision (pdfBytes, options = {}) {
 
 	const response = await openai.responses.create({
 		model: VISION_MODEL,
-		max_output_tokens: 12000,
+		max_output_tokens: 32000,
 		instructions: SYSTEM_PROMPT,
 		input: [
 			{

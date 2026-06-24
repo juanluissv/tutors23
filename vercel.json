@@ -1,0 +1,7 @@
+{
+	"functions": {
+		"src/server.js": {
+			"includeFiles": "node_modules/@napi-rs/**"
+		}
+	}
+}

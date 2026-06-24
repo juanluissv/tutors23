@@ -19,6 +19,7 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
+        "@napi-rs/canvas": "^0.1.80",
         "@llamaindex/openai": "^0.4.22",
         "@llamaindex/pinecone": "^0.1.22",
         "@llamaindex/readers": "^3.1.21",
@@ -39,9 +40,7 @@
         "multer": "^1.4.5-lts.1",
         "nodemon": "^3.0.3",
         "openai": "^6.21.0",
+        "pdf-lib": "^1.17.1",
         "pdf-parse": "^2.4.5"
-    },
-    "devDependencies": {
-        "pdf-lib": "^1.17.1"
     }
 }

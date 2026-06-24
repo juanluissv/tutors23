@@ -1001,6 +1001,17 @@ function SchoolAdminBookChapters () {
 												})}
 											</ol>
 
+											<div className='book-chapters__actions'>
+												<button
+													type='button'
+													className='book-chapters__add-btn'
+													disabled={isBusy}
+													onClick={handleAddChapter}
+												>
+													+ Add chapter
+												</button>
+											</div>
+
 											<div className={
 												'subject-book-tools '
 												+ 'subject-book-tools--after-list'
@@ -1107,16 +1118,7 @@ function SchoolAdminBookChapters () {
 												)}
 											</div>
 
-											<div className='book-chapters__actions'>
-												<button
-													type='button'
-													className='book-chapters__add-btn'
-													disabled={isBusy}
-													onClick={handleAddChapter}
-												>
-													+ Add chapter
-												</button>
-											</div>
+											
 										</>
 									)}
 								</section>
