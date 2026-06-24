@@ -1,0 +1,978 @@
+/* ============================================================
+   Unidad 1 · Semana 1 — Los bosques tropicales en el mundo
+   Static, print-faithful reproduction of the source PDF.
+   ============================================================ */
+
+.bosques-doc {
+	--green-900: #1b4332;
+	--green-800: #245741;
+	--green-700: #2d6a4f;
+	--green-600: #40916c;
+	--green-500: #52b788;
+	--green-300: #95d5b2;
+	--green-100: #d8f3dc;
+	--amber-500: #d9a441;
+	--amber-100: #f7ecd2;
+	--teal-700: #1d6f76;
+	--sky-600: #2a7fb8;
+	--ink-900: #1f2a24;
+	--ink-700: #3c4a42;
+	--ink-500: #61736a;
+	--paper: #ffffff;
+	--paper-edge: #e7efe9;
+	--page-shadow: 0 24px 60px -28px rgba(20, 60, 40, 0.45);
+
+	position: fixed;
+	inset: 0;
+	z-index: 1;
+	margin: 0;
+	padding: 48px 20px 96px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch;
+	background:
+		radial-gradient(1200px 600px at 12% -8%, #e9f6ee 0%, rgba(233, 246, 238, 0) 55%),
+		radial-gradient(1000px 520px at 110% 0%, #e3f1f4 0%, rgba(227, 241, 244, 0) 50%),
+		linear-gradient(180deg, #f4f9f5 0%, #eef5f0 100%);
+	font-family: 'Georgia', 'Iowan Old Style', 'Times New Roman', serif;
+	color: var(--ink-900);
+	box-sizing: border-box;
+}
+
+.bosques-doc *,
+.bosques-doc *::before,
+.bosques-doc *::after {
+	box-sizing: border-box;
+}
+
+/* ---------- Top toolbar ---------- */
+.bosques-toolbar {
+	max-width: 880px;
+	margin: 0 auto 28px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+.bosques-toolbar__brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.bosques-toolbar__leaf {
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	display: grid;
+	place-items: center;
+	background: linear-gradient(135deg, var(--green-600), var(--green-800));
+	color: #fff;
+	box-shadow: 0 10px 22px -10px rgba(45, 106, 79, 0.7);
+}
+
+.bosques-toolbar__brand-text {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.2;
+}
+
+.bosques-toolbar__brand-text strong {
+	font-size: 0.95rem;
+	color: var(--green-900);
+}
+
+.bosques-toolbar__brand-text span {
+	font-size: 0.78rem;
+	color: var(--ink-500);
+}
+
+.bosques-toolbar__print {
+	border: 1px solid var(--green-300);
+	background: #fff;
+	color: var(--green-800);
+	font-weight: 600;
+	font-size: 0.85rem;
+	padding: 10px 18px;
+	border-radius: 999px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	transition: transform 0.15s ease, box-shadow 0.15s ease,
+		background 0.15s ease;
+}
+
+.bosques-toolbar__print:hover {
+	background: var(--green-100);
+	transform: translateY(-1px);
+	box-shadow: 0 10px 20px -12px rgba(45, 106, 79, 0.6);
+}
+
+/* ---------- Page sheets ---------- */
+.bosques-pages {
+	max-width: 880px;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 40px;
+}
+
+.bosques-page {
+	position: relative;
+	background: var(--paper);
+	border: 1px solid var(--paper-edge);
+	border-radius: 18px;
+	padding: 56px 60px 64px;
+	box-shadow: var(--page-shadow);
+	overflow: hidden;
+}
+
+.bosques-page::before {
+	content: '';
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 6px;
+	background: linear-gradient(180deg, var(--green-500), var(--green-800));
+}
+
+.bosques-page__num {
+	position: absolute;
+	top: 22px;
+	right: 26px;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.72rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--ink-500);
+}
+
+.bosques-page__folio {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.74rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--green-700);
+	margin-bottom: 18px;
+}
+
+.bosques-page__folio span.dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--green-500);
+}
+
+/* ---------- Cover page ---------- */
+.bosques-cover {
+	background:
+		radial-gradient(900px 400px at 100% 0%, rgba(82, 183, 136, 0.25) 0%, rgba(82, 183, 136, 0) 60%),
+		linear-gradient(160deg, var(--green-900) 0%, var(--green-700) 55%, var(--green-600) 100%);
+	color: #fff;
+	border: none;
+	padding: 72px 60px 80px;
+}
+
+.bosques-cover::before {
+	background: linear-gradient(180deg, var(--amber-500), #b9842c);
+}
+
+.bosques-cover__unit {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.82rem;
+	font-weight: 700;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	padding: 8px 16px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.14);
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	color: #eafff3;
+	margin-bottom: 26px;
+}
+
+.bosques-cover__title {
+	font-size: clamp(2.1rem, 4.6vw, 3.3rem);
+	line-height: 1.08;
+	margin: 0 0 14px;
+	letter-spacing: -0.01em;
+	font-weight: 700;
+}
+
+.bosques-cover__subtitle {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 1.02rem;
+	color: rgba(232, 255, 243, 0.85);
+	max-width: 540px;
+	margin: 0 0 36px;
+}
+
+.bosques-cover__objectives {
+	background: rgba(255, 255, 255, 0.12);
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: 16px;
+	padding: 24px 26px;
+	max-width: 620px;
+	backdrop-filter: blur(2px);
+}
+
+.bosques-cover__objectives-label {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--amber-100);
+	margin: 0 0 10px;
+}
+
+.bosques-cover__objectives-text {
+	font-size: 1.08rem;
+	line-height: 1.55;
+	margin: 0;
+	color: #fff;
+}
+
+.bosques-cover__deco {
+	position: absolute;
+	right: -40px;
+	bottom: -50px;
+	width: 260px;
+	height: 260px;
+	opacity: 0.18;
+	color: #fff;
+	pointer-events: none;
+}
+
+/* ---------- Phase banner ---------- */
+.bosques-phase {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0 0 24px;
+	padding: 10px 20px 10px 14px;
+	border-radius: 999px;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: #fff;
+	background: linear-gradient(135deg, var(--green-600), var(--green-800));
+	box-shadow: 0 14px 28px -16px rgba(45, 106, 79, 0.8);
+}
+
+.bosques-phase__icon {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.bosques-phase--amber {
+	background: linear-gradient(135deg, var(--amber-500), #b9842c);
+	box-shadow: 0 14px 28px -16px rgba(185, 132, 44, 0.8);
+}
+
+.bosques-phase--teal {
+	background: linear-gradient(135deg, var(--teal-700), #134e54);
+	box-shadow: 0 14px 28px -16px rgba(19, 78, 84, 0.8);
+}
+
+/* ---------- Headings & text ---------- */
+.bosques-h1 {
+	font-size: clamp(1.5rem, 2.6vw, 1.95rem);
+	line-height: 1.2;
+	color: var(--green-900);
+	margin: 0 0 8px;
+	font-weight: 700;
+}
+
+.bosques-h2 {
+	font-size: 1.28rem;
+	line-height: 1.3;
+	color: var(--green-800);
+	margin: 30px 0 12px;
+	font-weight: 700;
+	position: relative;
+	padding-left: 16px;
+}
+
+.bosques-h2::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 4px;
+	bottom: 4px;
+	width: 5px;
+	border-radius: 4px;
+	background: linear-gradient(180deg, var(--green-500), var(--green-700));
+}
+
+.bosques-lede {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 1.02rem;
+	color: var(--ink-500);
+	margin: 0 0 24px;
+}
+
+.bosques-p {
+	font-size: 1.04rem;
+	line-height: 1.72;
+	color: var(--ink-700);
+	margin: 0 0 14px;
+	text-align: justify;
+	hyphens: auto;
+}
+
+.bosques-p strong {
+	color: var(--green-800);
+}
+
+/* ---------- Two-column content with sidebar ---------- */
+.bosques-columns {
+	display: grid;
+	grid-template-columns: 1fr 240px;
+	gap: 34px;
+	align-items: start;
+}
+
+.bosques-aside {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	position: sticky;
+	top: 20px;
+}
+
+/* ---------- Callout boxes ---------- */
+.bosques-callout {
+	border-radius: 14px;
+	padding: 18px 18px 20px;
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bosques-callout__kicker {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	margin: 0 0 8px;
+}
+
+.bosques-callout__title {
+	font-size: 0.98rem;
+	font-weight: 700;
+	margin: 0 0 6px;
+}
+
+.bosques-callout__text {
+	font-size: 0.9rem;
+	line-height: 1.55;
+	margin: 0;
+}
+
+.bosques-callout--web {
+	background: #eef6ff;
+	border: 1px solid #cfe4fb;
+	color: var(--sky-600);
+}
+
+.bosques-callout--web .bosques-callout__text {
+	color: #3a566b;
+}
+
+.bosques-callout--geo {
+	background: var(--green-100);
+	border: 1px solid var(--green-300);
+	color: var(--green-800);
+}
+
+.bosques-callout--geo .bosques-callout__text {
+	color: var(--ink-700);
+}
+
+/* ---------- Activity cards ---------- */
+.bosques-activity {
+	position: relative;
+	background: #f8fbf9;
+	border: 1px solid var(--paper-edge);
+	border-left: 5px solid var(--green-500);
+	border-radius: 14px;
+	padding: 22px 24px 22px 28px;
+	margin: 0 0 20px;
+}
+
+.bosques-activity--blue {
+	border-left-color: var(--sky-600);
+	background: #f4f9fd;
+}
+
+.bosques-activity--amber {
+	border-left-color: var(--amber-500);
+	background: #fdf8ee;
+}
+
+.bosques-activity__head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 10px;
+}
+
+.bosques-activity__badge {
+	width: 34px;
+	height: 34px;
+	border-radius: 10px;
+	flex: none;
+	display: grid;
+	place-items: center;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 800;
+	color: #fff;
+	background: var(--green-600);
+}
+
+.bosques-activity--blue .bosques-activity__badge {
+	background: var(--sky-600);
+}
+
+.bosques-activity--amber .bosques-activity__badge {
+	background: var(--amber-500);
+}
+
+.bosques-activity__title {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 1.02rem;
+	font-weight: 700;
+	color: var(--green-900);
+	margin: 0;
+}
+
+.bosques-activity__tag {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ink-500);
+	display: block;
+}
+
+.bosques-activity__body {
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bosques-activity__body p {
+	font-size: 0.98rem;
+	line-height: 1.6;
+	color: var(--ink-700);
+	margin: 0 0 10px;
+}
+
+.bosques-list {
+	list-style: none;
+	margin: 6px 0 0;
+	padding: 0;
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bosques-list li {
+	position: relative;
+	padding-left: 26px;
+	margin-bottom: 9px;
+	font-size: 0.98rem;
+	line-height: 1.6;
+	color: var(--ink-700);
+}
+
+.bosques-list li::before {
+	content: '';
+	position: absolute;
+	left: 4px;
+	top: 9px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--green-500);
+}
+
+.bosques-list li strong {
+	color: var(--green-800);
+}
+
+/* ---------- Schema / example diagram ---------- */
+.bosques-schema {
+	margin: 18px 0 4px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bosques-schema__node {
+	background: linear-gradient(135deg, var(--green-700), var(--green-900));
+	color: #fff;
+	font-weight: 700;
+	text-align: center;
+	padding: 14px 22px;
+	border-radius: 12px;
+	max-width: 260px;
+	box-shadow: 0 12px 24px -16px rgba(27, 67, 50, 0.9);
+}
+
+.bosques-schema__branches {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 12px;
+}
+
+.bosques-schema__branch {
+	background: var(--green-100);
+	border: 1px dashed var(--green-300);
+	color: var(--green-800);
+	font-size: 0.85rem;
+	font-weight: 600;
+	padding: 10px 14px;
+	border-radius: 10px;
+}
+
+.bosques-schema__connector {
+	width: 2px;
+	height: 18px;
+	background: var(--green-300);
+}
+
+/* ---------- Doc box ---------- */
+.bosques-doc-box {
+	border: 1px solid var(--paper-edge);
+	border-radius: 16px;
+	overflow: hidden;
+	margin: 26px 0;
+	background: #fbfdfb;
+	box-shadow: 0 18px 40px -30px rgba(20, 60, 40, 0.5);
+}
+
+.bosques-doc-box__head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 22px;
+	background: linear-gradient(135deg, var(--green-700), var(--green-800));
+	color: #fff;
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bosques-doc-box__chip {
+	font-size: 0.7rem;
+	font-weight: 800;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	background: rgba(255, 255, 255, 0.2);
+	padding: 4px 10px;
+	border-radius: 999px;
+}
+
+.bosques-doc-box__title {
+	font-size: 0.98rem;
+	font-weight: 700;
+	margin: 0;
+}
+
+.bosques-doc-box__body {
+	padding: 22px 24px 24px;
+}
+
+.bosques-doc-box__text {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.96rem;
+	line-height: 1.65;
+	color: var(--ink-700);
+	margin: 0 0 12px;
+}
+
+.bosques-doc-box__source {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.78rem;
+	font-style: italic;
+	color: var(--ink-500);
+	margin: 6px 0 0;
+}
+
+/* ---------- Pie / donut chart (Doc 1) ---------- */
+.bosques-chart {
+	display: flex;
+	align-items: center;
+	gap: 34px;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.bosques-chart__donut {
+	--tropical: var(--green-500);
+	--boreal: var(--green-900);
+	--templada: var(--amber-500);
+	--subtropical: var(--green-300);
+	width: 200px;
+	height: 200px;
+	border-radius: 50%;
+	flex: none;
+	background: conic-gradient(
+		var(--tropical) 0% 45%,
+		var(--boreal) 45% 72%,
+		var(--templada) 72% 88%,
+		var(--subtropical) 88% 100%
+	);
+	display: grid;
+	place-items: center;
+	box-shadow: 0 18px 36px -20px rgba(20, 60, 40, 0.6);
+	position: relative;
+}
+
+.bosques-chart__hole {
+	width: 108px;
+	height: 108px;
+	border-radius: 50%;
+	background: #fff;
+	display: grid;
+	place-items: center;
+	text-align: center;
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bosques-chart__hole strong {
+	display: block;
+	font-size: 1.5rem;
+	color: var(--green-800);
+	line-height: 1;
+}
+
+.bosques-chart__hole span {
+	font-size: 0.68rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ink-500);
+}
+
+.bosques-chart__legend {
+	display: grid;
+	gap: 12px;
+	font-family: 'Inter', system-ui, sans-serif;
+	min-width: 200px;
+}
+
+.bosques-chart__row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.bosques-chart__swatch {
+	width: 16px;
+	height: 16px;
+	border-radius: 5px;
+	flex: none;
+}
+
+.bosques-chart__name {
+	flex: 1;
+	font-size: 0.92rem;
+	color: var(--ink-700);
+}
+
+.bosques-chart__pct {
+	font-size: 0.95rem;
+	font-weight: 800;
+	color: var(--green-800);
+}
+
+/* ---------- Problem / glossary grid ---------- */
+.bosques-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+	margin: 18px 0 8px;
+}
+
+.bosques-term {
+	background: #fff;
+	border: 1px solid var(--paper-edge);
+	border-top: 4px solid var(--green-500);
+	border-radius: 14px;
+	padding: 18px 20px 20px;
+	box-shadow: 0 14px 30px -26px rgba(20, 60, 40, 0.55);
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bosques-term:nth-child(2) {
+	border-top-color: var(--sky-600);
+}
+
+.bosques-term:nth-child(3) {
+	border-top-color: var(--amber-500);
+}
+
+.bosques-term:nth-child(4) {
+	border-top-color: var(--teal-700);
+}
+
+.bosques-term__title {
+	font-size: 1.02rem;
+	font-weight: 800;
+	color: var(--green-900);
+	margin: 0 0 8px;
+}
+
+.bosques-term__text {
+	font-size: 0.92rem;
+	line-height: 1.58;
+	color: var(--ink-700);
+	margin: 0;
+}
+
+/* ---------- Region cards ---------- */
+.bosques-regions {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 14px;
+	margin: 18px 0 6px;
+}
+
+.bosques-region {
+	display: grid;
+	grid-template-columns: 150px 1fr;
+	gap: 18px;
+	align-items: stretch;
+	background: #fff;
+	border: 1px solid var(--paper-edge);
+	border-radius: 14px;
+	overflow: hidden;
+	box-shadow: 0 14px 30px -26px rgba(20, 60, 40, 0.5);
+}
+
+.bosques-region__label {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 6px;
+	padding: 18px 20px;
+	color: #fff;
+	font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bosques-region--green .bosques-region__label {
+	background: linear-gradient(160deg, var(--green-600), var(--green-800));
+}
+
+.bosques-region--amber .bosques-region__label {
+	background: linear-gradient(160deg, var(--amber-500), #b9842c);
+}
+
+.bosques-region--teal .bosques-region__label {
+	background: linear-gradient(160deg, var(--teal-700), #134e54);
+}
+
+.bosques-region__label strong {
+	font-size: 1.04rem;
+	line-height: 1.2;
+}
+
+.bosques-region__label span {
+	font-size: 0.74rem;
+	opacity: 0.85;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.bosques-region__text {
+	padding: 18px 22px 18px 0;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.94rem;
+	line-height: 1.6;
+	color: var(--ink-700);
+	align-self: center;
+}
+
+/* ---------- Map (Doc 3) ---------- */
+.bosques-map {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.bosques-map__legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 18px;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.82rem;
+	color: var(--ink-700);
+}
+
+.bosques-map__legend span {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.bosques-map__dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 3px;
+	flex: none;
+}
+
+.bosques-map__regions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.bosques-map__pin {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: var(--green-100);
+	border: 1px solid var(--green-300);
+	color: var(--green-800);
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.85rem;
+	font-weight: 600;
+	padding: 8px 14px;
+	border-radius: 999px;
+}
+
+/* ---------- Data table (consolidación) ---------- */
+.bosques-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 16px 0 8px;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.92rem;
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 14px 30px -26px rgba(20, 60, 40, 0.5);
+}
+
+.bosques-table th {
+	text-align: left;
+	background: linear-gradient(135deg, var(--green-700), var(--green-800));
+	color: #fff;
+	padding: 12px 16px;
+	font-weight: 700;
+}
+
+.bosques-table td {
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--paper-edge);
+	color: var(--ink-700);
+	background: #fff;
+}
+
+.bosques-table tr:nth-child(even) td {
+	background: #f7fbf8;
+}
+
+/* ---------- Forest chips ---------- */
+.bosques-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 12px 0 4px;
+}
+
+.bosques-chip {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.88rem;
+	font-weight: 600;
+	color: var(--green-800);
+	background: var(--green-100);
+	border: 1px solid var(--green-300);
+	padding: 8px 16px;
+	border-radius: 999px;
+}
+
+/* ---------- Footer ---------- */
+.bosques-footer {
+	max-width: 880px;
+	margin: 40px auto 0;
+	text-align: center;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-size: 0.82rem;
+	color: var(--ink-500);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 760px) {
+	.bosques-doc {
+		padding: 28px 12px 64px;
+	}
+
+	.bosques-page {
+		padding: 36px 24px 44px;
+		border-radius: 14px;
+	}
+
+	.bosques-cover {
+		padding: 48px 26px 56px;
+	}
+
+	.bosques-columns {
+		grid-template-columns: 1fr;
+		gap: 24px;
+	}
+
+	.bosques-aside {
+		position: static;
+		flex-direction: column;
+	}
+
+	.bosques-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.bosques-region {
+		grid-template-columns: 1fr;
+	}
+
+	.bosques-region__text {
+		padding: 0 20px 18px;
+	}
+}
+
+/* ---------- Print ---------- */
+@media print {
+	.bosques-toolbar,
+	.bosques-footer {
+		display: none;
+	}
+
+	.bosques-doc {
+		position: static;
+		inset: auto;
+		overflow: visible;
+		background: #fff;
+		padding: 0;
+	}
+
+	.bosques-page {
+		box-shadow: none;
+		border: none;
+		border-radius: 0;
+		page-break-after: always;
+	}
+}

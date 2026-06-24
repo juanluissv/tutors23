@@ -11,6 +11,7 @@ import ttsRoutes from './routes/ttsRoutes.js';
 import schoolAdminRoutes from './routes/schoolAdminRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
+import bookLessonsRoutes from './routes/bookLessonsRoutes.js';
 import planRoutes from './routes/planRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import questionsRoutes from './routes/questionsRoutes.js';
@@ -43,6 +44,7 @@ const __dirname = path.resolve() //set  __dirname to current directory
 app.use('/api/schooladmins', schoolAdminRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/subjects', subjectRoutes);
+app.use('/api/book-lessons', bookLessonsRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);

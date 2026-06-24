@@ -32,6 +32,7 @@ export const apiSlice = createApi({
         'Course',
         'Questions',
         'StudentAnswers',
+        'BookLesson',
     ],
     endpoints: (builder) => ({})
 });

@@ -2,11 +2,16 @@ import asyncHandler from 'express-async-handler';
 import crypto from 'node:crypto';
 import mongoose from 'mongoose';
 import Subject from '../models/subjectModel.js';
+import BookLessons from '../models/bookLessonsModel.js';
 import School from '../models/schoolModel.js';
 import SchoolAdmin from '../models/schoolAdminModel.js';
 import Teacher from '../models/teacherModel.js';
 import Question from '../models/questionModel.js';
 import { getS3, getBookBucketName, getBookKeyPrefix, getPublicBookUrlFromKey } from '../config/s3Client.js';
+import {
+    extractPdfPageRange,
+    sanitizeChapterPdfSlug,
+} from '../utils/extractChapterPdf.js';
 import {
     gradeLevelsToJson,
     normalizeSubjectGradesLevelField,
@@ -24,6 +29,189 @@ function normalizeTeacherEmailsForJson (val) {
     return [String(val)];
 }
 
+function bookChapterToJson (chapter) {
+    const fileId = chapter.ChapterFileId
+        && String(chapter.ChapterFileId).trim() !== ''
+        ? String(chapter.ChapterFileId).trim()
+        : undefined;
+    const chapterFileUrl = fileId
+        ? getPublicBookUrlFromKey(fileId) || undefined
+        : undefined;
+    return {
+        _id: chapter._id,
+        ChapterNumber: chapter.ChapterNumber,
+        ChapterTitle: chapter.ChapterTitle,
+        ChapterBeginPage: chapter.ChapterBeginPage,
+        ChapterEndPage: chapter.ChapterEndPage,
+        ChapterFileId: fileId,
+        chapterFileUrl,
+    };
+}
+
+function parseOptionalPageNumber (value) {
+    if (value == null || value === '') {
+        return undefined;
+    }
+    const num = Number(value);
+    return Number.isFinite(num) && num >= 0 ? num : undefined;
+}
+
+function mergeBookChaptersUpdate (incoming, existing = []) {
+    if (!Array.isArray(incoming)) {
+        return null;
+    }
+
+    const existingById = new Map(
+        existing
+            .filter((chapter) => chapter._id)
+            .map((chapter) => [String(chapter._id), chapter]),
+    );
+
+    return incoming.map((raw, index) => {
+        const existingChapter = raw._id
+            ? existingById.get(String(raw._id))
+            : existing[index];
+
+        const chapterNumberRaw = raw.ChapterNumber ?? (index + 1);
+        const chapterNumber = Number(chapterNumberRaw);
+        const title = raw.ChapterTitle != null
+            ? String(raw.ChapterTitle).trim()
+            : '';
+
+        return {
+            _id: existingChapter?._id,
+            ChapterNumber: Number.isFinite(chapterNumber)
+                ? chapterNumber
+                : index + 1,
+            ChapterTitle: title,
+            ChapterBeginPage: parseOptionalPageNumber(raw.ChapterBeginPage),
+            ChapterEndPage: parseOptionalPageNumber(raw.ChapterEndPage),
+            ChapterFileId: existingChapter?.ChapterFileId
+                || (raw.ChapterFileId
+                    ? String(raw.ChapterFileId).trim()
+                    : undefined),
+        };
+    });
+}
+
+function chapterMainTitle (chapter, index) {
+    const title = chapter.ChapterTitle != null
+        ? String(chapter.ChapterTitle).trim()
+        : '';
+    if (title) {
+        return title;
+    }
+    const num = chapter.ChapterNumber ?? (index + 1);
+    return `Chapter ${num}`;
+}
+
+async function syncBookLessonsForSubjectChapters (subject) {
+    const chapters = subject.bookChapters || [];
+    const subjectId = subject._id;
+    const chapterIds = [];
+
+    for (let index = 0; index < chapters.length; index += 1) {
+        const chapter = chapters[index];
+        if (!chapter._id) {
+            continue;
+        }
+
+        chapterIds.push(chapter._id);
+        const mainTitle = chapterMainTitle(chapter, index);
+
+        await BookLessons.findOneAndUpdate(
+            {
+                subject: subjectId,
+                'bookChapter.chapterId': chapter._id,
+            },
+            {
+                $set: {
+                    mainTitle,
+                    subject: subjectId,
+                    bookChapter: { chapterId: chapter._id },
+                },
+                $setOnInsert: {
+                    dateCreated: new Date(),
+                    content: [],
+                },
+            },
+            { upsert: true },
+        );
+    }
+
+    await BookLessons.deleteMany({
+        subject: subjectId,
+        'bookChapter.chapterId': { $exists: true, $nin: chapterIds },
+    });
+}
+
+async function loadSubjectForSchoolAdmin (req, res, subjectId) {
+    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+        res.status(400);
+        throw new Error('Invalid subject id');
+    }
+
+    const schoolAdmin = await SchoolAdmin.findById(req.schoolAdmin._id);
+
+    if (!schoolAdmin) {
+        res.status(404);
+        throw new Error('School admin not found');
+    }
+
+    const subject = await Subject.findById(subjectId);
+
+    if (!subject) {
+        res.status(404);
+        throw new Error('Subject not found');
+    }
+
+    const school = await School.findById(subject.school);
+
+    if (!school) {
+        res.status(404);
+        throw new Error('School not found');
+    }
+
+    if (
+        !school.admin
+        || school.admin.toString() !== req.schoolAdmin._id.toString()
+    ) {
+        res.status(403);
+        throw new Error('Not authorized to update this subject');
+    }
+
+    if (
+        schoolAdmin.school
+        && String(schoolAdmin.school) !== String(subject.school)
+    ) {
+        res.status(403);
+        throw new Error('Not authorized to update this subject');
+    }
+
+    return { subject, schoolAdmin, school };
+}
+
+async function deleteChapterFileFromS3 (fileKey) {
+    if (!fileKey || String(fileKey).trim() === '') {
+        return;
+    }
+
+    const s3 = getS3();
+    const bucket = getBookBucketName();
+    if (!s3 || !bucket) {
+        return;
+    }
+
+    try {
+        await s3.deleteObject({
+            Bucket: bucket,
+            Key: String(fileKey).trim(),
+        }).promise();
+    } catch (delErr) {
+        console.error('Could not delete chapter file from S3:', delErr);
+    }
+}
+
 const subjectToJson = (subject) => {
     const bookId = subject.bookId;
     const bookUrl = bookId
@@ -39,6 +227,9 @@ const subjectToJson = (subject) => {
         teacherEmail: normalizeTeacherEmailsForJson(subject.teacherEmail),
         bookId,
         bookUrl,
+        bookChapters: Array.isArray(subject.bookChapters)
+            ? subject.bookChapters.map(bookChapterToJson)
+            : [],
         dateCreated: subject.dateCreated,
         school: subject.school,
         studentCount: Array.isArray(subject.students)
@@ -1023,6 +1214,258 @@ const setSubjectTeacherEmail = asyncHandler(async (req, res) => {
     res.status(200).json(subjectToJson(updated));
 });
 
+// PUT /api/subjects/:id/book-chapters — use with protectSchoolAdmin
+const updateSubjectBookChapters = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+
+    const merged = mergeBookChaptersUpdate(
+        req.body?.bookChapters,
+        subject.bookChapters || [],
+    );
+
+    if (!merged) {
+        res.status(400);
+        throw new Error('bookChapters must be an array');
+    }
+
+    subject.bookChapters = merged;
+    await subject.save();
+    await syncBookLessonsForSubjectChapters(subject);
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(200).json(subjectToJson(updated));
+});
+
+// POST /api/subjects/:id/book-chapters/:chapterId/generate-pdf
+const generateSubjectBookChapterPdf = asyncHandler(async (req, res) => {
+    const { id, chapterId } = req.params;
+    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+
+    if (!mongoose.Types.ObjectId.isValid(chapterId)) {
+        res.status(400);
+        throw new Error('Invalid chapter id');
+    }
+
+    const chapter = (subject.bookChapters || []).find(
+        (item) => String(item._id) === String(chapterId),
+    );
+
+    if (!chapter) {
+        res.status(404);
+        throw new Error('Chapter not found');
+    }
+
+    if (!subject.bookId || String(subject.bookId).trim() === '') {
+        res.status(400);
+        throw new Error(
+            'Upload the full course book before generating chapter PDFs',
+        );
+    }
+
+    const startPage = chapter.ChapterBeginPage;
+    const endPage = chapter.ChapterEndPage;
+
+    if (startPage == null || endPage == null) {
+        res.status(400);
+        throw new Error(
+            'Chapter must have start and end page numbers before generating',
+        );
+    }
+
+    const s3 = getS3();
+    const bucket = getBookBucketName();
+    if (!s3 || !bucket) {
+        res.status(503);
+        throw new Error(
+            'File storage is not configured. Set AWS credentials and '
+            + 'AWS_S3_BUCKET.',
+        );
+    }
+
+    let fullBookBytes;
+    try {
+        const object = await s3.getObject({
+            Bucket: bucket,
+            Key: String(subject.bookId).trim(),
+        }).promise();
+        fullBookBytes = object.Body;
+    } catch (err) {
+        console.error(err);
+        res.status(502);
+        throw new Error('Could not load the full course book from storage.');
+    }
+
+    let extractedBuffer;
+    try {
+        extractedBuffer = await extractPdfPageRange(
+            fullBookBytes,
+            startPage,
+            endPage,
+            chapter.ChapterTitle,
+        );
+    } catch (err) {
+        res.status(400);
+        throw new Error(
+            err?.message || 'Could not extract chapter pages from the book',
+        );
+    }
+
+    const previousFileKey = chapter.ChapterFileId
+        && String(chapter.ChapterFileId).trim() !== ''
+        ? String(chapter.ChapterFileId).trim()
+        : null;
+
+    const prefix = getBookKeyPrefix();
+    const random = crypto.randomBytes(8).toString('hex');
+    const slug = sanitizeChapterPdfSlug(
+        chapter.ChapterTitle,
+        chapter.ChapterNumber,
+    );
+    const key = `${prefix}/${id}/chapters/${chapterId}-${slug}-${random}.pdf`;
+
+    try {
+        const upload = await s3.upload({
+            Bucket: bucket,
+            Key: key,
+            Body: extractedBuffer,
+            ContentType: 'application/pdf',
+        }).promise();
+        chapter.ChapterFileId = upload.Key;
+
+        if (previousFileKey && previousFileKey !== upload.Key) {
+            await deleteChapterFileFromS3(previousFileKey);
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(502);
+        throw new Error('Failed to save the chapter PDF to storage.');
+    }
+
+    await subject.save();
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(200).json(subjectToJson(updated));
+});
+
+// PUT /api/subjects/:id/book-chapters/:chapterId/file — protectSchoolAdmin
+const uploadSubjectBookChapterFile = asyncHandler(async (req, res) => {
+    const { id, chapterId } = req.params;
+    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+
+    if (!mongoose.Types.ObjectId.isValid(chapterId)) {
+        res.status(400);
+        throw new Error('Invalid chapter id');
+    }
+
+    const chapter = (subject.bookChapters || []).find(
+        (item) => String(item._id) === String(chapterId),
+    );
+
+    if (!chapter) {
+        res.status(404);
+        throw new Error('Chapter not found');
+    }
+
+    if (!req.file) {
+        res.status(400);
+        throw new Error('No PDF file uploaded');
+    }
+
+    const s3 = getS3();
+    const bucket = getBookBucketName();
+    if (!s3 || !bucket) {
+        res.status(503);
+        throw new Error(
+            'File storage is not configured. Set AWS credentials and '
+            + 'AWS_S3_BUCKET.',
+        );
+    }
+
+    const previousFileKey = chapter.ChapterFileId
+        && String(chapter.ChapterFileId).trim() !== ''
+        ? String(chapter.ChapterFileId).trim()
+        : null;
+
+    const prefix = getBookKeyPrefix();
+    const random = crypto.randomBytes(8).toString('hex');
+    const key = `${prefix}/${id}/chapters/${chapterId}-${random}.pdf`;
+
+    try {
+        const upload = await s3.upload({
+            Bucket: bucket,
+            Key: key,
+            Body: req.file.buffer,
+            ContentType: 'application/pdf',
+        }).promise();
+        chapter.ChapterFileId = upload.Key;
+
+        if (previousFileKey && previousFileKey !== upload.Key) {
+            try {
+                await s3.deleteObject({
+                    Bucket: bucket,
+                    Key: previousFileKey,
+                }).promise();
+            } catch (delErr) {
+                console.error(
+                    'Could not delete previous chapter file from S3:',
+                    delErr,
+                );
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(502);
+        throw new Error('Failed to upload the chapter PDF to storage.');
+    }
+
+    await subject.save();
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(200).json(subjectToJson(updated));
+});
+
+// DELETE /api/subjects/:id/book-chapters/:chapterId — protectSchoolAdmin
+const deleteSubjectBookChapter = asyncHandler(async (req, res) => {
+    const { id, chapterId } = req.params;
+    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+
+    if (!mongoose.Types.ObjectId.isValid(chapterId)) {
+        res.status(400);
+        throw new Error('Invalid chapter id');
+    }
+
+    const chapterIndex = (subject.bookChapters || []).findIndex(
+        (item) => String(item._id) === String(chapterId),
+    );
+
+    if (chapterIndex === -1) {
+        res.status(404);
+        throw new Error('Chapter not found');
+    }
+
+    const chapter = subject.bookChapters[chapterIndex];
+    const fileKey = chapter.ChapterFileId
+        && String(chapter.ChapterFileId).trim() !== ''
+        ? String(chapter.ChapterFileId).trim()
+        : null;
+
+    if (fileKey) {
+        await deleteChapterFileFromS3(fileKey);
+    }
+
+    subject.bookChapters.splice(chapterIndex, 1);
+    subject.bookChapters.forEach((item, index) => {
+        item.ChapterNumber = index + 1;
+    });
+
+    await subject.save();
+    await syncBookLessonsForSubjectChapters(subject);
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(200).json(subjectToJson(updated));
+});
+
 export {
     createSubject,
     getSubjectsBySchool,
@@ -1033,7 +1476,13 @@ export {
     getSubjectStudentsForSchoolAdmin,
     updateSubjectById,
     updateSubjectByTeacher,
+    updateSubjectBookChapters,
+    generateSubjectBookChapterPdf,
+    uploadSubjectBookChapterFile,
+    deleteSubjectBookChapter,
     addSubjectStudentEmailForTeacher,
     setSubjectTeacherEmail,
     subjectToJson,
+    loadSubjectForSchoolAdmin,
+    chapterMainTitle,
 };

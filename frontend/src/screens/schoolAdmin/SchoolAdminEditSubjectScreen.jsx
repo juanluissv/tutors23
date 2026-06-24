@@ -13,6 +13,8 @@ import { SUBJECTS_URL } from '../../constants'
 import { getSubjectGradeLevelNames } from '../../utils/gradeLevel'
 import '../../App.css'
 
+const MAX_BOOK_BYTES = 100 * 1024 * 1024
+
 const BookUploadGlyph = () => (
 	<svg
 		width='36'
@@ -311,6 +313,14 @@ function SchoolAdminEditSubjectScreen () {
 				toast.error('Please choose a PDF file')
 				return
 			}
+			if (file.size > MAX_BOOK_BYTES) {
+				setBookFile(null)
+				if (bookInputRef.current) {
+					bookInputRef.current.value = ''
+				}
+				toast.error('PDF must be 100 MB or smaller')
+				return
+			}
 			setBookFile(file)
 		} else {
 			setBookFile(null)
@@ -543,7 +553,7 @@ function SchoolAdminEditSubjectScreen () {
 										school. Change the title, description, or
 										assigned teacher; grade level is set when
 										the subject is created. Attach an optional
-										course book — PDF, up to 25 MB.
+										course book — PDF, up to 100 MB.
 									</p>
 								</div>
 								{isLoadingList && !currentSubject ? (
@@ -847,7 +857,7 @@ function SchoolAdminEditSubjectScreen () {
 															: 'Drop a file or tap to browse'}
 													</span>
 													<span className='teacher-book-upload__hint'>
-														PDF only · up to 25 MB
+														PDF only · up to 100 MB
 													</span>
 												</label>
 												{bookFile ? (
@@ -861,6 +871,115 @@ function SchoolAdminEditSubjectScreen () {
 													</button>
 												) : null}
 											</div>
+										</div>
+										<div className='subject-book-tools'>
+											<div className='subject-book-tools__header'>
+												<span className='subject-book-tools__eyebrow'>
+													Course book
+												</span>
+												<h3 className='subject-book-tools__title'>
+													Once you have a course book please generate book chapters
+												</h3>
+												<p className='subject-book-tools__desc'>
+													{hasStoredBook
+														? 'Split your PDF into chapters with page ranges for each section.'
+														: 'Save a course book above to unlock chapter splitting.'}
+												</p>
+											</div>
+											{hasStoredBook ? (
+												<Link
+													to={`/schooladmins/bookchapters/${subjectId}`}
+													className={
+														'subject-book-tools__card '
+														+ 'subject-book-tools__card--chapters'
+													}
+												>
+													<span
+														className='subject-book-tools__icon'
+														aria-hidden
+													>
+														<svg
+															width='22'
+															height='22'
+															viewBox='0 0 24 24'
+															fill='none'
+															stroke='currentColor'
+															strokeWidth='1.75'
+														>
+															<path
+																d='M4 6a2 2 0 012-2h5v16H6a2 2 0 01-2-2V6z'
+																strokeLinejoin='round'
+															/>
+															<path
+																d='M13 4h5a2 2 0 012 2v10a2 2 0 01-2 2h-5V4z'
+																strokeLinejoin='round'
+															/>
+															<path
+																d='M9 8h2M9 12h2M9 16h2'
+																strokeLinecap='round'
+															/>
+														</svg>
+													</span>
+													<span className='subject-book-tools__body'>
+														<span className='subject-book-tools__label'>
+															Generate Book chapters
+														</span>
+														<span className='subject-book-tools__hint'>
+															Define page ranges per chapter
+														</span>
+													</span>
+													<span
+														className='subject-book-tools__arrow'
+														aria-hidden
+													>
+														→
+													</span>
+												</Link>
+											) : (
+												<span
+													className={
+														'subject-book-tools__card '
+														+ 'subject-book-tools__card--chapters '
+														+ 'subject-book-tools__card--disabled'
+													}
+													aria-disabled='true'
+												>
+													<span
+														className='subject-book-tools__icon'
+														aria-hidden
+													>
+														<svg
+															width='22'
+															height='22'
+															viewBox='0 0 24 24'
+															fill='none'
+															stroke='currentColor'
+															strokeWidth='1.75'
+														>
+															<path
+																d='M4 6a2 2 0 012-2h5v16H6a2 2 0 01-2-2V6z'
+																strokeLinejoin='round'
+															/>
+															<path
+																d='M13 4h5a2 2 0 012 2v10a2 2 0 01-2 2h-5V4z'
+																strokeLinejoin='round'
+															/>
+															<path
+																d='M9 8h2M9 12h2M9 16h2'
+																strokeLinecap='round'
+															/>
+														</svg>
+													</span>
+													<span className='subject-book-tools__body'>
+														<span className='subject-book-tools__label'>
+															Generate Book chapters
+														</span>
+														<span className='subject-book-tools__hint'>
+															Requires a saved PDF
+														</span>
+													</span>
+												</span>
+											)}
 										</div>
 										<button
 											type='submit'

@@ -1,6 +1,6 @@
 import multer from 'multer';
 
-const MAX_BYTES = 25 * 1024 * 1024;
+const MAX_BYTES = 100 * 1024 * 1024;
 
 const memoryStorage = multer.memoryStorage();
 
@@ -22,6 +22,7 @@ const bookUpload = multer({
 });
 
 const uploadBookSingle = bookUpload.single('book');
+const uploadChapterFileSingle = bookUpload.single('chapterFile');
 
 /**
  * Only parse multipart for PUT /:id/teacher; JSON + express.json for other
@@ -38,7 +39,7 @@ function parseTeacherSubjectMultipart (req, res, next) {
                 if (err.code === 'LIMIT_FILE_SIZE') {
                     res.status(400);
                     return res.json({
-                        message: 'File too large. Maximum size is 25 MB.',
+                        message: 'File too large. Maximum size is 100 MB.',
                     });
                 }
                 res.status(400);
@@ -56,4 +57,37 @@ function parseTeacherSubjectMultipart (req, res, next) {
     next();
 }
 
-export { parseTeacherSubjectMultipart, MAX_BYTES };
+function parseChapterFileMultipart (req, res, next) {
+    const ct = (req.headers['content-type'] || '');
+    if (ct.includes('multipart/form-data')) {
+        return uploadChapterFileSingle(req, res, (err) => {
+            if (!err) {
+                return next();
+            }
+            if (err instanceof multer.MulterError) {
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    res.status(400);
+                    return res.json({
+                        message: 'File too large. Maximum size is 100 MB.',
+                    });
+                }
+                res.status(400);
+                return res.json({
+                    message: 'Invalid file upload. Use a single PDF file.',
+                });
+            }
+            if (err instanceof Error) {
+                res.status(400);
+                return res.json({ message: err.message });
+            }
+            return next(err);
+        });
+    }
+    next();
+}
+
+export {
+    parseTeacherSubjectMultipart,
+    parseChapterFileMultipart,
+    MAX_BYTES,
+};

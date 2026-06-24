@@ -1,6 +1,6 @@
 import express from 'express';
 import { protectSchoolAdmin, protectTeacher } from '../middleware/authMiddleware.js';
-import { parseTeacherSubjectMultipart } from '../middleware/teacherSubjectUpload.js';
+import { parseTeacherSubjectMultipart, parseChapterFileMultipart } from '../middleware/teacherSubjectUpload.js';
 import {
     createSubject,
     getSubjectsBySchool,
@@ -11,9 +11,18 @@ import {
     getSubjectStudentsForSchoolAdmin,
     updateSubjectById,
     updateSubjectByTeacher,
+    updateSubjectBookChapters,
+    generateSubjectBookChapterPdf,
+    uploadSubjectBookChapterFile,
+    deleteSubjectBookChapter,
     addSubjectStudentEmailForTeacher,
     setSubjectTeacherEmail,
 } from '../controllers/subjectController.js';
+import {
+    generateBookLessonsFromChapter,
+    getBookLessonsBySubject,
+    getBookLessonByIdForSchoolAdmin,
+} from '../controllers/bookLessonsController.js';
 
 const router = express.Router();
 
@@ -58,6 +67,49 @@ router.put(
     '/:id/teacher/student-email',
     protectTeacher,
     addSubjectStudentEmailForTeacher,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/generate-pdf',
+    protectSchoolAdmin,
+    generateSubjectBookChapterPdf,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/generate-lessons',
+    protectSchoolAdmin,
+    generateBookLessonsFromChapter,
+);
+
+router.get(
+    '/:id/book-lessons',
+    protectSchoolAdmin,
+    getBookLessonsBySubject,
+);
+
+router.get(
+    '/:id/book-lessons/:lessonId',
+    protectSchoolAdmin,
+    getBookLessonByIdForSchoolAdmin,
+);
+
+router.put(
+    '/:id/book-chapters/:chapterId/file',
+    protectSchoolAdmin,
+    parseChapterFileMultipart,
+    uploadSubjectBookChapterFile,
+);
+
+router.delete(
+    '/:id/book-chapters/:chapterId',
+    protectSchoolAdmin,
+    deleteSubjectBookChapter,
+);
+
+router.put(
+    '/:id/book-chapters',
+    protectSchoolAdmin,
+    updateSubjectBookChapters,
 );
 
 router

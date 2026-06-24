@@ -9,3 +9,4 @@ export const PLANS_URL = '/api/plans';
 export const COURSES_URL = '/api/courses';
 export const QUESTIONS_URL = '/api/questions';
 export const ANSWERS_URL = '/api/answers';
+export const BOOK_LESSONS_URL = '/api/book-lessons';

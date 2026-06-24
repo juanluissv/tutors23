@@ -32,6 +32,8 @@ import StudentWatchQuestionScreen from './screens/students/StudentWatchQuestionS
 import StudentWatchCourseSreen from './screens/students/StudentWatchCourseSreen';
 import StudentCoursesScreen from './screens/students/StudentCoursesScreen';
 import StudentSubscriptionScreen from './screens/students/StudentSubscriptionScreen';
+import StudentLessonPageScreen from './screens/students/StudentLessonPageScreen';
+import Unidad1Semana1BosquesScreen from './screens/books/Unidad1Semana1BosquesScreen';
 
 
 
@@ -115,6 +117,8 @@ import SchooldAdminStudentsScreen from './screens/schoolAdmin/SchooldAdminStuden
 import SchoolAdminSubjectStudentsScreen from './screens/schoolAdmin/SchoolAdminSubjectStudentsScreen';
 import SchoolAdminCoursesScreen from './screens/schoolAdmin/SchoolAdminCoursesScreen';
 import SchoolAdminViewCourseScreen from './screens/schoolAdmin/SchoolAdminViewCourseScreen';
+import SchoolAdminBookChapters from './screens/schoolAdmin/SchoolAdminBookChapters';
+import SchoolAdminGenerateLessonsScreen from './screens/schoolAdmin/SchoolAdminGenerateLessonsScreen';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -166,6 +170,7 @@ const router = createBrowserRouter(
             <Route  path="/9/valores/unidad6/semana5" element={<Semana5Unidad6Screen />} />
 
             <Route  path="/9/valores" element={<ValoresIndex />} />
+            <Route  path="/books/bosques/semana1" element={<Unidad1Semana1BosquesScreen />} />
             <Route  path="/french" element={<FrenchScreen />} />
             <Route  path="/chinese" element={<ChineseScreen />} />
 
@@ -183,6 +188,8 @@ const router = createBrowserRouter(
             <Route path="/students/watchcourse/:courseId" element={<StudentWatchCourseSreen />} />
             <Route path="/students/courses/:subjectId" element={<StudentCoursesScreen />} />
             <Route path="/students/subscription" element={<StudentSubscriptionScreen />} />
+            <Route  path="/students/lessonpage/:lessonId" element={<StudentLessonPageScreen />} />
+
 
             <Route  path="/teachers/login" element={<TeacherLoginScreen />} />
             <Route  path="/teachers/register" element={<TeacherRegisterScreen />} />
@@ -243,6 +250,12 @@ const router = createBrowserRouter(
             <Route
                 path="/schooladmins/students/:id"
                 element={<SchoolAdminSubjectStudentsScreen />}
+            />
+            <Route  path="/schooladmins/bookchapters/:subjectId" element={<SchoolAdminBookChapters />} />
+            <Route  path="/schooladmins/generatelessons/:subjectId" element={<SchoolAdminGenerateLessonsScreen />} />
+            <Route
+                path="/schooladmins/lessonpage/:subjectId/:lessonId"
+                element={<StudentLessonPageScreen />}
             />
         </Route>
     )

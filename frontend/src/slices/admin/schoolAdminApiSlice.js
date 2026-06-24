@@ -5,6 +5,7 @@ import {
     SCHOOL_ADMINS_URL,
     SCHOOLS_URL,
     SUBJECTS_URL,
+    BOOK_LESSONS_URL,
 } from "../../constants";
 
 export const schoolAdminApiSlice = apiSlice.injectEndpoints({
@@ -145,6 +146,113 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
                     body,
                 };
             },
+            invalidatesTags: (result) => {
+                const tags = ['Subject']
+                if (result?.school) {
+                    const sid = String(
+                        result.school._id ?? result.school,
+                    )
+                    tags.push(
+                        { type: 'School', id: sid },
+                        { type: 'Subject', id: `SCHOOL_LIST_${sid}` },
+                    )
+                }
+                return tags
+            },
+        }),
+        updateSubjectBookChapters: builder.mutation({
+            query: ({ id, bookChapters }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters`,
+                method: 'PUT',
+                body: { bookChapters },
+            }),
+            invalidatesTags: (result) => {
+                const tags = ['Subject']
+                if (result?.school) {
+                    const sid = String(
+                        result.school._id ?? result.school,
+                    )
+                    tags.push(
+                        { type: 'School', id: sid },
+                        { type: 'Subject', id: `SCHOOL_LIST_${sid}` },
+                    )
+                }
+                return tags
+            },
+        }),
+        generateSubjectBookChapterPdf: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/generate-pdf`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result) => {
+                const tags = ['Subject']
+                if (result?.school) {
+                    const sid = String(
+                        result.school._id ?? result.school,
+                    )
+                    tags.push(
+                        { type: 'School', id: sid },
+                        { type: 'Subject', id: `SCHOOL_LIST_${sid}` },
+                    )
+                }
+                return tags
+            },
+        }),
+        generateBookLessonsFromChapter: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/generate-lessons`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        getBookLessonsBySubject: builder.query({
+            query: (subjectId) => ({
+                url: `${SUBJECTS_URL}/${subjectId}/book-lessons`,
+            }),
+            providesTags: (result, error, subjectId) => [
+                { type: 'BookLesson', id: `SUBJECT_${subjectId}` },
+            ],
+        }),
+        getBookLessonByIdForSchoolAdmin: builder.query({
+            query: ({ subjectId, lessonId }) => ({
+                url: `${SUBJECTS_URL}/${subjectId}/book-lessons/${lessonId}`,
+            }),
+            providesTags: (result, error, { lessonId }) => [
+                { type: 'BookLesson', id: lessonId },
+            ],
+        }),
+        uploadSubjectBookChapterFile: builder.mutation({
+            query: ({ id, chapterId, chapterFile }) => {
+                const fd = new FormData()
+                fd.append('chapterFile', chapterFile)
+                return {
+                    url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/file`,
+                    method: 'PUT',
+                    body: fd,
+                }
+            },
+            invalidatesTags: (result) => {
+                const tags = ['Subject']
+                if (result?.school) {
+                    const sid = String(
+                        result.school._id ?? result.school,
+                    )
+                    tags.push(
+                        { type: 'School', id: sid },
+                        { type: 'Subject', id: `SCHOOL_LIST_${sid}` },
+                    )
+                }
+                return tags
+            },
+        }),
+        deleteSubjectBookChapter: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}`,
+                method: 'DELETE',
+            }),
             invalidatesTags: (result) => {
                 const tags = ['Subject']
                 if (result?.school) {
@@ -327,6 +435,13 @@ export const {
     useGetSubjectsBySchoolQuery,
     useCreateSubjectMutation,
     useUpdateSubjectMutation,
+    useUpdateSubjectBookChaptersMutation,
+    useGenerateSubjectBookChapterPdfMutation,
+    useGenerateBookLessonsFromChapterMutation,
+    useGetBookLessonsBySubjectQuery,
+    useGetBookLessonByIdForSchoolAdminQuery,
+    useUploadSubjectBookChapterFileMutation,
+    useDeleteSubjectBookChapterMutation,
     useSetSubjectTeacherEmailMutation,
     useGetPlansBySchoolQuery,
     useGetPlanByIdQuery,

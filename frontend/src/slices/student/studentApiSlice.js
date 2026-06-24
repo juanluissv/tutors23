@@ -1,5 +1,5 @@
 import { apiSlice } from "../apiSlice";
-import { COURSES_URL, STUDENTS_URL } from "../../constants"
+import { BOOK_LESSONS_URL, COURSES_URL, STUDENTS_URL } from "../../constants"
 
 export const studentApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -71,6 +71,14 @@ export const studentApiSlice = apiSlice.injectEndpoints({
                 'Earnings',
             ],
           }),
+          getBookLessonById: builder.query({
+            query: (lessonId) => ({
+              url: `${BOOK_LESSONS_URL}/${lessonId}`,
+            }),
+            providesTags: (result, error, lessonId) => [
+              { type: 'BookLesson', id: lessonId },
+            ],
+          }),
     }),
 })
 
@@ -85,4 +93,5 @@ export const {
     useGetCourseWatchForStudentQuery,
     useGetStudentSubjectCoursesQuery,
     useSubscribeMutation,
+    useGetBookLessonByIdQuery,
 } = studentApiSlice;

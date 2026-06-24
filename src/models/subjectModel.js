@@ -25,6 +25,30 @@ const subjectSchema = mongoose.Schema({
         type: String,
         required: false,
     },        
+    bookChapters: [
+        {
+            ChapterNumber: {
+                type: Number,
+                required: false
+            },
+            ChapterTitle: {
+                type: String,
+                required: false
+            },
+            ChapterBeginPage: {
+                type: Number,
+                required: false
+            },
+            ChapterEndPage: {
+                type: Number,
+                required: false
+            },
+            ChapterFileId: {
+                type: String,
+                required: false,
+            },
+        }
+    ],
     dateCreated: {
         type: Date,
         required: false

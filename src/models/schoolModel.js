@@ -26,7 +26,7 @@ const schoolSchema = mongoose.Schema({
         type: String,
         enum: ['high school', 'university'],
         required: true
-    },
+    },    
     gradesLevels: [
         {
             type: mongoose.Schema.Types.ObjectId,
