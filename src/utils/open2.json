@@ -1,0 +1,463 @@
+{
+  "mainTitle": "Unidad 1 · Semana 2",
+  "unitTheme": "Unidad 3",
+  "heroSubtitle": "La tenencia de la tierra y sus características",
+  "objectivesText": "",
+  "content": [
+    {
+      "type": "phase",
+      "text": "Exploración"
+    },
+    {
+      "type": "activity",
+      "meta": {
+        "activityNumber": 1,
+        "activityKind": "individual"
+      },
+      "text": "Observa las imágenes.",
+      "items": [
+        {
+          "label": "a",
+          "text": "Describe en tu cuaderno qué tipo de uso se hace de la tierra en cada una."
+        },
+        {
+          "label": "b",
+          "text": "Luego explica cuál es la importancia de esta actividad para las sociedades."
+        },
+        {
+          "label": "c",
+          "text": "Comparte tus resultados con el resto de la clase."
+        }
+      ]
+    },
+    {
+      "type": "activity",
+      "meta": {
+        "activityNumber": 2,
+        "activityKind": "con docente"
+      },
+      "text": "Formen equipos de trabajo y resuelvan:",
+      "items": [
+        {
+          "label": "a",
+          "text": "Inventen una historia relacionada con un conflicto de tenencia de la tierra."
+        },
+        {
+          "label": "b",
+          "text": "Con base en la historia, preparen una dramatización. Pueden hacerlo utilizando el siguiente esquema."
+        },
+        {
+          "label": "c",
+          "text": "Presenten sus dramatizaciones a la clase."
+        },
+        {
+          "label": "d",
+          "text": "Conversen, al finalizar las diferentes perspectivas y experiencias presentadas."
+        }
+      ]
+    },
+    {
+      "type": "activity",
+      "meta": {
+        "activityNumber": 3,
+        "activityKind": "en equipo"
+      },
+      "text": "Respondan.",
+      "items": [
+        {
+          "label": "•",
+          "text": "¿Por qué motivos existen disputas y enfrentamientos por el uso y posesión de la tierra?"
+        },
+        {
+          "label": "•",
+          "text": "¿Qué actores son los principales involucrados en los conflictos por la distribución y uso de la tierra?"
+        },
+        {
+          "label": "•",
+          "text": "¿Cómo influye la distribución desigual de la tierra en la calidad de vida de las personas en diferentes regiones del mundo?"
+        }
+      ]
+    },
+    {
+      "type": "figure",
+      "text": "Esquema de dramatización",
+      "items": [
+        {
+          "text": "Inicio, Nudo, Desenlace, Tema de la dramatización"
+        }
+      ]
+    },
+    {
+      "type": "phase",
+      "text": "Profundización"
+    },
+    {
+      "type": "h2",
+      "text": "La tenencia de la tierra y sus características"
+    },
+    {
+      "type": "p",
+      "text": "El concepto de tenencia de la tierra se refiere al conjunto de derechos y relaciones legales que una persona, comunidad o entidad tiene sobre la tierra. Estos derechos determinan quién tiene el control, el uso y los beneficios relacionados con una parcela o terreno específico."
+    },
+    {
+      "type": "p",
+      "text": "Existen diversas formas de tenencia de la tierra, y los sistemas varían según las leyes y las prácticas culturales en diferentes regiones y países. Algunos de los tipos comunes de tenencia de la tierra son:"
+    },
+    {
+      "type": "p",
+      "text": "La tenencia de la tierra es crucial para la sostenibilidad, la justicia social y la estabilidad de las comunidades, especialmente en zonas rurales donde la subsistencia depende de la agricultura. Los derechos de tenencia determinan el acceso a recursos, oportunidades económicas y seguridad alimentaria. A nivel mundial, muchos conflictos surgen por derechos de tenencia no definidos o disputas sobre la distribución equitativa de la tierra. Una gestión efectiva de la tenencia es esencial para resolver estos problemas y promover un uso sostenible y justo."
+    },
+    {
+      "type": "bulletList",
+      "items": [
+        {
+          "text": "Propiedad privada. En este sistema, un individuo o entidad posee la tierra de manera exclusiva. Tiene derechos legales para usar, vender o arrendar la propiedad."
+        },
+        {
+          "text": "Propiedad comunal. Esto significa que la tierra pertenece a una comunidad en lugar de individuos. Los derechos de uso y gestión suelen ser compartidos, y las decisiones sobre la tierra se toman de manera colectiva."
+        },
+        {
+          "text": "Propiedad estatal. Es cuando el Gobierno tiene propiedad y control sobre grandes extensiones de tierra. Puede asignar derechos de uso a individuos, entidades privadas o comunidades, pero el terreno pertenece al Estado."
+        },
+        {
+          "text": "Propiedad mixta. En este modelo, dos o más entidades comparten la posesión y administración de la tierra. Esto puede ser entre individuos, comunidades, Gobiernos o empresas privadas."
+        },
+        {
+          "text": "Tierras de arrendamiento y concesiones. En lugar de poseer la tierra, algunas personas o entidades pueden tener derechos de alquiler o arrendamiento, o contar con concesiones otorgadas por el Gobierno para utilizarla durante un período específico, según los términos acordados."
+        }
+      ]
+    },
+    {
+      "type": "info",
+      "text": "Conexión geográfica",
+      "items": [
+        {
+          "text": "En muchas sociedades indígenas, los derechos sobre la tierra se basan en tradiciones y prácticas culturales. Estos sistemas pueden no estar formalizados legalmente, pero son esenciales para la identidad y el sustento de las comunidades."
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Los orígenes de los conflictos por la tenencia de la tierra"
+    },
+    {
+      "type": "p",
+      "text": "La tenencia de la tierra fue radicalmente transformada por la colonización europea en África, Asia y América Latina. Los pueblos nativos, propietarios tradicionales de la tierra, fueron despojados y desplazados a zonas marginales, mientras las potencias europeas otorgaban grandes extensiones a sus empresas coloniales. Estos procesos se intensificaron con la Revolución Industrial en el siglo XVIII en Europa y el siglo XIX en Estados Unidos. La explotación de la mano de obra, la imposición de sistemas comerciales desfavorables y la apropiación de territorios ricos en recursos consolidaron el poder económico de los países colonizadores. Esto limitó el desarrollo industrial de los países dependientes y estableció relaciones comerciales desiguales con las regiones proveedoras de materias primas. Los efectos fueron devastadores: las economías locales se estancaron, la desigualdad social se profundizó y la población sufrió graves abusos."
+    },
+    {
+      "type": "p",
+      "text": "Hoy, los conflictos por la tenencia de la tierra reflejan la persistente herencia colonial. Las estructuras coloniales dejaron profundas huellas en la distribución de la propiedad y el acceso a la tierra, exacerbando las desigualdades económicas y sociales. La explotación de recursos y la inequidad en el acceso a la tierra continúan afectando a las poblaciones locales, mientras naciones poderosas e industrias extractivistas controlan grandes cantidades de terrenos en países menos industrializados. La lucha por la justicia agraria y la redistribución equitativa de la tierra sigue siendo un gran desafío."
+    },
+    {
+      "type": "doc",
+      "meta": {
+        "docNumber": 1
+      },
+      "text": "Desigualdad de la tierra: la impactante realidad",
+      "items": [
+        {
+          "text": "Históricamente, la desigualdad de la tierra está relacionada a los legados del colonialismo, la conquista y la división, y en muchas partes del mundo la acumulación de tierras transfiere poder político. Sin embargo, desde la década de 1980, la desigualdad en materia de tierras está aumentando, mientras que el uso insostenible de la tierra está imponiendo una enorme carga a los menos capaces de soportarla. Los pequeños agricultores, los pueblos indígenas, las mujeres rurales, los jóvenes y las comunidades agrícolas sin tierra están siendo comprimidos en parcelas más pequeñas o expulsados de la tierra por completo; sin embargo, cada vez más terrenos se concentran en menos manos, sirviendo principalmente a los intereses de empresas agroindustriales e inversores lejanos, utilizando modelos industriales de producción que emplean menos personas y generan problemas ambientales."
+        }
+      ]
+    },
+    {
+      "type": "activity",
+      "meta": {
+        "activityNumber": 4,
+        "activityKind": "en pares"
+      },
+      "text": "Desarrollen la habilidad de conexiones e interrelaciones. Para ello:",
+      "items": [
+        {
+          "label": "a",
+          "text": "Elaboren un mapa conceptual en el que expliquen las causas y las consecuencias de la desigualdad en el acceso y la tenencia de la tierra."
+        },
+        {
+          "label": "b",
+          "text": "Socialicen su propuesta con el resto de la clase."
+        },
+        {
+          "label": "c",
+          "text": "En conjunto, respondan cuál es la importancia de la distribución equitativa de la tierra para el mejoramiento de la calidad de vida de las poblaciones."
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Causas de los conflictos por la tenencia de la tierra"
+    },
+    {
+      "type": "p",
+      "text": "Los conflictos por la tenencia de la tierra a nivel mundial tienen raíces históricas profundas y están influenciados por diversas causas, que van desde la herencia colonial y las dinámicas económicas desiguales que se establecieron desde entonces, hasta factores contemporáneos como el crecimiento poblacional y los cambios ambientales."
+    },
+    {
+      "type": "p",
+      "text": "En la actualidad, los conflictos por la tenencia y el uso de la tierra son una fuente importante de inestabilidad política y social en diferentes partes del mundo. Estos se expresan de diversas formas, como la ocupación de tierras por parte de campesinos que no cuentan con parcelas para cultivo, la resistencia a los desalojos forzosos y los enfrentamientos entre comunidades locales, terratenientes y empresas extractivas."
+    },
+    {
+      "type": "glossary",
+      "items": [
+        {
+          "title": "Terrateniente",
+          "body": "Persona que posee extensas propiedades de tierra, destinadas a actividades de agricultura o ganadería."
+        }
+      ]
+    },
+    {
+      "type": "diagram",
+      "text": "Causas actuales",
+      "items": [
+        {
+          "title": "Los cambios ambientales",
+          "body": "Los efectos del cambio climático, como la desertificación y la pérdida de tierras agrícolas, han exacerbado la competencia por áreas fértiles, lo que también ha desencadenado desplazamientos de población y provocado nuevos conflictos territoriales."
+        },
+        {
+          "title": "El crecimiento poblacional y la demanda de recursos",
+          "body": "El aumento de la población mundial y la creciente demanda de tierras para la agricultura, la urbanización y la industria han intensificado la competencia por el dominio y la explotación de los recursos naturales."
+        },
+        {
+          "title": "La explotación de recursos naturales",
+          "body": "Las compañías extranjeras continúan buscado el control de tierras ricas en recursos, lo que provoca conflictos con las poblaciones locales por la tenencia de la tierra y el control sobre estos recursos."
+        }
+      ]
+    },
+    {
+      "type": "diagram",
+      "text": "Causas históricas",
+      "items": [
+        {
+          "title": "El despojo y la concentración de tierras",
+          "body": "Durante los procesos de colonización, las potencias europeas despojaron a las comunidades locales de sus territorios, estableciendo sistemas de propiedad que favorecían a los colonizadores. Esto derivó en la concentración de tierras en pocas manos, creando tensiones sobre la tenencia de la tierra que persisten actualmente."
+        },
+        {
+          "title": "Los impactos socioeconómicos desiguales",
+          "body": "Las relaciones comerciales asimétricas y la imposición de modelos agrarios establecidos desde la época colonial han llevado a desigualdades económicas persistentes al relegar a las comunidades locales a situaciones de dependencia, limitando su acceso y control sobre la tierra y resultando en la marginalización y empobrecimiento de estas."
+        },
+        {
+          "title": "Procesos de privatización",
+          "body": "En muchos países, la privatización de tierras comunales en los siglos XIX y XX provocó la expulsión de comunidades locales de sus territorios, lo que generó concentración de tierras en manos de unos pocos propietarios ricos. Esto ha provocado tensiones con las poblaciones dependientes de la tierra para subsistir y sin acceso a la misma."
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Conflictos por tenencia de la tierra en América Latina"
+    },
+    {
+      "type": "p",
+      "text": "Durante la Guerra Fría (1945-1991), la tenencia de la tierra en América Latina fue crucial debido a dos razones principales: la concentración de tierras en manos de terratenientes y la pobreza de los campesinos, que provocó protestas y conflictos armados. Además, para contener el comunismo, EE.UU. promovió la reforma agraria, mejorando las condiciones de vida de los campesinos y contrarrestando la influencia soviética tras la Revolución cubana de 1959. Actualmente, la región aún enfrenta problemas relacionados con el uso y la tenencia de la tierra, en su mayoría vinculados a las reformas agrarias del siglo XX."
+    },
+    {
+      "type": "glossary",
+      "items": [
+        {
+          "title": "Reforma agraria",
+          "body": "Conjunto de políticas y medidas que buscan redistribuir la propiedad y el control de la tierra en una sociedad."
+        }
+      ]
+    },
+    {
+      "type": "map",
+      "text": "Conflictos territoriales en América Latina",
+      "items": [
+        {
+          "title": "Brasil",
+          "body": "En 1964, el gobierno estableció la Ley de Reforma Agraria, limitada en su implementación. En la década de 1980, el Movimiento de los Trabajadores Rurales emergió buscando la redistribución de tierras y mejores condiciones laborales. A pesar de los avances, persisten obstáculos y actuales conflictos que involucran a terratenientes, agricultores e indígenas por el acceso a la tierra y el control de los recursos naturales."
+        },
+        {
+          "title": "México",
+          "body": "En Chiapas, los campesinos han perdido tierras ante propietarios extranjeros y empresas madereras, por lo que el Ejército Zapatista de Liberación Nacional (EZLN) inició una rebelión armada en 1994, lo que llevó a negociaciones y al reconocimiento de derechos indígenas sobre la tierra. Sin embargo, la violencia contra la autonomía de las comunidades persiste."
+        }
+      ]
+    },
+    {
+      "type": "activity",
+      "meta": {
+        "activityNumber": 5,
+        "activityKind": "en equipo"
+      },
+      "text": "Desarrollen la habilidad de conexiones e interrelaciones. Para ello, respondan:",
+      "items": [
+        {
+          "label": "a",
+          "text": "¿Qué relación existe entre la tenencia de la tierra y los conflictos regionales?"
+        },
+        {
+          "label": "b",
+          "text": "¿Cuáles han sido los resultados de las reformas agrarias en los casos estudiados?"
+        },
+        {
+          "label": "c",
+          "text": "¿Qué desafíos se enfrentan para lograr una distribución más equitativa en la región?"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "El legado colonial de África y los efectos de Guerra Fría"
+    },
+    {
+      "type": "p",
+      "text": "Tras la Segunda Guerra Mundial, los Gobiernos europeos pusieron fin a su dominio en África. No obstante, la historia colonial dejó fronteras artificiales que dividieron grupos étnicos, generando muchos conflictos por la tenencia de la tierra y su acceso."
+    },
+    {
+      "type": "p",
+      "text": "Además, la Guerra Fría jugó un papel importante en el proceso de descolonización de África: tanto Estados Unidos como la Unión Soviética compitieron por la influencia en el continente africano, apoyando las causas de diferentes movimientos independentistas. En algunos casos, la rivalidad de las superpotencias se manifestó en conflictos dentro de los nuevos Estados y agravó problemáticas étnicas preexistentes, lo que dificultó la construcción de Estados nacionales estables. Posteriormente, la disolución de la URSS en 1991 dejó a muchos países africanos que habían recibido su apoyo económico y militar en una situación de vulnerabilidad y de inestabilidad política."
+    },
+    {
+      "type": "p",
+      "text": "El neocolonialismo actual y los conflictos por tenencia de la tierra en África."
+    },
+    {
+      "type": "p",
+      "text": "Actualmente, el rápido crecimiento demográfico ha aumentado la presión sobre los territorios cultivables y los recursos naturales, intensificando las disputas entre comunidades. Por otra parte, la influencia de potencias económicas mundiales y compañías multinacionales continúa perpetuando el fenómeno del neocolonialismo, es decir, que, a pesar de la independencia formal, los países africanos siguen dependiendo económicamente de estas naciones. A esto se suma la corrupción y la deficiente gobernanza, que agravan la situación al conceder el control de la tierra y los recursos naturales a grupos y empresas poderosas en detrimento de las comunidades locales."
+    },
+    {
+      "type": "info",
+      "text": "Conexión geográfica",
+      "items": [
+        {
+          "text": "El continente africano enfrenta grandes desafíos en relación con el uso y la tenencia de la tierra, ya que es el hogar del mayor porcentaje de población rural del mundo, donde dos de cada tres habitantes residen en zonas rurales y dependen de actividades agrícolas para sobrevivir. Como consecuencia, esta región experimenta altos niveles de hambre, desnutrición y pobreza."
+        }
+      ]
+    },
+    {
+      "type": "diagram",
+      "text": "",
+      "items": [
+        {
+          "title": "Costa de Marfil",
+          "body": "Luego de independizarse de Francia, se promovió la inmigración para trabajar en las plantaciones de cacao y café. En 1998, una ley reconoció derechos tradicionales de tierra, cerrando la política migratoria. Esto generó inestabilidad y tensiones étnicas, desatando una guerra civil de siete años. Aunque los acuerdos de paz abordaron la cuestión agraria, su implementación ha sido lenta."
+        },
+        {
+          "title": "Sudán",
+          "body": "Desde 1983, la disputa territorial ha sido central en los conflictos armados en Sudán, persistiendo en la región de Darfur. En 2003, grupos guerrilleros africanos se rebelaron contra la discriminación gubernamental que favorecía a las minorías árabes en el acceso a la tierra. La respuesta del Gobierno fue una brutal campaña militar, que generó una crisis humanitaria, dejando más de 300 000 fallecidos y casi 2.5 millones de desplazados."
+        },
+        {
+          "title": "Zimbabue",
+          "body": "A partir 2000, se expulsó a terratenientes británicos y sus propiedades se distribuyeron entre agricultores locales, pero su falta de experiencia, recursos y acceso a mercados comerciales generó dificultades que afectaron la economía nacional. Además, muchos funcionarios se apropiaron de las mejores tierras para beneficio personal. Actualmente, el 49 % de la población vive en extrema pobreza, según la ONU."
+        },
+        {
+          "title": "Angola",
+          "body": "Tras la independencia de Portugal en 1975, se intentó implementar, sin éxito, el modelo soviético de cooperativas agrícolas. En 1991, una nueva reforma agraria estableció la propiedad mixta, pero los conflictos persisten debido a problemas de corrupción por parte del gobierno."
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Antecedentes históricos y políticos de Asia"
+    },
+    {
+      "type": "p",
+      "text": "Asia, el continente más extenso de la Tierra, se encuentra subdividida en 48 países y alberga a más de la mitad de la población mundial. De acuerdo con criterios culturales, políticos e históricos, se pueden distinguir cuatro grandes regiones:"
+    },
+    {
+      "type": "h2",
+      "text": "Conflictos actuales por el uso y la tenencia de la tierra en Asia"
+    },
+    {
+      "type": "p",
+      "text": "La Guerra Fría influyó en el desarrollo de los países de Asia de diversas maneras, según la región. En términos generales, esta disputa ideológica y política dividió al continente en dos bloques, uno prooccidental y otro procomunista, lo que condujo a disputas por el interés territorial y expansionista de cada potencia. Hoy en día, muchas comunidades rurales en países asiáticos se enfrentan a la ocupación y el acaparamiento de sus tierras por parte de grandes empresas privadas y multinacionales."
+    },
+    {
+      "type": "activity",
+      "meta": {
+        "activityNumber": 6,
+        "activityKind": "en equipo"
+      },
+      "text": "Desarrollen la habilidad de sensibilidad humana con el ambiente. Para ello:",
+      "items": [
+        {
+          "label": "a",
+          "text": "Elaboren un cuadro comparativo en el que presenten cuáles son los principales problemas a los que se enfrentan las poblaciones de los diferentes continentes y regiones estudiadas en cuanto al acceso y la tenencia de la tierra."
+        },
+        {
+          "label": "b",
+          "text": "A modo de conclusión, expliquen qué soluciones se pueden proponer para enfrentar la desigualdad en el acceso a la tierra en estas regiones."
+        }
+      ]
+    },
+    {
+      "type": "figure",
+      "text": "Mapa geopolítico de Asia",
+      "items": [
+        {
+          "text": "Asia Oriental. Los países que la conforman no estuvieron bajo dominio europeo; sin embargo, durante la Guerra Fría, Corea se dividió en dos zonas, cada una ocupada por una superpotencia, resultando en la división de Corea del Norte y Corea del Sur."
+        },
+        {
+          "text": "Asia Central. Estuvo dominada por potencias extranjeras en el siglo XIX. Gran Bretaña influyó en países como India, Pakistán y Afganistán, mientras que la URSS ejerció su dominio en Kazajistán, Kirguistán y Turkmenistán."
+        },
+        {
+          "text": "Sudeste Asiático. Entre los siglos XVI y XVIII, la región fue sometida al colonialismo europeo. Luego de la Segunda Guerra Mundial, se dio el proceso de descolonización y se convirtió en otro escenario de la Guerra Fría, que se expresó en la Guerra de Vietnam (1954-1975)."
+        },
+        {
+          "text": "Medio Oriente. De la división del Imperio Otomano surgieron estos Estados, que al principio fueron controlados por Gran Bretaña y Francia, y posteriormente obtuvieron su independencia en el siglo XX."
+        }
+      ]
+    },
+    {
+      "type": "phase",
+      "text": "Consolidación"
+    },
+    {
+      "type": "activity",
+      "meta": {
+        "activityNumber": 7,
+        "activityKind": "en equipo"
+      },
+      "text": "Lean el documento 2."
+    },
+    {
+      "type": "activity",
+      "meta": {
+        "activityNumber": 8,
+        "activityKind": "en equipo"
+      },
+      "text": "Elaboren una infografía donde expliquen los conflictos por el uso de la tierra.",
+      "items": [
+        {
+          "label": "a",
+          "text": "¿Cómo se está trabajando, por medio de esta iniciativa, para resolver los conflictos por el uso de la tenencia de la tierra?"
+        },
+        {
+          "label": "b",
+          "text": "¿Quiénes son los actores involucrados en los bancos de tierras en el Caribe? ¿Cuáles son sus roles?"
+        },
+        {
+          "label": "c",
+          "text": "¿A qué sectores beneficia esta iniciativa?"
+        },
+        {
+          "label": "d",
+          "text": "¿Por qué es necesario generar consensos entre los diferentes actores en procesos como este?"
+        },
+        {
+          "label": "e",
+          "text": "¿Qué perspectivas a futuro pueden generar proyectos como el de los bancos de tierras en el Caribe?"
+        }
+      ]
+    },
+    {
+      "type": "doc",
+      "meta": {
+        "docNumber": 2
+      },
+      "text": "Los bancos de tierras en el Caribe: avanzando en la innovación de los Sistemas de Administración de Tierras",
+      "items": [
+        {
+          "text": "El Caribe oriental se ha venido enfrentando a obstáculos significativos para la seguridad alimentaria y nutricional desde que una gran proporción de la superficie agrícola quedó inactiva o subutilizada tras la caída del cultivo del banano."
+        },
+        {
+          "text": "Es así que, desde el fin de los años 2010, los Gobiernos de Granada, Santa Lucía y San Vicente y las Granadinas decidieron explorar en conjunto alternativas para mejorar la coordinación intersectorial y modernizar los SAT, con miras a potenciar el desarrollo agrícola. Estos países buscaron el apoyo de FAO para el desarrollo de bancos nacionales de tierras, y dinamizar con ello el mercado de arrendamiento de tierras estatales y privadas, disminuyendo los costos de transacción y entregando mayor seguridad y certeza jurídica sobre la tenencia, y una mayor confianza entre privados (propietarios y arrendatarios). Asimismo, esta experiencia ha mostrado que es clave avanzar en acuerdos políticos para la implementación de este tipo de iniciativas. Se pone de manifiesto que para avanzar en la modernización de los sistemas de administración, más allá de los recursos necesarios, el pilar fundamental es la generación de consensos que permitan sostener estos procesos en el mediano y largo plazo."
+        },
+        {
+          "text": "Los tres países están en diferentes fases de implementación de zonas piloto que han sido incorporadas al banco nacional de tierras agrícolas. Dicha implementación ha comprendido, en primer lugar, un diseño institucional que permite la articulación intersectorial necesaria entre la administración de tierras, servicios de agricultura, servicios de extensión rural y agencias de planificación. Se diseñaron contratos modelo de arrendamiento y manuales de procedimiento del banco, y en los tres países el proyecto fue apoyado con una campaña de sensibilización y transparencia del proceso, dirigida tanto a la población general como al público objetivo de la iniciativa. Una de las innovaciones principales fue un software diseñado específicamente para la administración del banco de tierra, pero con utilidades que lo trascienden ampliamente, y que pueden representar un avance significativo en la modernización de los SAT para estos tres países y que también puede ser replicable a otras naciones del Caribe."
+        }
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Fuente: FAO (2022). Gobernanza de la tierra en América Latina y el Caribe. Innovación e inclusión para la recuperación económica y resiliencia."
+    }
+  ]
+}

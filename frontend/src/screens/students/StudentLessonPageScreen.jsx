@@ -50,24 +50,6 @@ const LeafIcon = ({ size = 22 }) => (
 	</svg>
 )
 
-const PrinterIcon = () => (
-	<svg
-		width='16'
-		height='16'
-		viewBox='0 0 24 24'
-		fill='none'
-		stroke='currentColor'
-		strokeWidth='2'
-		strokeLinecap='round'
-		strokeLinejoin='round'
-		aria-hidden
-	>
-		<polyline points='6 9 6 2 18 2 18 9' />
-		<path d='M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2' />
-		<rect x='6' y='14' width='12' height='8' />
-	</svg>
-)
-
 function phaseVariant (text) {
 	const lower = String(text || '').toLowerCase()
 	if (lower.includes('explor')) {
@@ -310,9 +292,93 @@ function LessonElement ({ element, activityNumber }) {
 		return (
 			<ul className='lesson-doc__list'>
 				{items.map((item, itemIndex) => (
-					<li key={`bul-${itemIndex}`}>{item.text}</li>
+					<li key={`bul-${itemIndex}`}>
+						{item.title ? (
+							<>
+								<strong>{item.title}</strong>
+								{item.body ? `: ${item.body}` : ''}
+							</>
+						) : (
+							item.body || item.text
+						)}
+					</li>
 				))}
 			</ul>
+		)
+	case 'diagram':
+		return (
+			<div className='lesson-doc__diagram'>
+				{text ? (
+					<div className='lesson-doc__diagram-root'>{text}</div>
+				) : null}
+				<div className='lesson-doc__diagram-branches'>
+					{items.map((item, itemIndex) => (
+						<div
+							key={`dg-${itemIndex}`}
+							className='lesson-doc__diagram-box'
+						>
+							{item.title ? (
+								<p className='lesson-doc__diagram-box-title'>
+									{item.title}
+								</p>
+							) : null}
+							{item.body || item.text ? (
+								<p className='lesson-doc__diagram-box-text'>
+									{item.body || item.text}
+								</p>
+							) : null}
+						</div>
+					))}
+				</div>
+			</div>
+		)
+	case 'map':
+		return (
+			<div className='lesson-doc__map'>
+				{text ? (
+					<p className='lesson-doc__section-title'>{text}</p>
+				) : null}
+				<div className='lesson-doc__grid'>
+					{items.map((item, itemIndex) => (
+						<div
+							key={`mp-${itemIndex}`}
+							className='lesson-doc__term'
+						>
+							{item.title ? (
+								<p className='lesson-doc__term-title'>
+									{item.title}
+								</p>
+							) : null}
+							<p className='lesson-doc__term-text'>
+								{item.body || item.text}
+							</p>
+						</div>
+					))}
+				</div>
+			</div>
+		)
+	case 'figure':
+		return (
+			<div className='lesson-doc__figure'>
+				{text ? (
+					<p className='lesson-doc__figure-caption'>{text}</p>
+				) : null}
+				{items.length > 0 ? (
+					<div className='lesson-doc__figure-body'>
+						{items.map((item, itemIndex) => (
+							<p
+								key={`fg-${itemIndex}`}
+								className='lesson-doc__figure-text'
+							>
+								{item.title ? (
+									<strong>{item.title}: </strong>
+								) : null}
+								{item.body || item.text}
+							</p>
+						))}
+					</div>
+				) : null}
+			</div>
 		)
 	case 'chips':
 		return (
@@ -500,6 +566,8 @@ function StudentLessonPageScreen () {
 	const isError = isSchoolAdminView ? isSchoolAdminError : isStudentError
 	const error = isSchoolAdminView ? schoolAdminError : studentError
 
+	console.log(lesson?.content)
+
 	// Split the flat element stream into "paper sheets", starting a new sheet
 	// at every learning phase (Exploración, Profundización, …) just like the
 	// printed textbook.
@@ -526,10 +594,6 @@ function StudentLessonPageScreen () {
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
-	}
-
-	const handlePrint = () => {
-		window.print()
 	}
 
 	const LayoutSidebar = isSchoolAdminView ? AdminSidebar : Sidebar
@@ -641,24 +705,16 @@ function StudentLessonPageScreen () {
 						<span>{mainTitle}</span>
 					</span>
 				</div>
-				<div className='lesson-doc__toolbar-actions'>
-					{backPath ? (
+				{backPath ? (
+					<div className='lesson-doc__toolbar-actions'>
 						<Link
 							to={backPath}
 							className='lesson-doc__btn lesson-doc__btn--ghost'
 						>
 							← Volver
 						</Link>
-					) : null}
-					<button
-						type='button'
-						className='lesson-doc__btn'
-						onClick={handlePrint}
-					>
-						<PrinterIcon />
-						Imprimir / Guardar PDF
-					</button>
-				</div>
+					</div>
+				) : null}
 			</div>
 
 			<div className='lesson-doc__pages'>
