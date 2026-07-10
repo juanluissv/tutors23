@@ -205,7 +205,6 @@ function HomeScreen() {
             const sendFromUrl = async () => {
                 const userMessage = { type: 'question', content: trimmedQuery };
                 setMessages(prev => [...prev, userMessage]);
-
                 let res;
                 try {
                     if (id == undefined) {

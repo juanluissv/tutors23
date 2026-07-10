@@ -1,0 +1,71 @@
+{
+  "mainTitle": "",
+  "unitTheme": "",
+  "heroSubtitle": "",
+  "objectivesText": "",
+  "content": [
+    {
+      "type": "phase",
+      "text": "Profundización"
+    },
+    {
+      "type": "p",
+      "text": "Los bosques son ecosistemas complejos que desempeñan un papel vital para la vida humana. Cubren alrededor del 31 % de la superficie terrestre del mundo y cumplen diversas funciones, entre las que se incluyen producción de oxígeno, purificación del aire, provisión de agua y de otros recursos naturales, por lo que son muy importantes para el mantenimiento de la salud y el equilibrio del planeta."
+    },
+    {
+      "type": "p",
+      "text": "La clasificación de los bosques se basa en distintos criterios, como la zona climática en la que se encuentran, el tipo de vegetación que los conforman o su función ecológica. En relación con la zona climática, los bosques se dividen en: tropicales, subtropicales, templados y boreales. De estos, las zonas tropicales destacan por tener la mayor proporción de bosques a nivel mundial, alcanzando el 45 %, mientras que el resto se distribuye entre las otras zonas climáticas (Doc. 1)."
+    },
+    {
+      "type": "doc",
+      "text": "Distribución mundial de los bosques por zona climática",
+      "meta": {
+        "docNumber": 1
+      },
+      "items": [
+        {
+          "text": "Fuente: FAO (2020). Evaluación de los recursos forestales mundiales."
+        }
+      ]
+    },
+    {
+      "type": "chart",
+      "items": [
+        {"label": "Boreal", "value": 27},
+        {"label": "Templada", "value": 16},
+        {"label": "Tropical", "value": 45},
+        {"label": "Subtropical", "value": 11}
+      ],
+      "meta": {
+        "chartKind": "donut",
+        "unit": "%"
+      }
+    },
+    {
+      "type": "h2",
+      "text": "Características de los bosques tropicales"
+    },
+    {
+      "type": "p",
+      "text": "Los bosques tropicales se localizan en la zona intertropical y constituyen uno de los ecosistemas más transcendentales a nivel mundial. Se caracterizan por su clima cálido y húmedo y experimentan precipitaciones abundantes a lo largo de todo el año, creando condiciones propicias para la vida vegetal y animal. Además, destacan por albergar una asombrosa diversidad biológica, con aproximadamente el 60 % de las especies conocidas de fauna y flora a nivel mundial. Sin embargo, en las últimas décadas, la deforestación ha amenazado seriamente la salud y la estabilidad de estos, afectando a regiones enteras."
+    },
+    {
+      "type": "info",
+      "text": "Conexión geográfica",
+      "items": [
+        {
+          "text": "Cerca del 54 % de los bosques del mundo concentran en cinco naciones: Rusia, Brasil, Canadá, Estados Unidos y China."
+        }
+      ]
+    },
+    {
+      "type": "info",
+      "text": "En la web",
+      "items": [
+        {
+          "text": "Tipos de bosques tropicales"
+        }
+      ]
+    }
+  ]
+}

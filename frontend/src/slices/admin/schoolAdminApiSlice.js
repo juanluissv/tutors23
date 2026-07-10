@@ -208,6 +208,50 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
                 { type: 'BookLesson', id: `SUBJECT_${id}` },
             ],
         }),
+        generateChapterTutorTxtFromLesson: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/generate-tutor-txt`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { schoolId }) => {
+                const tags = ['Subject']
+                if (schoolId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `SCHOOL_LIST_${schoolId}`,
+                    })
+                }
+                return tags
+            },
+        }),
+        uploadChapterTutorVideo: builder.mutation({
+            query: ({ id, chapterId, video }) => {
+                const fd = new FormData()
+                fd.append('video', video)
+                return {
+                    url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/tutor-video`,
+                    method: 'PUT',
+                    body: fd,
+                }
+            },
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        uploadChapterTutorTranscribe: builder.mutation({
+            query: ({ id, chapterId, transcribe }) => {
+                const fd = new FormData()
+                fd.append('transcribe', transcribe)
+                return {
+                    url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/tutor-transcribe`,
+                    method: 'PUT',
+                    body: fd,
+                }
+            },
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
         getBookLessonsBySubject: builder.query({
             query: (subjectId) => ({
                 url: `${SUBJECTS_URL}/${subjectId}/book-lessons`,
@@ -438,6 +482,9 @@ export const {
     useUpdateSubjectBookChaptersMutation,
     useGenerateSubjectBookChapterPdfMutation,
     useGenerateBookLessonsFromChapterMutation,
+    useGenerateChapterTutorTxtFromLessonMutation,
+    useUploadChapterTutorVideoMutation,
+    useUploadChapterTutorTranscribeMutation,
     useGetBookLessonsBySubjectQuery,
     useGetBookLessonByIdForSchoolAdminQuery,
     useUploadSubjectBookChapterFileMutation,

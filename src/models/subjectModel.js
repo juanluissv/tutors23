@@ -47,6 +47,14 @@ const subjectSchema = mongoose.Schema({
                 type: String,
                 required: false,
             },
+            ChapterTxtFileId: {
+                type: String,
+                required: false,
+            },
+            pineconeIndexName: {
+                type: String,
+                required: false,
+            },
         }
     ],
     dateCreated: {

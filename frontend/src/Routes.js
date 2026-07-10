@@ -34,7 +34,7 @@ import StudentCoursesScreen from './screens/students/StudentCoursesScreen';
 import StudentSubscriptionScreen from './screens/students/StudentSubscriptionScreen';
 import StudentLessonPageScreen from './screens/students/StudentLessonPageScreen';
 import Unidad1Semana1BosquesScreen from './screens/books/Unidad1Semana1BosquesScreen';
-
+import StudentViewBookScreen from './screens/students/StudentViewBookScreen';
 
 
 
@@ -119,6 +119,8 @@ import SchoolAdminCoursesScreen from './screens/schoolAdmin/SchoolAdminCoursesSc
 import SchoolAdminViewCourseScreen from './screens/schoolAdmin/SchoolAdminViewCourseScreen';
 import SchoolAdminBookChapters from './screens/schoolAdmin/SchoolAdminBookChapters';
 import SchoolAdminGenerateLessonsScreen from './screens/schoolAdmin/SchoolAdminGenerateLessonsScreen';
+import SchoolAdminViewBookScreen from './screens/schoolAdmin/SchoolAdminViewBookScreen';
+import SchoolAdminCreateTutor from './screens/schoolAdmin/SchoolAdminCreateTutor';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -189,7 +191,7 @@ const router = createBrowserRouter(
             <Route path="/students/courses/:subjectId" element={<StudentCoursesScreen />} />
             <Route path="/students/subscription" element={<StudentSubscriptionScreen />} />
             <Route  path="/students/lessonpage/:lessonId" element={<StudentLessonPageScreen />} />
-
+            <Route  path="/students/viewbook/:subjectId" element={<StudentViewBookScreen />} />
 
             <Route  path="/teachers/login" element={<TeacherLoginScreen />} />
             <Route  path="/teachers/register" element={<TeacherRegisterScreen />} />
@@ -257,6 +259,8 @@ const router = createBrowserRouter(
                 path="/schooladmins/lessonpage/:subjectId/:lessonId"
                 element={<StudentLessonPageScreen />}
             />
+            <Route  path="/schooladmins/viewbook/:subjectId" element={<SchoolAdminViewBookScreen />} />
+            <Route  path="/schooladmins/createtutor/:subjectId" element={<SchoolAdminCreateTutor />} />
         </Route>
     )
 );

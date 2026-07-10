@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import Loader from '../../components/Loader'
 import {
 	useGenerateBookLessonsFromChapterMutation,
 	useGetBookLessonsBySubjectQuery,
@@ -180,8 +181,10 @@ function SchoolAdminGenerateLessonsScreen () {
 		skip: !isValidSubjectParam,
 	})
 
-	const [generateLessons, { isLoading: isGenerating }] =
-		useGenerateBookLessonsFromChapterMutation()
+	const [generateLessons, {
+		isLoading: isMutating,
+		originalArgs: mutatingArgs,
+	}] = useGenerateBookLessonsFromChapterMutation()
 
 	const lessonsByChapterId = useMemo(() => {
 		const map = new Map()
@@ -411,6 +414,14 @@ function SchoolAdminGenerateLessonsScreen () {
 										<strong>{subjectTitle}</strong> to build
 										lessons chapter by chapter.
 									</p>
+									<p className='generate-lessons__index-link-wrap'>
+										<Link
+											to={`/schooladmins/viewbook/${subjectId}`}
+											className='generate-lessons__index-link'
+										>
+											Open web book index →
+										</Link>
+									</p>
 								</div>
 
 								{isSubjectsError ? (
@@ -610,9 +621,21 @@ function SchoolAdminGenerateLessonsScreen () {
 												const hasGeneratedLesson = Boolean(
 													lesson?.hasContent,
 												)
-												const isThisGenerating =
-													generatingChapterId === String(chapter._id)
-													&& isGenerating
+												const chapterId = chapter._id
+													? String(chapter._id)
+													: ''
+												const isThisGenerating = Boolean(
+													chapterId
+													&& (
+														generatingChapterId === chapterId
+														|| (
+															isMutating
+															&& String(
+																mutatingArgs?.chapterId,
+															) === chapterId
+														)
+													),
+												)
 												const chapterError = chapter._id
 													? chapterErrors[String(chapter._id)]
 													: undefined
@@ -713,7 +736,24 @@ function SchoolAdminGenerateLessonsScreen () {
 																</div>
 															)}
 
-															{hasGeneratedLesson ? (
+															{isThisGenerating ? (
+																<div
+																	className='generate-lessons__generating'
+																	role='status'
+																	aria-live='polite'
+																	aria-busy='true'
+																>
+																	<Loader size='sm' />
+																	<p className='generate-lessons__generating-title'>
+																		Generating lesson…
+																	</p>
+																	<p className='generate-lessons__generating-hint'>
+																		Reading text, tables and charts
+																		from the PDF with AI. This can
+																		take a minute.
+																	</p>
+																</div>
+															) : hasGeneratedLesson ? (
 																<div
 																	className='generate-lessons__lesson-ready'
 																	role='status'
@@ -754,6 +794,9 @@ function SchoolAdminGenerateLessonsScreen () {
 																	'generate-lessons__action-btn' +
 																	((!hasChapterFile || isThisGenerating)
 																		? ' generate-lessons__action-btn--disabled'
+																		: '') +
+																	(isThisGenerating
+																		? ' generate-lessons__action-btn--loading'
 																		: '')
 																}
 																disabled={
@@ -769,25 +812,36 @@ function SchoolAdminGenerateLessonsScreen () {
 																	)
 																}}
 															>
-																<span className='generate-lessons__action-btn-icon'>
-																	<SparkGlyph />
-																</span>
-																<span className='generate-lessons__action-btn-title'>
-																	{isThisGenerating
-																		? 'Generating…'
-																		: (hasGeneratedLesson
-																			? 'Regenerate lessons'
-																			: 'Generate lessons')}
-																</span>
-																<span className='generate-lessons__action-btn-hint'>
-																	{!hasChapterFile
-																		? 'Chapter PDF required first'
-																		: (isThisGenerating
-																			? 'Reading text, tables & charts with AI…'
-																			: (hasGeneratedLesson
-																				? 'Rebuild lesson (text, tables & charts)'
-																				: 'AI reads text, tables & charts from the PDF'))}
-																</span>
+																{isThisGenerating ? (
+																	<>
+																		<Loader size='sm' />
+																		<span className='generate-lessons__action-btn-title'>
+																			Generating…
+																		</span>
+																		<span className='generate-lessons__action-btn-hint'>
+																			Please wait while the lesson is
+																			being built
+																		</span>
+																	</>
+																) : (
+																	<>
+																		<span className='generate-lessons__action-btn-icon'>
+																			<SparkGlyph />
+																		</span>
+																		<span className='generate-lessons__action-btn-title'>
+																			{hasGeneratedLesson
+																				? 'Regenerate lessons'
+																				: 'Generate lessons'}
+																		</span>
+																		<span className='generate-lessons__action-btn-hint'>
+																			{!hasChapterFile
+																				? 'Chapter PDF required first'
+																				: (hasGeneratedLesson
+																					? 'Rebuild lesson (text, tables & charts)'
+																					: 'AI reads text, tables & charts from the PDF')}
+																		</span>
+																	</>
+																)}
 															</button>
 														</div>
 													</li>

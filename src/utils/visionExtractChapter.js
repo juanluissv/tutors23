@@ -1,11 +1,15 @@
 import OpenAI from 'openai'
+import { PDFDocument } from 'pdf-lib'
 import dotenv from 'dotenv'
+import { extractPdfPageRange } from './extractChapterPdf.js'
+import { assignBlockIds } from './lessonBlockIds.js'
 
 dotenv.config()
 
 const VISION_MODEL = process.env.LESSON_VISION_MODEL || 'gpt-4o'
 // Base64 inflates payloads ~33 %; keep well under the Responses API limits.
 const MAX_PDF_BYTES = 24 * 1024 * 1024
+const PAGE_BY_PAGE = process.env.LESSON_VISION_PAGE_BY_PAGE !== 'false'
 
 const ALLOWED_TYPES = new Set([
 	'eyebrow',
@@ -73,16 +77,19 @@ const SYSTEM_PROMPT = [
 	'un bloque genérico.',
 ].join(' ')
 
-function buildUserPrompt (fallbackTitle) {
+function buildSchemaPrompt (fallbackTitle) {
 	return [
-		'Convierte el siguiente capítulo en un objeto JSON con esta forma exacta:',
+		'Convierte el capítulo en un objeto JSON con esta forma exacta:',
 		'{',
 		'  "mainTitle": string,        // p. ej. "Unidad 1 · Semana 1"',
 		'  "unitTheme": string,        // tema de la unidad (encabezado)',
-		'  "heroSubtitle": string,     // título principal del contenido',
+		'  "heroSubtitle": string,     // título temático del capítulo',
 		'  "objectivesText": string,   // texto tras "En esta unidad aprenderemos a:"',
 		'  "content": Element[]',
 		'}',
+		'',
+		'"heroSubtitle" es el título principal del contenido del capítulo',
+		'(p. ej. "Los bosques tropicales en el mundo"), distinto de unitTheme.',
 		'',
 		'Cada Element es: { "type": string, "text"?: string, "items"?: Item[],',
 		'"meta"?: object }. Item es: { "label"?, "title"?, "body"?, "text"?,',
@@ -97,35 +104,42 @@ function buildUserPrompt (fallbackTitle) {
 		'  meta.activityKind ("individual" | "en pares" | "en equipo" |',
 		'  "con docente"). text = enunciado/título corto. items = pasos con',
 		'  label "a","b","c"… y text.',
-		'- "doc": recuadro "Doc. N". meta.docNumber, text = título, items = párrafos.',
+		'- "doc": recuadro "Doc. N" SIN gráfico de porcentajes. meta.docNumber,',
+		'  text = título, items = párrafos de texto (incluye la fuente).',
 		'- "info": llamado lateral ("En la web", "Conexión geográfica",',
 		'  "Conexión ciudadana"). text = etiqueta, items = texto.',
-		'- "glossary": glosario. items = { title: término, body: definición }.',
+		'- "glossary": glosario o cajas laterales de definición (p. ej.',
+		'  "La deforestación", "La contaminación"). items = { title: término,',
+		'  body: definición }.',
 		'- "table": tabla. meta.headers = string[] de encabezados; items = filas,',
 		'  cada una { cells: string[] } en el mismo orden de columnas.',
+		'  Tablas plantilla (solo encabezados para que el estudiante complete):',
+		'  meta.isTemplate = true, meta.headers con los encabezados, items = []',
+		'  o una fila con celdas vacías "".',
 		'- "chart": gráfico de datos (pastel, dona, barras). items =',
 		'  { label, value } donde value es solo el número. meta.chartKind =',
 		'  "donut" si las partes suman ~100, si no "bar". meta.unit (p. ej. "%").',
+		'  Si un recuadro "Doc. N" contiene un gráfico circular con porcentajes,',
+		'  usa "chart" (no "doc") y pon la fuente en un "p" aparte.',
 		'- "diagram": diagrama, esquema o infografía con un concepto central y',
-		'  varias cajas o ramas (p. ej. un esquema "Causas históricas" con tres',
-		'  cajas). text = la etiqueta o título central del diagrama. items = una',
-		'  caja por cada rama, cada una con { title, body }.',
-		'- "map": mapa temático con recuadros explicativos (p. ej. el mapa de',
-		'  Asia o de América Latina con cajas por país o región). text = el',
-		'  título o tema del mapa. items = un recuadro por cada caja, cada uno',
-		'  con { title: país o región, body: texto completo del recuadro }. Si',
-		'  el mapa tiene una leyenda de colores, agrégala ADEMÁS como un "table"',
-		'  con meta.headers = ["Categoría", "Significado"], o como un',
+		'  varias cajas o ramas (p. ej. "Causas históricas" o un esquema de',
+		'  "Estrategias" / "Problemas que afectan a…" en actividades).',
+		'  text = la etiqueta o título central del diagrama. items = una caja por',
+		'  cada rama, cada una con { title, body } (body puede ir vacío si la caja',
+		'  solo tiene título).',
+		'- "map": mapa temático. text = título del mapa. items = cada recuadro',
+		'  o etiqueta del mapa con { title: región, body?: texto del recuadro }.',
+		'  Si una etiqueta del mapa NO tiene texto explicativo, inclúyela igual',
+		'  con solo title. La leyenda de colores va ADEMÁS como "table" o',
 		'  "bulletList".',
 		'- "figure": CUALQUIER otra figura, ilustración o elemento visual que no',
 		'  encaje en chart, table, diagram o map. text = título o descripción',
 		'  breve; items = { text } con TODO el texto que aparezca dentro o junto',
 		'  a la figura.',
 		'- Recuadros de estudio de caso por país o región (p. ej. "Brasil",',
-		'  "México", "Costa de Marfil", "Sudán", "Zimbabue", "Angola"), aunque',
-		'  NO tengan un mapa visible, son contenido obligatorio: agrúpalos en un',
-		'  "map" (o "diagram") con un item { title: país, body: texto } por cada',
-		'  recuadro. Jamás los omitas por ser cajas al margen de la página.',
+		'  "México", "América del Sur", "Centro de África", "Sudeste asiático"),',
+		'  cuando son párrafos del cuerpo con h3 + texto, usa h3 + p (NO "map").',
+		'  Solo usa "map" si el recuadro está sobre o junto a un mapa visible.',
 		'- "chips": lista corta de nombres propios. items = { text }.',
 		'- "numberedList"/"bulletList": listas. items con title/body o text.',
 		'- "objectives": objetivos de aprendizaje. items = { text }.',
@@ -140,6 +154,19 @@ function buildUserPrompt (fallbackTitle) {
 		'    "body": "Durante los procesos de colonización, las potencias..." },',
 		'  { "title": "Los impactos socioeconómicos desiguales",',
 		'    "body": "Las relaciones comerciales asimétricas..." } ] }',
+		'',
+		'Ejemplo de esquema en actividad:',
+		'{ "type": "diagram", "text": "Estrategias", "items": [',
+		'  { "title": "Problemas que afectan a los bosques tropicales" } ] }',
+		'',
+		'Ejemplo de tabla plantilla:',
+		'{ "type": "table", "text": "Tabla de estrategias",',
+		'  "meta": { "headers": ["Estrategia", "Descripción"], "isTemplate": true },',
+		'  "items": [] }',
+		'',
+		'Ejemplo de sección regional (cuerpo, NO mapa):',
+		'{ "type": "h3", "text": "América del Sur" },',
+		'{ "type": "p", "text": "Según el informe de 2022 presentado por WWF..." }',
 		'',
 		'Ejemplo de "map" (mapa con recuadros) y su leyenda:',
 		'{ "type": "map", "text": "Conflictos por la tierra en América Latina",',
@@ -174,6 +201,26 @@ function buildUserPrompt (fallbackTitle) {
 		'',
 		'Responde ÚNICAMENTE con el objeto JSON, sin markdown ni explicaciones.',
 	].filter(Boolean).join('\n')
+}
+
+function buildUserPrompt (fallbackTitle) {
+	return buildSchemaPrompt(fallbackTitle)
+}
+
+function buildPagePrompt (fallbackTitle, pageNumber, totalPages) {
+	return [
+		buildSchemaPrompt(fallbackTitle),
+		'',
+		`IMPORTANTE: estás procesando SOLO la página ${pageNumber} de ${totalPages}.`,
+		'Extrae TODO el contenido visible en ESTA página únicamente.',
+		'No omitas párrafos del cuerpo aunque haya mapas o cajas al lado.',
+		pageNumber === 1
+			? 'Incluye mainTitle, unitTheme, heroSubtitle y objectivesText si aparecen.'
+			: 'Para mainTitle/unitTheme/heroSubtitle/objectivesText usa "" salvo que '
+				+ 'aparezcan explícitamente en esta página.',
+		'No repitas encabezados de folio ("Unidad X · Semana Y") como content.',
+		'Devuelve content[] con los bloques de esta página en orden de lectura.',
+	].join('\n')
 }
 
 function toStr (value) {
@@ -235,6 +282,9 @@ function sanitizeMeta (meta) {
 	if (Array.isArray(meta.headers)) {
 		result.headers = meta.headers.map((header) => toStr(header))
 	}
+	if (meta.isTemplate === true) {
+		result.isTemplate = true
+	}
 	return result
 }
 
@@ -267,7 +317,7 @@ function sanitizeLesson (data, fallbackTitle) {
 		unitTheme: toStr(safe.unitTheme),
 		heroSubtitle: toStr(safe.heroSubtitle),
 		objectivesText: toStr(safe.objectivesText),
-		content,
+		content: assignBlockIds(content),
 	}
 }
 
@@ -292,6 +342,88 @@ function parseJsonOutput (raw) {
 	}
 }
 
+async function getPdfPageCount (pdfBytes) {
+	const src = await PDFDocument.load(pdfBytes, { ignoreEncryption: true })
+	return src.getPageCount()
+}
+
+async function callVisionOnPdf (openai, pdfBytes, promptText) {
+	const base64 = Buffer.from(pdfBytes).toString('base64')
+
+	const response = await openai.responses.create({
+		model: VISION_MODEL,
+		max_output_tokens: 16000,
+		instructions: SYSTEM_PROMPT,
+		input: [
+			{
+				role: 'user',
+				content: [
+					{ type: 'input_text', text: promptText },
+					{
+						type: 'input_file',
+						filename: 'chapter.pdf',
+						file_data: `data:application/pdf;base64,${base64}`,
+					},
+				],
+			},
+		],
+	})
+
+	return parseJsonOutput(response.output_text)
+}
+
+function mergePageLessons (pageResults, fallbackTitle) {
+	const merged = {
+		mainTitle: fallbackTitle || 'Chapter lesson',
+		unitTheme: '',
+		heroSubtitle: '',
+		objectivesText: '',
+		content: [],
+	}
+
+	for (const page of pageResults) {
+		const lesson = sanitizeLesson(page, fallbackTitle)
+		if (lesson.mainTitle && lesson.mainTitle !== 'Chapter lesson') {
+			merged.mainTitle = lesson.mainTitle
+		}
+		if (lesson.unitTheme) {
+			merged.unitTheme = lesson.unitTheme
+		}
+		if (lesson.heroSubtitle) {
+			merged.heroSubtitle = lesson.heroSubtitle
+		}
+		if (lesson.objectivesText) {
+			merged.objectivesText = lesson.objectivesText
+		}
+		merged.content.push(...lesson.content)
+	}
+
+	return sanitizeLesson(merged, fallbackTitle)
+}
+
+async function extractLessonPageByPage (openai, pdfBytes, fallbackTitle) {
+	const totalPages = await getPdfPageCount(pdfBytes)
+	const pageResults = []
+
+	for (let page = 1; page <= totalPages; page += 1) {
+		const pageBytes = await extractPdfPageRange(pdfBytes, page, page)
+		const prompt = buildPagePrompt(fallbackTitle, page, totalPages)
+		const parsed = await callVisionOnPdf(openai, pageBytes, prompt)
+		pageResults.push(parsed)
+	}
+
+	return mergePageLessons(pageResults, fallbackTitle)
+}
+
+async function extractLessonSinglePass (openai, pdfBytes, fallbackTitle) {
+	const parsed = await callVisionOnPdf(
+		openai,
+		pdfBytes,
+		buildUserPrompt(fallbackTitle),
+	)
+	return sanitizeLesson(parsed, fallbackTitle)
+}
+
 /**
  * Run the chapter PDF through an OpenAI vision model and return a structured
  * lesson that matches the shape produced by parseChapterPdfText.
@@ -312,29 +444,9 @@ async function extractLessonFromPdfWithVision (pdfBytes, options = {}) {
 		throw new Error('Chapter PDF is too large for the vision pass')
 	}
 
-	const base64 = buffer.toString('base64')
-
-	const response = await openai.responses.create({
-		model: VISION_MODEL,
-		max_output_tokens: 32000,
-		instructions: SYSTEM_PROMPT,
-		input: [
-			{
-				role: 'user',
-				content: [
-					{ type: 'input_text', text: buildUserPrompt(fallbackTitle) },
-					{
-						type: 'input_file',
-						filename: 'chapter.pdf',
-						file_data: `data:application/pdf;base64,${base64}`,
-					},
-				],
-			},
-		],
-	})
-
-	const parsed = parseJsonOutput(response.output_text)
-	const lesson = sanitizeLesson(parsed, fallbackTitle)
+	const lesson = PAGE_BY_PAGE
+		? await extractLessonPageByPage(openai, buffer, fallbackTitle)
+		: await extractLessonSinglePass(openai, buffer, fallbackTitle)
 
 	if (lesson.content.length === 0) {
 		throw new Error('Vision pass produced no usable content')

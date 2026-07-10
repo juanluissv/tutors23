@@ -1,0 +1,118 @@
+{
+  "mainTitle": "",
+  "unitTheme": "",
+  "heroSubtitle": "",
+  "objectivesText": "",
+  "content": [
+    {
+      "type": "phase",
+      "text": "Consolidación"
+    },
+    {
+      "type": "activity",
+      "text": "Actividad en pares",
+      "meta": {
+        "activityNumber": 6,
+        "activityKind": "en pares"
+      },
+      "items": [
+        {
+          "label": "a",
+          "text": "Anótenlas en su cuaderno."
+        },
+        {
+          "label": "b",
+          "text": "Comparen sus respuestas con otros pares y seleccionen las mejores propuestas."
+        },
+        {
+          "label": "c",
+          "text": "Compartan en pleno su selección final."
+        }
+      ]
+    },
+    {
+      "type": "activity",
+      "text": "Actividad con docente",
+      "meta": {
+        "activityNumber": 7,
+        "activityKind": "con docente"
+      },
+      "items": [
+        {
+          "label": "a",
+          "text": "Seleccionen uno de los siguientes bosques tropicales."
+        },
+        {
+          "label": "b",
+          "text": "Investiguen datos sobre el bosque seleccionado y ordenen la información en una tabla como la siguiente:"
+        },
+        {
+          "label": "c",
+          "text": "Preparen una presentación creativa que puede incluir pósters, maquetas, videos, o dramatizaciones."
+        },
+        {
+          "label": "d",
+          "text": "Realicen una exposición en clase donde cada equipo presenta su bosque tropical y sus hallazgos."
+        }
+      ]
+    },
+    {
+      "type": "chips",
+      "items": [
+        {
+          "text": "Amazonas"
+        },
+        {
+          "text": "el Congo"
+        },
+        {
+          "text": "el Daintree"
+        },
+        {
+          "text": "Bosque Nuboso de Monteverde"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "meta": {
+        "headers": [
+          "Ubicación",
+          "Biodiversidad",
+          "Clima",
+          "Amenazas ambientales",
+          "Comunidades indígenas",
+          "Esfuerzos de conservación"
+        ],
+        "isTemplate": true
+      },
+      "items": []
+    },
+    {
+      "type": "activity",
+      "text": "Actividad en equipo",
+      "meta": {
+        "activityNumber": 8,
+        "activityKind": "en equipo"
+      },
+      "items": [
+        {
+          "label": "a",
+          "text": "Seleccionar uno de los bosques tropicales identificados en el contenido estudiado."
+        },
+        {
+          "label": "b",
+          "text": "Describir la zona en la que se ubica y los factores que causan la deforestación y otras problemáticas."
+        },
+        {
+          "label": "c",
+          "text": "Analizar los impactos en la biodiversidad y en el medioambiente, los efectos para las comunidades locales y las medidas de conservación existentes."
+        },
+        {
+          "label": "d",
+          "text": "Presentar sus hallazgos al resto de la clase y organizar una plenaria en la que comparen regiones."
+        }
+      ]
+    }
+  ]
+}

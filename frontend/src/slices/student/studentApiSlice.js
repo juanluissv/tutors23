@@ -71,6 +71,14 @@ export const studentApiSlice = apiSlice.injectEndpoints({
                 'Earnings',
             ],
           }),
+          getBookLessonsBySubjectForStudent: builder.query({
+            query: (subjectId) => ({
+              url: `${BOOK_LESSONS_URL}/subject/${subjectId}`,
+            }),
+            providesTags: (result, error, subjectId) => [
+              { type: 'BookLesson', id: `SUBJECT_${subjectId}` },
+            ],
+          }),
           getBookLessonById: builder.query({
             query: (lessonId) => ({
               url: `${BOOK_LESSONS_URL}/${lessonId}`,
@@ -93,5 +101,6 @@ export const {
     useGetCourseWatchForStudentQuery,
     useGetStudentSubjectCoursesQuery,
     useSubscribeMutation,
+    useGetBookLessonsBySubjectForStudentQuery,
     useGetBookLessonByIdQuery,
 } = studentApiSlice;

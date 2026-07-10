@@ -1,0 +1,115 @@
+{
+    "mainTitle": "",
+    "unitTheme": "",
+    "heroSubtitle": "Los bosques tropicales en el mundo",
+    "objectivesText": "",
+    "content": [
+      {
+        "type": "phase",
+        "text": "Exploración"
+      },
+      {
+        "type": "activity",
+        "text": "Actividad individual",
+        "meta": {
+          "activityNumber": 1,
+          "activityKind": "individual"
+        },
+        "items": [
+          {
+            "label": "a",
+            "text": "¿Cuál consideras que es la importancia de los bosques tropicales para la vida humana?"
+          },
+          {
+            "label": "b",
+            "text": "¿Qué acciones se implementan en tu localidad para proteger las zonas naturales o boscosas?"
+          }
+        ]
+      },
+      {
+        "type": "activity",
+        "text": "Actividad en pares",
+        "meta": {
+          "activityNumber": 2,
+          "activityKind": "en pares"
+        },
+        "items": [
+          {
+            "label": "a",
+            "text": "Busquen noticias recientes acerca de la situación de los bosques en El Salvador e identifiquen cuáles son las principales problemáticas que les afectan. "
+          },
+          {
+            "label": "b",
+            "text": "Elaboren un esquema con ellas. Pueden guiarse con el siguiente ejemplo."
+          }
+        ]
+      },
+      {
+        "type": "diagram",
+        "text": "Problemas que afectan a los bosques tropicales",
+        "items": [
+          {
+            "title": "",
+            "body": ""
+          },
+          {
+            "title": "",
+            "body": ""
+          },
+          {
+            "title": "",
+            "body": ""
+          },
+          {
+            "title": "",
+            "body": ""
+          }
+        ]
+      },
+      {
+        "type": "activity",
+        "text": "Actividad con docente",
+        "meta": {
+          "activityNumber": 3,
+          "activityKind": "con docente"
+        },
+        "items": [
+          {
+            "label": "a",
+            "text": "Piensen en acciones para proteger los bosques tropicales."
+          },
+          {
+            "label": "b",
+            "text": "Realicen una lluvia de ideas sobre distintas estrategias para sensibilizar a los miembros de su centro educativo y su comunidad acerca de la importancia de proteger los bosques tropicales."
+          },
+          {
+            "label": "c",
+            "text": "Escríbanlas en una tabla similar a la siguiente:"
+          }
+        ]
+      },
+      {
+        "type": "table",
+        "text": "Tabla de estrategias",
+        "meta": {
+          "headers": ["Estrategias"],
+          "isTemplate": true
+        },
+        "items": []
+      },
+      {
+        "type": "activity",
+        "text": "",
+        "meta": {
+          "activityNumber": 3,
+          "activityKind": "con docente"
+        },
+        "items": [
+          {
+            "label": "c",
+            "text": "Seleccionen tres estrategias y compartan en el pleno."
+          }
+        ]
+      }
+    ]
+  }

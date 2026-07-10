@@ -34,8 +34,15 @@ function bookChapterToJson (chapter) {
         && String(chapter.ChapterFileId).trim() !== ''
         ? String(chapter.ChapterFileId).trim()
         : undefined;
+    const txtFileId = chapter.ChapterTxtFileId
+        && String(chapter.ChapterTxtFileId).trim() !== ''
+        ? String(chapter.ChapterTxtFileId).trim()
+        : undefined;
     const chapterFileUrl = fileId
         ? getPublicBookUrlFromKey(fileId) || undefined
+        : undefined;
+    const chapterTxtFileUrl = txtFileId
+        ? getPublicBookUrlFromKey(txtFileId) || undefined
         : undefined;
     return {
         _id: chapter._id,
@@ -45,6 +52,12 @@ function bookChapterToJson (chapter) {
         ChapterEndPage: chapter.ChapterEndPage,
         ChapterFileId: fileId,
         chapterFileUrl,
+        ChapterTxtFileId: txtFileId,
+        chapterTxtFileUrl,
+        pineconeIndexName: chapter.pineconeIndexName
+            && String(chapter.pineconeIndexName).trim() !== ''
+            ? String(chapter.pineconeIndexName).trim()
+            : undefined,
     };
 }
 
@@ -90,6 +103,14 @@ function mergeBookChaptersUpdate (incoming, existing = []) {
                 || (raw.ChapterFileId
                     ? String(raw.ChapterFileId).trim()
                     : undefined),
+            ChapterTxtFileId: existingChapter?.ChapterTxtFileId
+                || (raw.ChapterTxtFileId
+                    ? String(raw.ChapterTxtFileId).trim()
+                    : undefined),
+            pineconeIndexName: existingChapter?.pineconeIndexName
+                || (raw.pineconeIndexName
+                    ? String(raw.pineconeIndexName).trim()
+                    : undefined),
         };
     });
 }
@@ -119,6 +140,11 @@ async function syncBookLessonsForSubjectChapters (subject) {
         chapterIds.push(chapter._id);
         const mainTitle = chapterMainTitle(chapter, index);
 
+        const chapterNumber = chapter.ChapterNumber ?? index + 1;
+        const chapterTitle = chapter.ChapterTitle != null
+            ? String(chapter.ChapterTitle).trim()
+            : '';
+
         await BookLessons.findOneAndUpdate(
             {
                 subject: subjectId,
@@ -128,7 +154,11 @@ async function syncBookLessonsForSubjectChapters (subject) {
                 $set: {
                     mainTitle,
                     subject: subjectId,
-                    bookChapter: { chapterId: chapter._id },
+                    bookChapter: {
+                        chapterId: chapter._id,
+                        chapterNumber,
+                        chapterTitle,
+                    },
                 },
                 $setOnInsert: {
                     dateCreated: new Date(),
@@ -1485,4 +1515,5 @@ export {
     subjectToJson,
     loadSubjectForSchoolAdmin,
     chapterMainTitle,
+    deleteChapterFileFromS3,
 };

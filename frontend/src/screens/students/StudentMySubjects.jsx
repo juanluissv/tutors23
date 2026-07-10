@@ -62,7 +62,7 @@ function StudentSubjectCardActions ({
 					</span>
 				)}
 				<Link
-					to={`/9/valores/unidad1/semana1`}
+					to={`/students/viewbook/${subjectId}`}
 					className='teacher-subject-card__btn'
 				>
 					Open book

@@ -1,11 +1,12 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import { getStudentActiveSubscription } from './subscriptionController.js';
 import { VectorStoreIndex, Settings, storageContextFromDefaults } from 'llamaindex';
-import { PineconeVectorStore } from "@llamaindex/pinecone";
-
-import { Pinecone } from "@pinecone-database/pinecone";
 import dotenv from 'dotenv';
-import { openai, OpenAIEmbedding } from '@llamaindex/openai';
+import { openai } from '@llamaindex/openai';
+import {
+	configureRagSettings,
+	createPineconeVectorStore,
+} from '../utils/ragConfig.js';
 dotenv.config()
 
 //GET /api/chat
@@ -32,22 +33,15 @@ const getChat = asyncHandler(async (req, res) => {
         apiKey: process.env.OPENAI_API_KEY // Uncomment if you want to set explicitly
     });
 
-    Settings.embedModel = new OpenAIEmbedding({
-        model: 'text-embedding-ada-002'  // This model produces exactly 1536 dimensions
-    });
+    configureRagSettings();
 
-    const pc = new Pinecone({
-        apiKey: process.env.PINECONE_API_KEY,
-      });
+    const indexName = String(id ?? '').trim();
+    if (!indexName) {
+        res.status(400);
+        throw new Error('Pinecone index id is required');
+    }
 
-      const pineconeIndex = pc.index(id);
-      //console.log(pineconeIndex);
-
-      const vectorStore = new PineconeVectorStore({
-        pineconeIndex,
-        indexName: id,
-      });
-      //console.log(vectorStore);
+    const vectorStore = createPineconeVectorStore(indexName);
 
       const storageContext = await storageContextFromDefaults({
         vectorStore,

@@ -178,6 +178,14 @@ function answerHasVideo (answer) {
   return answer?.mediaId != null && String(answer.mediaId).trim() !== ''
 }
 
+const LAPTOP_SIDEBAR_HOVER_MIN = 769
+const LAPTOP_SIDEBAR_HOVER_MAX = 1449
+
+function canExpandSidebarOnHover () {
+  const width = window.innerWidth
+  return width >= LAPTOP_SIDEBAR_HOVER_MIN && width <= LAPTOP_SIDEBAR_HOVER_MAX
+}
+
 function Sidebar ({ isOpen, toggleSidebar }) {
   const location = useLocation()
   const { studentInfo } = useSelector((state) => state.authStudent)
@@ -202,6 +210,34 @@ function Sidebar ({ isOpen, toggleSidebar }) {
 
   const [expandedValoresUnit, setExpandedValoresUnit] = useState(1)
   const [isValoresAccordionOpen, setIsValoresAccordionOpen] = useState(true)
+  const [isHoverExpanded, setIsHoverExpanded] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsHoverExpanded(false)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (!canExpandSidebarOnHover()) {
+        setIsHoverExpanded(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const handleSidebarMouseEnter = () => {
+    if (!isOpen && canExpandSidebarOnHover()) {
+      setIsHoverExpanded(true)
+    }
+  }
+
+  const handleSidebarMouseLeave = () => {
+    setIsHoverExpanded(false)
+  }
 
   useEffect(() => {
     const active = getActiveValoresUnit(location.pathname)
@@ -264,11 +300,22 @@ function Sidebar ({ isOpen, toggleSidebar }) {
       isActive || isStudentSubjectsSection ? ' sidebar-nav-link--active' : ''
     }`
 
+  const isSidebarExpanded = isOpen || isHoverExpanded
+
   return (
-    <aside
-      className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
-      aria-label="Main navigation"
+    <div
+      className={`sidebar-slot${
+        isOpen ? ' sidebar-slot--open' : ' sidebar-slot--closed'
+      }${isHoverExpanded ? ' sidebar-slot--hover-expanded' : ''}`}
     >
+      <aside
+        className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}${
+          isHoverExpanded ? ' sidebar-hover-expanded' : ''
+        }`}
+        aria-label="Main navigation"
+        onMouseEnter={handleSidebarMouseEnter}
+        onMouseLeave={handleSidebarMouseLeave}
+      >
       <div className="sidebar-header">
         <button
           type="button"
@@ -347,6 +394,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
                 </span>
               </span>
             </NavLink>
+            {isSidebarExpanded ? (
             <button
               type="button"
               className={`sidebar-valores-hub-expand${
@@ -384,6 +432,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
                 </svg>
               </span>
             </button>
+            ) : null}
           </div>
 
           <div
@@ -455,6 +504,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
 
       </div>
     </aside>
+    </div>
   )
 }
 

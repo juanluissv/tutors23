@@ -1,6 +1,10 @@
 import mongoose from 'mongoose'
 
 const lessonElementSchema = {
+	blockId: {
+		type: String,
+		required: false,
+	},
 	type: {
 		type: String,
 		required: true,
@@ -52,6 +56,7 @@ const lessonElementSchema = {
 		chartKind: { type: String, required: false },
 		unit: { type: String, required: false },
 		headers: { type: [String], required: false },
+		isTemplate: { type: Boolean, required: false },
 	},
 }
 
@@ -82,9 +87,25 @@ const bookLessonsSchema = mongoose.Schema({
 		required: true,
 		ref: 'Subject',
 	},
+	chapterVideoFileId: {
+		type: String,
+		required: false,
+	},
+	chapterTranscribeFileId: {
+		type: String,
+		required: false,
+	},
 	bookChapter: {
 		chapterId: {
 			type: mongoose.Schema.Types.ObjectId,
+			required: false,
+		},
+		chapterNumber: {
+			type: Number,
+			required: false,
+		},
+		chapterTitle: {
+			type: String,
 			required: false,
 		},
 	},

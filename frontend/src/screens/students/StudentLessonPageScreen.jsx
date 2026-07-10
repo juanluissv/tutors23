@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Sidebar from '../../components/Sidebar'
@@ -82,6 +82,8 @@ function LessonElement ({ element, activityNumber }) {
 	const text = element?.text ? String(element.text).trim() : ''
 	const items = Array.isArray(element?.items) ? element.items : []
 	const meta = element?.meta || {}
+	const blockId = element?.blockId ? String(element.blockId) : ''
+	const blockProps = blockId ? { 'data-block-id': blockId } : {}
 
 	if (!text && items.length === 0) {
 		return null
@@ -89,19 +91,39 @@ function LessonElement ({ element, activityNumber }) {
 
 	switch (type) {
 	case 'eyebrow':
-		return <p className='lesson-doc__section-title'>{text}</p>
+		return (
+			<p className='lesson-doc__section-title' {...blockProps}>
+				{text}
+			</p>
+		)
 	case 'h1':
 	case 'h2':
-		return <h2 className='lesson-doc__h2'>{text}</h2>
+		return (
+			<h2 className='lesson-doc__h2' {...blockProps}>
+				{text}
+			</h2>
+		)
 	case 'h3':
-		return <h3 className='lesson-doc__h3'>{text}</h3>
+		return (
+			<h3 className='lesson-doc__h3' {...blockProps}>
+				{text}
+			</h3>
+		)
 	case 'h4':
-		return <h4 className='lesson-doc__h4'>{text}</h4>
+		return (
+			<h4 className='lesson-doc__h4' {...blockProps}>
+				{text}
+			</h4>
+		)
 	case 'h5':
-		return <h5 className='lesson-doc__h5'>{text}</h5>
+		return (
+			<h5 className='lesson-doc__h5' {...blockProps}>
+				{text}
+			</h5>
+		)
 	case 'objectives':
 		return (
-			<div className='lesson-doc__callout'>
+			<div className='lesson-doc__callout' {...blockProps}>
 				<p className='lesson-doc__callout-kicker'>
 					<LeafIcon size={13} />
 					{text || 'En esta unidad aprenderemos a:'}
@@ -120,6 +142,7 @@ function LessonElement ({ element, activityNumber }) {
 		const variant = phaseVariant(text)
 		return (
 			<div
+				{...blockProps}
 				className={
 					'lesson-doc__phase'
 					+ (variant ? ` lesson-doc__phase--${variant}` : '')
@@ -141,6 +164,7 @@ function LessonElement ({ element, activityNumber }) {
 
 		return (
 			<div
+				{...blockProps}
 				className={
 					'lesson-doc__activity'
 					+ (variant ? ` lesson-doc__activity--${variant}` : '')
@@ -179,7 +203,7 @@ function LessonElement ({ element, activityNumber }) {
 	}
 	case 'doc':
 		return (
-			<div className='lesson-doc__doc'>
+			<div className='lesson-doc__doc' {...blockProps}>
 				<div className='lesson-doc__doc-head'>
 					<span className='lesson-doc__doc-chip'>
 						{meta.docNumber ? `Doc. ${meta.docNumber}` : 'Doc.'}
@@ -203,7 +227,10 @@ function LessonElement ({ element, activityNumber }) {
 	case 'info': {
 		const variant = calloutVariant(text)
 		return (
-			<div className={`lesson-doc__callout lesson-doc__callout--${variant}`}>
+			<div
+				className={`lesson-doc__callout lesson-doc__callout--${variant}`}
+				{...blockProps}
+			>
 				<p className='lesson-doc__callout-kicker'>
 					<LeafIcon size={13} />
 					{text}
@@ -221,7 +248,7 @@ function LessonElement ({ element, activityNumber }) {
 	}
 	case 'glossary':
 		return (
-			<div>
+			<div {...blockProps}>
 				<p className='lesson-doc__section-title'>
 					{text || 'Glosario'}
 				</p>
@@ -246,7 +273,7 @@ function LessonElement ({ element, activityNumber }) {
 		)
 	case 'profundizacion':
 		return (
-			<div>
+			<div {...blockProps}>
 				<p className='lesson-doc__section-title'>
 					{text || 'Profundización'}
 				</p>
@@ -271,7 +298,7 @@ function LessonElement ({ element, activityNumber }) {
 		)
 	case 'numberedList':
 		return (
-			<ul className='lesson-doc__numbered'>
+			<ul className='lesson-doc__numbered' {...blockProps}>
 				{items.map((item, itemIndex) => (
 					<li
 						key={`num-${itemIndex}`}
@@ -290,7 +317,7 @@ function LessonElement ({ element, activityNumber }) {
 		)
 	case 'bulletList':
 		return (
-			<ul className='lesson-doc__list'>
+			<ul className='lesson-doc__list' {...blockProps}>
 				{items.map((item, itemIndex) => (
 					<li key={`bul-${itemIndex}`}>
 						{item.title ? (
@@ -307,7 +334,7 @@ function LessonElement ({ element, activityNumber }) {
 		)
 	case 'diagram':
 		return (
-			<div className='lesson-doc__diagram'>
+			<div className='lesson-doc__diagram' {...blockProps}>
 				{text ? (
 					<div className='lesson-doc__diagram-root'>{text}</div>
 				) : null}
@@ -334,32 +361,45 @@ function LessonElement ({ element, activityNumber }) {
 		)
 	case 'map':
 		return (
-			<div className='lesson-doc__map'>
+			<div className='lesson-doc__map' {...blockProps}>
 				{text ? (
 					<p className='lesson-doc__section-title'>{text}</p>
 				) : null}
 				<div className='lesson-doc__grid'>
-					{items.map((item, itemIndex) => (
-						<div
-							key={`mp-${itemIndex}`}
-							className='lesson-doc__term'
-						>
-							{item.title ? (
-								<p className='lesson-doc__term-title'>
+					{items.map((item, itemIndex) => {
+						const body = item.body || item.text
+						if (!body) {
+							return (
+								<span
+									key={`mp-${itemIndex}`}
+									className='lesson-doc__map-label'
+								>
 									{item.title}
+								</span>
+							)
+						}
+						return (
+							<div
+								key={`mp-${itemIndex}`}
+								className='lesson-doc__term'
+							>
+								{item.title ? (
+									<p className='lesson-doc__term-title'>
+										{item.title}
+									</p>
+								) : null}
+								<p className='lesson-doc__term-text'>
+									{body}
 								</p>
-							) : null}
-							<p className='lesson-doc__term-text'>
-								{item.body || item.text}
-							</p>
-						</div>
-					))}
+							</div>
+						)
+					})}
 				</div>
 			</div>
 		)
 	case 'figure':
 		return (
-			<div className='lesson-doc__figure'>
+			<div className='lesson-doc__figure' {...blockProps}>
 				{text ? (
 					<p className='lesson-doc__figure-caption'>{text}</p>
 				) : null}
@@ -382,7 +422,7 @@ function LessonElement ({ element, activityNumber }) {
 		)
 	case 'chips':
 		return (
-			<div className='lesson-doc__chips'>
+			<div className='lesson-doc__chips' {...blockProps}>
 				{items.map((item, itemIndex) => (
 					<span key={`chip-${itemIndex}`} className='lesson-doc__chip'>
 						{item.text}
@@ -392,12 +432,24 @@ function LessonElement ({ element, activityNumber }) {
 		)
 	case 'table': {
 		const headers = Array.isArray(meta.headers) ? meta.headers : []
+		const isTemplate = meta.isTemplate === true
+		const rows = items.length > 0
+			? items
+			: (isTemplate && headers.length > 0
+				? [{ cells: headers.map(() => '') }]
+				: [])
+
 		return (
-			<div className='lesson-doc__table-wrap'>
+			<div className='lesson-doc__table-wrap' {...blockProps}>
 				{text ? (
 					<p className='lesson-doc__table-caption'>{text}</p>
 				) : null}
-				<table className='lesson-doc__table'>
+				<table
+					className={
+						'lesson-doc__table'
+						+ (isTemplate ? ' lesson-doc__table--template' : '')
+					}
+				>
 					{headers.length > 0 ? (
 						<thead>
 							<tr>
@@ -408,7 +460,7 @@ function LessonElement ({ element, activityNumber }) {
 						</thead>
 					) : null}
 					<tbody>
-						{items.map((item, rowIndex) => {
+						{rows.map((item, rowIndex) => {
 							const cells = Array.isArray(item.cells)
 								? item.cells
 								: []
@@ -416,7 +468,7 @@ function LessonElement ({ element, activityNumber }) {
 								<tr key={`tr-${rowIndex}`}>
 									{cells.map((cell, cellIndex) => (
 										<td key={`td-${rowIndex}-${cellIndex}`}>
-											{cell || '—'}
+											{cell || (isTemplate ? '\u00a0' : '—')}
 										</td>
 									))}
 								</tr>
@@ -459,7 +511,7 @@ function LessonElement ({ element, activityNumber }) {
 			.join(', ')
 
 		return (
-			<div className='lesson-doc__chart'>
+			<div className='lesson-doc__chart' {...blockProps}>
 				{isDonut ? (
 					<div
 						className='lesson-doc__chart-donut'
@@ -520,8 +572,173 @@ function LessonElement ({ element, activityNumber }) {
 		)
 	}
 	default:
-		return <p className='lesson-doc__p'>{text}</p>
+		return (
+			<p className='lesson-doc__p' {...blockProps}>
+				{text}
+			</p>
+		)
 	}
+}
+
+const BLOCK_ID_RE = /^[bh]\d+$/
+
+function parseVTT (vttText) {
+	const lines = vttText.split('\n')
+	const cues = []
+	let i = 0
+
+	while (i < lines.length) {
+		const line = lines[i].trim()
+
+		if (line === '' || line === 'WEBVTT' || /^NOTE\b/i.test(line)) {
+			i++
+			continue
+		}
+
+		let blockId = ''
+		let timestampLine = line
+
+		if (!line.includes('-->')) {
+			if (BLOCK_ID_RE.test(line)) {
+				blockId = line
+				i++
+				if (i >= lines.length) {
+					break
+				}
+				timestampLine = lines[i].trim()
+			} else if (/^\d+$/.test(line)) {
+				i++
+				if (i >= lines.length) {
+					break
+				}
+				timestampLine = lines[i].trim()
+			}
+		}
+
+		if (!timestampLine.includes('-->')) {
+			i++
+			continue
+		}
+
+		const [startTime, endTime] = timestampLine.split('-->')
+			.map((t) => t.trim())
+		const start = parseVttTime(startTime)
+		const end = parseVttTime(endTime)
+
+		i++
+		let text = ''
+		while (
+			i < lines.length
+			&& lines[i].trim() !== ''
+			&& !lines[i].includes('-->')
+		) {
+			const nextLine = lines[i].trim()
+			if (!BLOCK_ID_RE.test(nextLine) && !/^\d+$/.test(nextLine)) {
+				text += `${nextLine} `
+			}
+			i++
+		}
+
+		cues.push({
+			start,
+			end,
+			text: text.trim(),
+			blockId,
+		})
+	}
+
+	return cues
+}
+
+function parseVttTime (timeString) {
+	const parts = timeString.split(':')
+	if (parts.length === 3) {
+		const hours = parseFloat(parts[0])
+		const minutes = parseFloat(parts[1])
+		const seconds = parseFloat(parts[2])
+		return hours * 3600 + minutes * 60 + seconds
+	}
+	return 0
+}
+
+// Lesson elements that can be highlighted while the tutor video plays. We keep
+// this list broad so cues that map to headings, activities, callouts, lists,
+// glossary terms, etc. can also light up, not just plain paragraphs.
+const LESSON_TEXT_SELECTOR = [
+	'.lesson-doc__p',
+	'.lesson-doc__h2',
+	'.lesson-doc__h3',
+	'.lesson-doc__h4',
+	'.lesson-doc__h5',
+	'.lesson-doc__section-title',
+	'.lesson-doc__phase',
+	'.lesson-doc__callout-kicker',
+	'.lesson-doc__callout-text',
+	'.lesson-doc__doc-title',
+	'.lesson-doc__doc-text',
+	'.lesson-doc__activity-title',
+	'.lesson-doc__activity-body p',
+	'.lesson-doc__list li',
+	'.lesson-doc__numbered-text',
+	'.lesson-doc__term-title',
+	'.lesson-doc__term-text',
+	'.lesson-doc__figure-caption',
+	'.lesson-doc__figure-text',
+	'.lesson-doc__diagram-box-text',
+	'.lesson-doc__table-caption',
+].join(', ')
+
+// Very common Spanish words that add noise when matching a transcript cue to a
+// lesson block. Stripping them makes the overlap score reflect meaningful words.
+const MATCH_STOP_WORDS = new Set([
+	'de', 'la', 'el', 'en', 'los', 'las', 'un', 'una', 'unos', 'unas',
+	'que', 'por', 'con', 'del', 'sus', 'como', 'para', 'mas', 'muy',
+	'este', 'esta', 'estos', 'estas', 'ese', 'esa', 'sobre', 'entre',
+])
+
+// Lowercase, drop accents/diacritics and punctuation so that transcript text
+// (which may differ in punctuation or accents from the generated lesson text)
+// still lines up with the rendered content.
+function normalizeForMatch (text) {
+	return String(text || '')
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.replace(/[^a-z0-9\s]/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim()
+}
+
+function tokenizeForMatch (text) {
+	return normalizeForMatch(text)
+		.split(' ')
+		.filter((word) => word.length > 2 && !MATCH_STOP_WORDS.has(word))
+}
+
+// --- Matching tuning knobs -------------------------------------------------
+// Weighted share of a cue's distinctive words that must appear in a block for
+// it to count as a hit.
+const MATCH_SCORE_THRESHOLD = 0.6
+// Minimum distinctive "signal" a cue must carry to be placed at all. Cues made
+// only of generic, repeated words (e.g. "Actividad en pares") fall below this
+// and are intentionally ignored so the highlight doesn't jump around.
+const MIN_CUE_SIGNAL = 1.5
+// The winning block must beat the runner-up by at least this much weighted
+// signal, otherwise the cue is considered ambiguous (repeated text) and skipped.
+const MATCH_MARGIN = 0.75
+// Small continuity bonus so that, when scores are close, we prefer the block
+// nearest to (and ahead of) the one currently highlighted — video plays in
+// reading order, it should not leap back to the top of the page.
+const POSITION_BONUS_MAX = 0.4
+const POSITION_BONUS_SPAN = 6
+const LAPTOP_SIDEBAR_EXPAND_BREAKPOINT = 1450
+
+function getInitialSidebarOpen (isSchoolAdminView) {
+	const width = window.innerWidth
+	if (isSchoolAdminView) {
+		return width > 768
+	}
+	return width >= LAPTOP_SIDEBAR_EXPAND_BREAKPOINT
 }
 
 function StudentLessonPageScreen () {
@@ -530,15 +747,54 @@ function StudentLessonPageScreen () {
 	const { studentInfo } = useSelector((state) => state.authStudent)
 	const { schoolAdminInfo } = useSelector((state) => state.authSchoolAdmin)
 	const isSchoolAdminView = Boolean(subjectId)
-	const [isSidebarOpen, setIsSidebarOpen] = useState(
-		window.innerWidth > 768,
+	const [isSidebarOpen, setIsSidebarOpen] = useState(() =>
+		getInitialSidebarOpen(isSchoolAdminView),
 	)
+	const [allCues, setAllCues] = useState([])
+	const [videoLoading, setVideoLoading] = useState(true)
+	const [isClassVideoPlaying, setIsClassVideoPlaying] = useState(false)
+	const [questionText, setQuestionText] = useState('')
+
+	const contentRef = useRef(null)
+	const classVideoRef = useRef(null)
+	const questionTextareaRef = useRef(null)
+	// Cached, tokenized snapshot of the highlightable lesson blocks.
+	const matchIndexRef = useRef({ entries: [], idf: new Map() })
+	// The element currently highlighted and the cue text that produced it,
+	// tracked via refs so rapid timeupdate events never race React state.
+	const activeElementRef = useRef(null)
+	// DOM/reading order of the currently highlighted block, used to bias the
+	// next match forward and keep the read-along moving in sequence.
+	const activeOrderRef = useRef(-1)
+	const lastCueKeyRef = useRef('')
 
 	useEffect(() => {
 		if (isSchoolAdminView && !schoolAdminInfo) {
 			navigate('/schooladmins/login', { replace: true })
 		}
 	}, [isSchoolAdminView, schoolAdminInfo, navigate])
+
+	useEffect(() => {
+		const handleResize = () => {
+			const width = window.innerWidth
+
+			if (isSchoolAdminView) {
+				if (width > 768) {
+					setIsSidebarOpen(true)
+				}
+				return
+			}
+
+			if (width >= LAPTOP_SIDEBAR_EXPAND_BREAKPOINT) {
+				setIsSidebarOpen(true)
+			} else if (width > 768) {
+				setIsSidebarOpen(false)
+			}
+		}
+
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [isSchoolAdminView])
 
 	const {
 		data: studentLesson,
@@ -548,6 +804,7 @@ function StudentLessonPageScreen () {
 	} = useGetBookLessonByIdQuery(lessonId, {
 		skip: !lessonId || !studentInfo || isSchoolAdminView,
 	})
+
 
 	const {
 		data: schoolAdminLesson,
@@ -566,7 +823,328 @@ function StudentLessonPageScreen () {
 	const isError = isSchoolAdminView ? isSchoolAdminError : isStudentError
 	const error = isSchoolAdminView ? schoolAdminError : studentError
 
-	console.log(lesson?.content)
+	const chapterVideoUrl = lesson?.chapterVideoFileUrl
+		? String(lesson.chapterVideoFileUrl).trim()
+		: ''
+	const hasTutorVideo = chapterVideoUrl !== ''
+	const hasTutorTranscribe = Boolean(
+		lesson?.chapterTranscribeFileId || lesson?.chapterTranscribeFileUrl,
+	)
+	const chapterTranscribeUrl = useMemo(() => {
+		if (!lessonId || !hasTutorTranscribe) {
+			return ''
+		}
+		if (isSchoolAdminView && subjectId) {
+			return `/api/subjects/${subjectId}/book-lessons/${lessonId}/transcribe`
+		}
+		return `/api/book-lessons/${lessonId}/transcribe`
+	}, [lessonId, subjectId, isSchoolAdminView, hasTutorTranscribe])
+
+	useEffect(() => {
+		if (!chapterTranscribeUrl) {
+			setAllCues([])
+			return
+		}
+
+		let cancelled = false
+
+		const loadVTT = async () => {
+			try {
+				const response = await fetch(chapterTranscribeUrl, {
+					credentials: 'include',
+				})
+				if (!response.ok) {
+					throw new Error(`Transcript request failed (${response.status})`)
+				}
+				const vttText = await response.text()
+				const cues = parseVTT(vttText)
+				const filteredCues = cues.filter((cue) => (
+					!cue.text.includes('TurboScribe')
+					&& !cue.text.includes('Go Unlimited')
+				))
+
+				if (!cancelled) {
+					setAllCues(filteredCues)
+				}
+			} catch (loadError) {
+				console.error('Error loading VTT:', loadError)
+				if (!cancelled) {
+					setAllCues([])
+				}
+			}
+		}
+
+		loadVTT()
+
+		return () => {
+			cancelled = true
+		}
+	}, [chapterTranscribeUrl])
+
+	// Build a tokenized snapshot of every highlightable lesson block once the
+	// content is on screen. Matching against this cached index keeps the
+	// per-frame timeupdate work cheap (no repeated DOM reads / normalization).
+	const buildMatchIndex = useCallback(() => {
+		if (!contentRef.current) {
+			matchIndexRef.current = { entries: [], idf: new Map() }
+			return
+		}
+
+		const blockNodes = contentRef.current.querySelectorAll('[data-block-id]')
+		const nodes = blockNodes.length > 0
+			? blockNodes
+			: contentRef.current.querySelectorAll(LESSON_TEXT_SELECTOR)
+		const entries = []
+		// Document frequency: how many blocks each token appears in. Words that
+		// show up in many blocks (actividad, bosques, tropicales…) are common
+		// noise; words in few blocks are distinctive and disambiguate.
+		const docFreq = new Map()
+
+		nodes.forEach((element, order) => {
+			const tokens = tokenizeForMatch(element.textContent)
+			if (tokens.length === 0) {
+				return
+			}
+			const tokenSet = new Set(tokens)
+			entries.push({ element, tokenSet, order: entries.length })
+			// count each distinct token once per block
+			tokenSet.forEach((token) => {
+				docFreq.set(token, (docFreq.get(token) || 0) + 1)
+			})
+		})
+
+		// Inverse document frequency. A token present in every block gets a
+		// weight of 0 (log(1)); rarer tokens get progressively higher weight.
+		const total = entries.length || 1
+		const idf = new Map()
+		docFreq.forEach((freq, token) => {
+			idf.set(token, Math.log(total / freq))
+		})
+
+		matchIndexRef.current = { entries, idf }
+	}, [])
+
+	// Rebuild the highlight index whenever the rendered lesson changes. Runs
+	// after commit, so contentRef already holds the freshly rendered blocks.
+	useEffect(() => {
+		buildMatchIndex()
+		activeElementRef.current = null
+		activeOrderRef.current = -1
+		lastCueKeyRef.current = ''
+	}, [lesson, buildMatchIndex])
+
+	const applyHighlight = (element, order = -1) => {
+		if (!element || element === activeElementRef.current) {
+			return
+		}
+
+		clearHighlights()
+		element.classList.add('karaoke-active')
+		element.scrollIntoView({
+			behavior: 'smooth',
+			block: 'center',
+		})
+		activeElementRef.current = element
+		if (order >= 0) {
+			activeOrderRef.current = order
+		}
+	}
+
+	const clearHighlights = () => {
+		if (!contentRef.current) {
+			return
+		}
+		const highlighted = contentRef.current.querySelectorAll('.karaoke-active')
+		highlighted.forEach((el) => el.classList.remove('karaoke-active'))
+	}
+
+	// Find the lesson block that best matches a transcript cue.
+	//
+	// Robust against three sources of false positives:
+	//  1. Weighting  — each cue word contributes its IDF weight, so distinctive
+	//     words drive the match and generic/repeated words (actividad, bosques…)
+	//     count for almost nothing.
+	//  2. Signal gate — a cue must carry enough distinctive weight to be placed
+	//     at all; purely generic cues ("Actividad en pares") are skipped.
+	//  3. Uniqueness — the winner must clearly beat the runner-up, otherwise the
+	//     cue is ambiguous (its text is repeated across the lesson) and skipped.
+	// A small forward-position bonus breaks near-ties toward reading order so the
+	// highlight advances instead of leaping back up the page.
+	const findBestMatch = (cueText) => {
+		const index = matchIndexRef.current
+		const entries = index?.entries
+		const idf = index?.idf
+		if (!entries || entries.length === 0) {
+			return null
+		}
+
+		// Distinct cue tokens + the cue's total distinctive weight.
+		const cueTokens = new Set(tokenizeForMatch(cueText))
+		if (cueTokens.size === 0) {
+			return null
+		}
+
+		let cueWeight = 0
+		cueTokens.forEach((token) => {
+			cueWeight += idf.get(token) || 0
+		})
+
+		// The cue is only generic, repeated words → nothing reliable to anchor
+		// on. Keep the previous highlight rather than guessing.
+		if (cueWeight < MIN_CUE_SIGNAL) {
+			return null
+		}
+
+		const currentOrder = activeOrderRef.current
+
+		let best = null
+		let bestScore = 0
+		let secondSignal = 0
+		let bestSignal = 0
+
+		for (const entry of entries) {
+			let matchedWeight = 0
+			cueTokens.forEach((token) => {
+				if (entry.tokenSet.has(token)) {
+					matchedWeight += idf.get(token) || 0
+				}
+			})
+			if (matchedWeight === 0) {
+				continue
+			}
+
+			const coverage = matchedWeight / cueWeight
+
+			// Continuity bonus: prefer blocks at or just ahead of the current
+			// position; decays with distance and never applies to backward jumps.
+			let positionBonus = 0
+			if (currentOrder >= 0 && entry.order >= currentOrder) {
+				const distance = entry.order - currentOrder
+				positionBonus =
+					POSITION_BONUS_MAX
+					* Math.max(0, 1 - distance / POSITION_BONUS_SPAN)
+			}
+
+			const score = coverage + positionBonus
+
+			if (score > bestScore) {
+				secondSignal = bestSignal
+				bestScore = score
+				bestSignal = matchedWeight
+				best = entry
+			} else if (matchedWeight > secondSignal) {
+				secondSignal = matchedWeight
+			}
+		}
+
+		if (!best) {
+			return null
+		}
+
+		// Reject weak coverage and ambiguous ties (text repeated elsewhere).
+		if (bestScore < MATCH_SCORE_THRESHOLD) {
+			return null
+		}
+		if (bestSignal - secondSignal < MATCH_MARGIN) {
+			return null
+		}
+
+		return best
+	}
+
+	const handleTimeUpdate = (currentTime) => {
+		if (allCues.length === 0) {
+			return
+		}
+
+		const currentCue = allCues.find(
+			(cue) => currentTime >= cue.start && currentTime < cue.end,
+		)
+
+		// Between cues (or no active cue): keep the last highlight so the
+		// read-along doesn't flicker off during natural pauses in narration.
+		if (!currentCue) {
+			return
+		}
+
+		const cueKey = currentCue.blockId
+			? `${currentCue.start}:${currentCue.blockId}`
+			: `${currentCue.start}:${currentCue.text}`
+
+		if (cueKey === lastCueKeyRef.current) {
+			return
+		}
+		lastCueKeyRef.current = cueKey
+
+		if (currentCue.blockId && contentRef.current) {
+			const anchored = contentRef.current.querySelector(
+				`[data-block-id="${currentCue.blockId}"]`,
+			)
+			if (anchored) {
+				applyHighlight(anchored)
+				return
+			}
+		}
+
+		const match = findBestMatch(currentCue.text)
+
+		// No confident match for this cue: leave the previous highlight in
+		// place rather than clearing it, so the reader always has a cursor.
+		if (!match) {
+			return
+		}
+
+		applyHighlight(match.element, match.order)
+	}
+
+	const handleClassVideoToggle = () => {
+		if (!classVideoRef.current) {
+			return
+		}
+
+		if (classVideoRef.current.paused || classVideoRef.current.ended) {
+			classVideoRef.current.play()
+			setIsClassVideoPlaying(true)
+		} else {
+			classVideoRef.current.pause()
+			setIsClassVideoPlaying(false)
+		}
+	}
+
+	const adjustQuestionTextareaHeight = (el) => {
+		if (!el) {
+			return
+		}
+		el.style.height = 'auto'
+		const minH = 52
+		const maxH = 200
+		el.style.height = `${Math.min(Math.max(el.scrollHeight, minH), maxH)}px`
+	}
+
+	const handleQuestionChange = (e) => {
+		setQuestionText(e.target.value)
+		adjustQuestionTextareaHeight(e.target)
+	}
+
+	const handleSendQuestion = () => {
+		if (!questionText.trim()) {
+			return
+		}
+
+		if (classVideoRef.current) {
+			classVideoRef.current.pause()
+			setIsClassVideoPlaying(false)
+		}
+
+		const params = new URLSearchParams()
+		params.set('query', questionText.trim())
+
+		window.open(`/?${params.toString()}`, '_blank')
+		setQuestionText('')
+		if (questionTextareaRef.current) {
+			questionTextareaRef.current.style.height = '52px'
+		}
+	}
 
 	// Split the flat element stream into "paper sheets", starting a new sheet
 	// at every learning phase (Exploración, Profundización, …) just like the
@@ -604,8 +1182,10 @@ function StudentLessonPageScreen () {
 	}
 
 	const backPath = isSchoolAdminView
-		? `/schooladmins/generatelessons/${subjectId}`
-		: null
+		? `/schooladmins/viewbook/${subjectId}`
+		: (lesson?.subject?._id
+			? `/students/viewbook/${lesson.subject._id}`
+			: null)
 
 	const renderShell = (children) => (
 		<div className='chat-app chat-app--lesson-doc'>
@@ -619,7 +1199,10 @@ function StudentLessonPageScreen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area content-area--book-lesson'>
+					<div
+						className='content-area content-area--book-lesson'
+						ref={contentRef}
+					>
 						<div className='lesson-doc'>{children}</div>
 					</div>
 				</div>
@@ -670,7 +1253,7 @@ function StudentLessonPageScreen () {
 						navigate(-1)
 					}}
 				>
-					{backPath ? 'Volver a generar lecciones' : 'Volver'}
+					{backPath ? 'Volver al índice del libro' : 'Volver'}
 				</button>
 			</div>,
 		)
@@ -721,21 +1304,35 @@ function StudentLessonPageScreen () {
 				{/* ---------- Cover ---------- */}
 				<section className='lesson-doc__sheet lesson-doc__cover'>
 					<span className='lesson-doc__page-num'>1 / {totalSheets}</span>
-					<span className='lesson-doc__unit'>
+					<span
+						className='lesson-doc__unit'
+						data-block-id='h0'
+					>
 						<LeafIcon size={14} />
 						{mainTitle}
 					</span>
 					{subjectLabel ? (
 						<p className='lesson-doc__cover-eyebrow'>{subjectLabel}</p>
 					) : null}
-					<h1 className='lesson-doc__title'>
+					<h1
+						className='lesson-doc__title'
+						data-block-id='h1'
+					>
 						{unitTheme || mainTitle}
 					</h1>
 					{heroSubtitle ? (
-						<p className='lesson-doc__subtitle'>{heroSubtitle}</p>
+						<p
+							className='lesson-doc__subtitle'
+							data-block-id='h2'
+						>
+							{heroSubtitle}
+						</p>
 					) : null}
 					{objectivesText ? (
-						<div className='lesson-doc__objectives'>
+						<div
+							className='lesson-doc__objectives'
+							data-block-id='h3'
+						>
 							<p className='lesson-doc__objectives-label'>
 								En esta unidad aprenderemos a:
 							</p>
@@ -783,6 +1380,123 @@ function StudentLessonPageScreen () {
 			<p className='lesson-doc__footer'>
 				Reproducción web del material de estudio · {folioLabel}
 			</p>
+
+			{hasTutorVideo ? (
+				<div className='fixed-video-bottom-right lesson-doc-tutor-video'>
+					<div className='fixed-video-controls'>
+						<button
+							type='button'
+							className='fixed-video-button'
+							onClick={handleClassVideoToggle}
+							title={
+								isClassVideoPlaying
+									? 'Pausar video'
+									: 'Reproducir video'
+							}
+						>
+							{isClassVideoPlaying ? (
+								<svg
+									width='20'
+									height='20'
+									viewBox='0 0 24 24'
+									fill='none'
+									stroke='currentColor'
+									strokeWidth='2'
+									strokeLinecap='round'
+									strokeLinejoin='round'
+								>
+									<rect x='6' y='4' width='4' height='16' />
+									<rect x='14' y='4' width='4' height='16' />
+								</svg>
+							) : (
+								<svg
+									width='20'
+									height='20'
+									viewBox='0 0 24 24'
+									fill='none'
+									stroke='currentColor'
+									strokeWidth='2'
+									strokeLinecap='round'
+									strokeLinejoin='round'
+								>
+									<polygon points='5 3 19 12 5 21 5 3' />
+								</svg>
+							)}
+						</button>
+					</div>
+					<div className='lesson-doc-tutor-circle-shell'>
+						<div className='fixed-video-wrapper'>
+							{videoLoading ? (
+								<div className='fixed-video-loading-overlay'>
+									<svg
+										width='28'
+										height='28'
+										viewBox='0 0 24 24'
+										fill='none'
+										stroke='#ffffff'
+										strokeWidth='2'
+										className='audio-loading-spinner'
+									>
+										<circle
+											cx='12'
+											cy='12'
+											r='10'
+											strokeOpacity='0.25'
+										/>
+										<path
+											d='M12 2a10 10 0 0 1 10 10'
+											strokeLinecap='round'
+										/>
+									</svg>
+								</div>
+							) : null}
+							<video
+								ref={classVideoRef}
+								src={chapterVideoUrl}
+								controls={false}
+								onLoadedData={() => setVideoLoading(false)}
+								onLoadStart={() => setVideoLoading(true)}
+								onError={() => setVideoLoading(false)}
+								onPlay={() => setIsClassVideoPlaying(true)}
+								onPause={() => setIsClassVideoPlaying(false)}
+								onTimeUpdate={(e) => (
+									handleTimeUpdate(e.target.currentTime)
+								)}
+							/>
+						</div>
+					</div>
+					<div className='fixed-video-question-wrap lesson-doc-tutor-question-wrap'>
+						<textarea
+							ref={questionTextareaRef}
+							rows={2}
+							className='fixed-video-question-input lesson-doc-tutor-question-input'
+							placeholder={'Hazme una\npregunta'}
+							value={questionText}
+							onChange={handleQuestionChange}
+						/>
+						<button
+							type='button'
+							className='fixed-video-question-send lesson-doc-tutor-question-send'
+							onClick={handleSendQuestion}
+							aria-label='Enviar pregunta'
+						>
+							<svg
+								width='16'
+								height='16'
+								viewBox='0 0 24 24'
+								fill='none'
+								stroke='currentColor'
+								strokeWidth='2'
+								strokeLinecap='round'
+								strokeLinejoin='round'
+							>
+								<line x1='22' y1='2' x2='11' y2='13' />
+								<polygon points='22 2 15 22 11 13 2 9 22 2' />
+							</svg>
+						</button>
+					</div>
+				</div>
+			) : null}
 		</>,
 	)
 }

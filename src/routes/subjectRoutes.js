@@ -18,10 +18,16 @@ import {
     addSubjectStudentEmailForTeacher,
     setSubjectTeacherEmail,
 } from '../controllers/subjectController.js';
+import { parseChapterTutorVideo } from '../middleware/chapterTutorVideoUpload.js';
+import { parseChapterTutorTranscribe } from '../middleware/chapterTutorTranscribeUpload.js';
 import {
     generateBookLessonsFromChapter,
+    generateChapterTutorTxtFromLesson,
     getBookLessonsBySubject,
     getBookLessonByIdForSchoolAdmin,
+    getBookLessonTranscribeForSchoolAdmin,
+    uploadChapterTutorVideo,
+    uploadChapterTutorTranscribe,
 } from '../controllers/bookLessonsController.js';
 
 const router = express.Router();
@@ -81,10 +87,36 @@ router.post(
     generateBookLessonsFromChapter,
 );
 
+router.post(
+    '/:id/book-chapters/:chapterId/generate-tutor-txt',
+    protectSchoolAdmin,
+    generateChapterTutorTxtFromLesson,
+);
+
+router.put(
+    '/:id/book-chapters/:chapterId/tutor-video',
+    protectSchoolAdmin,
+    parseChapterTutorVideo,
+    uploadChapterTutorVideo,
+);
+
+router.put(
+    '/:id/book-chapters/:chapterId/tutor-transcribe',
+    protectSchoolAdmin,
+    parseChapterTutorTranscribe,
+    uploadChapterTutorTranscribe,
+);
+
 router.get(
     '/:id/book-lessons',
     protectSchoolAdmin,
     getBookLessonsBySubject,
+);
+
+router.get(
+    '/:id/book-lessons/:lessonId/transcribe',
+    protectSchoolAdmin,
+    getBookLessonTranscribeForSchoolAdmin,
 );
 
 router.get(
