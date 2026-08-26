@@ -13,6 +13,12 @@ import {
 	normalizeGradeLevels,
 	subjectIncludesGradeLevel,
 } from '../../utils/gradeLevel'
+import {
+	getSubjectProgramsLabel,
+	normalizeUniversityPrograms,
+	subjectIncludesProgram,
+} from '../../utils/universityProgram'
+import { isUniversitySchool } from '../../utils/schoolType'
 import '../../App.css'
 
 const GradCapIcon = () => (
@@ -153,7 +159,7 @@ function SchoolAdminMySubjectsScreen () {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
 	)
-	const [selectedGradeLevelId, setSelectedGradeLevelId] = useState('')
+	const [selectedCohortId, setSelectedCohortId] = useState('')
 
 	const {
 		data: subjects = [],
@@ -179,7 +185,10 @@ function SchoolAdminMySubjectsScreen () {
 	})
 
 	const gradesLevels = normalizeGradeLevels(schoolData?.gradesLevels)
-	const hasGradeLevels = gradesLevels.length > 0
+	const programs = normalizeUniversityPrograms(schoolData?.programs)
+	const isUniversity = isUniversitySchool(schoolData?.schoolType)
+	const cohorts = isUniversity ? programs : gradesLevels
+	const hasCohorts = cohorts.length > 0
 	const teachersList = useMemo(
 		() => (Array.isArray(teachers) ? teachers : []),
 		[teachers],
@@ -195,46 +204,50 @@ function SchoolAdminMySubjectsScreen () {
 		return map
 	}, [teachersList])
 	const hasTeachers = teachersList.length > 0
-	const canAddSubject = hasGradeLevels && hasTeachers
+	const canAddSubject = hasCohorts && hasTeachers
 	const isPageLoading = isLoading || isLoadingSchool || isLoadingTeachers
 	const subjectsList = useMemo(
 		() => (Array.isArray(subjects) ? subjects : []),
 		[subjects],
 	)
 	const filteredSubjects = useMemo(() => {
-		if (selectedGradeLevelId === '') {
+		if (selectedCohortId === '') {
 			return subjectsList
 		}
-		const selectedLevel = gradesLevels.find(
-			(level) => String(level._id) === selectedGradeLevelId,
+		const selectedCohort = cohorts.find(
+			(item) => String(item._id) === selectedCohortId,
 		)
-		if (!selectedLevel) {
+		if (!selectedCohort) {
 			return subjectsList
 		}
 		return subjectsList.filter(
-			(subject) => subjectIncludesGradeLevel(
-				subject.gradesLevel,
-				selectedLevel,
-			),
-		)
-	}, [subjectsList, selectedGradeLevelId, gradesLevels])
-	const subjectCountByGrade = useMemo(() => {
-		const counts = new Map()
-		for (const level of gradesLevels) {
-			const id = String(level._id)
-			const count = subjectsList.filter(
-				(subject) => subjectIncludesGradeLevel(
+			(subject) => isUniversity
+				? subjectIncludesProgram(subject.program, selectedCohort)
+				: subjectIncludesGradeLevel(
 					subject.gradesLevel,
-					level,
+					selectedCohort,
 				),
+		)
+	}, [subjectsList, selectedCohortId, cohorts, isUniversity])
+	const subjectCountByCohort = useMemo(() => {
+		const counts = new Map()
+		for (const cohort of cohorts) {
+			const id = String(cohort._id)
+			const count = subjectsList.filter(
+				(subject) => isUniversity
+					? subjectIncludesProgram(subject.program, cohort)
+					: subjectIncludesGradeLevel(
+						subject.gradesLevel,
+						cohort,
+					),
 			).length
 			counts.set(id, count)
 		}
 		return counts
-	}, [subjectsList, gradesLevels])
+	}, [subjectsList, cohorts, isUniversity])
 
-	const handleSelectGradeFilter = (gradeLevelId) => {
-		setSelectedGradeLevelId(gradeLevelId)
+	const handleSelectCohortFilter = (cohortId) => {
+		setSelectedCohortId(cohortId)
 	}
 
 	const toggleSidebar = () => {
@@ -304,7 +317,9 @@ function SchoolAdminMySubjectsScreen () {
 								School subjects
 							</h1>
 							<p className='teacher-subjects-page__subtitle'>
-								All subjects in your school. Create new ones or
+								All subjects in your {isUniversity
+									? 'institution'
+									: 'school'}. Create new ones or
 								manage existing subjects below.
 							</p>
 							{!isPageLoading && !isError && subjectsList.length > 0 && canAddSubject && (
@@ -324,11 +339,13 @@ function SchoolAdminMySubjectsScreen () {
 								</div>
 							)}
 
-							{!isPageLoading && !isError && subjectsList.length > 0 && hasGradeLevels && (
+							{!isPageLoading && !isError && subjectsList.length > 0 && hasCohorts && (
 								<div
 									className='teacher-subjects-page__grade-filter'
 									role='group'
-									aria-label='Filter subjects by grade level'
+									aria-label={isUniversity
+										? 'Filter subjects by program'
+										: 'Filter subjects by grade level'}
 								>
 									<div className='teacher-subjects-page__grade-filter-header'>
 										<span
@@ -338,9 +355,11 @@ function SchoolAdminMySubjectsScreen () {
 											<GradCapIcon />
 										</span>
 										<span className='teacher-subjects-page__grade-filter-label'>
-											Filter by grade
+											{isUniversity
+												? 'Filter by program'
+												: 'Filter by grade'}
 										</span>
-										{selectedGradeLevelId !== '' && (
+										{selectedCohortId !== '' && (
 											<span className='teacher-subjects-page__grade-filter-count'>
 												{filteredSubjects.length} subject
 												{filteredSubjects.length === 1 ? '' : 's'}
@@ -352,26 +371,26 @@ function SchoolAdminMySubjectsScreen () {
 											type='button'
 											className={
 												'teacher-subjects-page__grade-pill' +
-												(selectedGradeLevelId === ''
+												(selectedCohortId === ''
 													? ' teacher-subjects-page__grade-pill--active'
 													: '')
 											}
-											onClick={() => handleSelectGradeFilter('')}
-											aria-pressed={selectedGradeLevelId === ''}
+											onClick={() => handleSelectCohortFilter('')}
+											aria-pressed={selectedCohortId === ''}
 										>
-											All grades
+											{isUniversity ? 'All programs' : 'All grades'}
 											<span className='teacher-subjects-page__grade-pill-count'>
 												{subjectsList.length}
 											</span>
 										</button>
-										{gradesLevels.map((level) => {
-											const levelId = String(level._id)
-											const isActive = selectedGradeLevelId === levelId
-											const count = subjectCountByGrade.get(levelId) ?? 0
+										{cohorts.map((cohort) => {
+											const cohortId = String(cohort._id)
+											const isActive = selectedCohortId === cohortId
+											const count = subjectCountByCohort.get(cohortId) ?? 0
 
 											return (
 												<button
-													key={levelId}
+													key={cohortId}
 													type='button'
 													className={
 														'teacher-subjects-page__grade-pill' +
@@ -379,10 +398,16 @@ function SchoolAdminMySubjectsScreen () {
 															? ' teacher-subjects-page__grade-pill--active'
 															: '')
 													}
-													onClick={() => handleSelectGradeFilter(levelId)}
+													onClick={() =>
+														handleSelectCohortFilter(cohortId)}
 													aria-pressed={isActive}
 												>
-													Grade {level.name}
+													{isUniversity
+														? cohort.name
+														: `Grade ${cohort.name}`}
+													{isUniversity && cohort.department
+														? ` (${cohort.department})`
+														: ''}
 													<span className='teacher-subjects-page__grade-pill-count'>
 														{count}
 													</span>
@@ -414,11 +439,12 @@ function SchoolAdminMySubjectsScreen () {
 
 							{!isPageLoading && !isError && subjectsList.length === 0 && (
 								<div className='teacher-subjects-page__empty'>
-									{!hasGradeLevels ? (
+									{!hasCohorts ? (
 										<>
 											<p className='teacher-subjects-page__empty-text'>
-												Before you can add subjects, add the grade
-												levels your school offers in My school.
+												Before you can add subjects, add the {isUniversity
+													? 'programs your institution offers'
+													: 'grade levels your school offers'} in My school.
 											</p>
 											<Link
 												to='/schooladmins/myschools'
@@ -430,7 +456,11 @@ function SchoolAdminMySubjectsScreen () {
 												>
 													+
 												</span>
-												<span>Add grade levels first</span>
+												<span>
+													{isUniversity
+														? 'Add programs first'
+														: 'Add grade levels first'}
+												</span>
 											</Link>
 										</>
 									) : !hasTeachers ? (
@@ -478,14 +508,20 @@ function SchoolAdminMySubjectsScreen () {
 							{!isPageLoading && !isError && subjectsList.length > 0 && filteredSubjects.length === 0 && (
 								<div className='teacher-subjects-page__empty'>
 									<p className='teacher-subjects-page__empty-text'>
-										No subjects for this grade level yet.
+										No subjects for this {isUniversity
+											? 'program'
+											: 'grade level'} yet.
 									</p>
 									<button
 										type='button'
 										className='teacher-subjects-page__add-btn'
-										onClick={() => handleSelectGradeFilter('')}
+										onClick={() => handleSelectCohortFilter('')}
 									>
-										<span>Show all subjects</span>
+										<span>
+											{isUniversity
+												? 'Show all programs'
+												: 'Show all subjects'}
+										</span>
 									</button>
 								</div>
 							)}
@@ -502,9 +538,12 @@ function SchoolAdminMySubjectsScreen () {
 										?? (Array.isArray(subject.students)
 											? subject.students.length
 											: 0)
-									const gradeLabel = getSubjectGradeLevelsLabel(
-										subject.gradesLevel,
-									)
+									const cohortLabel = isUniversity
+										? getSubjectProgramsLabel(subject.program)
+										: getSubjectGradeLevelsLabel(subject.gradesLevel)
+									const metaLabel = isUniversity && subject.semester
+										? `${cohortLabel} · Semester ${subject.semester}`
+										: cohortLabel
 									const teacherLabel = getSubjectTeacherLabel(
 										subject,
 										teachersByEmail,
@@ -544,7 +583,7 @@ function SchoolAdminMySubjectsScreen () {
 														{teacherLabel}
 													</span>
 													<p className='teacher-subject-card__meta'>
-														{gradeLabel}
+														{metaLabel}
 														{subject.isCoursePublish
 															? ' · Published'
 															: ' · Draft'}

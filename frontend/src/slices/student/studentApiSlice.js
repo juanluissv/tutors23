@@ -71,6 +71,25 @@ export const studentApiSlice = apiSlice.injectEndpoints({
                 'Earnings',
             ],
           }),
+          getAvailableSubscriptionSubjects: builder.query({
+            query: (subscriptionId) => ({
+              url: `${STUDENTS_URL}/subscriptions/${subscriptionId}/available-subjects`,
+            }),
+            providesTags: (result, error, subscriptionId) => [
+              { type: 'Subscription', id: `AVAILABLE_${subscriptionId}` },
+            ],
+          }),
+          selectSubscriptionSubjects: builder.mutation({
+            query: ({ subscriptionId, subjectIds }) => ({
+              url: `${STUDENTS_URL}/subscriptions/${subscriptionId}/subjects`,
+              method: 'PUT',
+              body: { subjectIds },
+            }),
+            invalidatesTags: [
+              'Students',
+              'Subscription',
+            ],
+          }),
           getBookLessonsBySubjectForStudent: builder.query({
             query: (subjectId) => ({
               url: `${BOOK_LESSONS_URL}/subject/${subjectId}`,
@@ -101,6 +120,8 @@ export const {
     useGetCourseWatchForStudentQuery,
     useGetStudentSubjectCoursesQuery,
     useSubscribeMutation,
+    useGetAvailableSubscriptionSubjectsQuery,
+    useSelectSubscriptionSubjectsMutation,
     useGetBookLessonsBySubjectForStudentQuery,
     useGetBookLessonByIdQuery,
 } = studentApiSlice;

@@ -135,7 +135,7 @@ function Header({
 						>
 							<div className="user-dropdown__header">
 								<span className="user-dropdown__name">
-								Go to your account
+									Ver mi perfil
 								</span>
 								<span className="user-dropdown__email">
 									{studentInfo.email}

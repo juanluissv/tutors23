@@ -36,7 +36,7 @@ function formatDisplayDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return '—'
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'long',
 		day: 'numeric',
@@ -73,24 +73,24 @@ function formatRenewalDaysLabel (subscription) {
 		return '—'
 	}
 	if (subscription?.pastDue) {
-		return 'Past due — renew now'
+		return 'Vencida — renuévala ahora'
 	}
 	if (subscription?.renewal === false) {
 		if (days === 0) {
-			return 'Expires today'
+			return 'Vence hoy'
 		}
 		if (days === 1) {
-			return '1 day until expiration'
+			return '1 día para vencer'
 		}
-		return `${days} days until expiration`
+		return `${days} días para vencer`
 	}
 	if (days === 0) {
-		return 'Renews today'
+		return 'Se renueva hoy'
 	}
 	if (days === 1) {
-		return '1 day until renewal'
+		return '1 día para la renovación'
 	}
-	return `${days} days until renewal`
+	return `${days} días para la renovación`
 }
 
 function formatPlanCurrency (price) {
@@ -99,7 +99,7 @@ function formatPlanCurrency (price) {
 		return '—'
 	}
 	try {
-		return new Intl.NumberFormat(undefined, {
+		return new Intl.NumberFormat('es', {
 			style: 'currency',
 			currency: 'USD',
 			minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
@@ -113,9 +113,28 @@ function formatPlanCurrency (price) {
 function getPlanDisplayName (plan) {
 	const gradeName = plan?.gradesLevel?.name
 	if (gradeName) {
-		return `${gradeName} Plan`
+		return `Plan ${gradeName}`
 	}
-	return 'Learning Plan'
+	const programName = plan?.program?.name
+	if (programName) {
+		return `Plan ${programName}`
+	}
+	return 'Plan de aprendizaje'
+}
+
+function getSubscriptionSubjectTitles (subscription) {
+	const selected = subscription?.selectedSubjects
+	if (Array.isArray(selected) && selected.length > 0) {
+		return selected
+			.map((subject) => {
+				if (subject != null && typeof subject === 'object') {
+					return String(subject.title || '').trim()
+				}
+				return ''
+			})
+			.filter(Boolean)
+	}
+	return getSubjectTitles(subscription?.plan)
 }
 
 function getSubjectTitles (plan) {
@@ -151,19 +170,19 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 		return (
 			<div className='student-profile-sub student-profile-sub--empty'>
 				<p className='student-profile-sub__empty-title'>
-					No active subscription
+					No hay una suscripción activa
 				</p>
 				<p className='student-profile-sub__empty-text'>
 					{hasPlans
-						? 'Subscribe to your assigned plan to unlock full access.'
-						: 'Contact your school admin to get a plan assigned to your account.'}
+						? 'Suscríbete a tu plan asignado para desbloquear el acceso completo.'
+						: 'Contacta a tu administrador escolar para que asigne un plan a tu cuenta.'}
 				</p>
 				{hasPlans ? (
 					<Link
 						to='/students/subscription'
 						className='student-profile-sub__cta'
 					>
-						Subscribe now
+						Suscríbete ahora
 					</Link>
 				) : null}
 			</div>
@@ -172,7 +191,8 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 
 	const plan = subscription.plan
 	const planName = plan ? getPlanDisplayName(plan) : '—'
-	const subjectTitles = plan ? getSubjectTitles(plan) : []
+	const subjectTitles = getSubscriptionSubjectTitles(subscription)
+	const needsSubjectSelection = subscription.needsSubjectSelection === true
 	const asked = Number(subscription.questionsAsked) || 0
 	const total = Number(subscription.totalQuestions) || 0
 	const left = Number(subscription.questionsLeft) || 0
@@ -201,14 +221,14 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 								: ' student-profile-sub__status--inactive')
 						}
 					>
-						{subscription.active ? 'Active' : 'Inactive'}
+						{subscription.active ? 'Activa' : 'Inactiva'}
 					</span>
 				</div>
 				{plan?.price != null && (
 					<p className='student-profile-sub__price'>
 						{formatPlanCurrency(plan.price)}
 						<span className='student-profile-sub__price-per'>
-							/month
+							/mes
 						</span>
 					</p>
 				)}
@@ -227,10 +247,10 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 						<span className='student-profile-sub__renewal-copy'>
 							<span className='student-profile-sub__renewal-label'>
 								{subscription.pastDue
-									? 'Renewal overdue'
+									? 'Renovación vencida'
 									: subscription.renewal === false
-										? 'Days until expiration'
-										: 'Days until renewal'}
+										? 'Días para vencer'
+										: 'Días para la renovación'}
 							</span>
 							<span className='student-profile-sub__renewal-detail'>
 								{renewalDaysLabel}
@@ -246,9 +266,9 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 			{total > 0 && (
 				<div className='student-profile-sub__usage'>
 					<div className='student-profile-sub__usage-head'>
-						<span>Questions this period</span>
+						<span>Preguntas de este período</span>
 						<span>
-							{asked} used · {left} left · {total} total
+							{asked} usadas · {left} restantes · {total} en total
 						</span>
 					</div>
 					<div
@@ -257,7 +277,7 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 						aria-valuenow={usedPct}
 						aria-valuemin={0}
 						aria-valuemax={100}
-						aria-label='Questions used'
+						aria-label='Preguntas usadas'
 					>
 						<div
 							className='student-profile-sub__usage-fill'
@@ -269,18 +289,41 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 
 			<div className='student-profile-sub__grid'>
 				<SubscriptionDetailRow
-					label='Start date'
+					label='Fecha de inicio'
 					value={formatDisplayDate(subscription.startDate)}
 				/>
 				<SubscriptionDetailRow
-					label='End date'
+					label='Fecha de fin'
 					value={formatDisplayDate(subscription.endDate)}
 				/>
+				{subscription.endOfSemesterDate && (
+					<SubscriptionDetailRow
+						label='Fin del semestre'
+						value={formatDisplayDate(
+							subscription.endOfSemesterDate,
+						)}
+					/>
+				)}
+				{Array.isArray(subscription.semesters)
+					&& subscription.semesters.length > 0 && (
+					<SubscriptionDetailRow
+						label='Semestre actual'
+						value={
+							'Semestre '
+							+ String(
+								(Number(subscription.currentSemesterIndex)
+									|| 0) + 1,
+							)
+							+ ' de '
+							+ String(subscription.semesters.length)
+						}
+					/>
+				)}
 				<SubscriptionDetailRow
 					label={
 						subscription.renewal === false
-							? 'Days until expiration'
-							: 'Days until renewal'
+							? 'Días para vencer'
+							: 'Días para la renovación'
 					}
 					value={renewalDaysLabel}
 					highlight={
@@ -290,35 +333,35 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 					}
 				/>
 				<SubscriptionDetailRow
-					label='Questions asked'
+					label='Preguntas hechas'
 					value={String(asked)}
 				/>
 				<SubscriptionDetailRow
-					label='Questions left'
+					label='Preguntas restantes'
 					value={String(left)}
 					highlight={left > 0}
 				/>
 				<SubscriptionDetailRow
-					label='Total questions'
+					label='Preguntas en total'
 					value={String(total)}
 				/>
 				<SubscriptionDetailRow
-					label='Auto-renewal'
-					value={subscription.renewal ? 'Enabled' : 'Disabled'}
+					label='Renovación automática'
+					value={subscription.renewal ? 'Activada' : 'Desactivada'}
 				/>
 				<SubscriptionDetailRow
-					label='Payment status'
-					value={subscription.pastDue ? 'Past due' : 'Up to date'}
+					label='Estado de pago'
+					value={subscription.pastDue ? 'Vencido' : 'Al día'}
 					highlight={!subscription.pastDue}
 				/>
 				<SubscriptionDetailRow
-					label='Subscribed on'
+					label='Fecha de suscripción'
 					value={formatDisplayDate(subscription.createdAt)}
 				/>
 				{plan?.active !== undefined && (
 					<SubscriptionDetailRow
-						label='Plan status'
-						value={plan.active !== false ? 'Available' : 'Inactive'}
+						label='Estado del plan'
+						value={plan.active !== false ? 'Disponible' : 'Inactivo'}
 					/>
 				)}
 			</div>
@@ -326,7 +369,7 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 			{subjectTitles.length > 0 && (
 				<div className='student-profile-sub__subjects'>
 					<span className='student-profile-sub__subjects-label'>
-						Included subjects
+						Tus materias
 					</span>
 					<ul className='student-profile-sub__subjects-list'>
 						{subjectTitles.map((title) => (
@@ -336,12 +379,21 @@ function StudentSubscriptionPanel ({ subscription, hasPlans }) {
 				</div>
 			)}
 
-			{subscription.active && (
+			{needsSubjectSelection && subscription.active && (
+				<Link
+					to={`/students/select-subjects/${subscription._id}`}
+					className='student-profile-sub__cta'
+				>
+					Elige tus materias
+				</Link>
+			)}
+
+			{subscription.active && !needsSubjectSelection && (
 				<Link
 					to='/students/subscription'
 					className='student-profile-sub__manage-link'
 				>
-					Manage subscription
+					Administrar suscripción
 				</Link>
 			)}
 		</div>
@@ -399,16 +451,18 @@ function StudentProfileScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (fn === '' || ln === '') {
-			toast.error('First and last name are required')
+			toast.error('El nombre y el apellido son obligatorios')
 			return
 		}
 		if (newPassword !== '' || confirmPassword !== '') {
 			if (newPassword.length < 6) {
-				toast.error('New password must be at least 6 characters')
+				toast.error(
+					'La nueva contraseña debe tener al menos 6 caracteres',
+				)
 				return
 			}
 			if (newPassword !== confirmPassword) {
-				toast.error('Passwords do not match')
+				toast.error('Las contraseñas no coinciden')
 				return
 			}
 		}
@@ -443,9 +497,11 @@ function StudentProfileScreen () {
 			)
 			setNewPassword('')
 			setConfirmPassword('')
-			toast.success('Profile updated successfully')
+			toast.success('Perfil actualizado correctamente')
 		} catch (err) {
-			toast.error(err?.data?.message || err?.error || 'Update failed')
+			toast.error(
+				err?.data?.message || err?.error || 'No se pudo actualizar',
+			)
 		}
 	}
 
@@ -485,7 +541,7 @@ function StudentProfileScreen () {
 										</div>
 									</div>
 									<h1 className='login-card__title'>
-										My profile
+										Mi perfil
 									</h1>
 									<p
 										className={
@@ -494,8 +550,8 @@ function StudentProfileScreen () {
 										}
 									>
 										{activeTab === PROFILE_TAB
-											? 'View and update your account details.'
-											: 'View your current subscription and usage.'}
+											? 'Consulta y actualiza los datos de tu cuenta.'
+											: 'Consulta tu suscripción actual y el uso.'}
 									</p>
 								</div>
 
@@ -503,7 +559,7 @@ function StudentProfileScreen () {
 									<nav
 										className='student-profile-tabs'
 										role='tablist'
-										aria-label='Profile sections'
+										aria-label='Secciones del perfil'
 									>
 										<button
 											type='button'
@@ -520,7 +576,7 @@ function StudentProfileScreen () {
 											onClick={() =>
 												setActiveTab(PROFILE_TAB)}
 										>
-											Profile
+											Perfil
 										</button>
 										<button
 											type='button'
@@ -541,22 +597,22 @@ function StudentProfileScreen () {
 											onClick={() =>
 												setActiveTab(SUBSCRIPTION_TAB)}
 										>
-											My subscription
+											Mi suscripción
 										</button>
 									</nav>
 								)}
 
 								{!studentInfo && (
 									<p className='login-card__subtitle'>
-										<Link to='/login'>Sign in</Link>
+										<Link to='/login'>Inicia sesión</Link>
 										{' '}
-										to manage your profile.
+										para administrar tu perfil.
 									</p>
 								)}
 
 								{studentInfo && isLoading && (
 									<p className='login-card__subtitle'>
-										Loading profile…
+										Cargando perfil…
 									</p>
 								)}
 
@@ -567,7 +623,7 @@ function StudentProfileScreen () {
 									>
 										{error?.data?.message
 											|| error?.error
-											|| 'Could not load profile.'}
+											|| 'No se pudo cargar el perfil.'}
 									</p>
 								)}
 
@@ -589,14 +645,14 @@ function StudentProfileScreen () {
 												className='login-label'
 												htmlFor='sp-first-name'
 											>
-												First name
+												Nombre
 											</label>
 											<input
 												type='text'
 												id='sp-first-name'
 												name='firstname'
 												className='login-input'
-												placeholder='First name'
+												placeholder='Nombre'
 												autoComplete='given-name'
 												value={firstname}
 												disabled={isBusy}
@@ -609,14 +665,14 @@ function StudentProfileScreen () {
 												className='login-label'
 												htmlFor='sp-last-name'
 											>
-												Last name
+												Apellido
 											</label>
 											<input
 												type='text'
 												id='sp-last-name'
 												name='lastname'
 												className='login-input'
-												placeholder='Last name'
+												placeholder='Apellido'
 												autoComplete='family-name'
 												value={lastname}
 												disabled={isBusy}
@@ -631,7 +687,7 @@ function StudentProfileScreen () {
 											className='login-label'
 											htmlFor='sp-username'
 										>
-											Username
+											Nombre de usuario
 										</label>
 										<input
 											type='text'
@@ -650,7 +706,7 @@ function StudentProfileScreen () {
 											className='login-label'
 											htmlFor='sp-email'
 										>
-											Email address
+											Correo electrónico
 										</label>
 										<input
 											type='email'
@@ -672,14 +728,14 @@ function StudentProfileScreen () {
 												className='login-label'
 												htmlFor='sp-city'
 											>
-												City
+												Ciudad
 											</label>
 											<input
 												type='text'
 												id='sp-city'
 												name='city'
 												className='login-input'
-												placeholder='City'
+												placeholder='Ciudad'
 												autoComplete='address-level2'
 												value={city}
 												disabled={isBusy}
@@ -692,14 +748,14 @@ function StudentProfileScreen () {
 												className='login-label'
 												htmlFor='sp-country'
 											>
-												Country
+												País
 											</label>
 											<input
 												type='text'
 												id='sp-country'
 												name='country'
 												className='login-input'
-												placeholder='Country'
+												placeholder='País'
 												autoComplete='country-name'
 												value={country}
 												disabled={isBusy}
@@ -714,7 +770,7 @@ function StudentProfileScreen () {
 											className='login-label'
 											htmlFor='sp-birth-date'
 										>
-											Birth date (optional)
+											Fecha de nacimiento (opcional)
 										</label>
 										<input
 											type='date'
@@ -735,7 +791,7 @@ function StudentProfileScreen () {
 												className='login-label'
 												htmlFor='sp-new-password'
 											>
-												New password
+												Nueva contraseña
 											</label>
 											<input
 												type='password'
@@ -743,7 +799,7 @@ function StudentProfileScreen () {
 												name='newPassword'
 												className='login-input'
 												placeholder={
-													'Leave blank to keep current'
+													'Déjalo en blanco para mantener la actual'
 												}
 												autoComplete='new-password'
 												value={newPassword}
@@ -759,14 +815,14 @@ function StudentProfileScreen () {
 												className='login-label'
 												htmlFor='sp-confirm-password'
 											>
-												Confirm new password
+												Confirmar nueva contraseña
 											</label>
 											<input
 												type='password'
 												id='sp-confirm-password'
 												name='confirmPassword'
 												className='login-input'
-												placeholder='Confirm'
+												placeholder='Confirmar'
 												autoComplete='new-password'
 												value={confirmPassword}
 												disabled={isBusy}
@@ -781,7 +837,7 @@ function StudentProfileScreen () {
 									{subjects.length > 0 && (
 										<div className='login-field'>
 											<span className='login-label'>
-												Your subjects
+												Tus materias
 											</span>
 											<ul
 												className='login-card__subtitle'
@@ -793,7 +849,7 @@ function StudentProfileScreen () {
 												{subjects.map((sub) => (
 													<li key={sub._id}>
 														{sub.title
-															|| 'Untitled subject'}
+															|| 'Materia sin título'}
 													</li>
 												))}
 											</ul>
@@ -805,7 +861,7 @@ function StudentProfileScreen () {
 										className='login-submit'
 										disabled={isBusy}
 									>
-										{isBusy ? 'Saving…' : 'Save changes'}
+										{isBusy ? 'Guardando…' : 'Guardar cambios'}
 									</button>
 								</form>
 								</div>

@@ -37,6 +37,16 @@ const teacherSchema = mongoose.Schema({
         required: false,
         ref: 'School',
     },
+    schoolType: {
+        type: String,
+        enum: [
+            'primary',
+            'secondary',
+            'high_school',
+            'university',
+        ],
+        required: false,
+    },
     subjects: [
         {
             type: mongoose.Schema.Types.ObjectId,

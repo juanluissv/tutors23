@@ -1,0 +1,1540 @@
+{
+    "_id": {
+      "$oid": "6a3979882d6dcf3adc9b6ef4"
+    },
+    "bookChapter": {
+      "chapterId": {
+        "$oid": "6a3979883d65fb098299e07c"
+      },
+      "chapterNumber": 1,
+      "chapterTitle": "unidad 1 Semana 1"
+    },
+    "subject": {
+      "$oid": "6a29d978f0980d2359a5a559"
+    },
+    "__v": 2,
+    "content": [
+      {
+        "blockId": "b0",
+        "type": "phase",
+        "text": "Exploración",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa144"
+        }
+      },
+      {
+        "blockId": "b1",
+        "type": "activity",
+        "text": "Actividad individual",
+        "items": [
+          {
+            "label": "a",
+            "title": "",
+            "body": "",
+            "text": "¿Cuál consideras que es la importancia de los bosques tropicales para la vida humana?",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa146"
+            }
+          },
+          {
+            "label": "b",
+            "title": "",
+            "body": "",
+            "text": "¿Qué acciones se implementan en tu localidad para proteger las zonas naturales o boscosas?",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa147"
+            }
+          }
+        ],
+        "meta": {
+          "activityNumber": 1,
+          "activityKind": "individual",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa145"
+        }
+      },
+      {
+        "blockId": "b2",
+        "type": "activity",
+        "text": "Actividad en pares",
+        "items": [
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "Busquen noticias recientes acerca de la situación de los bosques en El Salvador e identifiquen cuáles son las principales problemáticas que les afectan.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa149"
+            }
+          },
+          {
+            "label": "a",
+            "title": "",
+            "body": "",
+            "text": "Elaboren un esquema con ellas. Pueden guiarse con el siguiente ejemplo.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa14a"
+            }
+          }
+        ],
+        "meta": {
+          "activityNumber": 2,
+          "activityKind": "en pares",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa148"
+        }
+      },
+      {
+        "blockId": "b3",
+        "type": "diagram",
+        "text": "Problemas que afectan a los bosques tropicales",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa14b"
+        }
+      },
+      {
+        "blockId": "b4",
+        "type": "activity",
+        "text": "Actividad con docente",
+        "items": [
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "Piensen en acciones para proteger los bosques tropicales.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa14d"
+            }
+          },
+          {
+            "label": "a",
+            "title": "",
+            "body": "",
+            "text": "Realicen una lluvia de ideas sobre distintas estrategias para sensibilizar a los miembros de su centro educativo y su comunidad acerca de la importancia de proteger los bosques tropicales.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa14e"
+            }
+          },
+          {
+            "label": "b",
+            "title": "",
+            "body": "",
+            "text": "Escríbanlas en una tabla similar a la siguiente:",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa14f"
+            }
+          },
+          {
+            "label": "c",
+            "title": "",
+            "body": "",
+            "text": "Seleccionen tres estrategias y compartan en el pleno.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa150"
+            }
+          }
+        ],
+        "meta": {
+          "activityNumber": 3,
+          "activityKind": "con docente",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa14c"
+        }
+      },
+      {
+        "blockId": "b5",
+        "type": "table",
+        "text": "Estrategias",
+        "items": [],
+        "meta": {
+          "headers": [
+            "Estrategias"
+          ],
+          "isTemplate": true
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa151"
+        }
+      },
+      {
+        "blockId": "b6",
+        "type": "phase",
+        "text": "Profundización",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa152"
+        }
+      },
+      {
+        "blockId": "b7",
+        "type": "h2",
+        "text": "Los bosques: importancia y clasificación",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa153"
+        }
+      },
+      {
+        "blockId": "b8",
+        "type": "p",
+        "text": "Los bosques son ecosistemas complejos que desempeñan un papel vital para la vida humana. Cubren alrededor del 31 % de la superficie terrestre del mundo y cumplen diversas funciones, entre las que se incluyen producción de oxígeno, purificación del aire, provisión de agua y de otros recursos naturales, por lo que son muy importantes para el mantenimiento de la salud y el equilibrio del planeta.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa154"
+        }
+      },
+      {
+        "blockId": "b9",
+        "type": "p",
+        "text": "La clasificación de los bosques se basa en distintos criterios, como la zona climática en la que se encuentran, el tipo de vegetación que los conforman o su función ecológica. En relación con la zona climática, los bosques se dividen en: tropicales, subtropicales, templados y boreales. De estos, las zonas tropicales destacan por tener la mayor proporción de bosques a nivel mundial, alcanzando el 45 %, mientras que el resto se distribuye entre las otras zonas climáticas (Doc. 1).",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa155"
+        }
+      },
+      {
+        "blockId": "b10",
+        "type": "h2",
+        "text": "Características de los bosques tropicales",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa156"
+        }
+      },
+      {
+        "blockId": "b11",
+        "type": "p",
+        "text": "Los bosques tropicales se localizan en la zona intertropical y constituyen uno de los ecosistemas más transcendentales a nivel mundial. Se caracterizan por su clima cálido y húmedo y experimentan precipitaciones abundantes a lo largo de todo el año, creando condiciones propicias para la vida vegetal y animal. Además, destacan por albergar una asombrosa diversidad biológica, con aproximadamente el 60 % de las especies conocidas de fauna y flora a nivel mundial. Sin embargo, en las últimas décadas, la deforestación ha amenazado seriamente la salud y la estabilidad de estos, afectando a regiones enteras.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa157"
+        }
+      },
+      {
+        "blockId": "b12",
+        "type": "info",
+        "text": "Conexión geográfica",
+        "items": [
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "Cerca del 54 % de los bosques del mundo concentran en cinco naciones: Rusia, Brasil, Canadá, Estados Unidos y China.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa159"
+            }
+          }
+        ],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa158"
+        }
+      },
+      {
+        "blockId": "b13",
+        "type": "doc",
+        "text": "Distribución mundial de los bosques por zona climática",
+        "items": [],
+        "meta": {
+          "docNumber": "1",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa15a"
+        }
+      },
+      {
+        "blockId": "b14",
+        "type": "chart",
+        "text": "",
+        "items": [
+          {
+            "label": "Boreal",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "27",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa15c"
+            }
+          },
+          {
+            "label": "Templada",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "16",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa15d"
+            }
+          },
+          {
+            "label": "Tropical",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "45",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa15e"
+            }
+          },
+          {
+            "label": "Subtropical",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "11",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa15f"
+            }
+          }
+        ],
+        "meta": {
+          "chartKind": "donut",
+          "unit": "%",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa15b"
+        }
+      },
+      {
+        "blockId": "b15",
+        "type": "p",
+        "text": "Fuente: FAO (2020). Evaluación de los recursos forestales mundiales.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa160"
+        }
+      },
+      {
+        "blockId": "b16",
+        "type": "info",
+        "text": "En la web",
+        "items": [
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "Tipos de bosques tropicales",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa162"
+            }
+          }
+        ],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa161"
+        }
+      },
+      {
+        "blockId": "b17",
+        "type": "activity",
+        "text": "Desarrollen la habilidad de sensibilidad humana en el ambiente.",
+        "items": [
+          {
+            "label": "a",
+            "title": "",
+            "body": "",
+            "text": "Identifiquen áreas boscosas o zonas que se caractericen por densa vegetación y diversidad biológica en territorio salvadoreño y busquen información sobre las problemáticas ambientales que afectan a sus habitantes.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa164"
+            }
+          },
+          {
+            "label": "b",
+            "title": "",
+            "body": "",
+            "text": "A partir de los datos recolectados, elaboren distintas propuestas que permitan dar respuestas viables y sostenibles para mejorar la calidad de vida de las poblaciones afectadas y su entorno.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa165"
+            }
+          }
+        ],
+        "meta": {
+          "activityNumber": 4,
+          "activityKind": "en pares",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa163"
+        }
+      },
+      {
+        "blockId": "b18",
+        "type": "h2",
+        "text": "Principales problemáticas de los bosques tropicales",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa166"
+        }
+      },
+      {
+        "blockId": "b19",
+        "type": "p",
+        "text": "Los bosques tropicales, a pesar de su importancia ecológica, se enfrentan a diversas problemáticas que ponen en riesgo su existencia: La deforestación es la principal problemática que afecta a los bosques tropicales (Doc. 2). Esta se produce mayoritariamente debido a las actividades humanas como las prácticas agrícolas intensivas, las actividades excesivas de pastoreo, las operaciones mineras, la construcción de represas y la expansión urbana u otros tipos de construcción de infraestructura relacionados con el desarrollo y crecimiento de la población.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa167"
+        }
+      },
+      {
+        "blockId": "b20",
+        "type": "glossary",
+        "text": "",
+        "items": [
+          {
+            "label": "",
+            "title": "La deforestación",
+            "body": "Es el proceso mediante el cual se elimina o reduce, a gran escala, la cobertura forestal de un área determinada. Puede ser causada por actividades humanas o naturales.",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa169"
+            }
+          },
+          {
+            "label": "",
+            "title": "La contaminación",
+            "body": "Se produce al introducir agentes químicos que alteran el ecosistema forestal, como el vertido de residuos y las emisiones industriales.",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa16a"
+            }
+          },
+          {
+            "label": "",
+            "title": "El cambio climático",
+            "body": "Es la variación significativa de los patrones climáticos de la Tierra que afecta a los bosques tropicales causando que sean más vulnerables a las sequías, incendios e inundaciones.",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa16b"
+            }
+          },
+          {
+            "label": "",
+            "title": "La sobreexplotación",
+            "body": "La tala excesiva y la explotación de recursos forestales sin prácticas sostenibles agotan los recursos y amenazan la capacidad de regeneración natural de los bosques tropicales.",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa16c"
+            }
+          }
+        ],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa168"
+        }
+      },
+      {
+        "blockId": "b21",
+        "type": "doc",
+        "text": "El impacto de las actividades productivas en la deforestación",
+        "items": [
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "En un estudio reciente, la FAO concluyó que, entre 2000 y 2018, casi el 90 % de la deforestación en zonas tropicales guarda relación con la agricultura (el 52.3 % se derivaba de la ampliación de las tierras de cultivo y el 37.5 %, de la ampliación de las tierras de pastoreo de ganado). Las tierras de cultivo provocaron más del 75 % de la deforestación de África y Asia. La causa más importante en América del Sur y Oceanía fue el pastoreo de ganado.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa16e"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "Fuente: FAO (2022). El estado de los bosques del mundo.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa16f"
+            }
+          }
+        ],
+        "meta": {
+          "docNumber": "2",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa16d"
+        }
+      },
+      {
+        "blockId": "b22",
+        "type": "p",
+        "text": "Las regiones más afectadas por la deforestación en las zonas tropicales se localizan en América del Sur, el centro de África y el sudeste de Asia. En América del Sur, la deforestación se concentra en la Amazonía, que es el bosque tropical más grande del mundo. En África, la Selva del Congo se encuentra amenazada por la expansión de la agricultura, la ganadería y la minería. En Asia, la deforestación se produce principalmente en Indonesia, Malasia y Birmania, a causa del cultivo de palma aceitera y la sobreexplotación de madera para la industria de papel (Doc. 3).",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa170"
+        }
+      },
+      {
+        "blockId": "b23",
+        "type": "map",
+        "text": "Mapa de las principales actividades productivas en bosques tropicales",
+        "items": [
+          {
+            "label": "",
+            "title": "Amazonía",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa172"
+            }
+          },
+          {
+            "label": "",
+            "title": "Cuenca del Congo",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa173"
+            }
+          },
+          {
+            "label": "",
+            "title": "Bosques de Madagascar",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa174"
+            }
+          },
+          {
+            "label": "",
+            "title": "Bosques de Papúa Nueva",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa175"
+            }
+          },
+          {
+            "label": "",
+            "title": "Bosques mesoamericanos",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa176"
+            }
+          },
+          {
+            "label": "",
+            "title": "Bosques de sudeste asiático",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa177"
+            }
+          }
+        ],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa171"
+        }
+      },
+      {
+        "blockId": "b24",
+        "type": "table",
+        "text": "Leyenda del mapa",
+        "items": [
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [
+              "Bosque tropical",
+              ""
+            ],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa179"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [
+              "Zonas deforestadas",
+              ""
+            ],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa17a"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [
+              "Explotación forestal",
+              ""
+            ],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa17b"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [
+              "Plantaciones de palma",
+              ""
+            ],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa17c"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [
+              "Plantaciones de soja",
+              ""
+            ],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa17d"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "",
+            "value": "",
+            "cells": [
+              "Operación minera",
+              ""
+            ],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa17e"
+            }
+          }
+        ],
+        "meta": {
+          "headers": [
+            "Categoría",
+            "Significado"
+          ]
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa178"
+        }
+      },
+      {
+        "blockId": "b25",
+        "type": "p",
+        "text": "Fuente: Global Forest Watch. Monitoreo de bosques diseñado para la acción.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa17f"
+        }
+      },
+      {
+        "blockId": "b26",
+        "type": "p",
+        "text": "La conversión de bosques tropicales en plantaciones agrícolas para la producción de cultivos comerciales, como la soya y la palma aceitera, sigue siendo la causa más significativa de deforestación en todo el mundo. La soya se utiliza principalmente como alimento para ganado, cerdos y aves de corral, y como ingrediente en productos procesados. La palma africana o aceitera se cultiva para obtener aceite de palma, que es un compuesto común en muchos alimentos y productos cosméticos. La expansión de tierras para el pastoreo y la ganadería, así como la industria del papel y la extracción ilegal de madera, que a menudo se destina a los mercados internacionales, también aumenta la degradación de los bosques y, en última instancia, su riesgo de desaparición.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa180"
+        }
+      },
+      {
+        "blockId": "b27",
+        "type": "h3",
+        "text": "América del Sur",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa181"
+        }
+      },
+      {
+        "blockId": "b28",
+        "type": "p",
+        "text": "Según el informe de 2022 presentado por World Wildlife Fund (WWF), el 18 % de los bosques amazónicos se ha perdido completamente y otro 17 % está degradado debido al cultivo a gran escala de soya y a la expansión de tierras para pastoreo, junto con la minería y la sobreexplotación de madera. Estas actividades afectan la calidad del agua y del aire, provocando a su vez una significativa pérdida de biodiversidad.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa182"
+        }
+      },
+      {
+        "blockId": "b29",
+        "type": "h3",
+        "text": "Centro de África",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa183"
+        }
+      },
+      {
+        "blockId": "b30",
+        "type": "p",
+        "text": "La cuenca del río Congo, en el centro de África, es la segunda zona tropical más grande a nivel mundial, con un área de 3.7 millones de km2. En esta región, la causa principal de deforestación es la agricultura de subsistencia, es decir, el cultivo de alimentos destinados para consumo propio, seguido por la explotación forestal, tanto industrial como artesanal, y las operaciones mineras, que han experimentado un aumento constante en las últimas décadas.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa184"
+        }
+      },
+      {
+        "blockId": "b31",
+        "type": "h3",
+        "text": "Sudeste asiático",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa185"
+        }
+      },
+      {
+        "blockId": "b32",
+        "type": "p",
+        "text": "De acuerdo con los datos de WWF, la producción de aceite de palma es la principal causa de la deforestación en la zona, especialmente en Indonesia y Malasia, que juntas producen el 84 % del aceite de palma del mundo. Además, las actividades madereras destinadas a la industria del papel y las prácticas agrícolas a pequeña escala, basadas en técnicas de tala y quema para la rápida preparación de la tierra, también ejercen un impacto significativo sobre los bosques tropicales de Asia.",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa186"
+        }
+      },
+      {
+        "blockId": "b33",
+        "type": "activity",
+        "text": "Actividad en pares",
+        "items": [
+          {
+            "label": "a",
+            "title": "",
+            "body": "",
+            "text": "Identifiquen, con base en el documento 3, cuáles son las principales actividades productivas por continente.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa188"
+            }
+          },
+          {
+            "label": "b",
+            "title": "",
+            "body": "",
+            "text": "Elijan una de las actividades e investiguen tanto las causas como los efectos inmediatos, a mediano y largo plazo que tiene para el entorno natural y la vida humana.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa189"
+            }
+          }
+        ],
+        "meta": {
+          "activityNumber": 5,
+          "activityKind": "en pares",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa187"
+        }
+      },
+      {
+        "blockId": "b34",
+        "type": "phase",
+        "text": "Consolidación",
+        "items": [],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa18a"
+        }
+      },
+      {
+        "blockId": "b35",
+        "type": "activity",
+        "text": "Establezcan tres acciones que se pueden realizar desde diferentes entidades para la conservación de los bosques tropicales en el mundo considerando las principales problemáticas a las que se enfrentan.",
+        "items": [
+          {
+            "label": "a",
+            "title": "",
+            "body": "",
+            "text": "Anótenlas en su cuaderno.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa18c"
+            }
+          },
+          {
+            "label": "b",
+            "title": "",
+            "body": "",
+            "text": "Comparen sus respuestas con otros pares y seleccionen las mejores propuestas.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa18d"
+            }
+          },
+          {
+            "label": "c",
+            "title": "",
+            "body": "",
+            "text": "Compartan en pleno su selección final.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa18e"
+            }
+          }
+        ],
+        "meta": {
+          "activityNumber": 6,
+          "activityKind": "en pares",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa18b"
+        }
+      },
+      {
+        "blockId": "b36",
+        "type": "activity",
+        "text": "Formen equipos de trabajo y realicen lo siguiente:",
+        "items": [
+          {
+            "label": "a",
+            "title": "",
+            "body": "",
+            "text": "Seleccionen uno de los siguientes bosques tropicales.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa190"
+            }
+          },
+          {
+            "label": "b",
+            "title": "",
+            "body": "",
+            "text": "Investiguen datos sobre el bosque seleccionado y ordenen la información en una tabla como la siguiente:",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa191"
+            }
+          }
+        ],
+        "meta": {
+          "activityNumber": 7,
+          "activityKind": "con docente",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa18f"
+        }
+      },
+      {
+        "blockId": "b37",
+        "type": "chips",
+        "text": "",
+        "items": [
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "Amazonas",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa193"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "el Congo",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa194"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "el Daintree",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa195"
+            }
+          },
+          {
+            "label": "",
+            "title": "",
+            "body": "",
+            "text": "Bosque Nuboso de Monteverde",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa196"
+            }
+          }
+        ],
+        "meta": {
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa192"
+        }
+      },
+      {
+        "blockId": "b38",
+        "type": "activity",
+        "text": "Identifiquen y expliquen las problemáticas de los bosques tropicales y las características específicas de las regiones afectadas por los procesos de deforestación. Para ello, realicen los siguientes pasos:",
+        "items": [
+          {
+            "label": "a",
+            "title": "",
+            "body": "",
+            "text": "Seleccionar uno de los bosques tropicales identificados en el contenido estudiado.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa198"
+            }
+          },
+          {
+            "label": "b",
+            "title": "",
+            "body": "",
+            "text": "Describir la zona en la que se ubica y los factores que causan la deforestación y otras problemáticas.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa199"
+            }
+          },
+          {
+            "label": "c",
+            "title": "",
+            "body": "",
+            "text": "Analizar los impactos en la biodiversidad y en el medioambiente, los efectos para las comunidades locales y las medidas de conservación existentes.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa19a"
+            }
+          },
+          {
+            "label": "d",
+            "title": "",
+            "body": "",
+            "text": "Presentar sus hallazgos al resto de la clase y organizar una plenaria en la que comparen regiones.",
+            "value": "",
+            "cells": [],
+            "_id": {
+              "$oid": "6a4faeaa70b9682e40dfa19b"
+            }
+          }
+        ],
+        "meta": {
+          "activityNumber": 8,
+          "activityKind": "en equipo",
+          "headers": []
+        },
+        "_id": {
+          "$oid": "6a4faeaa70b9682e40dfa197"
+        }
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-06-22T18:06:00.650Z"
+    },
+    "dateCreated": {
+      "$date": "2026-07-09T14:22:34.225Z"
+    },
+    "mainTitle": "Unidad 1 · Semana 1",
+    "updatedAt": {
+      "$date": "2026-07-15T22:04:36.333Z"
+    },
+    "heroSubtitle": "Regiones afectadas por la deforestación en bosques tropicales",
+    "objectivesText": "Valorar el rol de los Estados y otros actores, en la preservación y sostenibilidad de los recursos naturales rumbo a una gobernanza efectiva.",
+    "unitTheme": "Tierra, recursos hídricos y seguridad alimentaria",
+    "chapterVideoFileId": "public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-tutor-video-unidad-1-semana-1-1aaf0c2bb6baacf8.mp4",
+    "chapterTranscribeFileId": "public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-tutor-transcribe-unidad-1-semana-1-48b1f3e06e835b1a.vtt",
+    "suggestedQuestions": [
+      {
+        "question": "¿Cuál es el rol de los Estados en la preservación de los recursos naturales?",
+        "answer": "Los Estados tienen un rol importante en la preservación y sostenibilidad de los recursos naturales hacia una gobernanza efectiva.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb78"
+        }
+      },
+      {
+        "question": "¿Qué porcentaje de la superficie terrestre del mundo cubren los bosques?",
+        "answer": "Los bosques cubren alrededor del 31 % de la superficie terrestre del mundo.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb79"
+        }
+      },
+      {
+        "question": "¿Cuáles son las divisiones de los bosques según la zona climática?",
+        "answer": "Los bosques se dividen en tropicales, subtropicales, templados y boreales.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb7a"
+        }
+      },
+      {
+        "question": "¿Qué porcentaje de los bosques a nivel mundial corresponde a los bosques tropicales?",
+        "answer": "Los bosques tropicales representan el 45 % de los bosques a nivel mundial.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb7b"
+        }
+      },
+      {
+        "question": "¿Cuál es la principal problemática que enfrentan los bosques tropicales?",
+        "answer": "La principal problemática es la deforestación.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb7c"
+        }
+      },
+      {
+        "question": "¿Qué actividades humanas contribuyen a la deforestación de los bosques tropicales?",
+        "answer": "Prácticas agrícolas intensivas, pastoreo excesivo, operaciones mineras, construcción de represas y expansión urbana.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb7d"
+        }
+      },
+      {
+        "question": "¿Cuál es la principal causa de la deforestación en zonas tropicales entre 2000 y 2018?",
+        "answer": "La agricultura, que representa casi el 90 % de la deforestación.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb7e"
+        }
+      },
+      {
+        "question": "¿Qué efectos tienen las actividades de deforestación en el medio ambiente?",
+        "answer": "Afectan la calidad del agua y del aire, provocando una pérdida significativa de biodiversidad.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb7f"
+        }
+      },
+      {
+        "question": "¿Cuáles son las regiones más afectadas por la deforestación en las zonas tropicales?",
+        "answer": "América del Sur, el centro de África y el sudeste de Asia.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb80"
+        }
+      },
+      {
+        "question": "¿Qué porcentaje de la producción mundial de aceite de palma proviene de Indonesia y Malasia?",
+        "answer": "El 84 %.",
+        "_id": {
+          "$oid": "6a5661ac22f0722ecd0feb81"
+        }
+      }
+    ],
+    "videoScript": {
+      "title": "Regiones afectadas por la deforestación en bosques tropicales",
+      "language": "es",
+      "fullNarration": "Unidad 1 · Semana 1. Tierra, recursos hídricos y seguridad alimentaria Los bosques son ecosistemas complejos que desempeñan un papel vital para la vida humana. Cubren alrededor del 31 % de la superficie terrestre del mundo y cumplen diversas funciones, entre las que se incluyen producción de oxígeno, purificación del aire, provisión de agua y de otros recursos naturales, por lo que son muy importantes para el mantenimiento de la salud y el equilibrio del planeta. Valorar el rol de los Estados y otros actores, en la preservación y sostenibilidad de los recursos naturales rumbo a una gobernanza efectiva. Los bosques tropicales son fundamentales para el equilibrio ecológico del planeta. Se caracterizan por su clima cálido y húmedo y albergan una asombrosa diversidad biológica, con aproximadamente el 60 % de las especies conocidas de fauna y flora a nivel mundial. Sin embargo, la deforestación ha amenazado seriamente su salud y estabilidad. La clasificación de los bosques se basa en distintos criterios, como la zona climática y el tipo de vegetación. Los bosques tropicales representan el 45 % de la cobertura forestal mundial, mientras que los boreales y templados son menos prevalentes. En el gráfico de distribución mundial de los bosques por zona climática, podemos observar que los bosques tropicales son los más abundantes, alcanzando un 45 %. Los bosques boreales representan un 27 %, los templados un 16 % y los subtropicales un 11 %. La deforestación es la principal problemática que afecta a los bosques tropicales. Esta se produce mayoritariamente debido a actividades humanas como la agricultura intensiva y la expansión urbana. En el gráfico sobre el impacto de las actividades productivas en la deforestación, se muestra que el 52.3 % de la deforestación se debe a la ampliación de tierras de cultivo y el 37.5 % a la ampliación de tierras de pastoreo. La deforestación es el proceso mediante el cual se elimina o reduce, a gran escala, la cobertura forestal de un área determinada. Puede ser causada por actividades humanas o naturales. La contaminación se produce al introducir agentes químicos que alteran el ecosistema forestal. El cambio climático afecta a los bosques tropicales, haciéndolos más vulnerables a sequías e incendios. La sobreexplotación de recursos forestales amenaza la capacidad de regeneración natural de estos ecosistemas. La tala excesiva y la explotación sin prácticas sostenibles son preocupaciones serias. En el mapa de las principales actividades productivas en bosques tropicales, se destacan regiones como la Amazonía, la Cuenca del Congo y los bosques de sudeste asiático. En América del Sur, el 18 % de los bosques amazónicos se ha perdido completamente. La expansión de tierras para pastoreo y minería ha afectado la biodiversidad y calidad del agua. En Centro de África, la agricultura de subsistencia es la causa principal de deforestación. La cuenca del río Congo enfrenta serios desafíos por la explotación forestal y minería. En el sudeste asiático, la producción de aceite de palma es la principal causa de deforestación. Indonesia y Malasia son responsables del 84 % de la producción mundial de este aceite. Glosario En resumen, la deforestación, la contaminación, el cambio climático y la sobreexplotación son desafíos críticos que enfrentan los bosques tropicales. Es vital implementar estrategias de conservación y sostenibilidad para proteger estos ecosistemas. Recuerda que cada acción cuenta en la preservación de nuestros bosques. Juntos podemos hacer la diferencia.",
+      "estimatedDurationSeconds": 445,
+      "scenes": [
+        {
+          "sceneNumber": 1,
+          "type": "title",
+          "title": "Unidad 1 · Semana 1",
+          "subtitle": "Tierra, recursos hídricos y seguridad alimentaria",
+          "narration": "Unidad 1 · Semana 1. Tierra, recursos hídricos y seguridad alimentaria",
+          "durationSeconds": 10,
+          "visualNotes": "Texto en pantalla con el título y subtítulo.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36adb"
+          }
+        },
+        {
+          "sceneNumber": 2,
+          "type": "concept",
+          "title": "Regiones afectadas por la deforestación en bosques tropicales",
+          "subtitle": "",
+          "narration": "Los bosques son ecosistemas complejos que desempeñan un papel vital para la vida humana. Cubren alrededor del 31 % de la superficie terrestre del mundo y cumplen diversas funciones, entre las que se incluyen producción de oxígeno, purificación del aire, provisión de agua y de otros recursos naturales, por lo que son muy importantes para el mantenimiento de la salud y el equilibrio del planeta.",
+          "durationSeconds": 15,
+          "visualNotes": "Animación de un bosque tropical con fauna y flora.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36adc"
+          }
+        },
+        {
+          "sceneNumber": 3,
+          "type": "objectives",
+          "title": "Objetivos de aprendizaje",
+          "subtitle": "",
+          "narration": "Valorar el rol de los Estados y otros actores, en la preservación y sostenibilidad de los recursos naturales rumbo a una gobernanza efectiva.",
+          "durationSeconds": 20,
+          "visualNotes": "Texto en pantalla con iconos de sostenibilidad.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36add"
+          }
+        },
+        {
+          "sceneNumber": 4,
+          "type": "concept",
+          "title": "Importancia de los bosques tropicales",
+          "subtitle": "",
+          "narration": "Los bosques tropicales son fundamentales para el equilibrio ecológico del planeta. Se caracterizan por su clima cálido y húmedo y albergan una asombrosa diversidad biológica, con aproximadamente el 60 % de las especies conocidas de fauna y flora a nivel mundial. Sin embargo, la deforestación ha amenazado seriamente su salud y estabilidad.",
+          "durationSeconds": 30,
+          "visualNotes": "Gráficos de biodiversidad y deforestación.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36ade"
+          }
+        },
+        {
+          "sceneNumber": 5,
+          "type": "concept",
+          "title": "Clasificación de los bosques",
+          "subtitle": "",
+          "narration": "La clasificación de los bosques se basa en distintos criterios, como la zona climática y el tipo de vegetación. Los bosques tropicales representan el 45 % de la cobertura forestal mundial, mientras que los boreales y templados son menos prevalentes.",
+          "durationSeconds": 30,
+          "visualNotes": "Animación de un mapa mundial mostrando diferentes tipos de bosques.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36adf"
+          }
+        },
+        {
+          "sceneNumber": 6,
+          "type": "chart",
+          "title": "Distribución mundial de los bosques por zona climática",
+          "subtitle": "",
+          "narration": "En el gráfico de distribución mundial de los bosques por zona climática, podemos observar que los bosques tropicales son los más abundantes, alcanzando un 45 %. Los bosques boreales representan un 27 %, los templados un 16 % y los subtropicales un 11 %.",
+          "durationSeconds": 30,
+          "visualNotes": "Gráfico de dona mostrando la distribución porcentual.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [
+            {
+              "label": "Boreal",
+              "value": 27,
+              "_id": {
+                "$oid": "6a5803f447c75dc569b36ae1"
+              }
+            },
+            {
+              "label": "Templada",
+              "value": 16,
+              "_id": {
+                "$oid": "6a5803f447c75dc569b36ae2"
+              }
+            },
+            {
+              "label": "Tropical",
+              "value": 45,
+              "_id": {
+                "$oid": "6a5803f447c75dc569b36ae3"
+              }
+            },
+            {
+              "label": "Subtropical",
+              "value": 11,
+              "_id": {
+                "$oid": "6a5803f447c75dc569b36ae4"
+              }
+            }
+          ],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36ae0"
+          }
+        },
+        {
+          "sceneNumber": 7,
+          "type": "concept",
+          "title": "Impacto de las actividades productivas en la deforestación",
+          "subtitle": "",
+          "narration": "La deforestación es la principal problemática que afecta a los bosques tropicales. Esta se produce mayoritariamente debido a actividades humanas como la agricultura intensiva y la expansión urbana.",
+          "durationSeconds": 25,
+          "visualNotes": "Imágenes de actividades agrícolas y urbanas.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36ae5"
+          }
+        },
+        {
+          "sceneNumber": 8,
+          "type": "chart",
+          "title": "El impacto de las actividades productivas en la deforestación",
+          "subtitle": "",
+          "narration": "En el gráfico sobre el impacto de las actividades productivas en la deforestación, se muestra que el 52.3 % de la deforestación se debe a la ampliación de tierras de cultivo y el 37.5 % a la ampliación de tierras de pastoreo.",
+          "durationSeconds": 30,
+          "visualNotes": "Gráfico de barras mostrando los porcentajes.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [
+            {
+              "label": "Ampliación de tierras de cultivo",
+              "value": 52.3,
+              "_id": {
+                "$oid": "6a5803f447c75dc569b36ae7"
+              }
+            },
+            {
+              "label": "Ampliación de tierras de pastoreo",
+              "value": 37.5,
+              "_id": {
+                "$oid": "6a5803f447c75dc569b36ae8"
+              }
+            }
+          ],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36ae6"
+          }
+        },
+        {
+          "sceneNumber": 9,
+          "type": "concept",
+          "title": "Definición de deforestación",
+          "subtitle": "",
+          "narration": "La deforestación es el proceso mediante el cual se elimina o reduce, a gran escala, la cobertura forestal de un área determinada. Puede ser causada por actividades humanas o naturales.",
+          "durationSeconds": 20,
+          "visualNotes": "Animación explicativa sobre la deforestación.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36ae9"
+          }
+        },
+        {
+          "sceneNumber": 10,
+          "type": "concept",
+          "title": "Contaminación y cambio climático",
+          "subtitle": "",
+          "narration": "La contaminación se produce al introducir agentes químicos que alteran el ecosistema forestal. El cambio climático afecta a los bosques tropicales, haciéndolos más vulnerables a sequías e incendios.",
+          "durationSeconds": 30,
+          "visualNotes": "Imágenes de contaminación y efectos del cambio climático.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36aea"
+          }
+        },
+        {
+          "sceneNumber": 11,
+          "type": "concept",
+          "title": "Sobreexplotación de recursos",
+          "subtitle": "",
+          "narration": "La sobreexplotación de recursos forestales amenaza la capacidad de regeneración natural de estos ecosistemas. La tala excesiva y la explotación sin prácticas sostenibles son preocupaciones serias.",
+          "durationSeconds": 25,
+          "visualNotes": "Imágenes de tala de árboles y explotación forestal.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36aeb"
+          }
+        },
+        {
+          "sceneNumber": 12,
+          "type": "map",
+          "title": "Mapa de actividades productivas en bosques tropicales",
+          "subtitle": "",
+          "narration": "En el mapa de las principales actividades productivas en bosques tropicales, se destacan regiones como la Amazonía, la Cuenca del Congo y los bosques de sudeste asiático.",
+          "durationSeconds": 30,
+          "visualNotes": "Mapa interactivo mostrando las regiones afectadas.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [
+            "Amazonía",
+            "Cuenca del Congo",
+            "Bosques de Madagascar",
+            "Bosques de Papúa Nueva",
+            "Bosques mesoamericanos",
+            "Bosques de sudeste asiático"
+          ],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36aec"
+          }
+        },
+        {
+          "sceneNumber": 13,
+          "type": "concept",
+          "title": "Situación en América del Sur",
+          "subtitle": "",
+          "narration": "En América del Sur, el 18 % de los bosques amazónicos se ha perdido completamente. La expansión de tierras para pastoreo y minería ha afectado la biodiversidad y calidad del agua.",
+          "durationSeconds": 30,
+          "visualNotes": "Imágenes de la Amazonía y sus problemas.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36aed"
+          }
+        },
+        {
+          "sceneNumber": 14,
+          "type": "regional",
+          "title": "Situación en Centro de África",
+          "subtitle": "",
+          "narration": "En Centro de África, la agricultura de subsistencia es la causa principal de deforestación. La cuenca del río Congo enfrenta serios desafíos por la explotación forestal y minería.",
+          "durationSeconds": 30,
+          "visualNotes": "Imágenes de la Cuenca del Congo y sus actividades.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36aee"
+          }
+        },
+        {
+          "sceneNumber": 15,
+          "type": "regional",
+          "title": "Situación en Sudeste asiático",
+          "subtitle": "",
+          "narration": "En el sudeste asiático, la producción de aceite de palma es la principal causa de deforestación. Indonesia y Malasia son responsables del 84 % de la producción mundial de este aceite.",
+          "durationSeconds": 30,
+          "visualNotes": "Imágenes de plantaciones de palma aceitera.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36aef"
+          }
+        },
+        {
+          "sceneNumber": 16,
+          "type": "bulletList",
+          "title": "Glosario",
+          "subtitle": "",
+          "narration": "Glosario",
+          "durationSeconds": 20,
+          "visualNotes": "Lista de términos en pantalla.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36af0"
+          }
+        },
+        {
+          "sceneNumber": 17,
+          "type": "concept",
+          "title": "Resumen",
+          "subtitle": "",
+          "narration": "En resumen, la deforestación, la contaminación, el cambio climático y la sobreexplotación son desafíos críticos que enfrentan los bosques tropicales. Es vital implementar estrategias de conservación y sostenibilidad para proteger estos ecosistemas.",
+          "durationSeconds": 25,
+          "visualNotes": "Texto en pantalla con un llamado a la acción.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36af1"
+          }
+        },
+        {
+          "sceneNumber": 18,
+          "type": "outro",
+          "title": "Cierre",
+          "subtitle": "",
+          "narration": "Recuerda que cada acción cuenta en la preservación de nuestros bosques. Juntos podemos hacer la diferencia.",
+          "durationSeconds": 15,
+          "visualNotes": "Animación inspiradora sobre la conservación.",
+          "term": "",
+          "definition": "",
+          "items": [],
+          "data": [],
+          "regions": [],
+          "_id": {
+            "$oid": "6a5803f447c75dc569b36af2"
+          }
+        }
+      ],
+      "generatedAt": {
+        "$date": "2026-07-15T22:04:36.285Z"
+      }
+    }
+  }

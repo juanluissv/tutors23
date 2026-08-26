@@ -12,6 +12,14 @@ import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
 
+const BOOK_INDEX_LABELS = {
+	chapterFallback: (n) => `Capítulo ${n}`,
+	pagesRange: (start, end) => `Páginas ${start}–${end}`,
+	fromPage: (start) => `Desde la página ${start}`,
+	throughPage: (end) => `Hasta la página ${end}`,
+	otherChapters: 'Otros capítulos',
+}
+
 function StudentViewBookScreen () {
 	const navigate = useNavigate()
 	const { subjectId } = useParams()
@@ -68,7 +76,11 @@ function StudentViewBookScreen () {
 	}, [bookLessons])
 
 	const { rows, groups } = useMemo(
-		() => buildBookIndex(bookChapters, lessonsByChapterId),
+		() => buildBookIndex(
+			bookChapters,
+			lessonsByChapterId,
+			BOOK_INDEX_LABELS,
+		),
 		[bookChapters, lessonsByChapterId],
 	)
 

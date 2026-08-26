@@ -57,6 +57,11 @@ const studentSchema = mongoose.Schema({
             required: false,
             ref: 'GradeLevel',
         },
+    program: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        ref: 'UniversityProgram',
+    },
     subjects: [
         {
             type: mongoose.Schema.Types.ObjectId,

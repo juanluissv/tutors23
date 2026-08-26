@@ -5,6 +5,12 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import {
 	useGenerateChapterTutorTxtFromLessonMutation,
+	useGenerateSuggestedQuestionsFromLessonMutation,
+	useGenerateVideoScriptFromLessonMutation,
+	useGenerateVideoScriptAudioFromLessonMutation,
+	useGenerateSceneIllustrationsFromLessonMutation,
+	useGenerateAnimatedVideoFromLessonMutation,
+	useCheckAnimatedVideoStatusFromLessonMutation,
 	useGetBookLessonsBySubjectQuery,
 	useGetSubjectsBySchoolQuery,
 	useUploadChapterTutorVideoMutation,
@@ -118,6 +124,20 @@ function SchoolAdminCreateTutor () {
 		window.innerWidth > 768,
 	)
 	const [generatingChapterId, setGeneratingChapterId] = useState(null)
+	const [generatingQuestionsChapterId, setGeneratingQuestionsChapterId] =
+		useState(null)
+	const [generatingVideoScriptChapterId, setGeneratingVideoScriptChapterId] =
+		useState(null)
+	const [generatingVideoAudioChapterId, setGeneratingVideoAudioChapterId] =
+		useState(null)
+	const [
+		generatingIllustrationsChapterId,
+		setGeneratingIllustrationsChapterId,
+	] = useState(null)
+	const [generatingAnimatedVideoChapterId, setGeneratingAnimatedVideoChapterId] =
+		useState(null)
+	const [checkingVideoStatusChapterId, setCheckingVideoStatusChapterId] =
+		useState(null)
 	const [uploadingChapterId, setUploadingChapterId] = useState(null)
 	const [uploadingTranscribeChapterId, setUploadingTranscribeChapterId] =
 		useState(null)
@@ -125,12 +145,30 @@ function SchoolAdminCreateTutor () {
 	const [pendingTranscribeChapterId, setPendingTranscribeChapterId] =
 		useState(null)
 	const [chapterErrors, setChapterErrors] = useState({})
+	const [questionErrors, setQuestionErrors] = useState({})
+	const [videoScriptErrors, setVideoScriptErrors] = useState({})
+	const [videoAudioErrors, setVideoAudioErrors] = useState({})
+	const [illustrationErrors, setIllustrationErrors] = useState({})
+	const [animatedVideoErrors, setAnimatedVideoErrors] = useState({})
+	const [animatedVideoStatusMessages, setAnimatedVideoStatusMessages] = useState({})
 	const [videoErrors, setVideoErrors] = useState({})
 	const [transcribeErrors, setTranscribeErrors] = useState({})
 	const videoInputRef = useRef(null)
 	const transcribeInputRef = useRef(null)
 
 	const [generateTutorTxt] = useGenerateChapterTutorTxtFromLessonMutation()
+	const [generateSuggestedQuestions] =
+		useGenerateSuggestedQuestionsFromLessonMutation()
+	const [generateVideoScript] =
+		useGenerateVideoScriptFromLessonMutation()
+	const [generateVideoScriptAudio] =
+		useGenerateVideoScriptAudioFromLessonMutation()
+	const [generateSceneIllustrations] =
+		useGenerateSceneIllustrationsFromLessonMutation()
+	const [generateAnimatedVideo] =
+		useGenerateAnimatedVideoFromLessonMutation()
+	const [checkAnimatedVideoStatus] =
+		useCheckAnimatedVideoStatusFromLessonMutation()
 	const [uploadChapterTutorVideo] = useUploadChapterTutorVideoMutation()
 	const [uploadChapterTutorTranscribe] =
 		useUploadChapterTutorTranscribeMutation()
@@ -216,6 +254,124 @@ function SchoolAdminCreateTutor () {
 	}, [bookChapters])
 
 	const tutorTxtReadyCount = chapterTxtByChapterId.size
+
+	const suggestedQuestionsByChapterId = useMemo(() => {
+		const map = new Map()
+		for (const lesson of bookLessons) {
+			const chapterId = lesson?.bookChapter?.chapterId
+			if (!chapterId) {
+				continue
+			}
+			const count = Array.isArray(lesson?.suggestedQuestions)
+				? lesson.suggestedQuestions.length
+				: 0
+			if (count > 0 || lesson?.hasSuggestedQuestions) {
+				map.set(String(chapterId), {
+					count: count || 10,
+				})
+			}
+		}
+		return map
+	}, [bookLessons])
+
+	const suggestedQuestionsReadyCount = suggestedQuestionsByChapterId.size
+
+	const videoScriptByChapterId = useMemo(() => {
+		const map = new Map()
+		for (const lesson of bookLessons) {
+			const chapterId = lesson?.bookChapter?.chapterId
+			if (!chapterId) {
+				continue
+			}
+			const sceneCount = Array.isArray(lesson?.videoScript?.scenes)
+				? lesson.videoScript.scenes.length
+				: 0
+			if (sceneCount > 0 || lesson?.hasVideoScript) {
+				map.set(String(chapterId), {
+					sceneCount: sceneCount || 0,
+					title: lesson?.videoScript?.title
+						? String(lesson.videoScript.title).trim()
+						: '',
+					estimatedDurationSeconds: Number(
+						lesson?.videoScript?.estimatedDurationSeconds,
+					) || 0,
+				})
+			}
+		}
+		return map
+	}, [bookLessons])
+
+	const videoScriptReadyCount = videoScriptByChapterId.size
+
+	const videoAudioByChapterId = useMemo(() => {
+		const map = new Map()
+		for (const lesson of bookLessons) {
+			const chapterId = lesson?.bookChapter?.chapterId
+			if (!chapterId) {
+				continue
+			}
+			const audioFileId = lesson?.videoScriptAudioFileId
+				&& String(lesson.videoScriptAudioFileId).trim() !== ''
+				? String(lesson.videoScriptAudioFileId).trim()
+				: null
+			if (audioFileId || lesson?.hasVideoScriptAudio) {
+				map.set(String(chapterId), {
+					videoScriptAudioFileId: audioFileId || '',
+					videoScriptAudioFileUrl: lesson?.videoScriptAudioFileUrl || '',
+					audioGeneratedAt: lesson?.videoScript?.audioGeneratedAt || null,
+				})
+			}
+		}
+		return map
+	}, [bookLessons])
+
+	const videoAudioReadyCount = videoAudioByChapterId.size
+
+	const sceneIllustrationsByChapterId = useMemo(() => {
+		const map = new Map()
+		for (const lesson of bookLessons) {
+			const chapterId = lesson?.bookChapter?.chapterId
+			if (!chapterId) {
+				continue
+			}
+			const count = Number(lesson?.sceneIllustrationCount)
+				|| Number(lesson?.videoScript?.sceneIllustrationCount)
+				|| 0
+			const total = Array.isArray(lesson?.videoScript?.scenes)
+				? lesson.videoScript.scenes.length
+				: 0
+			if (count > 0 || lesson?.hasSceneIllustrations) {
+				map.set(String(chapterId), {
+					count: count || 0,
+					total: total || count || 0,
+					complete: Boolean(lesson?.hasSceneIllustrations)
+						|| (total > 0 && count >= total),
+				})
+			}
+		}
+		return map
+	}, [bookLessons])
+
+	const sceneIllustrationsReadyCount = sceneIllustrationsByChapterId.size
+
+	const creatomatePendingByChapterId = useMemo(() => {
+		const map = new Map()
+		for (const lesson of bookLessons) {
+			const chapterId = lesson?.bookChapter?.chapterId
+			if (!chapterId) {
+				continue
+			}
+			if (lesson?.hasCreatomateRenderPending) {
+				map.set(String(chapterId), {
+					creatomateRenderId: lesson?.creatomateRenderId || '',
+					creatomateRenderStatus: lesson?.creatomateRenderStatus || '',
+					creatomateRenderRequestedAt:
+						lesson?.creatomateRenderRequestedAt || null,
+				})
+			}
+		}
+		return map
+	}, [bookLessons])
 
 	const chapterVideoByChapterId = useMemo(() => {
 		const map = new Map()
@@ -305,6 +461,207 @@ function SchoolAdminCreateTutor () {
 		}
 	}
 
+	const handleGenerateSuggestedQuestions = async (chapterId) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		setGeneratingQuestionsChapterId(String(chapterId))
+		setQuestionErrors((prev) => {
+			const next = { ...prev }
+			delete next[String(chapterId)]
+			return next
+		})
+
+		try {
+			await generateSuggestedQuestions({
+				id: subjectId,
+				chapterId: String(chapterId),
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'Could not generate suggested questions. Please try again.'
+			setQuestionErrors((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} finally {
+			setGeneratingQuestionsChapterId(null)
+		}
+	}
+
+	const handleGenerateVideoScript = async (chapterId) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		setGeneratingVideoScriptChapterId(String(chapterId))
+		setVideoScriptErrors((prev) => {
+			const next = { ...prev }
+			delete next[String(chapterId)]
+			return next
+		})
+
+		try {
+			await generateVideoScript({
+				id: subjectId,
+				chapterId: String(chapterId),
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'Could not generate video script. Please try again.'
+			setVideoScriptErrors((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} finally {
+			setGeneratingVideoScriptChapterId(null)
+		}
+	}
+
+	const handleGenerateVideoAudio = async (chapterId) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		setGeneratingVideoAudioChapterId(String(chapterId))
+		setVideoAudioErrors((prev) => {
+			const next = { ...prev }
+			delete next[String(chapterId)]
+			return next
+		})
+
+		try {
+			await generateVideoScriptAudio({
+				id: subjectId,
+				chapterId: String(chapterId),
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'Could not generate video narration audio. Please try again.'
+			setVideoAudioErrors((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} finally {
+			setGeneratingVideoAudioChapterId(null)
+		}
+	}
+
+	const handleGenerateSceneIllustrations = async (chapterId, force = false) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		setGeneratingIllustrationsChapterId(String(chapterId))
+		setIllustrationErrors((prev) => {
+			const next = { ...prev }
+			delete next[String(chapterId)]
+			return next
+		})
+
+		try {
+			await generateSceneIllustrations({
+				id: subjectId,
+				chapterId: String(chapterId),
+				force,
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'Could not generate scene illustrations. Please try again.'
+			setIllustrationErrors((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} finally {
+			setGeneratingIllustrationsChapterId(null)
+		}
+	}
+
+	const handleGenerateAnimatedVideo = async (chapterId) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		setGeneratingAnimatedVideoChapterId(String(chapterId))
+		setAnimatedVideoErrors((prev) => {
+			const next = { ...prev }
+			delete next[String(chapterId)]
+			return next
+		})
+
+		try {
+			const result = await generateAnimatedVideo({
+				id: subjectId,
+				chapterId: String(chapterId),
+			}).unwrap()
+			await refetchLessons()
+			const message = result?.message
+				|| 'Creatomate render started. Use Check video status when ready.'
+			setAnimatedVideoStatusMessages((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'Could not generate animated video. Please try again.'
+			setAnimatedVideoErrors((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} finally {
+			setGeneratingAnimatedVideoChapterId(null)
+		}
+	}
+
+	const handleCheckVideoStatus = async (chapterId) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		setCheckingVideoStatusChapterId(String(chapterId))
+		setAnimatedVideoErrors((prev) => {
+			const next = { ...prev }
+			delete next[String(chapterId)]
+			return next
+		})
+
+		try {
+			const result = await checkAnimatedVideoStatus({
+				id: subjectId,
+				chapterId: String(chapterId),
+			}).unwrap()
+			await refetchLessons()
+			const message = result?.message
+				|| (result?.addedToLesson
+					? 'Video is ready and added to the lesson.'
+					: 'Video is still processing on Creatomate.')
+			setAnimatedVideoStatusMessages((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'Could not check video status. Please try again.'
+			setAnimatedVideoErrors((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} finally {
+			setCheckingVideoStatusChapterId(null)
+		}
+	}
+
 	const handleUploadVideoClick = (chapterId) => {
 		if (
 			!subjectId
@@ -312,6 +669,11 @@ function SchoolAdminCreateTutor () {
 			|| uploadingChapterId
 			|| uploadingTranscribeChapterId
 			|| generatingChapterId
+			|| generatingQuestionsChapterId
+			|| generatingVideoScriptChapterId
+			|| generatingVideoAudioChapterId
+			|| generatingAnimatedVideoChapterId
+			|| checkingVideoStatusChapterId
 		) {
 			return
 		}
@@ -326,6 +688,11 @@ function SchoolAdminCreateTutor () {
 			|| uploadingChapterId
 			|| uploadingTranscribeChapterId
 			|| generatingChapterId
+			|| generatingQuestionsChapterId
+			|| generatingVideoScriptChapterId
+			|| generatingVideoAudioChapterId
+			|| generatingAnimatedVideoChapterId
+			|| checkingVideoStatusChapterId
 		) {
 			return
 		}
@@ -583,7 +950,7 @@ function SchoolAdminCreateTutor () {
 										<p className='view-book__summary-hint'>
 											{readyCount === 0
 												? 'Generate web lessons first, then create AI tutors from them.'
-												: `${tutorTxtReadyCount} of ${readyCount} lessons have tutor text files ready · ${tutorVideoReadyCount} have tutor videos uploaded · ${tutorTranscribeReadyCount} have captions.`}
+												: `${tutorTxtReadyCount} of ${readyCount} lessons have tutor text files ready · ${suggestedQuestionsReadyCount} have suggested questions · ${videoScriptReadyCount} have video scripts · ${videoAudioReadyCount} have video narration audio · ${sceneIllustrationsReadyCount} have scene illustrations · ${tutorVideoReadyCount} have tutor videos uploaded · ${tutorTranscribeReadyCount} have captions.`}
 										</p>
 									</div>
 									<Link
@@ -669,6 +1036,25 @@ function SchoolAdminCreateTutor () {
 														const transcribeMeta = chapterTranscribeByChapterId.get(
 															chapterKey,
 														)
+														const questionsMeta = suggestedQuestionsByChapterId.get(
+															chapterKey,
+														)
+														const videoScriptMeta = videoScriptByChapterId.get(
+															chapterKey,
+														)
+														const videoAudioMeta = videoAudioByChapterId.get(
+															chapterKey,
+														)
+														const illustrationsMeta =
+															sceneIllustrationsByChapterId.get(
+																chapterKey,
+															)
+														const creatomatePendingMeta = creatomatePendingByChapterId.get(
+															chapterKey,
+														)
+														const hasCreatomatePending = Boolean(
+															creatomatePendingMeta?.creatomateRenderId,
+														)
 														const hasTutorTxt = Boolean(
 															txtMeta?.chapterTxtFileId
 															|| txtMeta?.chapterTxtFileUrl,
@@ -681,20 +1067,76 @@ function SchoolAdminCreateTutor () {
 															transcribeMeta?.chapterTranscribeFileId
 															|| transcribeMeta?.chapterTranscribeFileUrl,
 														)
+														const hasSuggestedQuestions = Boolean(
+															questionsMeta?.count > 0,
+														)
+														const hasVideoScript = Boolean(
+															videoScriptMeta?.sceneCount > 0,
+														)
+														const hasVideoAudio = Boolean(
+															videoAudioMeta?.videoScriptAudioFileId
+															|| videoAudioMeta?.videoScriptAudioFileUrl,
+														)
+														const hasSceneIllustrations = Boolean(
+															illustrationsMeta?.complete
+															|| (
+																illustrationsMeta?.count > 0
+																&& illustrationsMeta?.total > 0
+																&& illustrationsMeta.count
+																	>= illustrationsMeta.total
+															),
+														)
+														const hasAnySceneIllustrations = Boolean(
+															illustrationsMeta?.count > 0,
+														)
 														const isGeneratingThis = generatingChapterId
 															=== chapterKey
+														const isGeneratingQuestionsThis =
+															generatingQuestionsChapterId === chapterKey
+														const isGeneratingVideoScriptThis =
+															generatingVideoScriptChapterId === chapterKey
+														const isGeneratingVideoAudioThis =
+															generatingVideoAudioChapterId === chapterKey
+														const isGeneratingIllustrationsThis =
+															generatingIllustrationsChapterId === chapterKey
+														const isGeneratingAnimatedVideoThis =
+															generatingAnimatedVideoChapterId === chapterKey
+														const isCheckingVideoStatusThis =
+															checkingVideoStatusChapterId === chapterKey
 														const isUploadingThis = uploadingChapterId
 															=== chapterKey
 														const isUploadingTranscribeThis =
 															uploadingTranscribeChapterId === chapterKey
 														const chapterError = chapterErrors[chapterKey]
+														const questionError = questionErrors[chapterKey]
+														const videoScriptError = videoScriptErrors[chapterKey]
+														const videoAudioError = videoAudioErrors[chapterKey]
+														const illustrationError =
+															illustrationErrors[chapterKey]
+														const animatedVideoError = animatedVideoErrors[chapterKey]
+														const animatedVideoStatusMessage =
+															animatedVideoStatusMessages[chapterKey]
 														const videoError = videoErrors[chapterKey]
 														const transcribeError = transcribeErrors[chapterKey]
 														const actionDisabled = Boolean(
 															generatingChapterId
+															|| generatingQuestionsChapterId
+															|| generatingVideoScriptChapterId
+															|| generatingVideoAudioChapterId
+															|| generatingIllustrationsChapterId
+															|| generatingAnimatedVideoChapterId
+															|| checkingVideoStatusChapterId
 															|| uploadingChapterId
 															|| uploadingTranscribeChapterId,
 														)
+														const videoAudioDisabled = actionDisabled
+															|| !hasVideoScript
+														const illustrationsDisabled = actionDisabled
+															|| !hasVideoScript
+														const animatedVideoDisabled = actionDisabled
+															|| !hasVideoAudio
+														const checkVideoStatusDisabled = actionDisabled
+															|| !hasCreatomatePending
 														const uploadDisabled = actionDisabled
 															|| !hasTutorTxt
 														const transcribeUploadDisabled = actionDisabled
@@ -805,6 +1247,131 @@ function SchoolAdminCreateTutor () {
 																			{chapterError}
 																		</p>
 																	) : null}
+																	{questionError ? (
+																		<p className='create-tutor__error'>
+																			{questionError}
+																		</p>
+																	) : null}
+																	{hasSuggestedQuestions ? (
+																		<p className='create-tutor__questions-status'>
+																			{questionsMeta.count} suggested
+																			{' '}
+																			questions ready for students
+																		</p>
+																	) : null}
+																	{videoScriptError ? (
+																		<p className='create-tutor__error'>
+																			{videoScriptError}
+																		</p>
+																	) : null}
+																	{hasVideoScript ? (
+																		<p className='create-tutor__video-script-status'>
+																			Video script ready
+																			{' '}
+																			({videoScriptMeta.sceneCount} scenes
+																			{videoScriptMeta.estimatedDurationSeconds > 0
+																				? ` · ~${Math.round(
+																					videoScriptMeta.estimatedDurationSeconds / 60,
+																				)} min`
+																				: ''}
+																			)
+																		</p>
+																	) : null}
+																	{videoAudioError ? (
+																		<p className='create-tutor__error'>
+																			{videoAudioError}
+																		</p>
+																	) : null}
+																	{hasVideoAudio ? (
+																		<p className='create-tutor__video-audio-status'>
+																			Video narration audio ready
+																			{videoAudioMeta?.videoScriptAudioFileUrl ? (
+																				<>
+																					{' '}
+																					(
+																					<a
+																						href={
+																							videoAudioMeta.videoScriptAudioFileUrl
+																						}
+																						className='create-tutor__video-audio-link'
+																						target='_blank'
+																						rel='noopener noreferrer'
+																					>
+																						listen
+																					</a>
+																					)
+																				</>
+																			) : null}
+																		</p>
+																	) : null}
+																	{illustrationError ? (
+																		<p className='create-tutor__error'>
+																			{illustrationError}
+																		</p>
+																	) : null}
+																	{hasAnySceneIllustrations ? (
+																		<p className='create-tutor__illustrations-status'>
+																			Scene illustrations ready
+																			{' '}
+																			({illustrationsMeta.count}
+																			{illustrationsMeta.total > 0
+																				? ` of ${illustrationsMeta.total}`
+																				: ''}
+																			{' '}
+																			scenes
+																			{hasSceneIllustrations
+																				? ''
+																				: ' · incomplete'}
+																			)
+																		</p>
+																	) : null}
+																	{hasCreatomatePending ? (
+																		<p className='create-tutor__creatomate-pending-status'>
+																			Creatomate render in progress
+																			{creatomatePendingMeta?.creatomateRenderStatus
+																				? ` (${creatomatePendingMeta.creatomateRenderStatus})`
+																				: ''}
+																			{' '}
+																			— use Check video status.
+																		</p>
+																	) : null}
+																	{animatedVideoStatusMessage ? (
+																		<p className={
+																			animatedVideoStatusMessage
+																				.toLowerCase()
+																				.includes('added to the lesson')
+																				? 'create-tutor__animated-video-success'
+																				: 'create-tutor__creatomate-pending-status'
+																		}
+																		>
+																			{animatedVideoStatusMessage}
+																			{animatedVideoStatusMessage
+																				.toLowerCase()
+																				.includes('added to the lesson')
+																				&& videoMeta?.chapterVideoFileUrl ? (
+																					<>
+																						{' '}
+																						(
+																						<a
+																							href={
+																								videoMeta.chapterVideoFileUrl
+																							}
+																							className='create-tutor__video-audio-link'
+																							target='_blank'
+																							rel='noopener noreferrer'
+																						>
+																							watch
+																						</a>
+																						)
+																					</>
+																				) : null}
+																		</p>
+																	) : null}
+																	{animatedVideoError ? (
+																		<p className='create-tutor__error'>
+																			{animatedVideoError}
+																		</p>
+																	) : null}
 																	{videoError ? (
 																		<p className='create-tutor__error'>
 																			{videoError}
@@ -845,6 +1412,193 @@ function SchoolAdminCreateTutor () {
 																			: hasTutorTxt
 																				? 'Regenerate AI tutor for this lesson'
 																				: 'Generate AI tutor for this lesson'}
+																	</span>
+																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--questions' +
+																		(actionDisabled
+																			? ' create-tutor__generate-btn--disabled'
+																			: '')
+																	}
+																	disabled={actionDisabled}
+																	onClick={() =>
+																		void handleGenerateSuggestedQuestions(
+																			chapterKey,
+																		)}
+																>
+																	<span className='create-tutor__generate-btn-icon'>
+																		<TutorGenerateGlyph />
+																	</span>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isGeneratingQuestionsThis
+																			? 'Generating questions…'
+																			: hasSuggestedQuestions
+																				? 'Regenerate 10 suggested questions'
+																				: 'Generate 10 suggested questions'}
+																	</span>
+																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--video-script' +
+																		(actionDisabled
+																			? ' create-tutor__generate-btn--disabled'
+																			: '')
+																	}
+																	disabled={actionDisabled}
+																	onClick={() =>
+																		void handleGenerateVideoScript(
+																			chapterKey,
+																		)}
+																>
+																	<span className='create-tutor__generate-btn-icon'>
+																		<TutorGenerateGlyph />
+																	</span>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isGeneratingVideoScriptThis
+																			? 'Generating video script…'
+																			: hasVideoScript
+																				? 'Regenerate video script'
+																				: 'Generate video script'}
+																	</span>
+																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--video-audio' +
+																		(videoAudioDisabled
+																			? ' create-tutor__generate-btn--disabled'
+																			: '')
+																	}
+																	disabled={videoAudioDisabled}
+																	title={
+																		!hasVideoScript
+																			? 'Generate the video script first'
+																			: undefined
+																	}
+																	onClick={() =>
+																		void handleGenerateVideoAudio(
+																			chapterKey,
+																		)}
+																>
+																	<span className='create-tutor__generate-btn-icon'>
+																		<TutorGenerateGlyph />
+																	</span>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isGeneratingVideoAudioThis
+																			? 'Generating video audio…'
+																			: hasVideoAudio
+																				? 'Regenerate video narration audio'
+																				: 'Generate video narration audio'}
+																	</span>
+																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--illustrations' +
+																		(illustrationsDisabled
+																			? ' create-tutor__generate-btn--disabled'
+																			: '')
+																	}
+																	disabled={illustrationsDisabled}
+																	title={
+																		!hasVideoScript
+																			? 'Generate the video script first'
+																			: 'Uses OpenAI gpt-image-1-mini (~$0.10–0.20 per chapter)'
+																	}
+																	onClick={() =>
+																		void handleGenerateSceneIllustrations(
+																			chapterKey,
+																			hasSceneIllustrations,
+																		)}
+																>
+																	<span className='create-tutor__generate-btn-icon'>
+																		<TutorGenerateGlyph />
+																	</span>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isGeneratingIllustrationsThis
+																			? 'Generating scene illustrations…'
+																			: hasSceneIllustrations
+																				? 'Regenerate scene illustrations'
+																				: hasAnySceneIllustrations
+																					? 'Finish remaining illustrations'
+																					: 'Generate scene illustrations'}
+																	</span>
+																	<span className='create-tutor__generate-btn-hint'>
+																		OpenAI images · one illustration per scene
+																	</span>
+																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--animated-video' +
+																		(animatedVideoDisabled
+																			? ' create-tutor__generate-btn--disabled'
+																			: '')
+																	}
+																	disabled={animatedVideoDisabled}
+																	title={
+																		!hasVideoAudio
+																			? 'Generate the video narration audio first'
+																			: !hasSceneIllustrations
+																				? 'Tip: generate scene illustrations first for richer visuals'
+																				: 'Renders with Creatomate (may take several minutes)'
+																	}
+																	onClick={() =>
+																		void handleGenerateAnimatedVideo(
+																			chapterKey,
+																		)}
+																>
+																	<span className='create-tutor__generate-btn-icon'>
+																		<TutorGenerateGlyph />
+																	</span>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isGeneratingAnimatedVideoThis
+																			? 'Starting Creatomate render…'
+																			: hasCreatomatePending
+																				? 'Start new Creatomate render'
+																				: hasTutorVideo
+																					? 'Regenerate Creatomate video'
+																					: 'Generate Creatomate video'}
+																	</span>
+																	<span className='create-tutor__generate-btn-hint'>
+																		Starts render on Creatomate · then Check video status
+																	</span>
+																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--check-video' +
+																		(checkVideoStatusDisabled
+																			? ' create-tutor__generate-btn--disabled'
+																			: '')
+																	}
+																	disabled={checkVideoStatusDisabled}
+																	title={
+																		!hasCreatomatePending
+																			? 'Start a Creatomate render first'
+																			: 'Check if Creatomate finished and add video to lesson'
+																	}
+																	onClick={() =>
+																		void handleCheckVideoStatus(
+																			chapterKey,
+																		)}
+																>
+																	<span className='create-tutor__generate-btn-icon'>
+																		<TutorGenerateGlyph />
+																	</span>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isCheckingVideoStatusThis
+																			? 'Checking video status…'
+																			: 'Check video status'}
 																	</span>
 																</button>
 																<button

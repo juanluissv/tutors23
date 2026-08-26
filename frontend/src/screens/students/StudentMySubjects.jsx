@@ -8,10 +8,14 @@ import {
 	useGetProfileQuery,
 } from '../../slices/student/studentApiSlice'
 import { TeacherSubjectsGrid } from '../teachers/TeacherSubjectsGrid'
+import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
 	canViewQuestions,
+	getSelectSubjectsPath,
+	getStudentSubjectsEmptyMessage,
 	getSubscriptionBlockReason,
+	subscriptionNeedsSubjectSelection,
 } from '../../utils/subscriptionAccess'
 import '../../App.css'
 
@@ -48,7 +52,7 @@ function StudentSubjectCardActions ({
 						to={`/students/courses/${subjectId}`}
 						className='teacher-subject-card__btn'
 					>
-						Browse courses
+						Ver cursos
 					</Link>
 				) : (
 					<span
@@ -58,14 +62,14 @@ function StudentSubjectCardActions ({
 						}
 						title={viewBlockReason || undefined}
 					>
-						Browse courses
+						Ver cursos
 					</span>
 				)}
 				<Link
 					to={`/students/viewbook/${subjectId}`}
 					className='teacher-subject-card__btn'
 				>
-					Open book
+					Abrir libro
 				</Link>
 				{/* <Link
 					to={`/students/asknewquestion?subject=${subjectId}`}
@@ -98,6 +102,12 @@ function StudentMySubjects () {
 		currentSubscription,
 		'view',
 	)
+	const needsSelection = subscriptionNeedsSubjectSelection(
+		currentSubscription,
+	)
+	const selectSubjectsPath = getSelectSubjectsPath(
+		currentSubscription,
+	)
 
 	const {
 		data: subjects = [],
@@ -123,6 +133,21 @@ function StudentMySubjects () {
 		}
 	}, [studentInfo, navigate])
 
+	useEffect(() => {
+		if (
+			!isLoadingProfile
+			&& needsSelection
+			&& selectSubjectsPath
+		) {
+			navigate(selectSubjectsPath, { replace: true })
+		}
+	}, [
+		isLoadingProfile,
+		needsSelection,
+		selectSubjectsPath,
+		navigate,
+	])
+
 	if (!studentInfo) {
 		return null
 	}
@@ -141,33 +166,42 @@ function StudentMySubjects () {
 					/>
 					<div className='content-area'>
 						{showSubscriptionNotice ? (
-							<div className='ask-subscription-notice'>
-								<p className='ask-subscription-notice__title'>
-									Subscription required
-								</p>
-								<p className='ask-subscription-notice__text'>
-									{viewBlockReason}
-								</p>
-								<Link
-									to='/students/subscription'
-									className='ask-subscription-notice__link'
-								>
-									View plans & subscribe
-								</Link>
-							</div>
+							<StudentSubscriptionNotice
+								subscription={currentSubscription}
+							/>
 						) : null}
 						<TeacherSubjectsGrid
-							pageTitle='My subjects'
+							pageTitle='Mis materias'
 							pageSubtitle={
-								'Courses you are enrolled in. Open a ' +
-								'subject to continue learning or ask your ' +
-								'tutor a question.'
+								'Materias en las que estás inscrito. Abre '
+								+ 'una materia para seguir aprendiendo o '
+								+ 'preguntarle a tu profesor.'
 							}
-							emptyMessage={
-								'You are not enrolled in any subjects yet. ' +
-								'When a teacher adds you using your email, ' +
-								'your subjects will appear here after you sign in.'
-							}
+							copy={{
+								loading: 'Cargando materias…',
+								error:
+									'No pudimos cargar tus materias. '
+									+ 'Intenta de nuevo en un momento.',
+								retry: 'Intentar de nuevo',
+								students: 'estudiantes',
+								published: 'Publicado',
+								draft: 'Borrador',
+								paginationAria: 'Páginas de materias',
+								showing: 'Mostrando',
+								of: 'de',
+								subjects: 'materias',
+								prev: 'Anterior',
+								next: 'Siguiente',
+								pageAriaPrefix: 'Página',
+								noTeacher: 'Sin profesor',
+								teacherPrefix: 'profesor  ',
+							}}
+							showStudentCount={false}
+							showSubjectMeta={false}
+							showTeacherName={true}
+							emptyMessage={getStudentSubjectsEmptyMessage(
+								currentSubscription,
+							)}
 							subjects={subjects}
 							isLoading={isLoading || isLoadingProfile}
 							isError={isError}

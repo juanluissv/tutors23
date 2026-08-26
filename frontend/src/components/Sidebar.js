@@ -342,7 +342,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
             </span>
             <span className="sidebar-nav-link__label-wrap">
               <span className="sidebar-nav-link__label">
-                New Answers <br /> from Teachers
+                Respuestas   <br /> de  profesores
               </span>
               {newAnswersCount > 0 ? (
                 <span
@@ -359,7 +359,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
               <IconAskTeacher />
             </span>
             <span className="sidebar-nav-link__label">
-              Ask Your Teacher
+              Preguntale a <br /> tu profesor
             </span>
           </NavLink>
           
@@ -367,7 +367,9 @@ function Sidebar ({ isOpen, toggleSidebar }) {
             <span className="sidebar-nav-link__icon-well" aria-hidden="true">
               <IconSubjects />
             </span>
-            <span className="sidebar-nav-link__label">Your Subjects</span>
+            <span className="sidebar-nav-link__label">
+              Tus materias
+            </span>
           </NavLink>
         </nav>
 

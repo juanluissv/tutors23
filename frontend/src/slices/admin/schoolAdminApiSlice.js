@@ -121,7 +121,7 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
             },
         }),
         updateSubject: builder.mutation({
-            query: ({ id, book, ...body }) => {
+            query: ({ id, book, gradesLevel, program, ...body }) => {
                 if (book instanceof File) {
                     const fd = new FormData();
                     if (body.title != null) {
@@ -133,6 +133,19 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
                     if (body.teacherEmail != null) {
                         fd.append('teacherEmail', String(body.teacherEmail));
                     }
+                    if (body.semester !== undefined) {
+                        fd.append('semester', String(body.semester));
+                    }
+                    if (Array.isArray(program)) {
+                        program.forEach((programId) => {
+                            fd.append('program', String(programId));
+                        });
+                    }
+                    if (Array.isArray(gradesLevel)) {
+                        gradesLevel.forEach((gradeLevelId) => {
+                            fd.append('gradesLevel', String(gradeLevelId));
+                        });
+                    }
                     fd.append('book', book);
                     return {
                         url: `${SUBJECTS_URL}/${id}`,
@@ -143,7 +156,7 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
                 return {
                     url: `${SUBJECTS_URL}/${id}`,
                     method: 'PUT',
-                    body,
+                    body: { ...body, gradesLevel, program },
                 };
             },
             invalidatesTags: (result) => {
@@ -223,6 +236,61 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
                 }
                 return tags
             },
+        }),
+        generateSuggestedQuestionsFromLesson: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/generate-suggested-questions`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateVideoScriptFromLesson: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/generate-video-script`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateVideoScriptAudioFromLesson: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/generate-video-audio`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateSceneIllustrationsFromLesson: builder.mutation({
+            query: ({ id, chapterId, force = false }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/generate-scene-illustrations`,
+                method: 'POST',
+                body: { force },
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateAnimatedVideoFromLesson: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/generate-animated-video`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        checkAnimatedVideoStatusFromLesson: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/check-animated-video-status`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
         }),
         uploadChapterTutorVideo: builder.mutation({
             query: ({ id, chapterId, video }) => {
@@ -483,6 +551,12 @@ export const {
     useGenerateSubjectBookChapterPdfMutation,
     useGenerateBookLessonsFromChapterMutation,
     useGenerateChapterTutorTxtFromLessonMutation,
+    useGenerateSuggestedQuestionsFromLessonMutation,
+    useGenerateVideoScriptFromLessonMutation,
+    useGenerateVideoScriptAudioFromLessonMutation,
+    useGenerateSceneIllustrationsFromLessonMutation,
+    useGenerateAnimatedVideoFromLessonMutation,
+    useCheckAnimatedVideoStatusFromLessonMutation,
     useUploadChapterTutorVideoMutation,
     useUploadChapterTutorTranscribeMutation,
     useGetBookLessonsBySubjectQuery,

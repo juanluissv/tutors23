@@ -26,6 +26,16 @@ const GradCapIcon = () => (
 	</svg>
 )
 
+const DEFAULT_COPY = {
+	loading: 'Loading courses…',
+	error:
+		'We couldn\'t load courses for this subject. You may '
+		+ 'not have access, or there was a network issue.',
+	retry: 'Try again',
+	published: 'Published',
+	draft: 'Draft',
+}
+
 /**
  * Course list for a subject (same visual language as TeacherSubjectsGrid).
  */
@@ -39,7 +49,9 @@ export function TeacherCoursesGrid ({
 	isError,
 	refetch,
 	renderCardActions,
+	copy: copyProp,
 }) {
+	const copy = { ...DEFAULT_COPY, ...copyProp }
 	return (
 		<div className='teacher-subjects-page'>
 			<h1 className='teacher-subjects-page__title heading-gradient'>
@@ -56,13 +68,12 @@ export function TeacherCoursesGrid ({
 
 			{isLoading ? (
 				<p className='teacher-subjects-page__subtitle'>
-					Loading courses…
+					{copy.loading}
 				</p>
 			) : isError ? (
 				<div>
 					<p className='teacher-subjects-page__subtitle'>
-						We couldn&apos;t load courses for this subject. You may
-						not have access, or there was a network issue.
+						{copy.error}
 					</p>
 					<button
 						type='button'
@@ -70,7 +81,7 @@ export function TeacherCoursesGrid ({
 						style={{ maxWidth: 200, marginTop: 12 }}
 						onClick={() => void refetch()}
 					>
-						Try again
+						{copy.retry}
 					</button>
 				</div>
 			) : courses.length === 0 ? (
@@ -109,8 +120,8 @@ export function TeacherCoursesGrid ({
 										</h2>
 										<p className='teacher-subject-card__meta'>
 											{course.isPublish
-												? 'Published'
-												: 'Draft'}
+												? copy.published
+												: copy.draft}
 										</p>
 									</div>
 									<div className='teacher-subject-card__badge'>

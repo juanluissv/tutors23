@@ -73,6 +73,18 @@ const subjectSchema = mongoose.Schema({
             ref: 'GradeLevel',
         },
     ],
+    program: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'UniversityProgram',
+        },
+    ],
+    semester: {
+        type: Number,
+        required: false,
+        min: 1,
+    },
     courses: [
         {
             type: mongoose.Schema.Types.ObjectId,

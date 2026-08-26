@@ -16,10 +16,10 @@ import {
 	useGetCourseWatchForStudentQuery,
 	useGetProfileQuery,
 } from '../../slices/student/studentApiSlice'
+import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
 	canViewQuestions,
-	getSubscriptionBlockReason,
 } from '../../utils/subscriptionAccess'
 import { buildSectionGroups, lessonKey } from '../../utils/courseOutline'
 import '../teachers/TeacherPreviewCourseScreen.css'
@@ -89,10 +89,6 @@ function StudentWatchCourseSreen () {
 		[profile?.subscriptions],
 	)
 	const canView = canViewQuestions(currentSubscription)
-	const viewBlockReason = getSubscriptionBlockReason(
-		currentSubscription,
-		'view',
-	)
 
 	const {
 		data: course,
@@ -111,7 +107,12 @@ function StudentWatchCourseSreen () {
 	const [selectedLessonKey, setSelectedLessonKey] = useState(null)
 
 	const sectionGroups = useMemo(
-		() => (course ? buildSectionGroups(course) : []),
+		() => (course
+			? buildSectionGroups(course, {
+				section: 'Sección',
+				otherLessons: 'Otras lecciones',
+			})
+			: []),
 		[course],
 	)
 
@@ -191,7 +192,12 @@ function StudentWatchCourseSreen () {
 	const errText = error?.data?.message
 		|| error?.error
 		|| (typeof error === 'string' ? error : null)
-		|| 'Could not load this course.'
+		|| 'No se pudo cargar este curso.'
+
+	const lessonCount = sectionGroups.reduce(
+		(n, g) => n + g.lessons.length,
+		0,
+	)
 
 	if (!studentInfo) {
 		return null
@@ -210,23 +216,13 @@ function StudentWatchCourseSreen () {
 						<div className='center-content2 course-preview'>
 							{!courseIdOk && (
 								<p className='course-preview__alert'>
-									Invalid course link.
+									Enlace de curso no válido.
 								</p>
 							)}
 							{courseIdOk && !isLoadingProfile && !canView && (
-								<div className='ask-subscription-notice'>
-									<p className='ask-subscription-notice__title'>
-										Subscription required
-									</p>
-									<p className='ask-subscription-notice__text'>
-										{viewBlockReason}
-									</p>
-									<Link
-										to='/students/subscription'
-										className='ask-subscription-notice__link'
-									>
-										View plans & subscribe
-									</Link>
+								<StudentSubscriptionNotice
+									subscription={currentSubscription}
+								>
 									<div
 										className='course-preview__toolbar-row'
 										style={{ marginTop: '1rem' }}
@@ -235,14 +231,14 @@ function StudentWatchCourseSreen () {
 											to='/students/mysubjects'
 											className='course-preview__btn course-preview__btn--primary'
 										>
-											My subjects
+											Mis materias
 										</Link>
 									</div>
-								</div>
+								</StudentSubscriptionNotice>
 							)}
 							{courseIdOk && canView && isLoading && (
 								<p className='course-preview__muted'>
-									Loading course…
+									Cargando curso…
 								</p>
 							)}
 							{courseIdOk && canView && isError && (
@@ -254,13 +250,13 @@ function StudentWatchCourseSreen () {
 											className='course-preview__btn course-preview__btn--ghost'
 											onClick={() => refetch()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 										<Link
 											to='/students/mysubjects'
 											className='course-preview__btn course-preview__btn--primary'
 										>
-											My subjects
+											Mis materias
 										</Link>
 									</div>
 								</div>
@@ -270,7 +266,7 @@ function StudentWatchCourseSreen () {
 									<header className='course-preview__toolbar'>
 										<div>
 											<p className='course-preview__eyebrow'>
-												Your course
+												Tu curso
 											</p>
 											<h1 className='course-preview__course-title'>
 												{course.title}
@@ -285,7 +281,7 @@ function StudentWatchCourseSreen () {
 											to='/students/mysubjects'
 											className='course-preview__btn course-preview__btn--ghost'
 										>
-											← My subjects
+											← Mis materias
 										</Link>
 									</header>
 
@@ -302,24 +298,25 @@ function StudentWatchCourseSreen () {
 															preload='metadata'
 															src={selectedLesson.videoUrl}
 														>
-															Your browser does not support
-															video playback.
+															Tu navegador no admite la
+															reproducción de video.
 														</video>
 													) : (
 														<div className='course-preview__video-placeholder'>
 															{selectedLesson
 																? (
 																	<p>
-																		This lesson&apos;s video
-																		could not be loaded.
-																		Try again later or
-																		contact your teacher.
+																		No se pudo cargar el
+																		video de esta
+																		lección. Intenta más
+																		tarde o contacta a tu
+																		profesor.
 																	</p>
 																)
 																: (
 																	<p>
-																		Select a lesson from
-																		the outline.
+																		Selecciona una lección
+																		del temario.
 																	</p>
 																)}
 														</div>
@@ -328,7 +325,7 @@ function StudentWatchCourseSreen () {
 												<div className='course-preview__lesson-meta'>
 													<h2 className='course-preview__lesson-title'>
 														{selectedLesson?.title
-															|| 'No lesson selected'}
+															|| 'Ninguna lección seleccionada'}
 													</h2>
 													{selectedLesson?.description && (
 														<p className='course-preview__lesson-body'>
@@ -341,22 +338,21 @@ function StudentWatchCourseSreen () {
 
 										<aside
 											className='course-preview__sidebar'
-											aria-label='Course outline'
+											aria-label='Temario del curso'
 										>
 											<div className='course-preview__sidebar-head'>
-												<h2>Outline</h2>
+												<h2>Temario</h2>
 												<p>
-													{sectionGroups.reduce(
-														(n, g) => n + g.lessons.length,
-														0,
-													)}{' '}
-													lessons
+													{lessonCount}{' '}
+													{lessonCount === 1
+														? 'lección'
+														: 'lecciones'}
 												</p>
 											</div>
 											{sectionGroups.length === 0 && (
 												<p className='course-preview__muted'>
-													This course has no sections or
-													lessons yet.
+													Este curso aún no tiene
+													secciones ni lecciones.
 												</p>
 											)}
 											<ul className='course-preview__accordion'>
@@ -392,8 +388,8 @@ function StudentWatchCourseSreen () {
 																	{group.lessons.length
 																		=== 0 && (
 																		<li className='course-preview__empty-section'>
-																			No lessons in
-																			this section
+																			No hay lecciones en
+																			esta sección
 																		</li>
 																	)}
 																	{group.lessons.map(
@@ -422,7 +418,7 @@ function StudentWatchCourseSreen () {
 																						<PlayGlyph />
 																						<span className='course-preview__lesson-name'>
 																							{lesson.title
-																								|| 'Untitled lesson'}
+																								|| 'Lección sin título'}
 																						</span>
 																					</button>
 																				</li>

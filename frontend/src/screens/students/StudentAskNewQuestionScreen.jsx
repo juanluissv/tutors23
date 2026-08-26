@@ -6,10 +6,10 @@ import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useCreateStudentQuestionMutation } from '../../slices/student/questionsSlice'
 import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
+import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
 	canAskNewQuestion,
-	getSubscriptionBlockReason,
 } from '../../utils/subscriptionAccess'
 import '../../App.css'
 
@@ -115,10 +115,6 @@ function StudentAskNewQuestionScreen () {
 	const questionsLeft =
 		Number(currentSubscription?.questionsLeft) || 0
 	const canAsk = canAskNewQuestion(currentSubscription)
-	const askBlockReason = getSubscriptionBlockReason(
-		currentSubscription,
-		'ask',
-	)
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -137,11 +133,11 @@ function StudentAskNewQuestionScreen () {
 		e.preventDefault()
 		const titleTrim = title.trim()
 		if (!subjectId) {
-			toast.error('Choose a subject from My subjects first')
+			toast.error('Primero elige una materia en Mis materias')
 			return
 		}
 		if (!titleTrim) {
-			toast.error('Please enter a title')
+			toast.error('Por favor ingresa un título')
 			return
 		}
 		try {
@@ -150,13 +146,15 @@ function StudentAskNewQuestionScreen () {
 				description: description.trim(),
 				subject: subjectId,
 			}).unwrap()
-			toast.success('Your question was submitted')
+			toast.success('Tu pregunta fue enviada')
 			setTitle('')
 			setDescription('')
 			navigate(`/students/ask/${created._id}`)
 		} catch (err) {
 			toast.error(
-				err?.data?.message || err?.error || 'Could not submit question',
+				err?.data?.message
+				|| err?.error
+				|| 'No se pudo enviar la pregunta',
 			)
 		}
 	}
@@ -195,13 +193,13 @@ function StudentAskNewQuestionScreen () {
 											to='/students/mysubjects'
 											className='login-card__link'
 										>
-											&#8592; Back to my subjects
+											&#8592; Volver a mis materias
 										</Link>
 									</div>
 									{!isLoadingProfile && currentSubscription ? (
 										<div className='ask-questions-left'>
 											<span className='ask-questions-left__label'>
-												Questions left
+												Preguntas disponibles
 											</span>
 											<span
 												className={
@@ -215,8 +213,8 @@ function StudentAskNewQuestionScreen () {
 											</span>
 											{totalQuestions > 0 ? (
 												<span className='ask-questions-left__meta'>
-													{questionsAsked} used ·{' '}
-													{totalQuestions} total
+													{questionsAsked} usadas ·{' '}
+													{totalQuestions} en total
 												</span>
 											) : null}
 										</div>
@@ -226,38 +224,30 @@ function StudentAskNewQuestionScreen () {
 											'login-card__title answer-details__title'
 										}
 									>
-										Ask a new question
+										Haz una nueva pregunta
 									</h1>
 								</div>
 
 								{!subjectId ? (
 									<p className='login-card__subtitle'>
-										Select a subject from{' '}
+										Selecciona una materia en{' '}
 										<Link to='/students/mysubjects'>
-											My subjects
+											Mis materias
 										</Link>
 										{' '}
-										and use &quot;Ask a question&quot; on a
-										course card so your question is routed to
-										the right class.
+										y usa &quot;Preguntarle a tu
+										profesor&quot; en una tarjeta de curso
+										para que tu pregunta llegue a la
+										clase correcta.
 									</p>
 								) : null}
 
 								{!isLoadingProfile && !canAsk ? (
-									<div className='ask-subscription-notice'>
-										<p className='ask-subscription-notice__title'>
-											Cannot ask a new question
-										</p>
-										<p className='ask-subscription-notice__text'>
-											{askBlockReason}
-										</p>
-										<Link
-											to='/students/subscription'
-											className='ask-subscription-notice__link'
-										>
-											View plans & subscribe
-										</Link>
-									</div>
+									<StudentSubscriptionNotice
+										subscription={currentSubscription}
+										action='ask'
+										title='No puedes hacer una pregunta nueva'
+									/>
 								) : null}
 
 								<form
@@ -280,7 +270,7 @@ function StudentAskNewQuestionScreen () {
 											id='student-question-title'
 											name='title'
 											className='answer-details__input'
-											placeholder='Question title'
+											placeholder='Título de la pregunta'
 											autoComplete='off'
 											value={title}
 											disabled={isSubmitting}
@@ -305,7 +295,7 @@ function StudentAskNewQuestionScreen () {
 												'answer-details__input ' +
 												'answer-details__textarea'
 											}
-											placeholder='Description (optional)'
+											placeholder='Descripción (opcional)'
 											rows={4}
 											value={description}
 											disabled={isSubmitting}
@@ -320,8 +310,8 @@ function StudentAskNewQuestionScreen () {
 										disabled={!canSubmit}
 									>
 										{isSubmitting
-											? 'Submitting…'
-											: 'Submit question'}
+											? 'Enviando…'
+											: 'Enviar pregunta'}
 									</button>
 								</form>
 							</div>

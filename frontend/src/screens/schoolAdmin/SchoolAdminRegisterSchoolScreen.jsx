@@ -9,7 +9,9 @@ import AdminHeader from '../../components/AdminHeader'
 import '../../App.css'
 
 const SCHOOL_TYPE_OPTIONS = [
-	{ value: 'high school', label: 'High school' },
+	{ value: 'primary', label: 'Primary' },
+	{ value: 'secondary', label: 'Secondary' },
+	{ value: 'high_school', label: 'High school' },
 	{ value: 'university', label: 'University' },
 ]
 

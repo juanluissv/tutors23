@@ -32,27 +32,27 @@ function RegisterScreen () {
 		const ln = lastname.trim()
 		const un = username.trim().toLowerCase()
 		if (fn === '') {
-			toast.error('Please enter your first name')
+			toast.error('Por favor ingresa tu nombre')
 			return
 		}
 		if (ln === '') {
-			toast.error('Please enter your last name')
+			toast.error('Por favor ingresa tu apellido')
 			return
 		}
 		if (un === '') {
-			toast.error('Please enter your username')
+			toast.error('Por favor ingresa tu nombre de usuario')
 			return
 		}
 		if (password === '') {
-			toast.error('Please enter password')
+			toast.error('Por favor ingresa tu contraseña')
 			return
 		}
 		if (confirmPassword === '') {
-			toast.error('Please enter confirm password')
+			toast.error('Por favor confirma tu contraseña')
 			return
 		}
 		if (password !== confirmPassword) {
-			toast.error('Passwords do not match')
+			toast.error('Las contraseñas no coinciden')
 			return
 		}
 		try {
@@ -65,14 +65,16 @@ function RegisterScreen () {
 			dispatch(setStudentCredentials({ ...res }))
 			toast.success(
 				res?.accountCompleted
-					? 'Account completed — welcome to Ask to Learn'
-					: 'Account created',
+					? 'Cuenta completada — bienvenido a Ask to Learn'
+					: 'Cuenta creada',
 			)
 			navigate(
 				redirect === '/' ? '/students/mysubjects' : redirect,
 			)
 		} catch (err) {
-			toast.error(err?.data?.message || err?.error || 'Registration failed')
+			toast.error(
+				err?.data?.message || err?.error || 'No se pudo registrar',
+			)
 		}
 	}
 
@@ -90,12 +92,13 @@ function RegisterScreen () {
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
-									<h1 className='login-card__title'>Create an account</h1>
+									<h1 className='login-card__title'>Crea una cuenta</h1>
 									<p className='login-card__subtitle'>
-										Your school admin must add you to their
-										school first. Then use the username they
-										gave you to set your password and finish
-										your account.
+										Primero tu administrador escolar debe
+										agregarte a su escuela. Luego usa el
+										nombre de usuario que te dieron para
+										establecer tu contraseña y completar
+										tu cuenta.
 									</p>
 								</div>
 								<form
@@ -106,14 +109,14 @@ function RegisterScreen () {
 								>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='register-firstname'>
-											First name
+											Nombre
 										</label>
 										<input
 											type='text'
 											id='register-firstname'
 											name='firstname'
 											className='login-input'
-											placeholder='First name'
+											placeholder='Nombre'
 											autoComplete='given-name'
 											value={firstname}
 											disabled={isLoading}
@@ -122,14 +125,14 @@ function RegisterScreen () {
 									</div>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='register-lastname'>
-											Last name
+											Apellido
 										</label>
 										<input
 											type='text'
 											id='register-lastname'
 											name='lastname'
 											className='login-input'
-											placeholder='Last name'
+											placeholder='Apellido'
 											autoComplete='family-name'
 											value={lastname}
 											disabled={isLoading}
@@ -138,14 +141,14 @@ function RegisterScreen () {
 									</div>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='username'>
-											Username
+											Nombre de usuario
 										</label>
 										<input
 											type='text'
 											id='username'
 											name='username'
 											className='login-input'
-											placeholder='e.g. alex.rivera.4821'
+											placeholder='ej. alex.rivera.4821'
 											autoComplete='username'
 											value={username}
 											disabled={isLoading}
@@ -154,7 +157,7 @@ function RegisterScreen () {
 									</div>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='password'>
-											Password
+											Contraseña
 										</label>
 										<input
 											type='password'
@@ -173,7 +176,7 @@ function RegisterScreen () {
 											className='login-label'
 											htmlFor='confirm-password'
 										>
-											Confirm password
+											Confirmar contraseña
 										</label>
 										<input
 											type='password'
@@ -196,13 +199,13 @@ function RegisterScreen () {
 										className='login-submit'
 										disabled={isLoading}
 									>
-										{isLoading ? 'Signing up…' : 'Sign up'}
+										{isLoading ? 'Registrando…' : 'Registrarse'}
 									</button>
 								</form>
 								<p className='login-card__footer'>
 									Already have an account?{' '}
 									<Link to='/login' className='login-card__link'>
-										Sign in
+										Iniciar sesión
 									</Link>
 								</p>
 							</div>

@@ -3,10 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {
 	useGetPlansBySchoolQuery,
+	useGetSchoolByIdQuery,
 	useGetSubjectsBySchoolQuery,
 } from '../../slices/admin/schoolAdminApiSlice'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import { formatSemesterRange } from '../../utils/planSemester'
+import { getSubjectProgramsLabel } from '../../utils/universityProgram'
+import { isUniversitySchool } from '../../utils/schoolType'
 import '../../App.css'
 
 const ClipboardIcon = () => (
@@ -104,6 +108,61 @@ function summarizeSubjects (subjects, maxLabels = 3) {
 	return `${shown.join(' · ')}${suffix}`
 }
 
+function summarizePlanCoverage (plan) {
+	if (plan?.program) {
+		const programName = getSubjectProgramsLabel(
+			plan.program,
+			'this program',
+		)
+		const max = Number(plan.maxSubjects) || 5
+		return (
+			`Students choose up to ${max} subjects `
+		)
+	}
+	return summarizeSubjects(plan?.subjects)
+}
+
+function planMetaLine (plan) {
+	const questions = plan.totalQuestions ?? '—'
+	const semesterLabel = formatSemesterRange(plan.semesters)
+	const active = plan.active === true ? 'Active' : 'Inactive'
+	const isUniversityPlan = Boolean(plan.program)
+
+	if (isUniversityPlan) {
+		const programName = getSubjectProgramsLabel(
+			plan.program,
+			'Program',
+		)
+		const max = Number(plan.maxSubjects) || 5
+		const parts = [
+			`${questions} questions included`,
+			programName,
+			`Students choose up to ${max}`,
+		]
+		if (semesterLabel) {
+			parts.push(semesterLabel)
+		}
+		parts.push(active)
+		return parts.join(' · ')
+	}
+
+	const subjectCount = Array.isArray(plan.subjects)
+		? plan.subjects.length
+		: 0
+	const subjectLabel = `${subjectCount} ${
+		subjectCount === 1 ? 'subject' : 'subjects'
+	}`
+	const parts = [
+		`${questions} questions included`,
+		subjectLabel,
+	]
+	if (semesterLabel) {
+		parts.push(semesterLabel)
+	}
+	parts.push(active)
+	return parts.join(' · ')
+}
+
 function SchoolAdminPlansScreen () {
 	const navigate = useNavigate()
 	const { schoolAdminInfo } = useSelector((state) => state.authSchoolAdmin)
@@ -132,8 +191,16 @@ function SchoolAdminPlansScreen () {
 		skip: !schoolId,
 	})
 
+	const {
+		data: schoolData,
+		isLoading: isLoadingSchool,
+	} = useGetSchoolByIdQuery(schoolId, {
+		skip: !schoolId,
+	})
+
 	const hasSubjects = subjects.length > 0
-	const isPageLoading = isLoading || isSubjectsLoading
+	const isUniversity = isUniversitySchool(schoolData?.schoolType)
+	const isPageLoading = isLoading || isSubjectsLoading || isLoadingSchool
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -202,8 +269,18 @@ function SchoolAdminPlansScreen () {
 								School plans
 							</h1>
 							<p className='teacher-subjects-page__subtitle'>
-								All subscription plans for your school. Each plan sets
-								price, included question quota, and linked subjects.
+								{isUniversity
+									? (
+										'All subscription plans for your institution. '
+										+ 'Each plan sets price, question quota, '
+										+ 'program, and semester dates. Students '
+										+ 'choose their subjects after subscribing.'
+									)
+									: (
+										'All subscription plans for your school. '
+										+ 'Each plan sets price, included question '
+										+ 'quota, and linked subjects.'
+									)}
 							</p>
 							{!isPageLoading
 								&& !isError
@@ -302,17 +379,10 @@ function SchoolAdminPlansScreen () {
 											plan._id ?? plan.id ?? index,
 										)
 										const variant = (index % 5) + 1
-										const active = plan.active === true
 										const studentCount =
 											typeof plan.studentCount === 'number'
 												? plan.studentCount
 												: 0
-										const subjectCount =
-											Array.isArray(plan.subjects)
-												? plan.subjects.length
-												: 0
-										const questions =
-											plan.totalQuestions ?? '—'
 
 										return (
 											<article
@@ -347,15 +417,7 @@ function SchoolAdminPlansScreen () {
 																: 'students'}
 														</span>
 														<p className='teacher-subject-card__meta'>
-															{questions}{' '}
-															questions included
-															{' · '}
-															{subjectCount}{' '}
-															{subjectCount === 1
-																? 'subject'
-																: 'subjects'}
-															{' · '}
-															{active ? 'Active' : 'Inactive'}
+															{planMetaLine(plan)}
 														</p>
 													</div>
 													<div className='teacher-subject-card__badge'>
@@ -364,7 +426,7 @@ function SchoolAdminPlansScreen () {
 												</div>
 
 												<p className='teacher-subject-card__excerpt'>
-													{summarizeSubjects(plan.subjects)}
+													{summarizePlanCoverage(plan)}
 												</p>
 
 												<div className='teacher-subject-card__divider' />

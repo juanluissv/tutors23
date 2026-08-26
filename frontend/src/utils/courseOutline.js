@@ -9,7 +9,9 @@ export function lessonKey (lesson) {
 	)}`
 }
 
-export function buildSectionGroups (course) {
+export function buildSectionGroups (course, labels = {}) {
+	const sectionPrefix = labels.section ?? 'Section'
+	const otherLessons = labels.otherLessons ?? 'Other lessons'
 	const sections = Array.isArray(course?.sections)
 		? [...course.sections]
 		: []
@@ -32,8 +34,8 @@ export function buildSectionGroups (course) {
 			claimed.add(lessonKey(l))
 		})
 		const label = sec.sectionTitle
-			? `Section ${secNum}: ${sec.sectionTitle}`
-			: `Section ${secNum}`
+			? `${sectionPrefix} ${secNum}: ${sec.sectionTitle}`
+			: `${sectionPrefix} ${secNum}`
 		return {
 			sectionNumber: secNum,
 			label,
@@ -51,7 +53,7 @@ export function buildSectionGroups (course) {
 	if (orphanLessons.length > 0) {
 		rows.push({
 			sectionNumber: '__orphans',
-			label: 'Other lessons',
+			label: otherLessons,
 			lessons: orphanLessons,
 		})
 	}

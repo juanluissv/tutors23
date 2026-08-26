@@ -24,7 +24,12 @@ const schoolSchema = mongoose.Schema({
     },       
     schoolType: {
         type: String,
-        enum: ['high school', 'university'],
+        enum: [
+            'primary',
+            'secondary',
+            'high_school',
+            'university'
+        ],
         required: true
     },    
     gradesLevels: [
@@ -32,6 +37,13 @@ const schoolSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             required: false,
             ref: 'GradeLevel',
+        },
+    ],
+    programs: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: false,
+            ref: 'UniversityProgram',
         },
     ],
     subjects: [

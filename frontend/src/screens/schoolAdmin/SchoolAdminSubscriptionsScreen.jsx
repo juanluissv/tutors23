@@ -5,6 +5,7 @@ import { useGetPlanSubscriptionsQuery } from '../../slices/admin/schoolAdminApiS
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { getGradeLevelLabel } from '../../utils/gradeLevel'
+import { getSubjectProgramsLabel } from '../../utils/universityProgram'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
@@ -92,6 +93,38 @@ function summarizeSubjects (subjects, maxLabels = 4) {
 	const extra = titles.length - shown.length
 	const suffix = extra > 0 ? ` +${extra} more` : ''
 	return `${shown.join(' · ')}${suffix}`
+}
+
+function summarizePlanCoverage (plan) {
+	if (plan?.program) {
+		const programName = getSubjectProgramsLabel(
+			plan.program,
+			'this program',
+		)
+		const max = Number(plan.maxSubjects) || 5
+		return (
+			`Students choose up to ${max} subjects from ` +
+			`${programName} after subscribing.`
+		)
+	}
+	return summarizeSubjects(plan?.subjects)
+}
+
+function planCohortLabel (plan) {
+	if (plan?.program) {
+		return getSubjectProgramsLabel(plan.program, 'Program')
+	}
+	return getGradeLevelLabel(plan?.gradesLevel, 'All grades')
+}
+
+function studentCohortLabel (student, plan) {
+	if (plan?.program) {
+		return getSubjectProgramsLabel(
+			student?.program ?? plan.program,
+			'—',
+		)
+	}
+	return getGradeLevelLabel(student?.gradesLevel, '—')
 }
 
 function subscriptionStatusLabel (subscription) {
@@ -266,10 +299,7 @@ function SchoolAdminSubscriptionsScreen () {
 													<p className='plan-subscriptions-hero__meta'>
 														{plan.totalQuestions ?? '—'}{' '}
 														questions ·{' '}
-														{getGradeLevelLabel(
-															plan.gradesLevel,
-															'All grades',
-														)}
+														{planCohortLabel(plan)}
 														{' · '}
 														{plan.active === true
 															? 'Active plan'
@@ -290,7 +320,7 @@ function SchoolAdminSubscriptionsScreen () {
 												</span>
 											</div>
 											<p className='plan-subscriptions-hero__subjects'>
-												{summarizeSubjects(plan.subjects)}
+												{summarizePlanCoverage(plan)}
 											</p>
 											<div className='plan-subscriptions-hero__actions'>
 												<Link
@@ -383,9 +413,9 @@ function SchoolAdminSubscriptionsScreen () {
 													const sub = student.subscription
 													const status = subscriptionStatusLabel(sub)
 													const percent = usagePercent(sub)
-													const gradeName = getGradeLevelLabel(
-														student.gradesLevel,
-														'—',
+													const cohortName = studentCohortLabel(
+														student,
+														plan,
 													)
 
 													return (
@@ -412,7 +442,7 @@ function SchoolAdminSubscriptionsScreen () {
 																			{student.email}
 																		</span>
 																		<span className='plan-subscriptions-roster__grade'>
-																			{gradeName}
+																			{cohortName}
 																		</span>
 																	</div>
 																	<span

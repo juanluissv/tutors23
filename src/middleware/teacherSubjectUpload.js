@@ -1,6 +1,6 @@
 import multer from 'multer';
 
-const MAX_BYTES = 100 * 1024 * 1024;
+const MAX_BYTES = 200 * 1024 * 1024;
 
 const memoryStorage = multer.memoryStorage();
 
@@ -39,7 +39,7 @@ function parseTeacherSubjectMultipart (req, res, next) {
                 if (err.code === 'LIMIT_FILE_SIZE') {
                     res.status(400);
                     return res.json({
-                        message: 'File too large. Maximum size is 100 MB.',
+                        message: 'File too large. Maximum size is 200 MB.',
                     });
                 }
                 res.status(400);
@@ -68,7 +68,7 @@ function parseChapterFileMultipart (req, res, next) {
                 if (err.code === 'LIMIT_FILE_SIZE') {
                     res.status(400);
                     return res.json({
-                        message: 'File too large. Maximum size is 100 MB.',
+                        message: 'File too large. Maximum size is 200 MB.',
                     });
                 }
                 res.status(400);

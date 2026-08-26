@@ -1,5 +1,16 @@
 import mongoose from 'mongoose';
 
+const planSemesterSchema = mongoose.Schema({
+    startDate: {
+        type: Date,
+        required: true,
+    },
+    endDate: {
+        type: Date,
+        required: true,
+    },
+}, { _id: false })
+
 const planSchema = mongoose.Schema({    
     price: {
         type: Number,
@@ -18,6 +29,22 @@ const planSchema = mongoose.Schema({
             required: false,
             ref: 'GradeLevel',
         },
+    program: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+        ref: 'UniversityProgram',
+    },
+    maxSubjects: {
+        type: Number,
+        required: false,
+        min: 1,
+        default: 5,
+    },
+    semesters: {
+        type: [planSemesterSchema],
+        required: false,
+        default: [],
+    },
     subjects: [
         {
         type: mongoose.Schema.Types.ObjectId,

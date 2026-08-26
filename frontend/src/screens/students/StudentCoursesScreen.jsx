@@ -9,6 +9,7 @@ import {
 	useGetProfileQuery,
 } from '../../slices/student/studentApiSlice'
 import { TeacherCoursesGrid } from '../teachers/TeacherCoursesGrid'
+import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
 	canViewQuestions,
@@ -104,11 +105,11 @@ function StudentCoursesScreen () {
 						<div className='content-area'>
 							<div className='teacher-subjects-page'>
 								<p className='teacher-subjects-page__subtitle'>
-									Invalid subject link.
+									Enlace de materia no válido.
 								</p>
 								<p className='teacher-subjects-page__subtitle'>
 									<Link to='/students/mysubjects'>
-										Back to my subjects
+										Volver a mis materias
 									</Link>
 								</p>
 							</div>
@@ -120,8 +121,8 @@ function StudentCoursesScreen () {
 	}
 
 	const pageTitle = subjectTitle
-		? `Courses · ${subjectTitle}`
-		: 'Courses'
+		? `Cursos · ${subjectTitle}`
+		: 'Cursos'
 
 	const showSubscriptionNotice =
 		!isLoadingProfile && !canView
@@ -137,41 +138,41 @@ function StudentCoursesScreen () {
 					/>
 					<div className='content-area'>
 						{showSubscriptionNotice ? (
-							<div className='ask-subscription-notice'>
-								<p className='ask-subscription-notice__title'>
-									Subscription required
-								</p>
-								<p className='ask-subscription-notice__text'>
-									{viewBlockReason}
-								</p>
-								<Link
-									to='/students/subscription'
-									className='ask-subscription-notice__link'
-								>
-									View plans & subscribe
-								</Link>
-							</div>
+							<StudentSubscriptionNotice
+								subscription={currentSubscription}
+							/>
 						) : null}
 						<TeacherCoursesGrid
 							pageTitle={pageTitle}
 							pageSubtitle={
-								'Published courses for this subject. You can ' +
-								'watch lessons when your teacher marks a course ' +
-								'as published.'
+								'Cursos publicados de esta materia. Puedes '
+								+ 'ver las lecciones de estos cursos'
 							}
-							backLink={{
-								to: '/students/mysubjects',
-								label: '← Back to my subjects',
+							copy={{
+								loading: 'Cargando cursos…',
+								error:
+									'No pudimos cargar los cursos de esta '
+									+ 'materia. Puede que no tengas acceso, '
+									+ 'o que haya un problema de red.',
+								retry: 'Intentar de nuevo',
+								published: 'Publicado',
+								draft: 'Borrador',
 							}}
 							emptyMessage={
 								canView
 									? (
-										'There are no published courses for this subject ' +
-										'yet. Check back later, or browse any links your ' +
-										'teacher shared with you.'
+										'Aún no hay cursos publicados para '
+										+ 'esta materia. Vuelve más tarde, o '
+										+ 'revisa los enlaces que tu profesor '
+										+ 'te haya compartido.'
 									)
 									: (
-										'Subscribe to unlock course access for this subject.'
+										viewBlockReason
+										|| (
+											'Suscríbete para desbloquear el '
+											+ 'acceso a los cursos de esta '
+											+ 'materia.'
+										)
 									)
 							}
 							courses={courses}
@@ -189,7 +190,7 @@ function StudentCoursesScreen () {
 											'teacher-subject-card__btn--wide'
 										}
 									>
-										Watch course
+										Ver curso
 									</Link>
 								) : (
 									<span
@@ -200,7 +201,7 @@ function StudentCoursesScreen () {
 										}
 										title={viewBlockReason || undefined}
 									>
-										Watch course
+										Ver curso
 									</span>
 								)
 							)}

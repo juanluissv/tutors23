@@ -132,7 +132,7 @@ function StudentRecordCameraScreen () {
 				setRecordedBlob(normalized)
 			} catch (e) {
 				console.error(e)
-				toast.error('Could not process recording.')
+				toast.error('No se pudo procesar la grabación.')
 				setRecordedBlob(null)
 			}
 			setshowVideo(true)
@@ -144,7 +144,7 @@ function StudentRecordCameraScreen () {
 
 	const handleSaveVideo = async () => {
 		if (!recordedBlob || !id) {
-			toast.error('No recording to save.')
+			toast.error('No hay grabación para guardar.')
 			return
 		}
 		try {
@@ -152,12 +152,12 @@ function StudentRecordCameraScreen () {
 				questionId: id,
 				videoBlob: recordedBlob,
 			}).unwrap()
-			toast.success('Video saved')
+			toast.success('Video guardado')
 			setRecordedBlob(null)
 			navigate('/students/mysubjects')
 		} catch (err) {
 			toast.error(
-				err?.data?.message || err?.error || 'Upload failed',
+				err?.data?.message || err?.error || 'No se pudo subir el video',
 			)
 		}
 	}
@@ -181,15 +181,16 @@ function StudentRecordCameraScreen () {
 									/>
 									<header className="student-camera__header">
 										<h1 className="student-camera__title">
-											Record with your camera
+											Graba con tu cámara
 										</h1>
 										<p className="student-camera__subtitle">
-											When you continue, your browser will ask for
-											camera (and microphone) permission. Allow it
-											so we can capture your response.
+											Al continuar, el navegador te
+											pedirá permiso para la cámara (y
+											el micrófono). Acéptalo para
+											capturar tu pregunta.
 										</p>
 										<p className="student-camera__meta">
-											Maximum length: 5 minutes
+											Duración máxima: 5 minutos
 										</p>
 									</header>
 									<button
@@ -205,7 +206,7 @@ function StudentRecordCameraScreen () {
 											/>
 										</span>
 										<span className="student-camera__cta-label">
-											Start recording
+											Empezar a grabar
 										</span>
 									</button>
 								</div>
@@ -226,7 +227,7 @@ function StudentRecordCameraScreen () {
 													className="student-camera__preview-placeholder"
 													role="status"
 												>
-													Starting camera…
+													Iniciando cámara…
 												</div>
 											)}
 											<div
@@ -235,7 +236,7 @@ function StudentRecordCameraScreen () {
 												aria-live="polite"
 											>
 												<span className="student-camera__rec-dot" />
-												Recording
+												Grabando
 											</div>
 											{/* <div className="student-camera__timer">
 												{formatTimeLeft()}
@@ -255,7 +256,7 @@ function StudentRecordCameraScreen () {
 											/>
 										</span>
 										<span className="student-camera__cta-label">
-											Stop and finish
+											Detener y terminar
 										</span>
 									</button>
 								</div>
@@ -269,10 +270,11 @@ function StudentRecordCameraScreen () {
 									/>
 									<header className="student-camera__header student-camera__header--compact">
 										<h1 className="student-camera__title">
-											Preview your clip
+											Previsualiza tu grabación
 										</h1>
 										<p className="student-camera__subtitle">
-											Replay it below, then save or record again.
+											Reprodúcela abajo y luego guarda o
+											graba de nuevo.
 										</p>
 									</header>
 									<div className="student-camera__preview-shell">
@@ -295,7 +297,7 @@ function StudentRecordCameraScreen () {
 											<Button
 												className="student-camera__btn student-camera__btn--secondary"
 											>
-												Record again
+												Grabar de nuevo
 											</Button>
 										</LinkContainer>
 										<div className="student-camera__action-link">
@@ -308,8 +310,8 @@ function StudentRecordCameraScreen () {
 												onClick={() => void handleSaveVideo()}
 											>
 												{isUploading
-													? 'Saving…'
-													: 'Save video'}
+													? 'Guardando…'
+													: 'Guardar video'}
 											</Button>
 										</div>
 									</div>

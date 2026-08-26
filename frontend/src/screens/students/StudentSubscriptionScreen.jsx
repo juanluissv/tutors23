@@ -14,22 +14,22 @@ import '../../App.css'
 const PLAN_FEATURES = [
 	{
 		id: 'ai',
-		label: 'Unlimited access to the AI tutor',
+		label: 'Acceso ilimitado al tutor de IA',
 		tone: 'violet',
 	},
 	{
 		id: 'book',
-		label: 'Digital class book for every subject',
+		label: 'Libro digital de clase para cada materia',
 		tone: 'sky',
 	},
 	{
 		id: 'live',
-		label: 'Interactive live classes with teachers',
+		label: 'Clases en vivo interactivas con profesores',
 		tone: 'rose',
 	},
 	{
 		id: 'record',
-		label: 'Record your screen or camera to ask questions',
+		label: 'Graba tu pantalla o cámara para hacer preguntas',
 		tone: 'amber',
 	},
 ]
@@ -54,17 +54,21 @@ function resolvePrimaryPlan (plans, planIdFromQuery) {
 function getPlanDisplayName (plan) {
 	const gradeName = plan?.gradesLevel?.name
 	if (gradeName) {
-		return `${gradeName} Plan`
+		return `Plan ${gradeName}`
 	}
-	return 'Learning Plan'
+	const programName = plan?.program?.name
+	if (programName) {
+		return `Plan ${programName}`
+	}
+	return 'Plan de aprendizaje'
 }
 
 function getPlanTagline (plan) {
 	const totalQuestions = Number(plan?.totalQuestions)
 	if (!Number.isNaN(totalQuestions) && totalQuestions > 0) {
-		return `Ask up to ${totalQuestions} questions each month`
+		return `Haz hasta ${totalQuestions} preguntas cada mes`
 	}
-	return 'Everything you need to learn smarter'
+	return 'Todo lo que necesitas para aprender mejor'
 }
 
 function getSubjectTitles (plan) {
@@ -93,7 +97,7 @@ function formatPlanCurrency (price) {
 		return '—'
 	}
 	try {
-		return new Intl.NumberFormat(undefined, {
+		return new Intl.NumberFormat('es', {
 			style: 'currency',
 			currency: 'USD',
 			minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
@@ -326,7 +330,7 @@ const BrandLogo = ({ brand }) => {
 	}
 	return (
 		<span className='student-subscription-card__brand student-subscription-card__brand--generic'>
-			CARD
+			TARJETA
 		</span>
 	)
 }
@@ -469,12 +473,12 @@ function StudentSubscriptionScreen () {
 	)
 
 	const planName = useMemo(
-		() => (plan ? getPlanDisplayName(plan) : 'Learning Plan'),
+		() => (plan ? getPlanDisplayName(plan) : 'Plan de aprendizaje'),
 		[plan],
 	)
 
 	const planTagline = useMemo(
-		() => (plan ? getPlanTagline(plan) : 'Everything you need to learn smarter'),
+		() => (plan ? getPlanTagline(plan) : 'Todo lo que necesitas para aprender mejor'),
 		[plan],
 	)
 
@@ -522,22 +526,22 @@ function StudentSubscriptionScreen () {
 		e.preventDefault()
 
 		if (!plan?._id) {
-			toast.error('No plan selected')
+			toast.error('No hay un plan seleccionado')
 			return
 		}
 
 		if (isAlreadySubscribed) {
-			toast.info('You already have an active subscription for this plan')
+			toast.info('Ya tienes una suscripción activa para este plan')
 			return
 		}
 
 		const cardDigits = String(cardNumber || '').replace(/\D/g, '')
 		if (cardDigits.length < 13) {
-			toast.error('Please enter a valid card number')
+			toast.error('Por favor ingresa un número de tarjeta válido')
 			return
 		}
 		if (!nameOnCard.trim()) {
-			toast.error('Please enter the name on your card')
+			toast.error('Por favor ingresa el nombre de la tarjeta')
 			return
 		}
 
@@ -557,14 +561,24 @@ function StudentSubscriptionScreen () {
 			await refetchProfile()
 
 			toast.success(
-				result.message || 'Payment successful! Your subscription is active.',
+				result.message
+					|| '¡Pago exitoso! Tu suscripción está activa.',
 			)
+
+			if (result.needsSubjectSelection && result.subscription?._id) {
+				navigate(
+					`/students/select-subjects/${result.subscription._id}`,
+					{ replace: true },
+				)
+				return
+			}
+
 			navigate('/students/profile')
 		} catch (err) {
 			toast.error(
 				err?.data?.message
 					|| err?.error
-					|| 'Payment could not be processed',
+					|| 'No se pudo procesar el pago',
 			)
 		}
 	}
@@ -588,8 +602,8 @@ function StudentSubscriptionScreen () {
 		return padded.slice(0, 19)
 	}, [cardNumber])
 
-	const previewName = nameOnCard.trim() || 'Your Name'
-	const previewExpiry = expiry || 'MM / YY'
+	const previewName = nameOnCard.trim() || 'Tu nombre'
+	const previewExpiry = expiry || 'MM / AA'
 
 	if (!studentInfo) {
 		return null
@@ -612,7 +626,7 @@ function StudentSubscriptionScreen () {
 									<span>Pricing</span>
 								</span> */}
 								<h1 className='student-subscription-page__title heading-gradient'>
-									Subscribe to a plan
+									Suscríbete a un plan
 								</h1>
 								{/* <p className='student-subscription-page__subtitle'>
 									Unlock your full learning experience with one
@@ -623,7 +637,7 @@ function StudentSubscriptionScreen () {
 							{isLoadingProfile ? (
 								<div className='student-subscription-state'>
 									<p className='student-subscription-state__text'>
-										Loading your plan…
+										Cargando tu plan…
 									</p>
 								</div>
 							) : isProfileError ? (
@@ -631,28 +645,28 @@ function StudentSubscriptionScreen () {
 									<p className='student-subscription-state__text'>
 										{profileError?.data?.message
 											|| profileError?.error
-											|| 'Could not load your plan.'}
+											|| 'No se pudo cargar tu plan.'}
 									</p>
 								</div>
 							) : !plan ? (
 								<div className='student-subscription-state'>
 									<p className='student-subscription-state__text'>
-										No subscription plan has been assigned to
-										your account yet. Contact your school admin
-										to get started.
+										Aún no se ha asignado un plan de
+										suscripción a tu cuenta. Contacta a tu
+										administrador escolar para empezar.
 									</p>
 									<Link
 										to='/students/profile'
 										className='student-subscription-state__link'
 									>
-										Go to profile
+										Ir al perfil
 									</Link>
 								</div>
 							) : (
 							<div className='student-subscription-grid'>
 								<article
 									className='student-subscription-plan'
-									aria-label='Subscription plan details'
+									aria-label='Detalles del plan de suscripción'
 								>
 									<div
 										className='student-subscription-plan__orb student-subscription-plan__orb--one'
@@ -675,10 +689,10 @@ function StudentSubscriptionScreen () {
 										<div className='student-subscription-plan__top'>
 											<span className='student-subscription-plan__badge'>
 												<SparkleIcon />
-												<span>Most popular</span>
+												<span>Más popular</span>
 											</span>
 											<span className='student-subscription-plan__pill'>
-												Cancel anytime
+												Cancela cuando quieras
 											</span>
 										</div>
 
@@ -700,18 +714,18 @@ function StudentSubscriptionScreen () {
 													{planPriceAmount}
 												</span>
 												<span className='student-subscription-plan__per'>
-													/month
+													/mes
 												</span>
 											</p>
 											<p className='student-subscription-plan__bill'>
-												Billed monthly. No hidden fees.
+												Facturación mensual. Sin cargos ocultos.
 											</p>
 										</div>
 
 										{totalQuestions != null && (
 											<div className='student-subscription-plan__meta'>
 												<span className='student-subscription-plan__meta-label'>
-													Monthly questions
+													Preguntas mensuales
 												</span>
 												<span className='student-subscription-plan__meta-value'>
 													{totalQuestions}
@@ -719,10 +733,10 @@ function StudentSubscriptionScreen () {
 											</div>
 										)}
 
-										{subjectTitles.length > 0 && (
+										{subjectTitles.length > 0 ? (
 											<div className='student-subscription-plan__subjects'>
 												<p className='student-subscription-plan__subjects-label'>
-													Included subjects
+													Materias incluidas
 												</p>
 												<ul className='student-subscription-plan__subjects-list'>
 													{subjectTitles.map((title) => (
@@ -735,7 +749,20 @@ function StudentSubscriptionScreen () {
 													))}
 												</ul>
 											</div>
-										)}
+										) : plan?.program ? (
+											<div className='student-subscription-plan__subjects'>
+												<p className='student-subscription-plan__subjects-label'>
+													Selección de materias
+												</p>
+												<p className='student-subscription-plan__tagline'>
+													Después de suscribirte, elegirás
+													hasta {plan.maxSubjects ?? 5}{' '}
+													materias de{' '}
+													{plan.program?.name
+														?? 'tu programa'}.
+												</p>
+											</div>
+										) : null}
 
 										<ul className='student-subscription-plan__features'>
 											{PLAN_FEATURES.map((feature) => (
@@ -764,10 +791,10 @@ function StudentSubscriptionScreen () {
 												<ShieldIcon />
 											</span>
 											<div className='student-subscription-plan__guarantee-text'>
-												<strong>30-day money-back guarantee</strong>
+												<strong>Garantía de reembolso de 30 días</strong>
 												<span>
-													Not the right fit? Get a full refund,
-													no questions asked.
+													¿No es lo que buscabas? Recibe un
+													reembolso completo, sin preguntas.
 												</span>
 											</div>
 										</div>
@@ -776,21 +803,21 @@ function StudentSubscriptionScreen () {
 
 								<article
 									className='student-subscription-payment'
-									aria-label='Payment form'
+									aria-label='Formulario de pago'
 								>
 									<div className='student-subscription-payment__inner'>
 										<div className='student-subscription-payment__head'>
 											<div>
 												<h2 className='student-subscription-payment__title'>
-													Payment details
+													Datos de pago
 												</h2>
 												<p className='student-subscription-payment__lead'>
-													Enter your card information securely.
+													Ingresa los datos de tu tarjeta de forma segura.
 												</p>
 											</div>
 											<span className='student-subscription-payment__secure-tag'>
 												<LockIcon />
-												<span>SSL secure</span>
+												<span>SSL seguro</span>
 											</span>
 										</div>
 
@@ -820,7 +847,7 @@ function StudentSubscriptionScreen () {
 											<div className='student-subscription-card__row student-subscription-card__row--bottom'>
 												<div className='student-subscription-card__col'>
 													<span className='student-subscription-card__label'>
-														Card holder
+														Titular
 													</span>
 													<span className='student-subscription-card__value'>
 														{previewName}
@@ -828,7 +855,7 @@ function StudentSubscriptionScreen () {
 												</div>
 												<div className='student-subscription-card__col student-subscription-card__col--right'>
 													<span className='student-subscription-card__label'>
-														Expires
+														Vence
 													</span>
 													<span className='student-subscription-card__value'>
 														{previewExpiry}
@@ -848,14 +875,14 @@ function StudentSubscriptionScreen () {
 													className='student-subscription-payment__label'
 													htmlFor='subscription-name-on-card'
 												>
-													Name on card
+													Nombre en la tarjeta
 												</label>
 												<input
 													type='text'
 													id='subscription-name-on-card'
 													name='nameOnCard'
 													className='student-subscription-payment__input'
-													placeholder='Full name'
+													placeholder='Nombre completo'
 													autoComplete='cc-name'
 													value={nameOnCard}
 													onChange={(e) =>
@@ -868,7 +895,7 @@ function StudentSubscriptionScreen () {
 													className='student-subscription-payment__label'
 													htmlFor='subscription-card-number'
 												>
-													Card number
+													Número de tarjeta
 												</label>
 												<input
 													type='text'
@@ -889,14 +916,14 @@ function StudentSubscriptionScreen () {
 														className='student-subscription-payment__label'
 														htmlFor='subscription-expiry'
 													>
-														Expiry date
+														Fecha de vencimiento
 													</label>
 													<input
 														type='text'
 														id='subscription-expiry'
 														name='expiry'
 														className='student-subscription-payment__input'
-														placeholder='MM / YY'
+														placeholder='MM / AA'
 														autoComplete='cc-exp'
 														inputMode='numeric'
 														value={expiry}
@@ -932,30 +959,30 @@ function StudentSubscriptionScreen () {
 												{totalQuestions != null && (
 													<div className='student-subscription-payment__summary-row student-subscription-payment__summary-row--muted'>
 														<span>
-															{totalQuestions} questions / month
+															{totalQuestions} preguntas / mes
 														</span>
 														<span>
 															{subjectTitles.length > 0
-																? `${subjectTitles.length} subjects`
-																: 'Auto-renew'}
+																? `${subjectTitles.length} materias`
+																: 'Renovación automática'}
 														</span>
 													</div>
 												)}
 												<div className='student-subscription-payment__summary-row student-subscription-payment__summary-row--muted'>
-													<span>Billed every month</span>
-													<span>Auto-renew</span>
+													<span>Facturación mensual</span>
+													<span>Renovación automática</span>
 												</div>
 												<div className='student-subscription-payment__summary-divider' />
 												<div className='student-subscription-payment__summary-total'>
-													<span>Total today</span>
+													<span>Total de hoy</span>
 													<span>{planPriceFormatted}</span>
 												</div>
 											</div>
 
 											{isAlreadySubscribed ? (
 												<p className='student-subscription-payment__active-note'>
-													You already have an active subscription
-													for this plan.
+													Ya tienes una suscripción activa
+													para este plan.
 												</p>
 											) : null}
 
@@ -969,10 +996,10 @@ function StudentSubscriptionScreen () {
 											>
 												<span>
 													{isSubscribing
-														? 'Processing payment…'
+														? 'Procesando el pago…'
 														: isAlreadySubscribed
-															? 'Already subscribed'
-															: `Subscribe for ${planPriceFormatted}/mo`}
+															? 'Ya estás suscrito'
+															: `Suscríbete por ${planPriceFormatted}/mes`}
 												</span>
 												<ArrowIcon />
 											</button>
@@ -980,8 +1007,9 @@ function StudentSubscriptionScreen () {
 											<p className='student-subscription-payment__secure'>
 												<LockIcon />
 												<span>
-													Your payment is encrypted with 256-bit
-													SSL. We never store your card details.
+													Tu pago está cifrado con SSL de
+													256 bits. Nunca guardamos los
+													datos de tu tarjeta.
 												</span>
 											</p>
 										</form>

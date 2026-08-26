@@ -12,19 +12,42 @@ import {
     normalizeSubjectGradesLevelField,
     resolveSubjectGradeLevels,
 } from '../utils/gradeLevelHelpers.js';
+import {
+    programToJson,
+    programsToJson,
+    normalizeSubjectProgramField,
+    resolveSubjectPrograms,
+} from '../utils/universityProgramHelpers.js';
+import { isUniversitySchool } from '../utils/schoolTypeHelpers.js';
+import { parseMaxSubjects } from '../utils/subscriptionSubjectHelpers.js';
+import {
+    parsePlanSemesters,
+    semestersToJson,
+} from '../utils/planSemesterHelpers.js';
 
 const planSubjectPopulate = {
     path: 'subjects',
-    select: 'title gradesLevel',
-    populate: {
-        path: 'gradesLevel',
-        select: 'name',
-    },
+    select: 'title gradesLevel program',
+    populate: [
+        {
+            path: 'gradesLevel',
+            select: 'name',
+        },
+        {
+            path: 'program',
+            select: 'name department programType',
+        },
+    ],
 };
 
 const planGradeLevelPopulate = {
     path: 'gradesLevel',
     select: 'name',
+};
+
+const planProgramPopulate = {
+    path: 'program',
+    select: 'name department programType',
 };
 
 function planToJson (planDoc) {
@@ -40,6 +63,10 @@ function planToJson (planDoc) {
                 gradesLevel: gradeLevelsToJson(
                     normalizeSubjectGradesLevelField(s.gradesLevel),
                 ),
+                program: programsToJson(
+                    normalizeSubjectProgramField(s.program),
+                ),
+                semester: s.semester ?? undefined,
             };
         }
         return { _id: s };
@@ -53,6 +80,9 @@ function planToJson (planDoc) {
         totalQuestions: plan.totalQuestions,
         active: plan.active,
         gradesLevel: gradeLevelToJson(plan.gradesLevel),
+        program: programToJson(plan.program),
+        maxSubjects: plan.maxSubjects ?? undefined,
+        semesters: semestersToJson(plan.semesters),
         subjects: subjectsOut,
         studentCount,
         school: plan.school,
@@ -109,10 +139,18 @@ function parseSubjectIds (rawSubjects) {
     ];
 }
 
-async function validateSubjectsForSchool (res, uniqueIds, schoolIdStr) {
+async function validateSubjectsForSchool (
+    res,
+    uniqueIds,
+    schoolIdStr,
+    { requireAtLeastOne = true } = {},
+) {
     if (uniqueIds.length === 0) {
-        res.status(400);
-        throw new Error('Select at least one subject for this plan');
+        if (requireAtLeastOne) {
+            res.status(400);
+            throw new Error('Select at least one subject for this plan');
+        }
+        return;
     }
 
     for (const sid of uniqueIds) {
@@ -177,6 +215,7 @@ const getPlansBySchool = asyncHandler(async (req, res) => {
     const plans = await Plan.find({ school: schoolId })
         .populate(planSubjectPopulate)
         .populate(planGradeLevelPopulate)
+        .populate(planProgramPopulate)
         .sort({ createdAt: -1 })
         .lean();
 
@@ -195,6 +234,7 @@ const getPlanById = asyncHandler(async (req, res) => {
     const plan = await Plan.findById(id)
         .populate(planSubjectPopulate)
         .populate(planGradeLevelPopulate)
+        .populate(planProgramPopulate)
         .lean();
 
     if (!plan) {
@@ -219,6 +259,7 @@ const updatePlanById = asyncHandler(async (req, res) => {
         totalQuestions,
         subjects: subjectIdsFromBody,
         active,
+        semesters: semestersFromBody,
     } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -252,14 +293,24 @@ const updatePlanById = asyncHandler(async (req, res) => {
     }
     if (subjectIdsFromBody !== undefined) {
         const uniqueIds = parseSubjectIds(subjectIdsFromBody);
-        await validateSubjectsForSchool(res, uniqueIds, schoolIdStr);
+        const isUniversityPlan = Boolean(plan.program);
+        await validateSubjectsForSchool(
+            res,
+            uniqueIds,
+            schoolIdStr,
+            { requireAtLeastOne: !isUniversityPlan },
+        );
         plan.subjects = uniqueIds;
+    }
+    if (semestersFromBody !== undefined) {
+        plan.semesters = parsePlanSemesters(res, semestersFromBody);
     }
 
     const updated = await plan.save();
     const populated = await Plan.findById(updated._id)
         .populate(planSubjectPopulate)
         .populate(planGradeLevelPopulate)
+        .populate(planProgramPopulate)
         .exec();
 
     res.status(200).json(planToJson(populated));
@@ -274,6 +325,9 @@ const createPlan = asyncHandler(async (req, res) => {
         active,
         school: schoolIdFromBody,
         gradesLevel: gradesLevelFromBody,
+        program: programFromBody,
+        maxSubjects: maxSubjectsFromBody,
+        semesters: semestersFromBody,
     } = req.body;
 
     const schoolAdmin = await SchoolAdmin.findById(req.schoolAdmin._id);
@@ -322,10 +376,49 @@ const createPlan = asyncHandler(async (req, res) => {
     const priceNum = parsePrice(res, price);
     const totalQ = parseTotalQuestions(res, totalQuestions);
     const uniqueIds = parseSubjectIds(subjectIdsFromBody);
-    await validateSubjectsForSchool(res, uniqueIds, schoolIdStr);
+
+    const useUniversityPrograms = isUniversitySchool(school.schoolType);
+
+    if (useUniversityPrograms) {
+        await validateSubjectsForSchool(
+            res,
+            uniqueIds,
+            schoolIdStr,
+            { requireAtLeastOne: false },
+        );
+    } else {
+        await validateSubjectsForSchool(res, uniqueIds, schoolIdStr);
+    }
 
     let gradesLevelId;
-    if (
+    let programId;
+    let maxSubjects;
+
+    if (useUniversityPrograms) {
+        if (
+            programFromBody === undefined
+            || programFromBody === null
+            || String(programFromBody).trim() === ''
+        ) {
+            res.status(400);
+            throw new Error('Program is required for university plans');
+        }
+        const resolvedProgram = await resolveSubjectPrograms(
+            programFromBody,
+            school,
+        );
+        if (resolvedProgram.error) {
+            res.status(400);
+            throw new Error(resolvedProgram.error);
+        }
+        programId = resolvedProgram.value[0];
+        const parsedMax = parseMaxSubjects(maxSubjectsFromBody, 5);
+        if (parsedMax === null) {
+            res.status(400);
+            throw new Error('Max subjects must be a positive whole number');
+        }
+        maxSubjects = parsedMax;
+    } else if (
         gradesLevelFromBody !== undefined
         && gradesLevelFromBody !== null
         && String(gradesLevelFromBody).trim() !== ''
@@ -341,6 +434,8 @@ const createPlan = asyncHandler(async (req, res) => {
         gradesLevelId = resolved.value[0];
     }
 
+    const semesters = parsePlanSemesters(res, semestersFromBody);
+
     const plan = await Plan.create({
         price: priceNum,
         totalQuestions: totalQ,
@@ -349,6 +444,9 @@ const createPlan = asyncHandler(async (req, res) => {
                 ? Boolean(active)
                 : true,
         gradesLevel: gradesLevelId,
+        program: programId,
+        maxSubjects: useUniversityPrograms ? maxSubjects : undefined,
+        semesters,
         subjects: uniqueIds,
         school: school._id,
     });
@@ -360,6 +458,7 @@ const createPlan = asyncHandler(async (req, res) => {
     const populated = await Plan.findById(plan._id)
         .populate(planSubjectPopulate)
         .populate(planGradeLevelPopulate)
+        .populate(planProgramPopulate)
         .exec();
 
     res.status(201).json(planToJson(populated));
@@ -374,6 +473,8 @@ function subscriptionSummaryJson (subDoc) {
         _id: sub._id,
         startDate: sub.startDate,
         endDate: sub.endDate,
+        endOfSemesterDate: sub.endOfSemesterDate ?? null,
+        currentSemesterIndex: sub.currentSemesterIndex ?? 0,
         questionsAsked: sub.questionsAsked ?? 0,
         questionsLeft: sub.questionsLeft ?? 0,
         totalQuestions: sub.totalQuestions ?? 0,
@@ -398,6 +499,7 @@ function planSubscriberJson (studentDoc, subscriptionDoc) {
         signInDate: student.signInDate,
         createdAt: student.createdAt,
         gradesLevel: gradeLevelToJson(student.gradesLevel),
+        program: programToJson(student.program),
         subscription: subscriptionDoc
             ? subscriptionSummaryJson(subscriptionDoc)
             : null,
@@ -416,6 +518,7 @@ const getPlanSubscriptions = asyncHandler(async (req, res) => {
     const plan = await Plan.findById(id)
         .populate(planSubjectPopulate)
         .populate(planGradeLevelPopulate)
+        .populate(planProgramPopulate)
         .lean();
 
     if (!plan) {
@@ -452,9 +555,10 @@ const getPlanSubscriptions = asyncHandler(async (req, res) => {
         subscriptions: { $in: subscriptionIds },
     })
         .select(
-            'firstname lastname email signInDate createdAt gradesLevel subscriptions',
+            'firstname lastname email signInDate createdAt gradesLevel program subscriptions',
         )
         .populate('gradesLevel', 'name')
+        .populate('program', 'name department programType')
         .sort({ lastname: 1, firstname: 1 })
         .lean();
 

@@ -229,6 +229,11 @@ function SchoolAdminGenerateLessonsScreen () {
 		(chapter) => chapter.ChapterFileId || chapter.chapterFileUrl,
 	).length
 
+	const generatedLessonsCount = bookLessons.filter(
+		(lesson) => lesson?.hasContent,
+	).length
+	const hasGeneratedLessons = generatedLessonsCount > 0
+
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
 	}
@@ -850,6 +855,146 @@ function SchoolAdminGenerateLessonsScreen () {
 										</ol>
 									)}
 								</section>
+
+								<div className={
+									'subject-book-tools '
+									+ 'subject-book-tools--after-list'
+								}
+								>
+									<div className='subject-book-tools__header'>
+										<span className='subject-book-tools__eyebrow'>
+											Next step
+										</span>
+										<h3 className='subject-book-tools__title'>
+											AI tutor creation
+										</h3>
+										<p className='subject-book-tools__desc'>
+											{hasGeneratedLessons
+												? `Turn your ${generatedLessonsCount} generated lesson${generatedLessonsCount === 1 ? '' : 's'} into AI tutors with video, captions, and tutor scripts.`
+												: 'Generate at least one web lesson from a chapter PDF to unlock AI tutor creation.'}
+										</p>
+									</div>
+									{hasGeneratedLessons ? (
+										<Link
+											to={`/schooladmins/createtutor/${subjectId}`}
+											className={
+												'subject-book-tools__card '
+												+ 'subject-book-tools__card--tutor'
+											}
+										>
+											<span
+												className='subject-book-tools__icon'
+												aria-hidden
+											>
+												<svg
+													width='22'
+													height='22'
+													viewBox='0 0 24 24'
+													fill='none'
+													stroke='currentColor'
+													strokeWidth='1.75'
+												>
+													<circle
+														cx='10'
+														cy='8.5'
+														r='3.25'
+													/>
+													<path
+														d='M4 19.5c0-3 2.75-5 6-5s6 2 6 5'
+														strokeLinecap='round'
+													/>
+													<rect
+														x='15'
+														y='5'
+														width='7'
+														height='5'
+														rx='1.25'
+													/>
+													<path
+														d='M17.5 7.5l1.25 1 2.25-2'
+														strokeLinecap='round'
+														strokeLinejoin='round'
+													/>
+													<path
+														d='M19 13.5v2.25a1.25 1.25 0 01-1.25 1.25h-3'
+														strokeLinecap='round'
+													/>
+												</svg>
+											</span>
+											<span className='subject-book-tools__body'>
+												<span className='subject-book-tools__label'>
+													Create AI tutors
+												</span>
+												<span className='subject-book-tools__hint'>
+													Upload tutor video & captions per chapter
+												</span>
+											</span>
+											<span
+												className='subject-book-tools__arrow'
+												aria-hidden
+											>
+												→
+											</span>
+										</Link>
+									) : (
+										<span
+											className={
+												'subject-book-tools__card '
+												+ 'subject-book-tools__card--tutor '
+												+ 'subject-book-tools__card--disabled'
+											}
+											aria-disabled='true'
+										>
+											<span
+												className='subject-book-tools__icon'
+												aria-hidden
+											>
+												<svg
+													width='22'
+													height='22'
+													viewBox='0 0 24 24'
+													fill='none'
+													stroke='currentColor'
+													strokeWidth='1.75'
+												>
+													<circle
+														cx='10'
+														cy='8.5'
+														r='3.25'
+													/>
+													<path
+														d='M4 19.5c0-3 2.75-5 6-5s6 2 6 5'
+														strokeLinecap='round'
+													/>
+													<rect
+														x='15'
+														y='5'
+														width='7'
+														height='5'
+														rx='1.25'
+													/>
+													<path
+														d='M17.5 7.5l1.25 1 2.25-2'
+														strokeLinecap='round'
+														strokeLinejoin='round'
+													/>
+													<path
+														d='M19 13.5v2.25a1.25 1.25 0 01-1.25 1.25h-3'
+														strokeLinecap='round'
+													/>
+												</svg>
+											</span>
+											<span className='subject-book-tools__body'>
+												<span className='subject-book-tools__label'>
+													Create AI tutors
+												</span>
+												<span className='subject-book-tools__hint'>
+													Requires at least one generated lesson
+												</span>
+											</span>
+										</span>
+									)}
+								</div>
 							</div>
 						</div>
 					</div>

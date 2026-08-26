@@ -8,10 +8,12 @@ import {
 	useGetProfileQuery,
 } from '../../slices/student/studentApiSlice'
 import { TeacherSubjectsGrid } from '../teachers/TeacherSubjectsGrid'
+import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
 	canViewQuestions,
 	canAskNewQuestion,
+	getStudentSubjectsEmptyMessage,
 	getSubscriptionBlockReason,
 } from '../../utils/subscriptionAccess'
 import '../../App.css'
@@ -30,7 +32,7 @@ function AskTeacherSubjectCardActions ({
 					to={`/students/previousquestions/${subjectId}`}
 					className='teacher-subject-card__btn'
 				>
-					Previous questions
+					 Preguntas anteriores
 				</Link>
 			) : (
 				<span
@@ -40,7 +42,7 @@ function AskTeacherSubjectCardActions ({
 					}
 					title={viewBlockReason || undefined}
 				>
-					Previous questions
+					 Preguntas anteriores
 				</span>
 			)}
 			{canAsk ? (
@@ -48,7 +50,7 @@ function AskTeacherSubjectCardActions ({
 					to={`/students/asknewquestion?subject=${subjectId}`}
 					className='teacher-subject-card__btn'
 				>
-					Ask a question
+					Preguntarle a tu profesor
 				</Link>
 			) : (
 				<span
@@ -58,7 +60,7 @@ function AskTeacherSubjectCardActions ({
 					}
 					title={askBlockReason || undefined}
 				>
-					Ask a question
+					Preguntarle a tu profesor
 				</span>
 			)}
 		</div>
@@ -140,20 +142,9 @@ function StudentAskTeacherScreen () {
 					/>
 					<div className='content-area'>
 						{showSubscriptionNotice ? (
-							<div className='ask-subscription-notice'>
-								<p className='ask-subscription-notice__title'>
-									Subscription required
-								</p>
-								<p className='ask-subscription-notice__text'>
-									{viewBlockReason}
-								</p>
-								<Link
-									to='/students/subscription'
-									className='ask-subscription-notice__link'
-								>
-									View plans & subscribe
-								</Link>
-							</div>
+							<StudentSubscriptionNotice
+								subscription={currentSubscription}
+							/>
 						) : null}
 						{!showSubscriptionNotice
 							&& !isLoadingProfile
@@ -166,27 +157,44 @@ function StudentAskTeacherScreen () {
 								}
 							>
 								<p className='ask-subscription-notice__title'>
-									No questions remaining
+									No quedan preguntas
 								</p>
 								<p className='ask-subscription-notice__text'>
 									{askBlockReason}
 									{' '}
-									You can still review previous questions.
+									Aún puedes revisar las preguntas
+									anteriores.
 								</p>
 							</div>
 						) : null}
 						<TeacherSubjectsGrid
-							pageTitle='Ask your teacher'
+							pageTitle='Pregúntale a tu profesor'
 							pageSize={5}
 							pageSubtitle={
-								'Pick a subject to record and send a ' +
-								'question to your tutor'
+								'Selecciona una materia para preguntarle a tu profesor'
 							}
+							copy={{
+								loading: 'Cargando materias…',
+								error:
+									'No pudimos cargar tus materias. '
+									+ 'Intenta de nuevo en un momento.',
+								retry: 'Intentar de nuevo',
+								students: 'estudiantes',
+								published: 'Publicado',
+								draft: 'Borrador',
+								paginationAria: 'Páginas de materias',
+								showing: 'Mostrando',
+								of: 'de',
+								subjects: 'materias',
+								prev: 'Anterior',
+								next: 'Siguiente',
+								pageAriaPrefix: 'Página',
+							}}
 							afterSubtitle={
 								!isLoadingProfile && currentSubscription ? (
 									<div className='ask-questions-left'>
 										<span className='ask-questions-left__label'>
-											Questions left
+										 Preguntas disponibles 
 										</span>
 										<span
 											className={
@@ -200,18 +208,16 @@ function StudentAskTeacherScreen () {
 										</span>
 										{totalQuestions > 0 ? (
 											<span className='ask-questions-left__meta'>
-												{questionsAsked} used ·{' '}
-												{totalQuestions} total
+												{questionsAsked} usadas ·{' '}
+												{totalQuestions} en total
 											</span>
 										) : null}
 									</div>
 								) : null
 							}
-							emptyMessage={
-								'You are not enrolled in any subjects yet. ' +
-								'When a teacher adds you using your email, ' +
-								'your subjects will appear here after you sign in.'
-							}
+							emptyMessage={getStudentSubjectsEmptyMessage(
+								currentSubscription,
+							)}
 							subjects={subjects}
 							isLoading={isLoading || isLoadingProfile}
 							isError={isError}

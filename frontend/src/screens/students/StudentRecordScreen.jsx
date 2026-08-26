@@ -126,7 +126,7 @@ function StudentRecordScreen () {
 				setRecordedBlob(normalized)
 			} catch (e) {
 				console.error(e)
-				toast.error('Could not process recording.')
+				toast.error('No se pudo procesar la grabación.')
 				setRecordedBlob(null)
 			}
 			setshowVideo(true)
@@ -138,7 +138,7 @@ function StudentRecordScreen () {
 
 	const handleSaveVideo = async () => {
 		if (!recordedBlob || !id) {
-			toast.error('No recording to save.')
+			toast.error('No hay grabación para guardar.')
 			return
 		}
 		try {
@@ -146,12 +146,12 @@ function StudentRecordScreen () {
 				questionId: id,
 				videoBlob: recordedBlob,
 			}).unwrap()
-			toast.success('Video saved')
+			toast.success('Video guardado')
 			setRecordedBlob(null)
 			navigate('/students/mysubjects')
 		} catch (err) {
 			toast.error(
-				err?.data?.message || err?.error || 'Upload failed',
+				err?.data?.message || err?.error || 'No se pudo subir el video',
 			)
 		}
 	}
@@ -175,16 +175,17 @@ function StudentRecordScreen () {
 									/>
 									<header className="student-camera__header">
 										<h1 className="student-camera__title">
-											Record your screen
+											Graba tu pantalla
 										</h1>
 										<p className="student-camera__subtitle">
-											When you continue, your browser will ask
-											what to share—pick a tab, a window, or your
-											full screen. Recording starts after you
-											confirm.
+											Al continuar, el navegador te
+											preguntará qué compartir: elige una
+											pestaña, una ventana o toda la
+											pantalla. La grabación empieza
+											después de que confirmes.
 										</p>
 										<p className="student-camera__meta">
-											Maximum length: 5 minutes
+											Duración máxima: 5 minutos
 										</p>
 									</header>
 									<button
@@ -200,7 +201,7 @@ function StudentRecordScreen () {
 											/>
 										</span>
 										<span className="student-camera__cta-label">
-											Start screen recording
+											Empezar a grabar la pantalla
 										</span>
 									</button>
 								</div>
@@ -227,9 +228,9 @@ function StudentRecordScreen () {
 														className="student-camera__screen-hint-gif"
 													/>
 													<p>
-														Choose what to share in the
-														browser dialog. Your capture
-														will show here.
+														Elige qué compartir en el
+														diálogo del navegador. Tu
+														captura se mostrará aquí.
 													</p>
 												</div>
 											)}
@@ -239,7 +240,7 @@ function StudentRecordScreen () {
 												aria-live="polite"
 											>
 												<span className="student-camera__rec-dot" />
-												Recording
+												Grabando
 											</div>
 											{/* <div className="student-camera__timer">
 												{formatTimeLeft()}
@@ -259,7 +260,7 @@ function StudentRecordScreen () {
 											/>
 										</span>
 										<span className="student-camera__cta-label">
-											Stop and finish
+											Detener y terminar
 										</span>
 									</button>
 								</div>
@@ -273,10 +274,11 @@ function StudentRecordScreen () {
 									/>
 									<header className="student-camera__header student-camera__header--compact">
 										<h1 className="student-camera__title">
-											Preview your recording
+											Previsualiza tu grabación
 										</h1>
 										<p className="student-camera__subtitle">
-											Replay it below, then save or record again.
+											Reprodúcela abajo y luego guarda o
+											graba de nuevo.
 										</p>
 									</header>
 									<div className="student-camera__preview-shell">
@@ -299,7 +301,7 @@ function StudentRecordScreen () {
 											<Button
 												className="student-camera__btn student-camera__btn--secondary"
 											>
-												Record again
+												Grabar de nuevo
 											</Button>
 										</LinkContainer>
 										<div className="student-camera__action-link">
@@ -312,8 +314,8 @@ function StudentRecordScreen () {
 												onClick={() => void handleSaveVideo()}
 											>
 												{isUploading
-													? 'Saving…'
-													: 'Save video'}
+													? 'Guardando…'
+													: 'Guardar video'}
 											</Button>
 										</div>
 									</div>

@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
 import GradeLevel from '../models/gradeLevelModel.js';
+import Subject from '../models/subjectModel.js';
+import Plan from '../models/planModel.js';
+import Student from '../models/studentModel.js';
+import {
+    formatCohortInUseError,
+    isCohortInUse,
+} from './schoolTypeHelpers.js';
 
 export function gradeLevelToJson (gradeLevel) {
     if (gradeLevel == null) {
@@ -73,10 +80,42 @@ export async function createGradeLevelsForSchool (schoolId, gradesLevels) {
     return { value: ids };
 }
 
+async function getGradeLevelUsage (gradeLevelId) {
+    const [subjects, plans, students] = await Promise.all([
+        Subject.countDocuments({ gradesLevel: gradeLevelId }),
+        Plan.countDocuments({ gradesLevel: gradeLevelId }),
+        Student.countDocuments({ gradesLevel: gradeLevelId }),
+    ]);
+    return { subjects, plans, students };
+}
+
+export async function deleteAllSchoolGradeLevels (schoolId) {
+    await GradeLevel.deleteMany({ school: schoolId });
+}
+
 export async function syncSchoolGradeLevels (school, gradesLevels) {
     const parsed = parseGradeLevelNames(gradesLevels);
     if (parsed.error) {
         return parsed;
+    }
+
+    const nextNames = parsed.value;
+    const existing = await GradeLevel.find({ school: school._id });
+    const toDrop = existing.filter(
+        (level) => !nextNames.includes(level.name),
+    );
+
+    for (const level of toDrop) {
+        const usage = await getGradeLevelUsage(level._id);
+        if (isCohortInUse(usage)) {
+            return {
+                error: formatCohortInUseError(
+                    level.name,
+                    usage,
+                    'grade level',
+                ),
+            };
+        }
     }
 
     const ids = [];
@@ -92,6 +131,12 @@ export async function syncSchoolGradeLevels (school, gradesLevels) {
             });
         }
         ids.push(gradeLevel._id);
+    }
+
+    if (toDrop.length > 0) {
+        await GradeLevel.deleteMany({
+            _id: { $in: toDrop.map((level) => level._id) },
+        });
     }
 
     school.gradesLevels = ids;

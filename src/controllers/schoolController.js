@@ -10,10 +10,23 @@ import {
     gradeLevelToJson,
     gradeLevelsToJson,
     syncSchoolGradeLevels,
+    deleteAllSchoolGradeLevels,
 } from '../utils/gradeLevelHelpers.js';
+import {
+    programToJson,
+    programsToJson,
+    syncSchoolPrograms,
+    deleteAllSchoolPrograms,
+} from '../utils/universityProgramHelpers.js';
+import { isUniversitySchool } from '../utils/schoolTypeHelpers.js';
 import { generateUniqueStudentUsername } from '../utils/studentUsername.js';
 
-const VALID_SCHOOL_TYPES = ['high school', 'university'];
+const VALID_SCHOOL_TYPES = [
+    'primary',
+    'secondary',
+    'high_school',
+    'university',
+];
 
 function buildEmailExactRegex (rawEmail) {
     const t = String(rawEmail).trim();
@@ -62,8 +75,54 @@ async function assertSchoolAdminOwnsSchool (res, schoolAdminId, schoolId) {
     return { schoolAdmin, school };
 }
 
-async function populateSchoolGradeLevels (school) {
-    return School.findById(school._id).populate('gradesLevels', 'name');
+async function populateSchoolDetails (school) {
+    return School.findById(school._id)
+        .populate('gradesLevels', 'name')
+        .populate('programs', 'name department programType');
+}
+
+function schoolToResponseJson (school) {
+    const hasSubjects = (school.subjects ?? []).length > 0;
+    const hasPlans = (school.plans ?? []).length > 0;
+    const hasStudents = (school.students ?? []).length > 0;
+
+    return {
+        _id: school._id,
+        name: school.name,
+        country: school.country,
+        city: school.city,
+        address: school.address,
+        schoolType: school.schoolType,
+        gradesLevels: gradeLevelsToJson(school.gradesLevels),
+        programs: programsToJson(school.programs),
+        signInDate: school.signInDate,
+        admin: school.admin,
+        canChangeSchoolType: !hasSubjects && !hasPlans && !hasStudents,
+    };
+}
+
+async function countSchoolLinkedRecords (schoolId) {
+    const [subjects, plans, students] = await Promise.all([
+        Subject.countDocuments({ school: schoolId }),
+        Plan.countDocuments({ school: schoolId }),
+        Student.countDocuments({ school: schoolId }),
+    ]);
+    return { subjects, plans, students };
+}
+
+function hasValidCohortItems (items) {
+    if (!Array.isArray(items) || items.length === 0) {
+        return false;
+    }
+    return items.some((item) => {
+        if (typeof item === 'string') {
+            return item.trim() !== '';
+        }
+        if (item && typeof item === 'object') {
+            return String(item.name ?? '').trim() !== '';
+        }
+        return false;
+    });
 }
 
 // POST /api/schools — use with protectSchoolAdmin; links school ↔ admin
@@ -92,7 +151,9 @@ const createSchool = asyncHandler(async (req, res) => {
 
     if (!VALID_SCHOOL_TYPES.includes(schoolType)) {
         res.status(400);
-        throw new Error('schoolType must be high school or university');
+        throw new Error(
+            `schoolType must be one of: ${VALID_SCHOOL_TYPES.join(', ')}`,
+        );
     }
 
     const schoolAdmin = await SchoolAdmin.findById(req.schoolAdmin._id);
@@ -120,19 +181,9 @@ const createSchool = asyncHandler(async (req, res) => {
     schoolAdmin.school = school._id;
     await schoolAdmin.save();
 
-    const populatedSchool = await populateSchoolGradeLevels(school);
+    const populatedSchool = await populateSchoolDetails(school);
 
-    res.status(201).json({
-        _id: populatedSchool._id,
-        name: populatedSchool.name,
-        country: populatedSchool.country,
-        city: populatedSchool.city,
-        address: populatedSchool.address,
-        schoolType: populatedSchool.schoolType,
-        gradesLevels: gradeLevelsToJson(populatedSchool.gradesLevels),
-        signInDate: populatedSchool.signInDate,
-        admin: populatedSchool.admin,
-    });
+    res.status(201).json(schoolToResponseJson(populatedSchool));
 });
 
 // GET /api/schools/:id — use with protectSchoolAdmin; admin must own the school
@@ -144,7 +195,9 @@ const getSchoolById = asyncHandler(async (req, res) => {
         throw new Error('Invalid school id');
     }
 
-    const school = await School.findById(id).populate('gradesLevels', 'name');
+    const school = await School.findById(id)
+        .populate('gradesLevels', 'name')
+        .populate('programs', 'name department programType');
 
     if (!school) {
         res.status(404);
@@ -156,17 +209,7 @@ const getSchoolById = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to view this school');
     }
 
-    res.status(200).json({
-        _id: school._id,
-        name: school.name,
-        country: school.country,
-        city: school.city,
-        address: school.address,
-        schoolType: school.schoolType,
-        gradesLevels: gradeLevelsToJson(school.gradesLevels),
-        signInDate: school.signInDate,
-        admin: school.admin,
-    });
+    res.status(200).json(schoolToResponseJson(school));
 });
 
 // PUT /api/schools/:id — use with protectSchoolAdmin; admin must own the school
@@ -190,7 +233,15 @@ const updateSchoolById = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to update this school');
     }
 
-    const { name, country, city, address, schoolType, gradesLevels } = req.body;
+    const {
+        name,
+        country,
+        city,
+        address,
+        schoolType,
+        gradesLevels,
+        programs,
+    } = req.body;
 
     if (!name || String(name).trim() === '') {
         res.status(400);
@@ -214,25 +265,37 @@ const updateSchoolById = asyncHandler(async (req, res) => {
 
     if (!VALID_SCHOOL_TYPES.includes(schoolType)) {
         res.status(400);
-        throw new Error('schoolType must be high school or university');
+        throw new Error(
+            `schoolType must be one of: ${VALID_SCHOOL_TYPES.join(', ')}`,
+        );
     }
 
-    if (!Array.isArray(gradesLevels) || gradesLevels.length === 0) {
-        res.status(400);
-        throw new Error('At least one grade level is required');
+    const useUniversityPrograms = isUniversitySchool(schoolType);
+    const kindChanged =
+        isUniversitySchool(school.schoolType) !== useUniversityPrograms;
+
+    if (kindChanged) {
+        const linked = await countSchoolLinkedRecords(school._id);
+        if (
+            linked.subjects > 0
+            || linked.plans > 0
+            || linked.students > 0
+        ) {
+            res.status(400);
+            throw new Error(
+                'Cannot change between university and school types '
+                + 'because this institution already has subjects, plans, '
+                + 'or students',
+            );
+        }
     }
 
-    const hasValidGradeLevel = gradesLevels.some((item) => {
-        if (typeof item === 'string') {
-            return item.trim() !== '';
+    if (useUniversityPrograms) {
+        if (!hasValidCohortItems(programs)) {
+            res.status(400);
+            throw new Error('At least one program is required');
         }
-        if (item && typeof item === 'object') {
-            return String(item.name ?? '').trim() !== '';
-        }
-        return false;
-    });
-
-    if (!hasValidGradeLevel) {
+    } else if (!hasValidCohortItems(gradesLevels)) {
         res.status(400);
         throw new Error('At least one grade level is required');
     }
@@ -245,43 +308,64 @@ const updateSchoolById = asyncHandler(async (req, res) => {
         school.address = String(address).trim();
     }
 
-    const synced = await syncSchoolGradeLevels(school, gradesLevels);
-    if (synced.error) {
-        res.status(400);
-        throw new Error(synced.error);
-    }
-
-    if (!school.gradesLevels || school.gradesLevels.length === 0) {
-        res.status(400);
-        throw new Error('At least one grade level is required');
+    if (useUniversityPrograms) {
+        const syncedPrograms = await syncSchoolPrograms(school, programs);
+        if (syncedPrograms.error) {
+            res.status(400);
+            throw new Error(syncedPrograms.error);
+        }
+        if (!school.programs || school.programs.length === 0) {
+            res.status(400);
+            throw new Error('At least one program is required');
+        }
+        school.gradesLevels = [];
+        if (kindChanged) {
+            await deleteAllSchoolGradeLevels(school._id);
+        }
+    } else {
+        const synced = await syncSchoolGradeLevels(school, gradesLevels);
+        if (synced.error) {
+            res.status(400);
+            throw new Error(synced.error);
+        }
+        if (!school.gradesLevels || school.gradesLevels.length === 0) {
+            res.status(400);
+            throw new Error('At least one grade level is required');
+        }
+        school.programs = [];
+        if (kindChanged) {
+            await deleteAllSchoolPrograms(school._id);
+        }
     }
 
     const updatedSchool = await school.save();
-    const populatedSchool = await populateSchoolGradeLevels(updatedSchool);
+    const populatedSchool = await populateSchoolDetails(updatedSchool);
 
-    res.status(200).json({
-        _id: populatedSchool._id,
-        name: populatedSchool.name,
-        country: populatedSchool.country,
-        city: populatedSchool.city,
-        address: populatedSchool.address,
-        schoolType: populatedSchool.schoolType,
-        gradesLevels: gradeLevelsToJson(populatedSchool.gradesLevels),
-        signInDate: populatedSchool.signInDate,
-        admin: populatedSchool.admin,
-    });
+    res.status(200).json(schoolToResponseJson(populatedSchool));
 });
 
 // POST /api/schools/:id/teachers — use with protectSchoolAdmin
 const addTeacherToSchool = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { email, firstname, lastname } = req.body;
+    const { email, firstname, lastname, schoolType: schoolTypeFromBody } = req.body;
 
     const { school } = await assertSchoolAdminOwnsSchool(
         res,
         req.schoolAdmin._id,
         id,
     );
+
+    if (
+        schoolTypeFromBody !== undefined
+        && schoolTypeFromBody !== null
+        && String(schoolTypeFromBody).trim() !== ''
+        && String(schoolTypeFromBody).trim() !== school.schoolType
+    ) {
+        res.status(400);
+        throw new Error('School type does not match your institution');
+    }
+
+    const teacherSchoolType = school.schoolType;
 
     if (!firstname || String(firstname).trim() === '') {
         res.status(400);
@@ -333,6 +417,7 @@ const addTeacherToSchool = asyncHandler(async (req, res) => {
         existingTeacher.lastname = String(lastname).trim().toLowerCase();
         existingTeacher.email = trimmedEmail;
         existingTeacher.school = school._id;
+        existingTeacher.schoolType = teacherSchoolType;
         teacher = await existingTeacher.save();
     } else {
         teacher = await Teacher.create({
@@ -343,6 +428,7 @@ const addTeacherToSchool = asyncHandler(async (req, res) => {
             image: 'none',
             signInDate: new Date(),
             school: school._id,
+            schoolType: teacherSchoolType,
         });
     }
 
@@ -357,6 +443,7 @@ const addTeacherToSchool = asyncHandler(async (req, res) => {
         lastname: teacher.lastname,
         email: teacher.email,
         school: teacher.school,
+        schoolType: teacher.schoolType,
         signInDate: teacher.signInDate,
     });
 });
@@ -372,7 +459,7 @@ const getTeachersBySchool = asyncHandler(async (req, res) => {
     );
 
     const teachers = await Teacher.find({ school: id })
-        .select('firstname lastname email signInDate createdAt')
+        .select('firstname lastname email signInDate createdAt schoolType')
         .sort({ createdAt: -1 })
         .lean();
 
@@ -382,6 +469,7 @@ const getTeachersBySchool = asyncHandler(async (req, res) => {
             firstname: teacher.firstname,
             lastname: teacher.lastname,
             email: teacher.email,
+            schoolType: teacher.schoolType,
             signInDate: teacher.signInDate,
             createdAt: teacher.createdAt,
         })),
@@ -407,6 +495,68 @@ async function assertGradeLevelBelongsToSchool (
         res.status(400);
         throw new Error('Grade level must belong to your school');
     }
+}
+
+function schoolProgramIds (school) {
+    return (school.programs ?? []).map((id) => String(id));
+}
+
+async function assertProgramBelongsToSchool (
+    res,
+    school,
+    programId,
+) {
+    if (!mongoose.Types.ObjectId.isValid(programId)) {
+        res.status(400);
+        throw new Error('Invalid program');
+    }
+
+    const allowed = schoolProgramIds(school);
+    if (!allowed.includes(String(programId))) {
+        res.status(400);
+        throw new Error('Program must belong to your institution');
+    }
+}
+
+async function assertPlanBelongsToSchoolAndProgram (
+    res,
+    school,
+    planId,
+    programId,
+) {
+    if (!mongoose.Types.ObjectId.isValid(planId)) {
+        res.status(400);
+        throw new Error('Invalid plan');
+    }
+
+    const plan = await Plan.findById(planId).select(
+        'school program active subjects',
+    );
+
+    if (!plan) {
+        res.status(404);
+        throw new Error('Plan not found');
+    }
+
+    if (String(plan.school) !== String(school._id)) {
+        res.status(403);
+        throw new Error('This plan does not belong to your school');
+    }
+
+    if (plan.active === false) {
+        res.status(400);
+        throw new Error('This plan is not active');
+    }
+
+    if (
+        plan.program
+        && String(plan.program) !== String(programId)
+    ) {
+        res.status(400);
+        throw new Error('This plan is for a different program');
+    }
+
+    return plan;
 }
 
 async function assertPlanBelongsToSchoolAndGrade (
@@ -501,6 +651,7 @@ function studentListItemJson (student) {
         signInDate: student.signInDate,
         createdAt: student.createdAt,
         gradesLevel: gradeLevelToJson(student.gradesLevel),
+        program: programToJson(student.program),
         plan:
             primaryPlan != null && typeof primaryPlan === 'object'
                 ? {
@@ -521,6 +672,7 @@ const addStudentToSchool = asyncHandler(async (req, res) => {
         firstname,
         lastname,
         gradesLevel: gradesLevelFromBody,
+        program: programFromBody,
         plan: planFromBody,
     } = req.body;
 
@@ -529,6 +681,8 @@ const addStudentToSchool = asyncHandler(async (req, res) => {
         req.schoolAdmin._id,
         id,
     );
+
+    const useUniversityPrograms = isUniversitySchool(school.schoolType);
 
     if (!firstname || String(firstname).trim() === '') {
         res.status(400);
@@ -541,21 +695,56 @@ const addStudentToSchool = asyncHandler(async (req, res) => {
     }
 
     if (
-        gradesLevelFromBody === undefined
-        || gradesLevelFromBody === null
-        || String(gradesLevelFromBody).trim() === ''
-    ) {
-        res.status(400);
-        throw new Error('Grade level is required');
-    }
-
-    if (
         planFromBody === undefined
         || planFromBody === null
         || String(planFromBody).trim() === ''
     ) {
         res.status(400);
         throw new Error('Plan is required');
+    }
+
+    let gradesLevelId;
+    let programId;
+    let plan;
+
+    if (useUniversityPrograms) {
+        if (
+            programFromBody === undefined
+            || programFromBody === null
+            || String(programFromBody).trim() === ''
+        ) {
+            res.status(400);
+            throw new Error('Program is required');
+        }
+
+        programId = String(programFromBody).trim();
+        await assertProgramBelongsToSchool(res, school, programId);
+
+        plan = await assertPlanBelongsToSchoolAndProgram(
+            res,
+            school,
+            String(planFromBody).trim(),
+            programId,
+        );
+    } else {
+        if (
+            gradesLevelFromBody === undefined
+            || gradesLevelFromBody === null
+            || String(gradesLevelFromBody).trim() === ''
+        ) {
+            res.status(400);
+            throw new Error('Grade level is required');
+        }
+
+        gradesLevelId = String(gradesLevelFromBody).trim();
+        await assertGradeLevelBelongsToSchool(res, school, gradesLevelId);
+
+        plan = await assertPlanBelongsToSchoolAndGrade(
+            res,
+            school,
+            String(planFromBody).trim(),
+            gradesLevelId,
+        );
     }
 
     const emailTrimmed = email != null ? String(email).trim() : '';
@@ -569,16 +758,6 @@ const addStudentToSchool = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Invalid email address');
     }
-
-    const gradesLevelId = String(gradesLevelFromBody).trim();
-    await assertGradeLevelBelongsToSchool(res, school, gradesLevelId);
-
-    const plan = await assertPlanBelongsToSchoolAndGrade(
-        res,
-        school,
-        String(planFromBody).trim(),
-        gradesLevelId,
-    );
 
     const emailRegex = trimmedEmail
         ? buildEmailExactRegex(trimmedEmail)
@@ -620,7 +799,13 @@ const addStudentToSchool = asyncHandler(async (req, res) => {
             existingStudent.email = trimmedEmail;
         }
         existingStudent.school = school._id;
-        existingStudent.gradesLevel = gradesLevelId;
+        if (useUniversityPrograms) {
+            existingStudent.program = programId;
+            existingStudent.gradesLevel = undefined;
+        } else {
+            existingStudent.gradesLevel = gradesLevelId;
+            existingStudent.program = undefined;
+        }
         if (
             !existingStudent.username
             || String(existingStudent.username).trim() === ''
@@ -643,10 +828,14 @@ const addStudentToSchool = asyncHandler(async (req, res) => {
             username,
             role: 'student',
             school: school._id,
-            gradesLevel: gradesLevelId,
             signInDate: new Date(),
             plans: [plan._id],
         };
+        if (useUniversityPrograms) {
+            createPayload.program = programId;
+        } else {
+            createPayload.gradesLevel = gradesLevelId;
+        }
         if (trimmedEmail != null) {
             createPayload.email = trimmedEmail;
         }
@@ -666,9 +855,10 @@ const addStudentToSchool = asyncHandler(async (req, res) => {
 
     const populated = await Student.findById(student._id)
         .select(
-            'firstname lastname email username signInDate createdAt gradesLevel plans',
+            'firstname lastname email username signInDate createdAt gradesLevel program plans',
         )
         .populate('gradesLevel', 'name')
+        .populate('program', 'name department programType')
         .populate({
             path: 'plans',
             select: 'price totalQuestions active',
@@ -691,9 +881,10 @@ const getStudentsBySchool = asyncHandler(async (req, res) => {
 
     const students = await Student.find({ school: id })
         .select(
-            'firstname lastname email username signInDate createdAt gradesLevel plans',
+            'firstname lastname email username signInDate createdAt gradesLevel program plans',
         )
         .populate('gradesLevel', 'name')
+        .populate('program', 'name department programType')
         .populate({
             path: 'plans',
             select: 'price totalQuestions active',

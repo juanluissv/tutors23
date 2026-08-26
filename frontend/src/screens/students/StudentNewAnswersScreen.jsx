@@ -5,34 +5,33 @@ import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useGetStudentNewAnswersQuery } from '../../slices/student/studentAnswersSlice'
 import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
+import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
 	canViewQuestions,
-	getSubscriptionBlockReason,
 } from '../../utils/subscriptionAccess'
 import '../../App.css'
 
 const PAGE_SIZE = 2
 
-// const CARD_THEME_CYCLE = ['amber', 'indigo', 'blue', 'sky', 'violet' ]
-const CARD_THEME_CYCLE = ['amber', 'sky', 'indigo', 'blue', 'violet' ]
+const PAIR_THEMES = [
+	['sky', 'indigo'],
+	['blue', 'pink'],
+]
 
-function themeForAnswerId (id) {
-	const s = String(id ?? '')
-	let sum = 0
-	for (let i = 0; i < s.length; i += 1) {
-		sum += s.charCodeAt(i)
-	}
-	return CARD_THEME_CYCLE[sum % CARD_THEME_CYCLE.length]
+function themesForPage (pageIndex) {
+	return PAIR_THEMES[pageIndex % PAIR_THEMES.length]
 }
 
 const THEME_GRADIENTS = {
-	sky: { from: '#0369a1', to: '#38bdf8' },
-	violet: { from: '#6d28d9', to: '#c084fc' },
-	blue: { from: '#1d4ed8', to: '#60a5fa' },
+	sky: { from: '#0369a1', to: '#7dd3fc' },
+	violet: { from: '#7c3aed', to: '#c4b5fd' },
+	blue: { from: '#1d4ed8', to: '#93c5fd' },
 	amber: { from: '#d97706', to: '#fbbf24' },
 	rose: { from: '#be123c', to: '#fb7185' },
-	indigo: { from: '#4338ca', to: '#818cf8' },
+	indigo: { from: '#4f46e5', to: '#818cf8' },
+	pink: { from: '#be185d', to: '#f9a8d4' },
+	cyan: { from: '#0369a1', to: '#7dd3fc' },
 }
 
 const PlayIcon = () => (
@@ -99,10 +98,10 @@ const AnswerBadge = ({ theme, gradientId }) => {
 
 function teacherDisplayName (teacher) {
 	if (!teacher || typeof teacher !== 'object') {
-		return 'Teacher'
+		return 'Profesor'
 	}
 	const parts = [teacher.firstname, teacher.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Teacher'
+	return parts.length > 0 ? parts.join(' ') : 'Profesor'
 }
 
 function formatQaDate (value) {
@@ -113,7 +112,7 @@ function formatQaDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return ''
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
@@ -128,7 +127,7 @@ function answerQuestionTitle (answer) {
 		}
 	}
 	const t = answer?.title
-	return t != null && String(t).trim() !== '' ? String(t).trim() : 'Your question'
+	return t != null && String(t).trim() !== '' ? String(t).trim() : 'Tu pregunta'
 }
 
 function answerHasVideo (answer) {
@@ -140,7 +139,7 @@ function AnswerVideoThumb ({ watchTo, ariaLabel }) {
 		<Link
 			to={watchTo}
 			className='new-answers__video'
-			aria-label={ariaLabel ?? 'Watch answer video'}
+			aria-label={ariaLabel ?? 'Ver video de la respuesta'}
 		>
 			<div className='new-answers__video-glow' />
 			<div className='new-answers__video-placeholder'>
@@ -160,13 +159,12 @@ function AnswerVideoThumb ({ watchTo, ariaLabel }) {
 	)
 }
 
-function AnswerCard ({ item }) {
+function AnswerCard ({ item, theme = 'blue' }) {
 	const category =
 		item.subject && typeof item.subject === 'object'
 			? item.subject.title
-			: 'Subject'
+			: 'Materia'
 	const watchPath = `/students/watchanswer/${String(item._id)}`
-	const theme = themeForAnswerId(item._id)
 	const hasDescription =
 		item.description != null && String(item.description).trim() !== ''
 
@@ -176,7 +174,7 @@ function AnswerCard ({ item }) {
 				<span className='new-answers__tag'>{category}</span>
 				<span className='new-answers__pill'>
 					<span className='new-answers__pill-dot' />
-					New
+					Nueva
 				</span>
 			</div>
 
@@ -186,7 +184,7 @@ function AnswerCard ({ item }) {
 
 			<AnswerVideoThumb
 				watchTo={watchPath}
-				ariaLabel='Watch answer video'
+				ariaLabel='Ver video de la respuesta'
 			/>
 
 			{hasDescription && (
@@ -200,7 +198,7 @@ function AnswerCard ({ item }) {
 			</span>
 
 			<Link to={watchPath} className='new-answers__watch'>
-				Watch answer
+				Mira la respuesta
 				<PlayIconSmall />
 			</Link>
 		</div>
@@ -243,10 +241,6 @@ function StudentNewAnswersScreen () {
 		profile?.subscriptions,
 	)
 	const canView = canViewQuestions(currentSubscription)
-	const viewBlockReason = getSubscriptionBlockReason(
-		currentSubscription,
-		'view',
-	)
 
 	const {
 		data: answersFromApi = [],
@@ -296,12 +290,17 @@ function StudentNewAnswersScreen () {
 		return newAnswers.slice(start, start + PAGE_SIZE)
 	}, [newAnswers, currentPage])
 
+	const pairThemes = themesForPage(currentPage - 1)
+	const firstTheme = pairThemes[0]
+	const secondTheme = pairThemes[1]
+
 	if (!studentInfo) {
 		return null
 	}
 
 	const errorMessage =
-		error?.data?.message || error?.error || 'Could not load new answers.'
+		error?.data?.message || error?.error
+		|| 'No se pudieron cargar las nuevas respuestas.'
 
 	return (
 		<div className='chat-app ask-screen'>
@@ -316,46 +315,34 @@ function StudentNewAnswersScreen () {
 						<div className='center-content3'>
 							<div className='new-answers-page new-answers-page--centered'>
 								<h1 className='new-answers-page__title heading-gradient'>
-									New answers from teachers
+									Respuestas de tus profesores
 								</h1>
 								<p className='new-answers-page__subtitle'>
 									{canView ? (
 										<>
-											You have{' '}
-											<strong>{newAnswers.length}</strong>{' '}
-											new video{' '}
+											Tienes{' '}
+											<strong>{newAnswers.length}</strong>
+											{' '}
 											{newAnswers.length === 1
-												? 'answer'
-												: 'answers'}{' '}
-											waiting. Watch them before they move to
-											your previous questions.
+												? 'nueva respuesta pendiente.'
+												: 'nuevas respuestas pendientes.'}
 										</>
 									) : (
-										'Watch the video answers your teachers '
-										+ 'have recorded for your questions.'
+										'Mira las respuestas en video que '
+										+ 'tus profesores grabaron para '
+										+ 'tus preguntas.'
 									)}
 								</p>
 
 								{!isLoadingProfile && !canView ? (
-									<div className='ask-subscription-notice'>
-										<p className='ask-subscription-notice__title'>
-											Subscription required
-										</p>
-										<p className='ask-subscription-notice__text'>
-											{viewBlockReason}
-										</p>
-										<Link
-											to='/students/subscription'
-											className='ask-subscription-notice__link'
-										>
-											View plans & subscribe
-										</Link>
-									</div>
+									<StudentSubscriptionNotice
+										subscription={currentSubscription}
+									/>
 								) : null}
 
 								{canView && isLoading && (
 									<p className='new-answers__status'>
-										Loading answers…
+										Cargando respuestas…
 									</p>
 								)}
 
@@ -368,7 +355,7 @@ function StudentNewAnswersScreen () {
 											style={{ marginTop: '0.75rem' }}
 											onClick={() => refetch()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								)}
@@ -379,10 +366,9 @@ function StudentNewAnswersScreen () {
 										<div className='new-answers__empty-icon'>
 											<AnswerBadge />
 										</div>
-										<p className='new-answers__empty-text'>
-											No new answers yet. When a teacher
-											responds to your questions, they will
-											appear here until you watch them.
+										<p className='new-answers__empty-text'>										
+											Cuando un profesor responde a tus preguntas, 
+											aparecerán aquí hasta que las veas.
 										</p>
 									</div>
 								)}
@@ -393,20 +379,20 @@ function StudentNewAnswersScreen () {
 										<div
 											className={`new-answers__pair ${paginatedAnswers.length === 1 ? 'new-answers__pair--single' : ''}`}
 										>
-											<AnswerCard item={paginatedAnswers[0]} />
+											<AnswerCard
+												item={paginatedAnswers[0]}
+												theme={firstTheme}
+											/>
 
 											{paginatedAnswers.length > 1 && (
 												<>
 													<NewAnswersConnector
-														firstTheme={themeForAnswerId(
-															paginatedAnswers[0]._id,
-														)}
-														secondTheme={themeForAnswerId(
-															paginatedAnswers[1]._id,
-														)}
+														firstTheme={firstTheme}
+														secondTheme={secondTheme}
 													/>
 													<AnswerCard
 														item={paginatedAnswers[1]}
+														theme={secondTheme}
 													/>
 												</>
 											)}

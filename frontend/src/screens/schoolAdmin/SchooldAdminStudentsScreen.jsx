@@ -12,6 +12,11 @@ import {
 	subjectIncludesGradeLevel,
 } from '../../utils/gradeLevel'
 import {
+	normalizeUniversityPrograms,
+	subjectIncludesProgram,
+} from '../../utils/universityProgram'
+import { isUniversitySchool } from '../../utils/schoolType'
+import {
 	TeacherSubjectsGrid,
 	SubjectCardActionsStudentsSchoolAdmin,
 } from '../teachers/TeacherSubjectsGrid'
@@ -81,49 +86,56 @@ function SchooldAdminStudentsScreen () {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
 	)
-	const [selectedGradeLevelId, setSelectedGradeLevelId] = useState('')
+	const [selectedCohortId, setSelectedCohortId] = useState('')
 
 	const gradesLevels = normalizeGradeLevels(schoolData?.gradesLevels)
-	const hasGradeLevels = gradesLevels.length > 0
+	const programs = normalizeUniversityPrograms(schoolData?.programs)
+	const isUniversity = isUniversitySchool(schoolData?.schoolType)
+	const cohorts = isUniversity ? programs : gradesLevels
+	const hasCohorts = cohorts.length > 0
 	const isPageLoading = isLoading || isLoadingSchool
 	const subjectsList = useMemo(
 		() => (Array.isArray(subjects) ? subjects : []),
 		[subjects],
 	)
 	const filteredSubjects = useMemo(() => {
-		if (selectedGradeLevelId === '') {
+		if (selectedCohortId === '') {
 			return subjectsList
 		}
-		const selectedLevel = gradesLevels.find(
-			(level) => String(level._id) === selectedGradeLevelId,
+		const selectedCohort = cohorts.find(
+			(item) => String(item._id) === selectedCohortId,
 		)
-		if (!selectedLevel) {
+		if (!selectedCohort) {
 			return subjectsList
 		}
 		return subjectsList.filter(
-			(subject) => subjectIncludesGradeLevel(
-				subject.gradesLevel,
-				selectedLevel,
-			),
-		)
-	}, [subjectsList, selectedGradeLevelId, gradesLevels])
-	const subjectCountByGrade = useMemo(() => {
-		const counts = new Map()
-		for (const level of gradesLevels) {
-			const id = String(level._id)
-			const count = subjectsList.filter(
-				(subject) => subjectIncludesGradeLevel(
+			(subject) => isUniversity
+				? subjectIncludesProgram(subject.program, selectedCohort)
+				: subjectIncludesGradeLevel(
 					subject.gradesLevel,
-					level,
+					selectedCohort,
 				),
+		)
+	}, [subjectsList, selectedCohortId, cohorts, isUniversity])
+	const subjectCountByCohort = useMemo(() => {
+		const counts = new Map()
+		for (const cohort of cohorts) {
+			const id = String(cohort._id)
+			const count = subjectsList.filter(
+				(subject) => isUniversity
+					? subjectIncludesProgram(subject.program, cohort)
+					: subjectIncludesGradeLevel(
+						subject.gradesLevel,
+						cohort,
+					),
 			).length
 			counts.set(id, count)
 		}
 		return counts
-	}, [subjectsList, gradesLevels])
+	}, [subjectsList, cohorts, isUniversity])
 
-	const handleSelectGradeFilter = (gradeLevelId) => {
-		setSelectedGradeLevelId(gradeLevelId)
+	const handleSelectCohortFilter = (cohortId) => {
+		setSelectedCohortId(cohortId)
 	}
 
 	const toggleSidebar = () => {
@@ -197,8 +209,16 @@ function SchooldAdminStudentsScreen () {
 						<TeacherSubjectsGrid
 							pageTitle='Students by subject'
 							pageSubtitle={
-								'Pick a subject to see enrolled students ' +
-								'and activity.'
+								isUniversity
+									? (
+										'Pick a subject to see enrolled students '
+										+ 'and activity. Filter by program to '
+										+ 'narrow the list.'
+									)
+									: (
+										'Pick a subject to see enrolled students '
+										+ 'and activity.'
+									)
 							}
 							afterSubtitle={
 								!isPageLoading && !isError ? (
@@ -217,11 +237,13 @@ function SchooldAdminStudentsScreen () {
 												<span>Add students</span>
 											</Link>
 										</div>
-										{subjectsList.length > 0 && hasGradeLevels ? (
+										{subjectsList.length > 0 && hasCohorts ? (
 											<div
 												className='teacher-subjects-page__grade-filter'
 												role='group'
-												aria-label='Filter subjects by grade level'
+												aria-label={isUniversity
+													? 'Filter subjects by program'
+													: 'Filter subjects by grade level'}
 											>
 												<div className='teacher-subjects-page__grade-filter-header'>
 													<span
@@ -231,12 +253,16 @@ function SchooldAdminStudentsScreen () {
 														<GradCapIcon />
 													</span>
 													<span className='teacher-subjects-page__grade-filter-label'>
-														Filter by grade
+														{isUniversity
+															? 'Filter by program'
+															: 'Filter by grade'}
 													</span>
-													{selectedGradeLevelId !== '' && (
+													{selectedCohortId !== '' && (
 														<span className='teacher-subjects-page__grade-filter-count'>
 															{filteredSubjects.length} subject
-															{filteredSubjects.length === 1 ? '' : 's'}
+															{filteredSubjects.length === 1
+																? ''
+																: 's'}
 														</span>
 													)}
 												</div>
@@ -245,26 +271,33 @@ function SchooldAdminStudentsScreen () {
 														type='button'
 														className={
 															'teacher-subjects-page__grade-pill' +
-															(selectedGradeLevelId === ''
+															(selectedCohortId === ''
 																? ' teacher-subjects-page__grade-pill--active'
 																: '')
 														}
-														onClick={() => handleSelectGradeFilter('')}
-														aria-pressed={selectedGradeLevelId === ''}
+														onClick={() =>
+															handleSelectCohortFilter('')}
+														aria-pressed={selectedCohortId === ''}
 													>
-														All grades
+														{isUniversity
+															? 'All programs'
+															: 'All grades'}
 														<span className='teacher-subjects-page__grade-pill-count'>
 															{subjectsList.length}
 														</span>
 													</button>
-													{gradesLevels.map((level) => {
-														const levelId = String(level._id)
-														const isActive = selectedGradeLevelId === levelId
-														const count = subjectCountByGrade.get(levelId) ?? 0
+													{cohorts.map((cohort) => {
+														const cohortId = String(cohort._id)
+														const isActive =
+															selectedCohortId === cohortId
+														const count =
+															subjectCountByCohort.get(
+																cohortId,
+															) ?? 0
 
 														return (
 															<button
-																key={levelId}
+																key={cohortId}
 																type='button'
 																className={
 																	'teacher-subjects-page__grade-pill' +
@@ -272,10 +305,19 @@ function SchooldAdminStudentsScreen () {
 																		? ' teacher-subjects-page__grade-pill--active'
 																		: '')
 																}
-																onClick={() => handleSelectGradeFilter(levelId)}
+																onClick={() =>
+																	handleSelectCohortFilter(
+																		cohortId,
+																	)}
 																aria-pressed={isActive}
 															>
-																Grade {level.name}
+																{isUniversity
+																	? cohort.name
+																	: `Grade ${cohort.name}`}
+																{isUniversity
+																	&& cohort.department
+																	? ` (${cohort.department})`
+																	: ''}
 																<span className='teacher-subjects-page__grade-pill-count'>
 																	{count}
 																</span>
@@ -289,8 +331,10 @@ function SchooldAdminStudentsScreen () {
 								) : null
 							}
 							emptyMessage={
-								selectedGradeLevelId !== '' && subjectsList.length > 0
-									? 'No subjects for this grade level yet.'
+								selectedCohortId !== '' && subjectsList.length > 0
+									? (isUniversity
+										? 'No subjects for this program yet.'
+										: 'No subjects for this grade level yet.')
 									: 'No subjects yet. Create subjects first, then ' +
 										'students enrolled in them will appear here.'
 							}
@@ -298,6 +342,7 @@ function SchooldAdminStudentsScreen () {
 							isLoading={isPageLoading}
 							isError={isError}
 							refetch={refetch}
+							isUniversity={isUniversity}
 							renderCardActions={(subject) => (
 								<SubjectCardActionsStudentsSchoolAdmin
 									subjectId={String(subject._id)}

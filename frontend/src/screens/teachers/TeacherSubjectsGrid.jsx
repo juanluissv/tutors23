@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { subjectGradeLabel } from '../../utils/gradeLevel'
+import { getSubjectCohortLabel } from '../../utils/universityProgram'
 import '../../App.css'
 
 const ChevronLeftIcon = () => (
@@ -41,6 +41,7 @@ function SubjectsPagination ({
 	pageSize,
 	totalCount,
 	onPageChange,
+	copy,
 }) {
 	const start = (currentPage - 1) * pageSize + 1
 	const end = Math.min(currentPage * pageSize, totalCount)
@@ -48,14 +49,14 @@ function SubjectsPagination ({
 	return (
 		<nav
 			className='subjects-pagination'
-			aria-label='Subject pages'
+			aria-label={copy.paginationAria}
 		>
 			<p className='subjects-pagination__summary'>
-				Showing{' '}
+				{copy.showing}{' '}
 				<strong>{start}–{end}</strong>
-				{' '}of{' '}
+				{' '}{copy.of}{' '}
 				<strong>{totalCount}</strong>
-				{' '}subjects
+				{' '}{copy.subjects}
 			</p>
 			<div className='subjects-pagination__controls'>
 				<button
@@ -63,10 +64,10 @@ function SubjectsPagination ({
 					className='subjects-pagination__nav'
 					onClick={() => onPageChange(currentPage - 1)}
 					disabled={currentPage <= 1}
-					aria-label='Previous page'
+					aria-label={copy.prev}
 				>
 					<ChevronLeftIcon />
-					<span>Prev</span>
+					<span>{copy.prev}</span>
 				</button>
 				<div className='subjects-pagination__pages'>
 					{Array.from({ length: totalPages }, (_, i) => i + 1).map(
@@ -81,7 +82,7 @@ function SubjectsPagination ({
 										: '')
 								}
 								onClick={() => onPageChange(page)}
-								aria-label={`Page ${page}`}
+								aria-label={`${copy.pageAriaPrefix} ${page}`}
 								aria-current={
 									currentPage === page ? 'page' : undefined
 								}
@@ -96,14 +97,33 @@ function SubjectsPagination ({
 					className='subjects-pagination__nav'
 					onClick={() => onPageChange(currentPage + 1)}
 					disabled={currentPage >= totalPages}
-					aria-label='Next page'
+					aria-label={copy.next}
 				>
-					<span>Next</span>
+					<span>{copy.next}</span>
 					<ChevronRightIcon />
 				</button>
 			</div>
 		</nav>
 	)
+}
+
+const DEFAULT_GRID_COPY = {
+	loading: 'Loading subjects…',
+	error:
+		'We couldn\'t load your subjects. Try again in a moment.',
+	retry: 'Try again',
+	students: 'students',
+	published: 'Published',
+	draft: 'Draft',
+	paginationAria: 'Subject pages',
+	showing: 'Showing',
+	of: 'of',
+	subjects: 'subjects',
+	prev: 'Prev',
+	next: 'Next',
+	pageAriaPrefix: 'Page',
+	noTeacher: 'No teacher assigned',
+	teacherPrefix: 'profesor  ',
 }
 
 const GradCapIcon = () => (
@@ -149,6 +169,45 @@ const StudentsIcon = () => (
 	</svg>
 )
 
+const TeacherIcon = () => (
+	<svg
+		width='14'
+		height='14'
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+	>
+		<path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' />
+		<circle cx='12' cy='7' r='4' />
+	</svg>
+)
+
+function getSubjectTeacherLabel (subject, fallback) {
+	const teachers = Array.isArray(subject?.teachers)
+		? subject.teachers
+		: []
+	const names = teachers
+		.map((teacher) => {
+			if (!teacher || typeof teacher !== 'object') {
+				return ''
+			}
+			return [teacher.firstname, teacher.lastname]
+				.filter(Boolean)
+				.join(' ')
+				.trim()
+		})
+		.filter(Boolean)
+
+	if (names.length > 0) {
+		return names.join(', ')
+	}
+
+	return fallback
+}
+
 
 /**
  * Shared subject cards grid (loading / error / empty / list).
@@ -162,6 +221,10 @@ const StudentsIcon = () => (
  * @param {() => void} props.refetch
  * @param {(subject: object, index: number) => import('react').ReactNode} props.renderCardActions
  * @param {import('react').ReactNode} [props.afterSubtitle]
+ * @param {function} [props.getSubjectMetaLabel] — card meta line; defaults
+ *   to program + semester for university subjects, otherwise grade
+ * @param {boolean} [props.isUniversity] — prefer program labels when the
+ *   school is a university even if a subject has no program yet
  * @param {number} [props.pageSize] — when set, paginate the grid
  */
 export function TeacherSubjectsGrid ({
@@ -174,8 +237,15 @@ export function TeacherSubjectsGrid ({
 	isError,
 	refetch,
 	renderCardActions,
+	getSubjectMetaLabel,
+	isUniversity = false,
 	pageSize,
+	copy: copyProp,
+	showStudentCount = true,
+	showSubjectMeta = true,
+	showTeacherName = false,
 }) {
+	const copy = { ...DEFAULT_GRID_COPY, ...copyProp }
 	const [currentPage, setCurrentPage] = useState(1)
 
 	const shouldPaginate = Boolean(
@@ -221,13 +291,12 @@ export function TeacherSubjectsGrid ({
 
 			{isLoading ? (
 				<p className='teacher-subjects-page__subtitle'>
-					Loading subjects…
+					{copy.loading}
 				</p>
 			) : isError ? (
 				<div>
 					<p className='teacher-subjects-page__subtitle'>
-						We couldn&apos;t load your subjects. Try again in a
-						moment.
+						{copy.error}
 					</p>
 					<button
 						type='button'
@@ -235,7 +304,7 @@ export function TeacherSubjectsGrid ({
 						style={{ maxWidth: 200, marginTop: 12 }}
 						onClick={() => void refetch()}
 					>
-						Try again
+						{copy.retry}
 					</button>
 				</div>
 			) : subjects.length === 0 ? (
@@ -252,7 +321,11 @@ export function TeacherSubjectsGrid ({
 							: index
 						const variant = (globalIndex % 5) + 1
 						const studentsCount = Number(subject.studentCount) || 0
-						const gradeLabel = subjectGradeLabel(subject)
+						const metaLabel = getSubjectMetaLabel
+							? getSubjectMetaLabel(subject)
+							: getSubjectCohortLabel(subject, {
+								isUniversity,
+							})
 						return (
 							<article
 								key={id}
@@ -278,16 +351,44 @@ export function TeacherSubjectsGrid ({
 										<h2 className='teacher-subject-card__name'>
 											{subject.title}
 										</h2>
-										<span className='teacher-subject-card__students'>
-											<StudentsIcon />
-											{studentsCount} students
-										</span>
-										<p className='teacher-subject-card__meta'>
-											{gradeLabel}
-											{subject.isCoursePublish
-												? ' · Published'
-												: ' · Draft'}
-										</p>
+										{showStudentCount ? (
+											<span className='teacher-subject-card__students'>
+												<StudentsIcon />
+												{studentsCount} {copy.students}
+											</span>
+										) : null}
+										{showTeacherName ? (
+											<span className={
+												'teacher-subject-card__teacher '
+												+ 'teacher-subject-card__teacher--stacked'
+											}
+											>
+												<span className={
+													'teacher-subject-card__teacher-label'
+												}
+												>
+													<TeacherIcon />
+													{copy.teacherPrefix}
+												</span>
+												<span className={
+													'teacher-subject-card__teacher-name'
+												}
+												>
+													{getSubjectTeacherLabel(
+														subject,
+														copy.noTeacher,
+													)}
+												</span>
+											</span>
+										) : null}
+										{showSubjectMeta ? (
+											<p className='teacher-subject-card__meta'>
+												{metaLabel}
+												{subject.isCoursePublish
+													? ` · ${copy.published}`
+													: ` · ${copy.draft}`}
+											</p>
+										) : null}
 									</div>
 									<div className='teacher-subject-card__badge'>
 										<GradCapIcon />
@@ -316,6 +417,7 @@ export function TeacherSubjectsGrid ({
 						pageSize={pageSize}
 						totalCount={subjects.length}
 						onPageChange={handlePageChange}
+						copy={copy}
 					/>
 				) : null}
 				</>

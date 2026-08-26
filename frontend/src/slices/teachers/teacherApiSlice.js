@@ -114,11 +114,6 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
                     if (body.description != null) {
                         fd.append('description', String(body.description));
                     }
-                    if (body.gradesLevel == null) {
-                        fd.append('gradesLevel', '');
-                    } else {
-                        fd.append('gradesLevel', String(body.gradesLevel));
-                    }
                     fd.append('book', book);
                     return {
                         url: `${SUBJECTS_URL}/${id}/teacher`,
@@ -231,6 +226,188 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
               return tags;
             },
         }),
+        updateSubjectBookChaptersByTeacher: builder.mutation({
+            query: ({ id, bookChapters }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters`,
+                method: 'PUT',
+                body: { bookChapters },
+            }),
+            invalidatesTags: (result, error, { id, teacherId }) => {
+                const tags = [];
+                if (teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${teacherId}`,
+                    });
+                }
+                if (id) {
+                    tags.push({ type: 'Subject', id });
+                }
+                return tags;
+            },
+        }),
+        generateSubjectBookChapterPdfByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-pdf`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id, teacherId }) => {
+                const tags = [];
+                if (teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${teacherId}`,
+                    });
+                }
+                if (id) {
+                    tags.push({ type: 'Subject', id });
+                }
+                return tags;
+            },
+        }),
+        deleteSubjectBookChapterByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, { id, teacherId }) => {
+                const tags = [];
+                if (teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${teacherId}`,
+                    });
+                }
+                if (id) {
+                    tags.push({ type: 'Subject', id });
+                }
+                return tags;
+            },
+        }),
+        getBookLessonsBySubjectForTeacher: builder.query({
+            query: (subjectId) => ({
+                url: `${SUBJECTS_URL}/${subjectId}/teacher/book-lessons`,
+            }),
+            providesTags: (result, error, subjectId) => [
+                { type: 'BookLesson', id: `SUBJECT_${subjectId}` },
+            ],
+        }),
+        getBookLessonByIdForTeacher: builder.query({
+            query: ({ subjectId, lessonId }) => ({
+                url: `${SUBJECTS_URL}/${subjectId}/teacher/book-lessons/${lessonId}`,
+            }),
+            providesTags: (result, error, { lessonId }) => [
+                { type: 'BookLesson', id: lessonId },
+            ],
+        }),
+        generateBookLessonsFromChapterByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-lessons`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateChapterTutorTxtFromLessonByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-tutor-txt`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { teacherId }) => {
+                const tags = ['Subject'];
+                if (teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${teacherId}`,
+                    });
+                }
+                return tags;
+            },
+        }),
+        generateSuggestedQuestionsFromLessonByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-suggested-questions`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateVideoScriptFromLessonByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-video-script`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateVideoScriptAudioFromLessonByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-video-audio`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateSceneIllustrationsFromLessonByTeacher: builder.mutation({
+            query: ({ id, chapterId, force = false }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-scene-illustrations`,
+                method: 'POST',
+                body: { force },
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        generateAnimatedVideoFromLessonByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-animated-video`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        checkAnimatedVideoStatusFromLessonByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/check-animated-video-status`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        uploadChapterTutorVideoByTeacher: builder.mutation({
+            query: ({ id, chapterId, video }) => {
+                const fd = new FormData();
+                fd.append('video', video);
+                return {
+                    url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/tutor-video`,
+                    method: 'PUT',
+                    body: fd,
+                };
+            },
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        uploadChapterTutorTranscribeByTeacher: builder.mutation({
+            query: ({ id, chapterId, transcribe }) => {
+                const fd = new FormData();
+                fd.append('transcribe', transcribe);
+                return {
+                    url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/tutor-transcribe`,
+                    method: 'PUT',
+                    body: fd,
+                };
+            },
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
     }),
 });
 
@@ -251,4 +428,19 @@ export const {
     useCreateCourseMutation,
     useAddCourseSectionMutation,
     useAddCourseLessonMutation,
+    useUpdateSubjectBookChaptersByTeacherMutation,
+    useGenerateSubjectBookChapterPdfByTeacherMutation,
+    useDeleteSubjectBookChapterByTeacherMutation,
+    useGetBookLessonsBySubjectForTeacherQuery,
+    useGetBookLessonByIdForTeacherQuery,
+    useGenerateBookLessonsFromChapterByTeacherMutation,
+    useGenerateChapterTutorTxtFromLessonByTeacherMutation,
+    useGenerateSuggestedQuestionsFromLessonByTeacherMutation,
+    useGenerateVideoScriptFromLessonByTeacherMutation,
+    useGenerateVideoScriptAudioFromLessonByTeacherMutation,
+    useGenerateSceneIllustrationsFromLessonByTeacherMutation,
+    useGenerateAnimatedVideoFromLessonByTeacherMutation,
+    useCheckAnimatedVideoStatusFromLessonByTeacherMutation,
+    useUploadChapterTutorVideoByTeacherMutation,
+    useUploadChapterTutorTranscribeByTeacherMutation,
 } = teacherApiSlice;

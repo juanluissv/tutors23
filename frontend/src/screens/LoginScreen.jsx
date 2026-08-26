@@ -32,11 +32,11 @@ function LoginScreen () {
 		e.preventDefault()
 		const un = username.trim().toLowerCase()
 		if (un === '') {
-			toast.error('Please enter your username')
+			toast.error('Por favor ingresa tu nombre de usuario')
 			return
 		}
 		if (password === '') {
-			toast.error('Please enter password')
+			toast.error('Por favor ingresa tu contraseña')
 			return
 		}
 		try {
@@ -64,9 +64,9 @@ function LoginScreen () {
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
-									<h1 className='login-card__title'>Welcome back</h1>
+									<h1 className='login-card__title'>Bienvenido de nuevo</h1>
 									<p className='login-card__subtitle'>
-										Sign in to your account to continue learning
+										Inicia sesión en tu cuenta para seguir aprendiendo
 									</p>
 								</div>
 								<form
@@ -77,14 +77,14 @@ function LoginScreen () {
 								>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='username'>
-											Username
+											Nombre de usuario
 										</label>
 										<input
 											type='text'
 											id='username'
 											name='username'
 											className='login-input'
-											placeholder='e.g. alex.rivera.4821'
+											placeholder='ej. alex.rivera.4821'
 											autoComplete='username'
 											onChange={(e) => setUsername(e.target.value)}
 											value={username}
@@ -92,7 +92,7 @@ function LoginScreen () {
 									</div>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='password'>
-											Password
+											Contraseña
 										</label>
 										<input
 											type='password'
@@ -117,7 +117,7 @@ function LoginScreen () {
 												className='login-checkbox'
 											/> */}
 											<span className='login-remember__text'>
-												Please click Sign in to enter demo 
+												Haz clic en Iniciar sesión para entrar a la demo 
 											</span>
 										</label>
 									</div>
@@ -127,26 +127,26 @@ function LoginScreen () {
 										name='login-button'
 										className='login-submit'
 									>
-										Sign in
+										Iniciar sesión
 									</button>
 								</form>
 								<p className='login-card__footer'>
-									Don't have an account?{' '}
+									¿No tienes una cuenta?{' '}
 									<Link to='/register' className='login-card__link'>
-										Sign up
+										Regístrate
 									</Link>
 								</p>
 								<div
 									className='login-card__teacher-gateway'
 									role='navigation'
-									aria-label='Teacher sign-in'
+									aria-label='Inicio de sesión de profesores'
 								>
 									<div className='login-card__teacher-gateway-accent' aria-hidden /> <br />
 									{/* <p className='login-card__teacher-gateway-kicker'>
 										Educators
 									</p> */}
 									<p className='login-card__teacher-gateway-lead'>
-										Are you a teacher?
+										¿Eres profesor?
 									</p>
 									{/* <p className='login-card__teacher-gateway-hint'>
 										Access your dashboard, subjects, and class tools on the
@@ -175,7 +175,7 @@ function LoginScreen () {
 											</svg>
 										</span>
 										<span className='login-card__teacher-gateway-btn-label'>
-											Teacher login
+											Acceso para profesores
 										</span>
 										<span
 											className='login-card__teacher-gateway-btn-arrow'

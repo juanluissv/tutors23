@@ -1,0 +1,1292 @@
+{
+    "id": "eacc92ca-49e4-47b8-96ae-4111f949bbd7",
+    "status": "succeeded",
+    "url": "https://f002.backblazeb2.com/file/creatomate-c8xg3hsxdu/eacc92ca-49e4-47b8-96ae-4111f949bbd7.mp4",
+    "output_format": "mp4",
+    "render_scale": 0.375,
+    "width": 480,
+    "height": 270,
+    "frame_rate": 60,
+    "duration": 445,
+    "file_size": 8257925,
+    "source": {
+      "width": 1280,
+      "height": 720,
+      "duration": 445,
+      "elements": [
+        {
+          "time": 0,
+          "type": "audio",
+          "track": 2,
+          "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-video-audio-unidad-1-semana-1-99463fb12eda546c.mp3",
+          "duration": 445
+        },
+        {
+          "clip": true,
+          "time": 0,
+          "type": "composition",
+          "track": 1,
+          "duration": 10,
+          "elements": [
+            {
+              "y": "40%",
+              "text": "Unidad 1 · Semana 1",
+              "time": 0.4,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "22%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "58%",
+              "text": "Tierra, recursos hídricos y seguridad alimentaria",
+              "time": 0.7,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "18%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "700",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "fill_color": "rgba(243,207,86,1)"
+        },
+        {
+          "clip": true,
+          "time": 10,
+          "type": "composition",
+          "track": 1,
+          "duration": 15,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Regiones afectadas por la deforestación en bosques tropicales",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "Los bosques son ecosistemas complejos que desempeñan un papel vital para la vida humana. Cubren alrededor del 31 % de la superficie terrestre del mundo y cumplen diversas funciones, entre las que se incluyen producción de oxígeno, purificación del aire, provisión de agua y de otros recursos naturales, por lo que son muy importantes para el mantenimiento de la salud y el equilibrio del planeta.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 25,
+          "type": "composition",
+          "track": 1,
+          "duration": 20,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Objetivos de aprendizaje",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "Valorar el rol de los Estados y otros actores, en la preservación y sostenibilidad de los recursos naturales rumbo a una gobernanza efectiva.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(60,174,163,1)"
+        },
+        {
+          "clip": true,
+          "time": 45,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Importancia de los bosques tropicales",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "Los bosques tropicales son fundamentales para el equilibrio ecológico del planeta. Se caracterizan por su clima cálido y húmedo y albergan una asombrosa diversidad biológica, con aproximadamente el 60 % de las especies conocidas de fauna y flora a nivel mundial. Sin embargo, la deforestación ha amenazado seriamente su salud y estabilidad.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 75,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Clasificación de los bosques",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "La clasificación de los bosques se basa en distintos criterios, como la zona climática y el tipo de vegetación. Los bosques tropicales representan el 45 % de la cobertura forestal mundial, mientras que los boreales y templados son menos prevalentes.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 105,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Distribución mundial de los bosques por zona climática",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "62%",
+              "text": "Boreal: 27%\nTemplada: 16%\nTropical: 45%\nSubtropical: 11%",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "28%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "100%"
+            },
+            {
+              "y": "28%",
+              "text": "Boreal 27%",
+              "time": 0.2,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "10%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "600",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "x": "52%",
+              "y": "32.2%",
+              "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+              "time": 0.35,
+              "type": "shape",
+              "track": 2,
+              "width": "33%",
+              "height": "4.199999999999999%",
+              "x_anchor": "0%",
+              "y_anchor": "50%",
+              "fill_color": "rgba(60,174,163,1)"
+            },
+            {
+              "y": "40%",
+              "text": "Templada 16%",
+              "time": 0.2,
+              "type": "text",
+              "track": 3,
+              "width": "88%",
+              "height": "10%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "600",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "x": "52%",
+              "y": "44.2%",
+              "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+              "time": 0.35,
+              "type": "shape",
+              "track": 4,
+              "width": "19.555555555555557%",
+              "height": "4.199999999999999%",
+              "x_anchor": "0%",
+              "y_anchor": "50%",
+              "fill_color": "rgba(73,128,241,1)"
+            },
+            {
+              "y": "52%",
+              "text": "Tropical 45%",
+              "time": 0.2,
+              "type": "text",
+              "track": 5,
+              "width": "88%",
+              "height": "10%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "600",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "x": "52%",
+              "y": "56.2%",
+              "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+              "time": 0.35,
+              "type": "shape",
+              "track": 6,
+              "width": "55%",
+              "height": "4.199999999999999%",
+              "x_anchor": "0%",
+              "y_anchor": "50%",
+              "fill_color": "rgba(253,75,75,1)"
+            },
+            {
+              "y": "64%",
+              "text": "Subtropical 11%",
+              "time": 0.2,
+              "type": "text",
+              "track": 7,
+              "width": "88%",
+              "height": "10%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "600",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "x": "52%",
+              "y": "68.2%",
+              "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+              "time": 0.35,
+              "type": "shape",
+              "track": 8,
+              "width": "13.444444444444445%",
+              "height": "4.199999999999999%",
+              "x_anchor": "0%",
+              "y_anchor": "50%",
+              "fill_color": "rgba(243,207,86,1)"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "#ffffff"
+        },
+        {
+          "clip": true,
+          "time": 135,
+          "type": "composition",
+          "track": 1,
+          "duration": 25,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Impacto de las actividades productivas en la deforestación",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "La deforestación es la principal problemática que afecta a los bosques tropicales. Esta se produce mayoritariamente debido a actividades humanas como la agricultura intensiva y la expansión urbana.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 160,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "El impacto de las actividades productivas en la deforestación",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "62%",
+              "text": "Ampliación de tierras de cultivo: 52.3%\nAmpliación de tierras de pastoreo: 37.5%",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "28%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "100%"
+            },
+            {
+              "y": "28%",
+              "text": "Ampliación de tierras de cultivo 52.3%",
+              "time": 0.2,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "10%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "600",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "x": "52%",
+              "y": "32.2%",
+              "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+              "time": 0.35,
+              "type": "shape",
+              "track": 2,
+              "width": "55%",
+              "height": "4.199999999999999%",
+              "x_anchor": "0%",
+              "y_anchor": "50%",
+              "fill_color": "rgba(60,174,163,1)"
+            },
+            {
+              "y": "40%",
+              "text": "Ampliación de tierras de pastoreo 37.5%",
+              "time": 0.2,
+              "type": "text",
+              "track": 3,
+              "width": "88%",
+              "height": "10%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "600",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "x": "52%",
+              "y": "44.2%",
+              "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+              "time": 0.35,
+              "type": "shape",
+              "track": 4,
+              "width": "39.43594646271511%",
+              "height": "4.199999999999999%",
+              "x_anchor": "0%",
+              "y_anchor": "50%",
+              "fill_color": "rgba(73,128,241,1)"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "#ffffff"
+        },
+        {
+          "clip": true,
+          "time": 190,
+          "type": "composition",
+          "track": 1,
+          "duration": 20,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Definición de deforestación",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "La deforestación es el proceso mediante el cual se elimina o reduce, a gran escala, la cobertura forestal de un área determinada. Puede ser causada por actividades humanas o naturales.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 210,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Contaminación y cambio climático",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "La contaminación se produce al introducir agentes químicos que alteran el ecosistema forestal. El cambio climático afecta a los bosques tropicales, haciéndolos más vulnerables a sequías e incendios.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 240,
+          "type": "composition",
+          "track": 1,
+          "duration": 25,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Sobreexplotación de recursos",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "La sobreexplotación de recursos forestales amenaza la capacidad de regeneración natural de estos ecosistemas. La tala excesiva y la explotación sin prácticas sostenibles son preocupaciones serias.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 265,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Mapa de actividades productivas en bosques tropicales",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "• Amazonía\n• Cuenca del Congo\n• Bosques de Madagascar\n• Bosques de Papúa Nueva\n• Bosques mesoamericanos\n• Bosques de sudeste asiático",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(60,174,163,1)"
+        },
+        {
+          "clip": true,
+          "time": 295,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Situación en América del Sur",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "En América del Sur, el 18 % de los bosques amazónicos se ha perdido completamente. La expansión de tierras para pastoreo y minería ha afectado la biodiversidad y calidad del agua.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 325,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Situación en Centro de África",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "En Centro de África, la agricultura de subsistencia es la causa principal de deforestación. La cuenca del río Congo enfrenta serios desafíos por la explotación forestal y minería.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "#ffffff"
+        },
+        {
+          "clip": true,
+          "time": 355,
+          "type": "composition",
+          "track": 1,
+          "duration": 30,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Situación en Sudeste asiático",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "En el sudeste asiático, la producción de aceite de palma es la principal causa de deforestación. Indonesia y Malasia son responsables del 84 % de la producción mundial de este aceite.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "#ffffff"
+        },
+        {
+          "clip": true,
+          "time": 385,
+          "type": "composition",
+          "track": 1,
+          "duration": 20,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Glosario",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "Glosario",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 405,
+          "type": "composition",
+          "track": 1,
+          "duration": 25,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Resumen",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "En resumen, la deforestación, la contaminación, el cambio climático y la sobreexplotación son desafíos críticos que enfrentan los bosques tropicales. Es vital implementar estrategias de conservación y sostenibilidad para proteger estos ecosistemas.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "#ffffff",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(73,128,241,1)"
+        },
+        {
+          "clip": true,
+          "time": 430,
+          "type": "composition",
+          "track": 1,
+          "duration": 15,
+          "elements": [
+            {
+              "y": "18%",
+              "text": "Cierre",
+              "time": 0.25,
+              "type": "text",
+              "track": 1,
+              "width": "88%",
+              "height": "16%",
+              "text_wrap": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "type": "scale",
+                  "track": 0,
+                  "easing": "quadratic-out",
+                  "duration": 0.5,
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "800",
+              "line_height": "115%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            },
+            {
+              "y": "55%",
+              "text": "Recuerda que cada acción cuenta en la preservación de nuestros bosques. Juntos podemos hacer la diferencia.",
+              "time": 0.45,
+              "type": "text",
+              "track": 2,
+              "width": "88%",
+              "height": "65%",
+              "text_wrap": true,
+              "fill_color": "rgba(0,0,0,1)",
+              "font_family": "Inter",
+              "font_weight": "500",
+              "line_height": "120%",
+              "x_alignment": "50%",
+              "y_alignment": "50%"
+            }
+          ],
+          "animations": [
+            {
+              "time": 0,
+              "type": "circular-wipe",
+              "duration": 0.8,
+              "transition": true
+            }
+          ],
+          "fill_color": "rgba(243,207,86,1)"
+        }
+      ],
+      "fill_color": "#ffffff",
+      "output_format": "mp4"
+    }
+  }

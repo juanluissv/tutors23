@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import {
 	useAddTeacherToSchoolMutation,
+	useGetSchoolByIdQuery,
 	useGetTeachersBySchoolQuery,
 } from '../../slices/admin/schoolAdminApiSlice'
 import AdminSidebar from '../../components/AdminSidebar'
@@ -62,6 +63,13 @@ function SchoolAdminAddTeacherScreen () {
 	const [email, setEmail] = useState('')
 
 	const {
+		data: schoolData,
+		isLoading: isLoadingSchool,
+	} = useGetSchoolByIdQuery(schoolId, {
+		skip: !schoolId,
+	})
+
+	const {
 		data: teachers = [],
 		isLoading: isLoadingTeachers,
 		isError: isTeachersError,
@@ -73,6 +81,8 @@ function SchoolAdminAddTeacherScreen () {
 	const [addTeacher, { isLoading: isSaving }] = useAddTeacherToSchoolMutation()
 
 	const teachersList = Array.isArray(teachers) ? teachers : []
+	const schoolType = schoolData?.schoolType ?? ''
+	const isBusy = isSaving || isLoadingSchool
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -101,6 +111,10 @@ function SchoolAdminAddTeacherScreen () {
 			toast.error('Please enter the teacher email')
 			return
 		}
+		if (schoolType.trim() === '') {
+			toast.error('Could not determine your school type. Try again.')
+			return
+		}
 
 		try {
 			await addTeacher({
@@ -108,6 +122,7 @@ function SchoolAdminAddTeacherScreen () {
 				firstname: firstname.trim(),
 				lastname: lastname.trim(),
 				email: email.trim(),
+				schoolType,
 			}).unwrap()
 			toast.success('Teacher added to your school')
 			setFirstname('')
@@ -302,7 +317,7 @@ function SchoolAdminAddTeacherScreen () {
 											autoComplete='given-name'
 											value={firstname}
 											required
-											disabled={isSaving}
+											disabled={isBusy}
 											onChange={(e) =>
 												setFirstname(e.target.value)}
 										/>
@@ -323,7 +338,7 @@ function SchoolAdminAddTeacherScreen () {
 											autoComplete='family-name'
 											value={lastname}
 											required
-											disabled={isSaving}
+											disabled={isBusy}
 											onChange={(e) =>
 												setLastname(e.target.value)}
 										/>
@@ -344,7 +359,7 @@ function SchoolAdminAddTeacherScreen () {
 											autoComplete='email'
 											value={email}
 											required
-											disabled={isSaving}
+											disabled={isBusy}
 											onChange={(e) => setEmail(e.target.value)}
 										/>
 									</div>
@@ -352,7 +367,7 @@ function SchoolAdminAddTeacherScreen () {
 										type='submit'
 										id='schooladmin-add-teacher-submit'
 										className='login-submit'
-										disabled={isSaving}
+										disabled={isBusy}
 									>
 										{isSaving ? 'Adding…' : 'Add teacher'}
 									</button>

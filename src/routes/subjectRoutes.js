@@ -23,6 +23,12 @@ import { parseChapterTutorTranscribe } from '../middleware/chapterTutorTranscrib
 import {
     generateBookLessonsFromChapter,
     generateChapterTutorTxtFromLesson,
+    generateSuggestedQuestionsFromLesson,
+    generateVideoScriptFromLesson,
+    generateVideoScriptAudioFromLesson,
+    generateSceneIllustrationsFromLesson,
+    generateAnimatedVideoFromLesson,
+    checkAnimatedVideoStatusFromLesson,
     getBookLessonsBySubject,
     getBookLessonByIdForSchoolAdmin,
     getBookLessonTranscribeForSchoolAdmin,
@@ -75,6 +81,104 @@ router.put(
     addSubjectStudentEmailForTeacher,
 );
 
+router.put(
+    '/:id/teacher/book-chapters',
+    protectTeacher,
+    updateSubjectBookChapters,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-pdf',
+    protectTeacher,
+    generateSubjectBookChapterPdf,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-lessons',
+    protectTeacher,
+    generateBookLessonsFromChapter,
+);
+
+router.get(
+    '/:id/teacher/book-lessons',
+    protectTeacher,
+    getBookLessonsBySubject,
+);
+
+router.get(
+    '/:id/teacher/book-lessons/:lessonId',
+    protectTeacher,
+    getBookLessonByIdForSchoolAdmin,
+);
+
+router.get(
+    '/:id/teacher/book-lessons/:lessonId/transcribe',
+    protectTeacher,
+    getBookLessonTranscribeForSchoolAdmin,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-tutor-txt',
+    protectTeacher,
+    generateChapterTutorTxtFromLesson,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-suggested-questions',
+    protectTeacher,
+    generateSuggestedQuestionsFromLesson,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-video-script',
+    protectTeacher,
+    generateVideoScriptFromLesson,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-video-audio',
+    protectTeacher,
+    generateVideoScriptAudioFromLesson,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-scene-illustrations',
+    protectTeacher,
+    generateSceneIllustrationsFromLesson,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-animated-video',
+    protectTeacher,
+    generateAnimatedVideoFromLesson,
+);
+
+router.post(
+    '/:id/teacher/book-chapters/:chapterId/check-animated-video-status',
+    protectTeacher,
+    checkAnimatedVideoStatusFromLesson,
+);
+
+router.put(
+    '/:id/teacher/book-chapters/:chapterId/tutor-video',
+    protectTeacher,
+    parseChapterTutorVideo,
+    uploadChapterTutorVideo,
+);
+
+router.put(
+    '/:id/teacher/book-chapters/:chapterId/tutor-transcribe',
+    protectTeacher,
+    parseChapterTutorTranscribe,
+    uploadChapterTutorTranscribe,
+);
+
+router.delete(
+    '/:id/teacher/book-chapters/:chapterId',
+    protectTeacher,
+    deleteSubjectBookChapter,
+);
+
 router.post(
     '/:id/book-chapters/:chapterId/generate-pdf',
     protectSchoolAdmin,
@@ -91,6 +195,42 @@ router.post(
     '/:id/book-chapters/:chapterId/generate-tutor-txt',
     protectSchoolAdmin,
     generateChapterTutorTxtFromLesson,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/generate-suggested-questions',
+    protectSchoolAdmin,
+    generateSuggestedQuestionsFromLesson,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/generate-video-script',
+    protectSchoolAdmin,
+    generateVideoScriptFromLesson,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/generate-video-audio',
+    protectSchoolAdmin,
+    generateVideoScriptAudioFromLesson,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/generate-scene-illustrations',
+    protectSchoolAdmin,
+    generateSceneIllustrationsFromLesson,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/generate-animated-video',
+    protectSchoolAdmin,
+    generateAnimatedVideoFromLesson,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/check-animated-video-status',
+    protectSchoolAdmin,
+    checkAnimatedVideoStatusFromLesson,
 );
 
 router.put(

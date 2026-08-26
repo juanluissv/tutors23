@@ -17,6 +17,31 @@ import {
     normalizeSubjectGradesLevelField,
     resolveSubjectGradeLevels,
 } from '../utils/gradeLevelHelpers.js';
+import {
+    programsToJson,
+    normalizeSubjectProgramField,
+    resolveSubjectPrograms,
+    requireSubjectPrograms,
+} from '../utils/universityProgramHelpers.js';
+import { isUniversitySchool } from '../utils/schoolTypeHelpers.js';
+
+function parseSubjectSemester (semester, useUniversityPrograms) {
+    if (!useUniversityPrograms) {
+        return { value: undefined };
+    }
+    if (
+        semester === undefined
+        || semester === null
+        || String(semester).trim() === ''
+    ) {
+        return { value: undefined };
+    }
+    const num = Number(semester);
+    if (!Number.isInteger(num) || num < 1) {
+        return { error: 'Semester must be a positive whole number' };
+    }
+    return { value: num };
+}
 
 /** Always return [] or string[] for API (handles legacy single-string docs). */
 function normalizeTeacherEmailsForJson (val) {
@@ -221,6 +246,43 @@ async function loadSubjectForSchoolAdmin (req, res, subjectId) {
     return { subject, schoolAdmin, school };
 }
 
+async function loadSubjectForTeacher (req, res, subjectId) {
+    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+        res.status(400);
+        throw new Error('Invalid subject id');
+    }
+
+    const subject = await Subject.findById(subjectId);
+
+    if (!subject) {
+        res.status(404);
+        throw new Error('Subject not found');
+    }
+
+    const teacherId = req.teacher._id;
+    const isAssigned = (subject.teachers || []).some(
+        (t) => String(t) === String(teacherId),
+    );
+
+    if (!isAssigned) {
+        res.status(403);
+        throw new Error('Not authorized to update this subject');
+    }
+
+    return { subject, teacher: req.teacher };
+}
+
+async function loadSubjectForBookChapters (req, res, subjectId) {
+    if (req.teacher) {
+        return loadSubjectForTeacher(req, res, subjectId);
+    }
+    if (req.schoolAdmin) {
+        return loadSubjectForSchoolAdmin(req, res, subjectId);
+    }
+    res.status(401);
+    throw new Error('Not authorized');
+}
+
 async function deleteChapterFileFromS3 (fileKey) {
     if (!fileKey || String(fileKey).trim() === '') {
         return;
@@ -254,6 +316,10 @@ const subjectToJson = (subject) => {
         gradesLevel: gradeLevelsToJson(
             normalizeSubjectGradesLevelField(subject.gradesLevel),
         ),
+        program: programsToJson(
+            normalizeSubjectProgramField(subject.program),
+        ),
+        semester: subject.semester ?? undefined,
         teacherEmail: normalizeTeacherEmailsForJson(subject.teacherEmail),
         bookId,
         bookUrl,
@@ -279,13 +345,23 @@ const subjectGradeLevelPopulate = {
     select: 'name',
 };
 
+const subjectProgramPopulate = {
+    path: 'program',
+    select: 'name department programType',
+};
+
+const subjectCohortPopulate = [
+    subjectGradeLevelPopulate,
+    subjectProgramPopulate,
+];
+
 async function findSubjectWithGradeLevel (query) {
-    return Subject.findOne(query).populate(subjectGradeLevelPopulate);
+    return Subject.findOne(query).populate(subjectCohortPopulate);
 }
 
 async function findSubjectsWithGradeLevel (query) {
     return Subject.find(query)
-        .populate(subjectGradeLevelPopulate)
+        .populate(subjectCohortPopulate)
         .sort({ dateCreated: -1, createdAt: -1 });
 }
 
@@ -573,7 +649,14 @@ function findSubscriptionForSubject (student, subjectId) {
             return false;
         }
         const planSubjects = plan.subjects || [];
-        return planSubjects.some(
+        const inPlan = planSubjects.some(
+            (s) => String(s?._id ?? s) === String(subjectId),
+        );
+        if (inPlan) {
+            return true;
+        }
+        const selected = sub.selectedSubjects || [];
+        return selected.some(
             (s) => String(s?._id ?? s) === String(subjectId),
         );
     });
@@ -645,7 +728,7 @@ async function findSubjectWithEnrolledStudents (subjectId) {
             select: 'firstname lastname email signInDate createdAt subscriptions',
             populate: {
                 path: 'subscriptions',
-                select: 'active pastDue endDate createdAt',
+                select: 'active pastDue endDate createdAt selectedSubjects',
                 populate: {
                     path: 'plan',
                     select: 'subjects',
@@ -759,6 +842,8 @@ const createSubject = asyncHandler(async (req, res) => {
         title,
         description,
         gradesLevel,
+        program,
+        semester,
         school: schoolIdFromBody,
     } = req.body;
 
@@ -810,13 +895,42 @@ const createSubject = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to create a subject for this school');
     }
 
-    const parsedGradesLevel = await resolveSubjectGradeLevels(
-        gradesLevel,
-        school,
+    const useUniversityPrograms = isUniversitySchool(school.schoolType);
+
+    let parsedGradesLevel = { value: [] };
+    let parsedProgram = { value: [] };
+
+    if (useUniversityPrograms) {
+        parsedProgram = await resolveSubjectPrograms(program, school);
+        if (parsedProgram.error) {
+            res.status(400);
+            throw new Error(parsedProgram.error);
+        }
+        const requiredPrograms = requireSubjectPrograms(
+            parsedProgram.value,
+        );
+        if (requiredPrograms.error) {
+            res.status(400);
+            throw new Error(requiredPrograms.error);
+        }
+    } else {
+        parsedGradesLevel = await resolveSubjectGradeLevels(
+            gradesLevel,
+            school,
+        );
+        if (parsedGradesLevel.error) {
+            res.status(400);
+            throw new Error(parsedGradesLevel.error);
+        }
+    }
+
+    const parsedSemester = parseSubjectSemester(
+        semester,
+        useUniversityPrograms,
     );
-    if (parsedGradesLevel.error) {
+    if (parsedSemester.error) {
         res.status(400);
-        throw new Error(parsedGradesLevel.error);
+        throw new Error(parsedSemester.error);
     }
 
     const createdSubject = await Subject.create({
@@ -826,6 +940,8 @@ const createSubject = asyncHandler(async (req, res) => {
                 ? String(description).trim()
                 : undefined,
         gradesLevel: parsedGradesLevel.value ?? [],
+        program: parsedProgram.value ?? [],
+        semester: parsedSemester.value,
         dateCreated: new Date(),
         school: school._id,
     });
@@ -957,6 +1073,60 @@ const updateSubjectById = asyncHandler(async (req, res) => {
         await syncSubjectTeacherLinks(subject, school._id);
     }
 
+    const useUniversityPrograms = isUniversitySchool(school.schoolType);
+
+    if (req.body.semester !== undefined) {
+        if (
+            req.body.semester === null
+            || String(req.body.semester).trim() === ''
+        ) {
+            subject.set('semester', undefined);
+        } else {
+            const parsedSemester = parseSubjectSemester(
+                req.body.semester,
+                useUniversityPrograms,
+            );
+            if (parsedSemester.error) {
+                res.status(400);
+                throw new Error(parsedSemester.error);
+            }
+            subject.semester = parsedSemester.value;
+        }
+    }
+
+    if (useUniversityPrograms) {
+        if (req.body.program !== undefined) {
+            const parsedProgram = await resolveSubjectPrograms(
+                req.body.program,
+                school,
+            );
+            if (parsedProgram.error) {
+                res.status(400);
+                throw new Error(parsedProgram.error);
+            }
+            const requiredPrograms = requireSubjectPrograms(
+                parsedProgram.value,
+            );
+            if (requiredPrograms.error) {
+                res.status(400);
+                throw new Error(requiredPrograms.error);
+            }
+            subject.program = requiredPrograms.value;
+            subject.gradesLevel = [];
+        }
+    } else if (req.body.gradesLevel !== undefined) {
+        const parsedGradesLevel = await resolveSubjectGradeLevels(
+            req.body.gradesLevel,
+            school,
+        );
+        if (parsedGradesLevel.error) {
+            res.status(400);
+            throw new Error(parsedGradesLevel.error);
+        }
+        subject.gradesLevel = parsedGradesLevel.value ?? [];
+        subject.program = [];
+    }
+
     if (req.file) {
         const s3 = getS3();
         const bucket = getBookBucketName();
@@ -1011,7 +1181,7 @@ const updateSubjectById = asyncHandler(async (req, res) => {
     }
 
     const updated = await subject.save();
-    await updated.populate(subjectGradeLevelPopulate);
+    await updated.populate(subjectCohortPopulate);
     res.status(200).json(subjectToJson(updated));
 });
 
@@ -1108,7 +1278,7 @@ const updateSubjectByTeacher = asyncHandler(async (req, res) => {
     }
 
     const updated = await subject.save();
-    await updated.populate(subjectGradeLevelPopulate);
+    await updated.populate(subjectCohortPopulate);
     res.status(200).json(subjectToJson(updated));
 });
 
@@ -1247,7 +1417,7 @@ const setSubjectTeacherEmail = asyncHandler(async (req, res) => {
 // PUT /api/subjects/:id/book-chapters — use with protectSchoolAdmin
 const updateSubjectBookChapters = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+    const { subject } = await loadSubjectForBookChapters(req, res, id);
 
     const merged = mergeBookChaptersUpdate(
         req.body?.bookChapters,
@@ -1270,7 +1440,7 @@ const updateSubjectBookChapters = asyncHandler(async (req, res) => {
 // POST /api/subjects/:id/book-chapters/:chapterId/generate-pdf
 const generateSubjectBookChapterPdf = asyncHandler(async (req, res) => {
     const { id, chapterId } = req.params;
-    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+    const { subject } = await loadSubjectForBookChapters(req, res, id);
 
     if (!mongoose.Types.ObjectId.isValid(chapterId)) {
         res.status(400);
@@ -1458,7 +1628,7 @@ const uploadSubjectBookChapterFile = asyncHandler(async (req, res) => {
 // DELETE /api/subjects/:id/book-chapters/:chapterId — protectSchoolAdmin
 const deleteSubjectBookChapter = asyncHandler(async (req, res) => {
     const { id, chapterId } = req.params;
-    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+    const { subject } = await loadSubjectForBookChapters(req, res, id);
 
     if (!mongoose.Types.ObjectId.isValid(chapterId)) {
         res.status(400);
@@ -1514,6 +1684,7 @@ export {
     setSubjectTeacherEmail,
     subjectToJson,
     loadSubjectForSchoolAdmin,
+    loadSubjectForBookChapters,
     chapterMainTitle,
     deleteChapterFileFromS3,
 };

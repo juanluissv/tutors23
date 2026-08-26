@@ -14,10 +14,10 @@ import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useGetStudentAnswerByIdQuery } from '../../slices/student/studentAnswersSlice'
 import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
+import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
 	canViewQuestions,
-	getSubscriptionBlockReason,
 } from '../../utils/subscriptionAccess'
 import { ANSWERS_URL } from '../../constants'
 import '../../App.css'
@@ -158,10 +158,6 @@ function StudentWatchAnswerScreen () {
 		profile?.subscriptions,
 	)
 	const canView = canViewQuestions(currentSubscription)
-	const viewBlockReason = getSubscriptionBlockReason(
-		currentSubscription,
-		'view',
-	)
 
 	const canFetch = isLikelyMongoId(answerId)
 	const {
@@ -410,20 +406,9 @@ function StudentWatchAnswerScreen () {
 							)}
 
 							{canFetch && !isLoadingProfile && !canView ? (
-								<div className='ask-subscription-notice'>
-									<p className='ask-subscription-notice__title'>
-										Subscription required
-									</p>
-									<p className='ask-subscription-notice__text'>
-										{viewBlockReason}
-									</p>
-									<Link
-										to='/students/subscription'
-										className='ask-subscription-notice__link'
-									>
-										View plans & subscribe
-									</Link>
-								</div>
+								<StudentSubscriptionNotice
+									subscription={currentSubscription}
+								/>
 							) : null}
 
 							{canFetch && canView && isLoading && (

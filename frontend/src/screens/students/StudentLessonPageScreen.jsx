@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import TeacherSidebar from '../../components/TeacherSidebar'
+import TeacherHeader from '../../components/TeacherHeader'
 import { useGetBookLessonByIdQuery } from '../../slices/student/studentApiSlice'
 import { useGetBookLessonByIdForSchoolAdminQuery } from '../../slices/admin/schoolAdminApiSlice'
+import { useGetBookLessonByIdForTeacherQuery } from '../../slices/teachers/teacherApiSlice'
 import '../../App.css'
 import './StudentLessonPageScreen.css'
 
@@ -733,22 +736,22 @@ const POSITION_BONUS_MAX = 0.4
 const POSITION_BONUS_SPAN = 6
 const LAPTOP_SIDEBAR_EXPAND_BREAKPOINT = 1450
 
-function getInitialSidebarOpen (isSchoolAdminView) {
-	const width = window.innerWidth
-	if (isSchoolAdminView) {
-		return width > 768
-	}
-	return width >= LAPTOP_SIDEBAR_EXPAND_BREAKPOINT
+function getInitialSidebarOpen () {
+	return window.innerWidth >= LAPTOP_SIDEBAR_EXPAND_BREAKPOINT
 }
 
 function StudentLessonPageScreen () {
 	const navigate = useNavigate()
+	const location = useLocation()
 	const { lessonId, subjectId } = useParams()
 	const { studentInfo } = useSelector((state) => state.authStudent)
 	const { schoolAdminInfo } = useSelector((state) => state.authSchoolAdmin)
-	const isSchoolAdminView = Boolean(subjectId)
+	const { teacherInfo } = useSelector((state) => state.authTeacher)
+	const isSchoolAdminView = location.pathname.startsWith('/schooladmins/')
+	const isTeacherView = location.pathname.startsWith('/teachers/')
+	const isStaffView = isSchoolAdminView || isTeacherView
 	const [isSidebarOpen, setIsSidebarOpen] = useState(() =>
-		getInitialSidebarOpen(isSchoolAdminView),
+		getInitialSidebarOpen(),
 	)
 	const [allCues, setAllCues] = useState([])
 	const [videoLoading, setVideoLoading] = useState(true)
@@ -772,18 +775,14 @@ function StudentLessonPageScreen () {
 		if (isSchoolAdminView && !schoolAdminInfo) {
 			navigate('/schooladmins/login', { replace: true })
 		}
-	}, [isSchoolAdminView, schoolAdminInfo, navigate])
+		if (isTeacherView && !teacherInfo) {
+			navigate('/teachers/login', { replace: true })
+		}
+	}, [isSchoolAdminView, isTeacherView, schoolAdminInfo, teacherInfo, navigate])
 
 	useEffect(() => {
 		const handleResize = () => {
 			const width = window.innerWidth
-
-			if (isSchoolAdminView) {
-				if (width > 768) {
-					setIsSidebarOpen(true)
-				}
-				return
-			}
 
 			if (width >= LAPTOP_SIDEBAR_EXPAND_BREAKPOINT) {
 				setIsSidebarOpen(true)
@@ -794,7 +793,7 @@ function StudentLessonPageScreen () {
 
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
-	}, [isSchoolAdminView])
+	}, [])
 
 	const {
 		data: studentLesson,
@@ -802,7 +801,7 @@ function StudentLessonPageScreen () {
 		isError: isStudentError,
 		error: studentError,
 	} = useGetBookLessonByIdQuery(lessonId, {
-		skip: !lessonId || !studentInfo || isSchoolAdminView,
+		skip: !lessonId || !studentInfo || isStaffView,
 	})
 
 
@@ -818,10 +817,30 @@ function StudentLessonPageScreen () {
 		},
 	)
 
-	const lesson = isSchoolAdminView ? schoolAdminLesson : studentLesson
-	const isLoading = isSchoolAdminView ? isSchoolAdminLoading : isStudentLoading
-	const isError = isSchoolAdminView ? isSchoolAdminError : isStudentError
-	const error = isSchoolAdminView ? schoolAdminError : studentError
+	const {
+		data: teacherLesson,
+		isLoading: isTeacherLoading,
+		isError: isTeacherError,
+		error: teacherError,
+	} = useGetBookLessonByIdForTeacherQuery(
+		{ subjectId, lessonId },
+		{
+			skip: !lessonId || !subjectId || !teacherInfo || !isTeacherView,
+		},
+	)
+
+	const lesson = isSchoolAdminView
+		? schoolAdminLesson
+		: (isTeacherView ? teacherLesson : studentLesson)
+	const isLoading = isSchoolAdminView
+		? isSchoolAdminLoading
+		: (isTeacherView ? isTeacherLoading : isStudentLoading)
+	const isError = isSchoolAdminView
+		? isSchoolAdminError
+		: (isTeacherView ? isTeacherError : isStudentError)
+	const error = isSchoolAdminView
+		? schoolAdminError
+		: (isTeacherView ? teacherError : studentError)
 
 	const chapterVideoUrl = lesson?.chapterVideoFileUrl
 		? String(lesson.chapterVideoFileUrl).trim()
@@ -830,6 +849,37 @@ function StudentLessonPageScreen () {
 	const hasTutorTranscribe = Boolean(
 		lesson?.chapterTranscribeFileId || lesson?.chapterTranscribeFileUrl,
 	)
+
+	const hasSuggestedQuestions = Boolean(
+		lesson?.hasSuggestedQuestions
+		|| (
+			Array.isArray(lesson?.suggestedQuestions)
+			&& lesson.suggestedQuestions.some(
+				(item) => String(item?.question ?? '').trim(),
+			)
+		),
+	)
+
+	const chatIndexId = lesson?.chatIndexId
+		? String(lesson.chatIndexId).trim()
+		: ''
+
+	const openLessonChat = (question) => {
+		const trimmedQuestion = String(question ?? '').trim()
+		if (!trimmedQuestion) {
+			return
+		}
+
+		const params = new URLSearchParams()
+		params.set('query', trimmedQuestion)
+
+		const chatPath = chatIndexId
+			? `/subjects/${encodeURIComponent(chatIndexId)}`
+			: '/'
+
+		window.open(`${chatPath}?${params.toString()}`, '_blank')
+	}
+
 	const chapterTranscribeUrl = useMemo(() => {
 		if (!lessonId || !hasTutorTranscribe) {
 			return ''
@@ -837,8 +887,11 @@ function StudentLessonPageScreen () {
 		if (isSchoolAdminView && subjectId) {
 			return `/api/subjects/${subjectId}/book-lessons/${lessonId}/transcribe`
 		}
+		if (isTeacherView && subjectId) {
+			return `/api/subjects/${subjectId}/teacher/book-lessons/${lessonId}/transcribe`
+		}
 		return `/api/book-lessons/${lessonId}/transcribe`
-	}, [lessonId, subjectId, isSchoolAdminView, hasTutorTranscribe])
+	}, [lessonId, subjectId, isSchoolAdminView, isTeacherView, hasTutorTranscribe])
 
 	useEffect(() => {
 		if (!chapterTranscribeUrl) {
@@ -1136,14 +1189,31 @@ function StudentLessonPageScreen () {
 			setIsClassVideoPlaying(false)
 		}
 
-		const params = new URLSearchParams()
-		params.set('query', questionText.trim())
-
-		window.open(`/?${params.toString()}`, '_blank')
+		openLessonChat(questionText.trim())
 		setQuestionText('')
 		if (questionTextareaRef.current) {
 			questionTextareaRef.current.style.height = '52px'
 		}
+	}
+
+	const handleOpenSuggestedQuestions = () => {
+		const lessonSubjectId = String(lesson?.subject?._id ?? '').trim()
+		const chapterId = String(lesson?.bookChapter?.chapterId ?? '').trim()
+
+		if (!lessonSubjectId || !chapterId) {
+			return
+		}
+
+		if (classVideoRef.current) {
+			classVideoRef.current.pause()
+			setIsClassVideoPlaying(false)
+		}
+
+		const params = new URLSearchParams()
+		params.set('subjectId', lessonSubjectId)
+		params.set('chapterId', chapterId)
+		params.set('questions', '1')
+		window.open(`/?${params.toString()}`, '_blank', 'noopener,noreferrer')
 	}
 
 	// Split the flat element stream into "paper sheets", starting a new sheet
@@ -1174,18 +1244,28 @@ function StudentLessonPageScreen () {
 		setIsSidebarOpen(!isSidebarOpen)
 	}
 
-	const LayoutSidebar = isSchoolAdminView ? AdminSidebar : Sidebar
-	const LayoutHeader = isSchoolAdminView ? AdminHeader : Header
+	const LayoutSidebar = isSchoolAdminView
+		? AdminSidebar
+		: (isTeacherView ? TeacherSidebar : Sidebar)
+	const LayoutHeader = isSchoolAdminView
+		? AdminHeader
+		: (isTeacherView ? TeacherHeader : Header)
 
 	if (isSchoolAdminView && !schoolAdminInfo) {
 		return null
 	}
 
+	if (isTeacherView && !teacherInfo) {
+		return null
+	}
+
 	const backPath = isSchoolAdminView
 		? `/schooladmins/viewbook/${subjectId}`
-		: (lesson?.subject?._id
-			? `/students/viewbook/${lesson.subject._id}`
-			: null)
+		: (isTeacherView
+			? `/teachers/generatelessons/${subjectId}`
+			: (lesson?.subject?._id
+				? `/students/viewbook/${lesson.subject._id}`
+				: null))
 
 	const renderShell = (children) => (
 		<div className='chat-app chat-app--lesson-doc'>
@@ -1210,7 +1290,7 @@ function StudentLessonPageScreen () {
 		</div>
 	)
 
-	if (!isSchoolAdminView && !studentInfo) {
+	if (!isStaffView && !studentInfo) {
 		return renderShell(
 			<div className='lesson-doc__state'>
 				<h1 className='lesson-doc__state-title'>Inicia sesión</h1>
@@ -1495,6 +1575,42 @@ function StudentLessonPageScreen () {
 							</svg>
 						</button>
 					</div>
+					{hasSuggestedQuestions && !isStaffView ? (
+						<button
+							type='button'
+							className='lesson-doc-suggested-link'
+							onClick={handleOpenSuggestedQuestions}
+						>
+							<span
+								className='lesson-doc-suggested-link__icon'
+								aria-hidden
+							>
+								<svg
+									width='18'
+									height='18'
+									viewBox='0 0 24 24'
+									fill='none'
+									stroke='currentColor'
+									strokeWidth='2'
+									strokeLinecap='round'
+									strokeLinejoin='round'
+								>
+									<circle cx='12' cy='12' r='10' />
+									<path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3' />
+									<line x1='12' y1='17' x2='12.01' y2='17' />
+								</svg>
+							</span>
+							<span className='lesson-doc-suggested-link__text'>
+								Examen de práctica
+							</span>
+							<span
+								className='lesson-doc-suggested-link__arrow'
+								aria-hidden
+							>
+								→
+							</span>
+						</button>
+					) : null}
 				</div>
 			) : null}
 		</>,

@@ -1,24 +1,35 @@
-function chapterTitle (chapter, index) {
+const DEFAULT_LABELS = {
+	chapterFallback: (n) => `Chapter ${n}`,
+	pagesRange: (start, end) => `Pages ${start}–${end}`,
+	fromPage: (start) => `From page ${start}`,
+	throughPage: (end) => `Through page ${end}`,
+	otherChapters: 'Other chapters',
+	unitFallback: (n) => `Unidad ${n}`,
+}
+
+function chapterTitle (chapter, index, labels = DEFAULT_LABELS) {
 	const title = chapter?.ChapterTitle
 		? String(chapter.ChapterTitle).trim()
 		: ''
 	if (title) {
 		return title
 	}
-	return `Chapter ${chapter?.ChapterNumber ?? index + 1}`
+	return labels.chapterFallback(
+		chapter?.ChapterNumber ?? index + 1,
+	)
 }
 
-function chapterPageLabel (chapter) {
+function chapterPageLabel (chapter, labels = DEFAULT_LABELS) {
 	const start = chapter?.ChapterBeginPage
 	const end = chapter?.ChapterEndPage
 	if (start != null && end != null) {
-		return `Pages ${start}–${end}`
+		return labels.pagesRange(start, end)
 	}
 	if (start != null) {
-		return `From page ${start}`
+		return labels.fromPage(start)
 	}
 	if (end != null) {
-		return `Through page ${end}`
+		return labels.throughPage(end)
 	}
 	return ''
 }
@@ -33,23 +44,24 @@ function parseWeekNumber (text) {
 	return match ? Number(match[1]) : null
 }
 
-function unitLabel (unitNumber, unitTheme) {
+function unitLabel (unitNumber, unitTheme, labels = DEFAULT_LABELS) {
 	if (unitTheme) {
 		return unitTheme
 	}
 	if (unitNumber != null) {
-		return `Unidad ${unitNumber}`
+		return labels.unitFallback(unitNumber)
 	}
-	return 'Other chapters'
+	return labels.otherChapters
 }
 
-function buildBookIndex (chapters, lessonsByChapterId) {
+function buildBookIndex (chapters, lessonsByChapterId, labels = {}) {
+	const copy = { ...DEFAULT_LABELS, ...labels }
 	const rows = chapters.map((chapter, index) => {
 		const chapterId = chapter._id ? String(chapter._id) : ''
 		const lesson = chapterId
 			? lessonsByChapterId.get(chapterId)
 			: undefined
-		const title = chapterTitle(chapter, index)
+		const title = chapterTitle(chapter, index, copy)
 		const orderSource = lesson?.mainTitle
 			|| lesson?.bookChapter?.chapterTitle
 			|| title
@@ -64,7 +76,7 @@ function buildBookIndex (chapters, lessonsByChapterId) {
 			chapterId,
 			chapterNumber,
 			title,
-			pageLabel: chapterPageLabel(chapter),
+			pageLabel: chapterPageLabel(chapter, copy),
 			unitNumber,
 			weekNumber,
 			unitTheme: lesson?.unitTheme || '',
@@ -108,7 +120,7 @@ function buildBookIndex (chapters, lessonsByChapterId) {
 		const unitTheme = items.find((item) => item.unitTheme)?.unitTheme || ''
 		groups.push({
 			unitNumber,
-			label: unitLabel(unitNumber, unitTheme),
+			label: unitLabel(unitNumber, unitTheme, copy),
 			items,
 		})
 	}

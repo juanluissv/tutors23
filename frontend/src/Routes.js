@@ -32,6 +32,7 @@ import StudentWatchQuestionScreen from './screens/students/StudentWatchQuestionS
 import StudentWatchCourseSreen from './screens/students/StudentWatchCourseSreen';
 import StudentCoursesScreen from './screens/students/StudentCoursesScreen';
 import StudentSubscriptionScreen from './screens/students/StudentSubscriptionScreen';
+import StudentSelectPlanSubjectsScreen from './screens/students/StudentSelectPlanSubjectsScreen';
 import StudentLessonPageScreen from './screens/students/StudentLessonPageScreen';
 import Unidad1Semana1BosquesScreen from './screens/books/Unidad1Semana1BosquesScreen';
 import StudentViewBookScreen from './screens/students/StudentViewBookScreen';
@@ -90,8 +91,9 @@ import TeacherAddLessonsScreen from './screens/teachers/TeacherAddLessonsScreen'
 import TeacherPreviewCourseScreen from './screens/teachers/TeacherPreviewCourseScreen';
 import TeacherWatchAnswerScreen from './screens/teachers/TeacherWatchAnswerScreen';
 import TeacherCoursesScreen from './screens/teachers/TeacherCoursesScreen';
-
-
+import TeacherBookChaptersScreen from './screens/teachers/TeacherBookChaptersScreen';
+import TeacherGenerateLessonsScreen from './screens/teachers/TeacherGenerateLessonsScreen';
+import TeacherCreateTutorScreen from './screens/teachers/TeacherCreateTutorScreen';
 
 
 import SchoolAdminLoginScreen from './screens/schoolAdmin/SchoolAdminLoginScreen';
@@ -190,6 +192,7 @@ const router = createBrowserRouter(
             <Route path="/students/watchcourse/:courseId" element={<StudentWatchCourseSreen />} />
             <Route path="/students/courses/:subjectId" element={<StudentCoursesScreen />} />
             <Route path="/students/subscription" element={<StudentSubscriptionScreen />} />
+            <Route path="/students/select-subjects/:subscriptionId" element={<StudentSelectPlanSubjectsScreen />} />
             <Route  path="/students/lessonpage/:lessonId" element={<StudentLessonPageScreen />} />
             <Route  path="/students/viewbook/:subjectId" element={<StudentViewBookScreen />} />
 
@@ -220,6 +223,13 @@ const router = createBrowserRouter(
             />
             <Route path="/teachers/courses/:id" element={<TeacherCoursesScreen />} />
             <Route path="/teachers/courses/:id/preview" element={<TeacherPreviewCourseScreen />} />
+            <Route path="/teachers/bookchapters/:subjectId" element={<TeacherBookChaptersScreen />} />
+            <Route path="/teachers/generatelessons/:subjectId" element={<TeacherGenerateLessonsScreen />} />
+            <Route
+                path="/teachers/lessonpage/:subjectId/:lessonId"
+                element={<StudentLessonPageScreen />}
+            />
+            <Route path="/teachers/createtutor/:subjectId" element={<TeacherCreateTutorScreen />} />
             
             <Route  path="/schooladmins/login" element={<SchoolAdminLoginScreen />} />
             <Route  path="/schooladmins/register" element={<SchoolAdminRegisterScreen />} />

@@ -11,7 +11,11 @@ import {
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { normalizeGradeLevels } from '../../utils/gradeLevel'
+import { normalizeUniversityPrograms } from '../../utils/universityProgram'
+import { isUniversitySchool } from '../../utils/schoolType'
 import '../../App.css'
+
+const MAX_BOOK_BYTES = 200 * 1024 * 1024
 
 const BookUploadGlyph = () => (
 	<svg
@@ -125,6 +129,8 @@ function SchoolAdminCreateSubjectScreen () {
 	)
 	const [title, setTitle] = useState('')
 	const [selectedGradeLevelIds, setSelectedGradeLevelIds] = useState([])
+	const [selectedProgramIds, setSelectedProgramIds] = useState([])
+	const [semester, setSemester] = useState('')
 	const [selectedTeacherId, setSelectedTeacherId] = useState('')
 	const [description, setDescription] = useState('')
 	const [bookFile, setBookFile] = useState(null)
@@ -144,6 +150,12 @@ function SchoolAdminCreateSubjectScreen () {
 	})
 
 	const gradesLevels = normalizeGradeLevels(schoolData?.gradesLevels)
+	const programs = normalizeUniversityPrograms(schoolData?.programs)
+	const isUniversity = isUniversitySchool(schoolData?.schoolType)
+	const cohorts = isUniversity ? programs : gradesLevels
+	const selectedCohortIds = isUniversity
+		? selectedProgramIds
+		: selectedGradeLevelIds
 	const teachersList = Array.isArray(teachers) ? teachers : []
 	const hasTeachers = teachersList.length > 0
 
@@ -164,6 +176,21 @@ function SchoolAdminCreateSubjectScreen () {
 		setSelectedGradeLevelIds((prev) =>
 			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
 		)
+	}
+
+	const handleToggleProgram = (programId) => {
+		const id = String(programId)
+		setSelectedProgramIds((prev) =>
+			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+		)
+	}
+
+	const handleToggleCohort = (cohortId) => {
+		if (isUniversity) {
+			handleToggleProgram(cohortId)
+		} else {
+			handleToggleGradeLevel(cohortId)
+		}
 	}
 
 	useEffect(() => {
@@ -207,6 +234,14 @@ function SchoolAdminCreateSubjectScreen () {
 				toast.error('Please choose a PDF file')
 				return
 			}
+			if (file.size > MAX_BOOK_BYTES) {
+				setBookFile(null)
+				if (bookInputRef.current) {
+					bookInputRef.current.value = ''
+				}
+				toast.error('PDF must be 200 MB or smaller')
+				return
+			}
 			setBookFile(file)
 		} else {
 			setBookFile(null)
@@ -226,13 +261,27 @@ function SchoolAdminCreateSubjectScreen () {
 			toast.error('Please select a teacher for this subject')
 			return
 		}
+		if (isUniversity && selectedCohortIds.length === 0) {
+			toast.error('Select at least one program for this subject')
+			return
+		}
 
 		const body = {
 			title: title.trim(),
 			school: schoolId,
 		}
-		if (selectedGradeLevelIds.length > 0) {
-			body.gradesLevel = selectedGradeLevelIds
+		if (isUniversity) {
+			body.program = selectedCohortIds
+		} else if (selectedCohortIds.length > 0) {
+			body.gradesLevel = selectedCohortIds
+		}
+		if (isUniversity && semester.trim() !== '') {
+			const semesterNum = Number(semester)
+			if (!Number.isInteger(semesterNum) || semesterNum < 1) {
+				toast.error('Semester must be a positive whole number')
+				return
+			}
+			body.semester = semesterNum
 		}
 		if (description.trim() !== '') {
 			body.description = description.trim()
@@ -304,7 +353,7 @@ function SchoolAdminCreateSubjectScreen () {
 		)
 	}
 
-	if (!isLoadingSchool && gradesLevels.length === 0) {
+	if (!isLoadingSchool && cohorts.length === 0) {
 		return (
 			<div className='chat-app chat-app--teacher-login ask-screen'>
 				<div className='main-container'>
@@ -321,10 +370,14 @@ function SchoolAdminCreateSubjectScreen () {
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											Add grade levels first
+											{isUniversity
+												? 'Add programs first'
+												: 'Add grade levels first'}
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Your school needs at least one grade level
+											Your {isUniversity
+												? 'institution needs at least one program'
+												: 'school needs at least one grade level'}
 											before you can create subjects. Add them in
 											My school, then come back here.
 										</p>
@@ -408,10 +461,13 @@ function SchoolAdminCreateSubjectScreen () {
 										Create a subject
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Add a new subject to your school. Choose
-										grade levels, assign a teacher, and add
+										Add a new subject to your {isUniversity
+											? 'institution'
+											: 'school'}. Choose
+										{isUniversity ? ' programs' : ' grade levels'},
+										assign a teacher, and add
 										a short description. Attach an optional
-										course book — PDF, up to 25 MB.
+										course book — PDF, up to 200 MB.
 									</p>
 								</div>
 								<form
@@ -443,26 +499,34 @@ function SchoolAdminCreateSubjectScreen () {
 										<div className='subject-grade-picker__header'>
 											<label
 												className='login-label subject-grade-picker__title'
-												htmlFor='schooladmin-create-subject-grade'
+												htmlFor='schooladmin-create-subject-cohort'
 											>
-												Grade levels
-												<span className='subject-grade-picker__optional'>
-													(optional)
-												</span>
+												{isUniversity ? 'Programs' : 'Grade levels'}
+												{!isUniversity && (
+													<span className='subject-grade-picker__optional'>
+														(optional)
+													</span>
+												)}
 											</label>
-											{selectedGradeLevelIds.length > 0 && (
+											{selectedCohortIds.length > 0 && (
 												<span className='subject-grade-picker__count'>
-													{selectedGradeLevelIds.length} selected
+													{selectedCohortIds.length} selected
 												</span>
 											)}
 										</div>
 										{isLoadingSchool ? (
 											<p className='subject-grade-picker__hint'>
-												Loading grade levels…
+												{isUniversity
+													? 'Loading programs…'
+													: 'Loading grade levels…'}
 											</p>
-										) : gradesLevels.length === 0 ? (
+										) : cohorts.length === 0 ? (
 											<p className='subject-grade-picker__hint'>
-												No grade levels on your school yet.{' '}
+												No {isUniversity
+													? 'programs'
+													: 'grade levels'} on your {isUniversity
+													? 'institution'
+													: 'school'} yet.{' '}
 												<Link to='/schooladmins/myschools'>
 													Add them in My school
 												</Link>{' '}
@@ -472,19 +536,28 @@ function SchoolAdminCreateSubjectScreen () {
 											<>
 												<p
 													className='subject-grade-picker__hint'
-													id='schooladmin-create-subject-grade'
+													id='schooladmin-create-subject-cohort'
 												>
-													Choose one or more grades this
-													subject applies to.
+													{isUniversity
+														? (
+															'Choose at least one program '
+															+ 'this subject applies to.'
+														)
+														: (
+															'Choose one or more grades '
+															+ 'this subject applies to.'
+														)}
 												</p>
 												<div
 													className='subject-grade-picker__grid'
 													role='group'
-													aria-label='Grade levels for this subject'
+													aria-label={isUniversity
+														? 'Programs for this subject'
+														: 'Grade levels for this subject'}
 												>
-													{gradesLevels.map((level) => {
-														const levelId = String(level._id)
-														const checked = selectedGradeLevelIds
+													{cohorts.map((item) => {
+														const levelId = String(item._id)
+														const checked = selectedCohortIds
 															.includes(levelId)
 														return (
 															<label
@@ -502,12 +575,14 @@ function SchoolAdminCreateSubjectScreen () {
 																<input
 																	type='checkbox'
 																	className='subject-grade-picker__input'
-																	name='gradesLevel'
+																	name={isUniversity
+																		? 'program'
+																		: 'gradesLevel'}
 																	value={levelId}
 																	checked={checked}
 																	disabled={isBusy}
 																	onChange={() =>
-																		handleToggleGradeLevel(
+																		handleToggleCohort(
 																			levelId,
 																		)}
 																/>
@@ -534,7 +609,10 @@ function SchoolAdminCreateSubjectScreen () {
 																	)}
 																</span>
 																<span className='subject-grade-picker__label'>
-																	{level.name}
+																	{item.name}
+																	{item.department
+																		? ` (${item.department})`
+																		: ''}
 																</span>
 															</label>
 														)
@@ -543,6 +621,37 @@ function SchoolAdminCreateSubjectScreen () {
 											</>
 										)}
 									</div>
+									{isUniversity && (
+										<div className='login-field'>
+											<label
+												className='login-label'
+												htmlFor='schooladmin-create-subject-semester'
+											>
+												Semester
+												<span className='subject-grade-picker__optional'>
+													(optional)
+												</span>
+											</label>
+											<input
+												type='number'
+												id='schooladmin-create-subject-semester'
+												name='semester'
+												className='login-input'
+												min='1'
+												step='1'
+												placeholder='e.g. 1'
+												autoComplete='off'
+												value={semester}
+												disabled={isBusy}
+												onChange={(e) =>
+													setSemester(e.target.value)}
+											/>
+											<p className='subject-grade-picker__hint'>
+												Which semester of the program this
+												subject belongs to.
+											</p>
+										</div>
+									)}
 									<div className='login-field subject-teacher-picker'>
 										<div className='subject-teacher-picker__header'>
 											<label
@@ -718,7 +827,7 @@ function SchoolAdminCreateSubjectScreen () {
 														: 'Drop a file or tap to browse'}
 												</span>
 												<span className='teacher-book-upload__hint'>
-													PDF only · up to 25 MB
+													PDF only · up to 200 MB
 												</span>
 											</label>
 											{bookFile ? (
@@ -739,8 +848,10 @@ function SchoolAdminCreateSubjectScreen () {
 										className='login-submit'
 										disabled={
 											isBusy
-											|| gradesLevels.length === 0
+											|| cohorts.length === 0
 											|| !selectedTeacherId
+											|| (isUniversity
+												&& selectedCohortIds.length === 0)
 										}
 									>
 										{isCreating || isAssigningTeacher

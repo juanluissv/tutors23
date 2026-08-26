@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import {
+	useGetSchoolByIdQuery,
 	useGetSubjectsBySchoolQuery,
 	useGetTeachersBySchoolQuery,
 	useUpdateSubjectMutation,
@@ -11,9 +12,15 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { SUBJECTS_URL } from '../../constants'
 import { getSubjectGradeLevelNames } from '../../utils/gradeLevel'
+import {
+	getProgramTypeLabel,
+	normalizeSubjectPrograms,
+	normalizeUniversityPrograms,
+} from '../../utils/universityProgram'
+import { isUniversitySchool } from '../../utils/schoolType'
 import '../../App.css'
 
-const MAX_BOOK_BYTES = 100 * 1024 * 1024
+const MAX_BOOK_BYTES = 200 * 1024 * 1024
 
 const BookUploadGlyph = () => (
 	<svg
@@ -155,7 +162,17 @@ function SchoolAdminEditSubjectScreen () {
 	const [description, setDescription] = useState('')
 	const [bookFile, setBookFile] = useState(null)
 	const [selectedTeacherId, setSelectedTeacherId] = useState('')
+	const [selectedProgramIds, setSelectedProgramIds] = useState([])
+	const [semester, setSemester] = useState('')
 	const initializedTeacherForSubjectRef = useRef(null)
+	const initializedCohortForSubjectRef = useRef(null)
+
+	const {
+		data: schoolData,
+		isLoading: isLoadingSchool,
+	} = useGetSchoolByIdQuery(schoolId, {
+		skip: !schoolId,
+	})
 
 	const {
 		data: subjects = [],
@@ -180,6 +197,10 @@ function SchoolAdminEditSubjectScreen () {
 
 	const [updateSubject, { isLoading: isSaving }] = useUpdateSubjectMutation()
 
+	const isUniversity = isUniversitySchool(schoolData?.schoolType)
+	const programs = normalizeUniversityPrograms(schoolData?.programs)
+	const isBusy = isLoadingList || isLoadingTeachers || isLoadingSchool || isSaving
+
 	const isValidSubjectParam =
 		subjectId != null && OBJECT_ID_RE.test(String(subjectId))
 
@@ -189,8 +210,6 @@ function SchoolAdminEditSubjectScreen () {
 		}
 		return subjects.find((s) => String(s._id) === String(subjectId))
 	}, [subjects, subjectId, isValidSubjectParam])
-
-	const isBusy = isLoadingList || isLoadingTeachers || isSaving
 
 	const assignedTeacher = useMemo(() => {
 		if (!currentSubject || teachersList.length === 0) {
@@ -238,7 +257,39 @@ function SchoolAdminEditSubjectScreen () {
 
 	useEffect(() => {
 		initializedTeacherForSubjectRef.current = null
+		initializedCohortForSubjectRef.current = null
 	}, [subjectId])
+
+	const handleToggleProgram = (programId) => {
+		const id = String(programId)
+		setSelectedProgramIds((prev) =>
+			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+		)
+	}
+
+	useEffect(() => {
+		if (!currentSubject || !isUniversity) {
+			return
+		}
+
+		const subjectKey = String(currentSubject._id)
+
+		if (initializedCohortForSubjectRef.current === subjectKey) {
+			return
+		}
+
+		setSelectedProgramIds(
+			normalizeSubjectPrograms(currentSubject.program).map(
+				(item) => String(item._id),
+			),
+		)
+		setSemester(
+			currentSubject.semester != null
+				? String(currentSubject.semester)
+				: '',
+		)
+		initializedCohortForSubjectRef.current = subjectKey
+	}, [currentSubject, isUniversity])
 
 	useEffect(() => {
 		if (!currentSubject) {
@@ -318,7 +369,7 @@ function SchoolAdminEditSubjectScreen () {
 				if (bookInputRef.current) {
 					bookInputRef.current.value = ''
 				}
-				toast.error('PDF must be 100 MB or smaller')
+				toast.error('PDF must be 200 MB or smaller')
 				return
 			}
 			setBookFile(file)
@@ -340,6 +391,10 @@ function SchoolAdminEditSubjectScreen () {
 			toast.error('Please select a teacher for this subject')
 			return
 		}
+		if (isUniversity && selectedProgramIds.length === 0) {
+			toast.error('Select at least one program for this subject')
+			return
+		}
 
 		const body = {
 			id: String(subjectId),
@@ -353,6 +408,19 @@ function SchoolAdminEditSubjectScreen () {
 		}
 		if (bookFile instanceof File) {
 			body.book = bookFile
+		}
+		if (isUniversity) {
+			body.program = selectedProgramIds
+			if (semester.trim() !== '') {
+				const semesterNum = Number(semester)
+				if (!Number.isInteger(semesterNum) || semesterNum < 1) {
+					toast.error('Semester must be a positive whole number')
+					return
+				}
+				body.semester = semesterNum
+			} else {
+				body.semester = ''
+			}
 		}
 
 		try {
@@ -550,10 +618,13 @@ function SchoolAdminEditSubjectScreen () {
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										Update how this subject appears in your
-										school. Change the title, description, or
-										assigned teacher; grade level is set when
-										the subject is created. Attach an optional
-										course book — PDF, up to 100 MB.
+										{isUniversity ? ' institution' : ' school'}.
+										Change the title, description, or assigned
+										teacher; {isUniversity
+											? 'programs and semester'
+											: 'grade level'} can be updated below.
+										Attach an optional course book — PDF, up to
+										200 MB.
 									</p>
 								</div>
 								{isLoadingList && !currentSubject ? (
@@ -586,23 +657,161 @@ function SchoolAdminEditSubjectScreen () {
 												onChange={(e) => setTitle(e.target.value)}
 											/>
 										</div>
-										<div className='login-field'>
-											<label
-												className='login-label'
-												htmlFor='schooladmin-edit-subject-grade'
-											>
-												Grade level
-											</label>
-											<input
-												type='text'
-												id='schooladmin-edit-subject-grade'
-												className='login-input'
-												value={gradeDisplayLabel}
-												readOnly
-												tabIndex={-1}
-												aria-readonly='true'
-											/>
-										</div>
+										{isUniversity ? (
+											<div className='login-field subject-grade-picker'>
+												<div className='subject-grade-picker__header'>
+													<label
+														className='login-label subject-grade-picker__title'
+														htmlFor='schooladmin-edit-subject-program'
+													>
+														Programs
+													</label>
+													{selectedProgramIds.length > 0 && (
+														<span className='subject-grade-picker__count'>
+															{selectedProgramIds.length} selected
+														</span>
+													)}
+												</div>
+												{isLoadingSchool ? (
+													<p className='subject-grade-picker__hint'>
+														Loading programs…
+													</p>
+												) : programs.length === 0 ? (
+													<p className='subject-grade-picker__hint'>
+														No programs on your institution yet.{' '}
+														<Link to='/schooladmins/myschools'>
+															Add them in My school
+														</Link>
+													</p>
+												) : (
+													<>
+														<p
+															className='subject-grade-picker__hint'
+															id='schooladmin-edit-subject-program'
+														>
+															Choose at least one program this
+															subject applies to.
+														</p>
+														<div
+															className='subject-grade-picker__grid'
+															role='group'
+															aria-label='Programs for this subject'
+														>
+															{programs.map((item) => {
+																const programId = String(item._id)
+																const checked = selectedProgramIds
+																	.includes(programId)
+																return (
+																	<label
+																		key={programId}
+																		className={
+																			'subject-grade-picker__option'
+																			+ (checked
+																				? ' subject-grade-picker__option--selected'
+																				: '')
+																			+ (isBusy
+																				? ' subject-grade-picker__option--disabled'
+																				: '')
+																		}
+																	>
+																		<input
+																			type='checkbox'
+																			className='subject-grade-picker__input'
+																			name='program'
+																			value={programId}
+																			checked={checked}
+																			disabled={isBusy}
+																			onChange={() =>
+																				handleToggleProgram(
+																					programId,
+																				)}
+																		/>
+																		<span
+																			className='subject-grade-picker__check'
+																			aria-hidden='true'
+																		>
+																			{checked && (
+																				<svg
+																					width='12'
+																					height='12'
+																					viewBox='0 0 12 12'
+																					fill='none'
+																					xmlns='http://www.w3.org/2000/svg'
+																				>
+																					<path
+																						d='M2.5 6L5 8.5L9.5 3.5'
+																						stroke='currentColor'
+																						strokeWidth='1.75'
+																						strokeLinecap='round'
+																						strokeLinejoin='round'
+																					/>
+																				</svg>
+																			)}
+																		</span>
+																		<span className='subject-grade-picker__label'>
+																			{item.name}
+																			{item.programType
+																				? ` · ${getProgramTypeLabel(
+																					item.programType,
+																				)}`
+																				: ''}
+																			{item.department
+																				? ` (${item.department})`
+																				: ''}
+																		</span>
+																	</label>
+																)
+															})}
+														</div>
+													</>
+												)}
+											</div>
+										) : (
+											<div className='login-field'>
+												<label
+													className='login-label'
+													htmlFor='schooladmin-edit-subject-grade'
+												>
+													Grade level
+												</label>
+												<input
+													type='text'
+													id='schooladmin-edit-subject-grade'
+													className='login-input'
+													value={gradeDisplayLabel}
+													readOnly
+													tabIndex={-1}
+													aria-readonly='true'
+												/>
+											</div>
+										)}
+										{isUniversity && (
+											<div className='login-field'>
+												<label
+													className='login-label'
+													htmlFor='schooladmin-edit-subject-semester'
+												>
+													Semester
+													<span className='subject-grade-picker__optional'>
+														(optional)
+													</span>
+												</label>
+												<input
+													type='number'
+													id='schooladmin-edit-subject-semester'
+													name='semester'
+													className='login-input'
+													min='1'
+													step='1'
+													placeholder='e.g. 1'
+													autoComplete='off'
+													value={semester}
+													disabled={isBusy}
+													onChange={(e) =>
+														setSemester(e.target.value)}
+												/>
+											</div>
+										)}
 										<div className='login-field subject-teacher-picker'>
 											<div className='subject-teacher-picker__header'>
 												<label
@@ -857,7 +1066,7 @@ function SchoolAdminEditSubjectScreen () {
 															: 'Drop a file or tap to browse'}
 													</span>
 													<span className='teacher-book-upload__hint'>
-														PDF only · up to 100 MB
+														PDF only · up to 200 MB
 													</span>
 												</label>
 												{bookFile ? (
@@ -985,7 +1194,12 @@ function SchoolAdminEditSubjectScreen () {
 											type='submit'
 											id='schooladmin-edit-subject-save'
 											className='login-submit'
-											disabled={isBusy || !selectedTeacherId}
+											disabled={
+												isBusy
+												|| !selectedTeacherId
+												|| (isUniversity
+													&& selectedProgramIds.length === 0)
+											}
 										>
 											{isSaving ? 'Saving…' : 'Save changes'}
 										</button>

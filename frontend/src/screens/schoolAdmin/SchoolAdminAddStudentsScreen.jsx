@@ -10,6 +10,11 @@ import {
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { normalizeGradeLevels } from '../../utils/gradeLevel'
+import {
+	normalizeUniversityPrograms,
+	planMatchesProgram,
+} from '../../utils/universityProgram'
+import { isUniversitySchool } from '../../utils/schoolType'
 import '../../App.css'
 
 function resolveSchoolId (school) {
@@ -71,6 +76,7 @@ function SchoolAdminAddStudentsScreen () {
 	const [lastname, setLastname] = useState('')
 	const [email, setEmail] = useState('')
 	const [selectedGradesLevel, setSelectedGradesLevel] = useState('')
+	const [selectedProgram, setSelectedProgram] = useState('')
 	const [selectedPlanId, setSelectedPlanId] = useState('')
 
 	const {
@@ -92,6 +98,13 @@ function SchoolAdminAddStudentsScreen () {
 		[schoolData],
 	)
 
+	const programs = useMemo(
+		() => normalizeUniversityPrograms(schoolData?.programs),
+		[schoolData],
+	)
+
+	const isUniversity = isUniversitySchool(schoolData?.schoolType)
+
 	const plansList = useMemo(
 		() => (Array.isArray(plans) ? plans : []),
 		[plans],
@@ -103,13 +116,21 @@ function SchoolAdminAddStudentsScreen () {
 	)
 
 	const filteredPlans = useMemo(() => {
-		if (selectedGradesLevel === '') {
+		const cohortId = isUniversity ? selectedProgram : selectedGradesLevel
+		if (cohortId === '') {
 			return []
 		}
 		return activePlans.filter((plan) =>
-			planMatchesGradeLevel(plan, selectedGradesLevel),
+			isUniversity
+				? planMatchesProgram(plan, cohortId)
+				: planMatchesGradeLevel(plan, cohortId),
 		)
-	}, [activePlans, selectedGradesLevel])
+	}, [
+		activePlans,
+		isUniversity,
+		selectedGradesLevel,
+		selectedProgram,
+	])
 
 	const formBusy = isSaving || isLoadingSchool || isLoadingPlans
 
@@ -125,7 +146,7 @@ function SchoolAdminAddStudentsScreen () {
 
 	useEffect(() => {
 		setSelectedPlanId('')
-	}, [selectedGradesLevel])
+	}, [selectedGradesLevel, selectedProgram])
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
@@ -140,7 +161,12 @@ function SchoolAdminAddStudentsScreen () {
 			toast.error('Please enter the student last name')
 			return
 		}
-		if (selectedGradesLevel === '') {
+		if (isUniversity) {
+			if (selectedProgram === '') {
+				toast.error('Please select a program')
+				return
+			}
+		} else if (selectedGradesLevel === '') {
 			toast.error('Please select a grade level')
 			return
 		}
@@ -154,8 +180,12 @@ function SchoolAdminAddStudentsScreen () {
 			schoolId,
 			firstname: firstname.trim(),
 			lastname: lastname.trim(),
-			gradesLevel: selectedGradesLevel,
 			plan: selectedPlanId,
+		}
+		if (isUniversity) {
+			payload.program = selectedProgram
+		} else {
+			payload.gradesLevel = selectedGradesLevel
 		}
 		if (trimmedEmail !== '') {
 			payload.email = trimmedEmail
@@ -315,15 +345,25 @@ function SchoolAdminAddStudentsScreen () {
 									<div className='login-field'>
 										<label
 											className='login-label'
-											htmlFor='schooladmin-add-student-grade'
+											htmlFor='schooladmin-add-student-cohort'
 										>
-											Grade level
+											{isUniversity ? 'Program' : 'Grade level'}
 										</label>
 										{isLoadingSchool ? (
 											<p className='school-grades-levels__hint'>
-												Loading grade levels…
+												{isUniversity
+													? 'Loading programs…'
+													: 'Loading grade levels…'}
 											</p>
-										) : gradesLevels.length === 0 ? (
+										) : isUniversity && programs.length === 0 ? (
+											<p className='school-grades-levels__hint'>
+												No programs on your institution yet.{' '}
+												<Link to='/schooladmins/myschools'>
+													Add them in My school
+												</Link>{' '}
+												first.
+											</p>
+										) : !isUniversity && gradesLevels.length === 0 ? (
 											<p className='school-grades-levels__hint'>
 												No grade levels on your school yet.{' '}
 												<Link to='/schooladmins/myschools'>
@@ -333,28 +373,39 @@ function SchoolAdminAddStudentsScreen () {
 											</p>
 										) : (
 											<select
-												id='schooladmin-add-student-grade'
-												name='gradesLevel'
+												id='schooladmin-add-student-cohort'
+												name={isUniversity ? 'program' : 'gradesLevel'}
 												className='login-input'
-												value={selectedGradesLevel}
+												value={isUniversity
+													? selectedProgram
+													: selectedGradesLevel}
 												required
 												disabled={formBusy}
-												onChange={(e) =>
-													setSelectedGradesLevel(
-														e.target.value,
-													)}
+												onChange={(e) => {
+													if (isUniversity) {
+														setSelectedProgram(e.target.value)
+													} else {
+														setSelectedGradesLevel(e.target.value)
+													}
+												}}
 											>
 												<option value=''>
-													Select a grade level
+													{isUniversity
+														? 'Select a program'
+														: 'Select a grade level'}
 												</option>
-												{gradesLevels.map((level) => (
-													<option
-														key={level._id}
-														value={level._id}
-													>
-														{level.name}
-													</option>
-												))}
+												{(isUniversity ? programs : gradesLevels)
+													.map((item) => (
+														<option
+															key={item._id}
+															value={item._id}
+														>
+															{item.name}
+															{item.department
+																? ` (${item.department})`
+																: ''}
+														</option>
+													))}
 											</select>
 										)}
 									</div>
@@ -389,22 +440,32 @@ function SchoolAdminAddStudentsScreen () {
 										{!isLoadingPlans
 											&& !isPlansError
 											&& activePlans.length > 0
-											&& selectedGradesLevel === '' && (
+											&& (isUniversity
+												? selectedProgram
+												: selectedGradesLevel) === '' && (
 											<p className='school-grades-levels__hint'>
-												Select a grade level above to see
+												Select {isUniversity
+													? 'a program'
+													: 'a grade level'} above to see
 												matching plans.
 											</p>
 										)}
 										{!isLoadingPlans
 											&& !isPlansError
-											&& selectedGradesLevel !== ''
+											&& (isUniversity
+												? selectedProgram
+												: selectedGradesLevel) !== ''
 											&& filteredPlans.length === 0 && (
 											<p className='school-grades-levels__hint'>
-												No active plans for this grade.{' '}
+												No active plans for this {isUniversity
+													? 'program'
+													: 'grade'}.{' '}
 												<Link to='/schooladmins/createplan'>
 													Create a plan
 												</Link>{' '}
-												for this grade level.
+												for this {isUniversity
+													? 'program'
+													: 'grade level'}.
 											</p>
 										)}
 										{!isLoadingPlans
@@ -451,7 +512,9 @@ function SchoolAdminAddStudentsScreen () {
 										className='login-submit'
 										disabled={
 											formBusy
-											|| gradesLevels.length === 0
+											|| (isUniversity
+												? programs.length === 0
+												: gradesLevels.length === 0)
 											|| activePlans.length === 0
 										}
 									>

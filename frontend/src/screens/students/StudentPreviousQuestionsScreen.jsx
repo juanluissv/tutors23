@@ -10,6 +10,7 @@ import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useGetStudentPreviousQuestionsQuery } from '../../slices/student/studentPreviousQuestionsSlice'
 import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
+import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
 	canViewQuestions,
@@ -119,10 +120,10 @@ function isLikelyMongoId (value) {
 
 function teacherDisplayName (teacher) {
 	if (!teacher || typeof teacher !== 'object') {
-		return 'Teacher'
+		return 'Profesor'
 	}
 	const parts = [teacher.firstname, teacher.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Teacher'
+	return parts.length > 0 ? parts.join(' ') : 'Profesor'
 }
 
 function formatQaDate (value) {
@@ -133,7 +134,7 @@ function formatQaDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return ''
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
@@ -179,7 +180,7 @@ function QaTimelineVideoThumb ({ watchTo, ariaLabel }) {
 			<Link
 				to={watchTo}
 				className='qa-timeline__video'
-				aria-label={ariaLabel ?? 'Watch video'}
+				aria-label={ariaLabel ?? 'Ver video'}
 			>
 				{inner}
 			</Link>
@@ -281,7 +282,7 @@ function StudentPreviousQuestionsScreen () {
 
 	const errorMessage =
 		error?.data?.message || error?.error
-			|| 'Could not load previous questions.'
+			|| 'No se pudieron cargar las preguntas anteriores.'
 
 	const subjectTitle =
 		convo?.subject && typeof convo.subject === 'object'
@@ -301,40 +302,32 @@ function StudentPreviousQuestionsScreen () {
 						<div className='center-content3'>
 							<div className='qa-timeline-page qa-timeline-page--student'>
 								<h1 className='qa-timeline-page__title heading-gradient'>
-									Questions &amp; answers
+									Preguntas y respuestas
 								</h1>
 								<p className='qa-timeline-page__subtitle'>
 									{subjectTitle != null ? (
 										<>
-											Your recorded questions for{' '}
+											Tus preguntas anteriores de{' '}
 											<strong>{subjectTitle}</strong>,
-											including those still awaiting a reply.
+											incluyendo las que aún esperan
+											una respuesta.
 										</>
 									) : subjectQuery != null ? (
-										'Your recorded questions for this subject, '
-										+ 'including those still awaiting a reply.'
+										'Tus preguntas anteriores de esta '
+										+ 'materia, incluyendo las que aún '
+										+ 'esperan una respuesta.'
 									) : (
-										'Your recorded questions and teacher '
-										+ 'replies, including those still '
-										+ 'awaiting an answer.'
+										'Tus preguntas anteriores y las '
+										+ 'respuestas de tus profesores, '
+										+ 'incluyendo las que aún esperan '
+										+ 'una respuesta.'
 									)}
 								</p>
 
-								{!isLoadingProfile && !canView ? (
-									<div className='ask-subscription-notice'>
-										<p className='ask-subscription-notice__title'>
-											Subscription required
-										</p>
-										<p className='ask-subscription-notice__text'>
-											{viewBlockReason}
-										</p>
-										<Link
-											to='/students/subscription'
-											className='ask-subscription-notice__link'
-										>
-											View plans & subscribe
-										</Link>
-									</div>
+								{!isLoadingProfile && viewBlockReason ? (
+									<StudentSubscriptionNotice
+										subscription={currentSubscription}
+									/>
 								) : null}
 
 								{canView && isLoading && (
@@ -344,7 +337,7 @@ function StudentPreviousQuestionsScreen () {
 										width: '100%',
 									}}
 									>
-										Loading…
+										Cargando…
 									</p>
 								)}
 
@@ -364,7 +357,7 @@ function StudentPreviousQuestionsScreen () {
 											style={{ marginTop: '0.75rem' }}
 											onClick={() => refetch()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								)}
@@ -378,16 +371,16 @@ function StudentPreviousQuestionsScreen () {
 									>
 										{subjectQuery != null ? (
 											<>
-												No recorded questions yet for this
-												subject. After you ask a question
-												and save your video, it will show
-												up here.
+												Aún no hay preguntas grabadas
+												para esta materia. Después de
+												hacer una pregunta y guardar tu
+												video, aparecerá aquí.
 											</>
 										) : (
 											<>
-												No recorded questions yet. After you
-												ask a question and save your video,
-												it will show up here.
+												Aún no hay preguntas grabadas.
+												Después de hacer una pregunta y
+												guardar tu video, aparecerá aquí.
 											</>
 										)}
 									</p>
@@ -406,7 +399,7 @@ function StudentPreviousQuestionsScreen () {
 													+ 'qa-timeline__tag--question'
 												}
 												>
-													{subjectTitle ?? 'Subject'}
+													{subjectTitle ?? 'Materia'}
 												</span>
 												<h3 className='qa-timeline__card-title'>
 													{convo.title}
@@ -417,7 +410,7 @@ function StudentPreviousQuestionsScreen () {
 															String(convo._id)
 														}`
 													}
-													ariaLabel='Watch question video'
+													ariaLabel='Ver video de la pregunta'
 												/>
 												{convo.description != null
 													&& String(convo.description)
@@ -430,7 +423,7 @@ function StudentPreviousQuestionsScreen () {
 													</p>
 												)}
 												<span className='qa-timeline__meta'>
-													You ·{' '}
+													Tú ·{' '}
 													{formatQaDate(
 														convo.dateCreated,
 													)}
@@ -446,7 +439,7 @@ function StudentPreviousQuestionsScreen () {
 														+ 'qa-timeline__watch--question'
 													}
 												>
-													Watch question
+													Mira la pregunta
 													<PlayIconSmall />
 												</Link>
 											</div>
@@ -484,8 +477,8 @@ function StudentPreviousQuestionsScreen () {
 												}
 												>
 													{hasAnswerVideo
-														? 'Teacher answer'
-														: 'Awaiting answer'}
+														? 'Respuesta del profesor'
+														: 'Esperando respuesta'}
 												</span>
 												{hasAnswerVideo ? (
 													<QaTimelineVideoThumb
@@ -496,7 +489,7 @@ function StudentPreviousQuestionsScreen () {
 																)
 															}`
 														}
-														ariaLabel='Watch answer video'
+														ariaLabel='Ver video de la respuesta'
 													/>
 												) : null}
 												{hasAnswerVideo ? (
@@ -539,7 +532,7 @@ function StudentPreviousQuestionsScreen () {
 																+ 'qa-timeline__watch--answer'
 															}
 														>
-															Watch answer
+															Mira la respuesta
 															<PlayIconSmall />
 														</Link>
 													</>
@@ -549,9 +542,11 @@ function StudentPreviousQuestionsScreen () {
 														+ 'qa-timeline__card-text--pending'
 													}
 													>
-														Your teacher has not posted
-														a video answer yet. Check
-														back here once they do.
+														Tu profesor aún no ha
+														publicado una respuesta
+														en video. Vuelve a
+														consultar aquí cuando
+														lo haga.
 													</p>
 												)}
 											</div>

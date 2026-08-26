@@ -12,6 +12,8 @@ import {
     studentSubscriptionsPopulate,
     refreshStudentSubscriptions,
 } from './subscriptionController.js';
+import Subscription from '../models/subscriptionModel.js';
+import { linkStudentToSubjects } from '../utils/subscriptionSubjectHelpers.js';
 
 const subjectWithGradeLevelPopulate = {
     path: 'subjects',
@@ -24,19 +26,29 @@ const subjectWithGradeLevelPopulate = {
 
 const studentPlanPopulate = {
     path: 'plans',
-    select: 'price totalQuestions active gradesLevel subjects school createdAt',
+    select: 'price totalQuestions active gradesLevel program maxSubjects subjects school semesters createdAt',
     populate: [
         {
             path: 'subjects',
-            select: 'title gradesLevel',
-            populate: {
-                path: 'gradesLevel',
-                select: 'name',
-            },
+            select: 'title gradesLevel program semester',
+            populate: [
+                {
+                    path: 'gradesLevel',
+                    select: 'name',
+                },
+                {
+                    path: 'program',
+                    select: 'name department programType',
+                },
+            ],
         },
         {
             path: 'gradesLevel',
             select: 'name',
+        },
+        {
+            path: 'program',
+            select: 'name department programType',
         },
     ],
 };
@@ -115,14 +127,20 @@ async function ensureStudentSubjectsLinkedFromAssignedPlans (
     }
 
     const plans = await Plan.find({ _id: { $in: planIds } })
-        .select('subjects')
+        .select('subjects program')
         .lean();
 
     const subjectIds = [
         ...new Set(
-            plans.flatMap((p) =>
-                (p.subjects ?? []).map((id) => String(id)),
-            ),
+            plans.flatMap((p) => {
+                if (
+                    p.program
+                    && (!p.subjects || p.subjects.length === 0)
+                ) {
+                    return [];
+                }
+                return (p.subjects ?? []).map((id) => String(id));
+            }),
         ),
     ].filter((id) => id !== 'undefined' && id !== 'null');
 
@@ -144,6 +162,46 @@ async function ensureStudentSubjectsLinkedFromAssignedPlans (
     await Student.updateOne(
         { _id: studentDoc._id },
         { $addToSet: { subjects: { $each: subjectIds } } },
+    );
+}
+
+/**
+ * Restore subject links from active subscriptions that already have
+ * selectedSubjects (university student-choice plans).
+ */
+async function ensureStudentSubjectsLinkedFromSubscriptions (
+    studentDoc,
+    normalizedEmail,
+) {
+    const subIds = (studentDoc.subscriptions ?? []).filter(Boolean);
+    if (subIds.length === 0) {
+        return;
+    }
+
+    const subs = await Subscription.find({
+        _id: { $in: subIds },
+        active: true,
+        selectedSubjects: { $exists: true, $not: { $size: 0 } },
+    })
+        .select('selectedSubjects')
+        .lean();
+
+    const subjectIds = [
+        ...new Set(
+            subs.flatMap((sub) =>
+                (sub.selectedSubjects ?? []).map((id) => String(id)),
+            ),
+        ),
+    ].filter((id) => id !== 'undefined' && id !== 'null');
+
+    if (subjectIds.length === 0) {
+        return;
+    }
+
+    await linkStudentToSubjects(
+        studentDoc._id,
+        subjectIds,
+        normalizedEmail,
     );
 }
 
@@ -199,6 +257,10 @@ const authStudent = asyncHandler(async (req, res) => {
             emailNorm,
         );
         await refreshStudentSubscriptions(student._id);
+        await ensureStudentSubjectsLinkedFromSubscriptions(
+            student,
+            emailNorm,
+        );
 
         const fresh = await Student.findById(student._id)
             .select('-password')
@@ -484,6 +546,7 @@ const updateStudentProfile = asyncHandler(async (req, res) => {
 const getMySubjects = asyncHandler(async (req, res) => {
     const studentId = req.student._id
     const subjects = await Subject.find({ students: studentId })
+        .populate('teachers', 'firstname lastname')
         .sort({ dateCreated: -1, createdAt: -1 })
         .lean()
 
@@ -516,6 +579,19 @@ const getMySubjects = asyncHandler(async (req, res) => {
         subjects.map((subj) => ({
             ...subjectToJson(subj),
             courses: coursesBySubjectId.get(String(subj._id)) ?? [],
+            teachers: Array.isArray(subj.teachers)
+                ? subj.teachers
+                    .filter((teacher) => (
+                        teacher
+                        && typeof teacher === 'object'
+                        && (teacher.firstname || teacher.lastname)
+                    ))
+                    .map((teacher) => ({
+                        _id: teacher._id,
+                        firstname: teacher.firstname,
+                        lastname: teacher.lastname,
+                    }))
+                : [],
         })),
     )
 })

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetSubjectsByTeacherIdQuery } from '../../slices/teachers/teacherApiSlice'
+import { isUniversitySchool } from '../../utils/schoolType'
 import {
 	TeacherSubjectsGrid,
 	SubjectCardActionsStudents,
@@ -16,6 +17,7 @@ function TeacherStudentsBySubjectScreen () {
 	const teacherId = teacherInfo?._id
 		? String(teacherInfo._id)
 		: null
+	const isUniversity = isUniversitySchool(teacherInfo?.schoolType)
 
 	const {
 		data: subjects = [],
@@ -70,6 +72,7 @@ function TeacherStudentsBySubjectScreen () {
 							isLoading={isLoading}
 							isError={isError}
 							refetch={refetch}
+							isUniversity={isUniversity}
 							renderCardActions={(subject) => (
 								<SubjectCardActionsStudents
 									subjectId={String(subject._id)}

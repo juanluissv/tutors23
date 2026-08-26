@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { NavLink, useLocation } from 'react-router-dom'
 
@@ -586,10 +586,46 @@ function hasLinkedSchool (school) {
 	return Boolean(school)
 }
 
+const LAPTOP_SIDEBAR_HOVER_MIN = 769
+const LAPTOP_SIDEBAR_HOVER_MAX = 1449
+
+function canExpandSidebarOnHover () {
+	const width = window.innerWidth
+	return width >= LAPTOP_SIDEBAR_HOVER_MIN && width <= LAPTOP_SIDEBAR_HOVER_MAX
+}
+
 function AdminSidebar ({ isOpen, toggleSidebar }) {
 	const location = useLocation()
 	const { schoolAdminInfo } = useSelector((state) => state.authSchoolAdmin)
 	const showMySchool = hasLinkedSchool(schoolAdminInfo?.school)
+	const [isHoverExpanded, setIsHoverExpanded] = useState(false)
+
+	useEffect(() => {
+		if (isOpen) {
+			setIsHoverExpanded(false)
+		}
+	}, [isOpen])
+
+	useEffect(() => {
+		const handleResize = () => {
+			if (!canExpandSidebarOnHover()) {
+				setIsHoverExpanded(false)
+			}
+		}
+
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
+
+	const handleSidebarMouseEnter = () => {
+		if (!isOpen && canExpandSidebarOnHover()) {
+			setIsHoverExpanded(true)
+		}
+	}
+
+	const handleSidebarMouseLeave = () => {
+		setIsHoverExpanded(false)
+	}
 
 	const navClass = ({ isActive }) =>
 		`sidebar-nav-link${isActive ? ' sidebar-nav-link--active' : ''}`
@@ -628,12 +664,19 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 		}`
 
 	return (
-		<aside
-			className={`sidebar sidebar--teacher ${
-				isOpen ? 'sidebar-open' : 'sidebar-closed'
-			}`}
-			aria-label="Main navigation"
+		<div
+			className={`sidebar-slot${
+				isOpen ? ' sidebar-slot--open' : ' sidebar-slot--closed'
+			}${isHoverExpanded ? ' sidebar-slot--hover-expanded' : ''}`}
 		>
+			<aside
+				className={`sidebar sidebar--teacher ${
+					isOpen ? 'sidebar-open' : 'sidebar-closed'
+				}${isHoverExpanded ? ' sidebar-hover-expanded' : ''}`}
+				aria-label="Main navigation"
+				onMouseEnter={handleSidebarMouseEnter}
+				onMouseLeave={handleSidebarMouseLeave}
+			>
 			<div className="sidebar-header">
 				<button
 					type="button"
@@ -745,6 +788,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 				</nav>
 			</div>
 		</aside>
+		</div>
 	)
 }
 

@@ -12,11 +12,17 @@ import { toast } from 'react-toastify';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useGetChatMutation } from '../slices/chatSlice';
-import { useGetProfileQuery } from '../slices/student/studentApiSlice';
+import {
+  useGetProfileQuery,
+  useGetMySubjectsQuery,
+  useGetBookLessonsBySubjectForStudentQuery,
+} from '../slices/student/studentApiSlice';
+import StudentSubscriptionNotice from '../components/StudentSubscriptionNotice';
 import {
   resolveCurrentSubscription,
   canViewQuestions,
   getSubscriptionBlockReason,
+  subscriptionNeedsSubjectSelection,
 } from '../utils/subscriptionAccess';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -43,27 +49,116 @@ const SendButtonIcon = () => (
   </svg>
 )
 
-const SUGGESTED_QUESTIONS = [
-  'Qué porcentaje de la superficie terrestre mundial está cubierto por bosques y cuál es su importancia vital?',
-  'Según la zona climática, ¿cuál es la distribución porcentual de los bosques en el mundo?',
-  'Qué características climáticas y biológicas definen a los bosques tropicales?',
-  'De acuerdo con la FAO, ¿qué actividad productiva es responsable de casi el 90 % de la deforestación en zonas tropicales entre 2000 y 2018?',
-  'Cuáles son las causas principales de la deforestación en el Sudeste Asiático?',
-  'Defina el concepto de tenencia de la tierra.',
-  'Explique la diferencia entre la propiedad comunal y la propiedad estatal de la tierra.',
-  'Cómo influyó la Guerra Fría en las políticas de tenencia de la tierra en América Latina?',
-  'Qué factores caracterizan el neocolonialismo actual y los conflictos de tierras en África?',
-  'En qué consiste la iniciativa de los bancos de tierras en el Caribe oriental?',
-]
-
-
-
 function getChatErrorMessage (error) {
   return (
     error?.data?.message
     || error?.error
-    || 'Sorry, there was an error processing your question.'
+    || 'Lo siento, hubo un error al procesar tu pregunta.'
   );
+}
+
+function resolveChapterChatIndexId (chapter, subjectId) {
+  const pineconeIndex = String(chapter?.pineconeIndexName ?? '').trim()
+  if (pineconeIndex) {
+    return pineconeIndex
+  }
+
+  const chapterId = String(chapter?._id ?? '').trim()
+  if (chapterId) {
+    return `${String(subjectId)}-${chapterId}`
+  }
+
+  return String(subjectId)
+}
+
+function getSubjectChapters (subject, mySubjectsById) {
+  const subjectId = String(subject?._id ?? '')
+  const fullSubject = mySubjectsById.get(subjectId) || subject
+  const chapters = Array.isArray(fullSubject?.bookChapters)
+    ? fullSubject.bookChapters
+    : []
+
+  return chapters
+    .filter((chapter) => String(chapter?.ChapterTitle || '').trim())
+    .sort((a, b) => {
+      const aNum = Number(a?.ChapterNumber)
+      const bNum = Number(b?.ChapterNumber)
+      if (Number.isFinite(aNum) && Number.isFinite(bNum)) {
+        return aNum - bNum
+      }
+      return 0
+    })
+}
+
+function isChapterBubbleActive (routeId, chapter, subjectId) {
+  if (routeId == null) {
+    return false
+  }
+
+  return String(routeId) === resolveChapterChatIndexId(chapter, subjectId)
+}
+
+function findLessonForChapter (bookLessons, chapter) {
+  if (!Array.isArray(bookLessons) || !chapter) {
+    return null
+  }
+
+  const chapterId = String(chapter?._id ?? '').trim()
+  const chapterNumber = Number(chapter?.ChapterNumber)
+  const chapterTitle = String(chapter?.ChapterTitle ?? '').trim().toLowerCase()
+
+  return bookLessons.find((lesson) => {
+    const bookChapter = lesson?.bookChapter || {}
+    const lessonChapterId = String(bookChapter.chapterId ?? '').trim()
+
+    if (chapterId && lessonChapterId && lessonChapterId === chapterId) {
+      return true
+    }
+
+    if (
+      Number.isFinite(chapterNumber)
+      && Number(bookChapter.chapterNumber) === chapterNumber
+    ) {
+      return true
+    }
+
+    const lessonTitle = String(bookChapter.chapterTitle ?? '')
+      .trim()
+      .toLowerCase()
+
+    return Boolean(chapterTitle && lessonTitle && lessonTitle === chapterTitle)
+  }) || null
+}
+
+function collectSubjectsById (...subjectLists) {
+  const byId = new Map()
+
+  for (const list of subjectLists) {
+    if (!Array.isArray(list)) {
+      continue
+    }
+
+    for (const subject of list) {
+      if (!subject) {
+        continue
+      }
+
+      const subjectId = String(subject._id || '').trim()
+      const title = String(subject.title || '').trim()
+
+      if (!subjectId || !title) {
+        continue
+      }
+
+      byId.set(subjectId, {
+        ...subject,
+        _id: subjectId,
+        title,
+      })
+    }
+  }
+
+  return byId
 }
 
 function HomeScreen() {
@@ -82,6 +177,13 @@ function HomeScreen() {
     skip: !studentInfo,
   });
 
+  const {
+    data: mySubjects = [],
+    isLoading: isLoadingMySubjects,
+  } = useGetMySubjectsQuery(undefined, {
+    skip: !studentInfo,
+  });
+
   const currentSubscription = useMemo(
     () => resolveCurrentSubscription(profile?.subscriptions),
     [profile?.subscriptions],
@@ -91,6 +193,149 @@ function HomeScreen() {
     currentSubscription,
     'view',
   );
+
+  const mySubjectsById = useMemo(() => {
+    const map = new Map()
+    for (const subject of mySubjects) {
+      if (subject?._id) {
+        map.set(String(subject._id), subject)
+      }
+    }
+    return map
+  }, [mySubjects])
+
+  const subscribedSubjects = useMemo(() => {
+    const planSubjectsFromProfile = (profile?.plans || []).flatMap(
+      (plan) => (Array.isArray(plan?.subjects) ? plan.subjects : []),
+    )
+    const subjectsById = collectSubjectsById(
+      mySubjects,
+      profile?.subjects,
+      planSubjectsFromProfile,
+      currentSubscription?.plan?.subjects,
+      currentSubscription?.selectedSubjects,
+    )
+
+    const planSubjectIds = (
+      currentSubscription?.plan?.subjects || []
+    )
+      .map((subject) => String(subject?._id || subject || '').trim())
+      .filter(Boolean)
+    const selectedSubjectIds = (
+      currentSubscription?.selectedSubjects || []
+    )
+      .map((subject) => String(subject?._id || subject || '').trim())
+      .filter(Boolean)
+    const subscriptionSubjectIds = [
+      ...planSubjectIds,
+      ...selectedSubjectIds,
+    ]
+
+    if (subscriptionSubjectIds.length > 0) {
+      const fromSubscription = subscriptionSubjectIds
+        .map((subjectId) => subjectsById.get(subjectId))
+        .filter(Boolean)
+
+      if (fromSubscription.length > 0) {
+        return fromSubscription
+      }
+    }
+
+    return [...subjectsById.values()]
+  }, [
+    mySubjects,
+    profile?.subjects,
+    profile?.plans,
+    currentSubscription?.plan?.subjects,
+    currentSubscription?.selectedSubjects,
+  ])
+
+  const [selectedSubjectId, setSelectedSubjectId] = useState(null)
+  const [selectedChapter, setSelectedChapter] = useState(null)
+
+  const selectedSubject = useMemo(() => {
+    if (!selectedSubjectId) {
+      return null
+    }
+
+    return (
+      subscribedSubjects.find(
+        (subject) => String(subject._id) === String(selectedSubjectId),
+      ) || null
+    )
+  }, [selectedSubjectId, subscribedSubjects])
+
+  const selectedSubjectChapters = useMemo(() => {
+    if (!selectedSubject) {
+      return []
+    }
+
+    return getSubjectChapters(selectedSubject, mySubjectsById)
+  }, [selectedSubject, mySubjectsById])
+
+  const activePineconeIndexId = useMemo(() => {
+    const routeIndexId = String(id ?? '').trim()
+    if (routeIndexId) {
+      return routeIndexId
+    }
+    return null
+  }, [id])
+
+  const {
+    data: bookLessons = [],
+    isLoading: isLoadingBookLessons,
+    isError: isBookLessonsError,
+  } = useGetBookLessonsBySubjectForStudentQuery(selectedSubjectId, {
+    skip: !studentInfo || !selectedSubjectId,
+  })
+
+  const selectedChapterLesson = useMemo(() => {
+    if (!selectedChapter?.chapter) {
+      return null
+    }
+
+    return findLessonForChapter(bookLessons, selectedChapter.chapter)
+  }, [bookLessons, selectedChapter])
+
+  const selectedChapterQuestions = useMemo(() => {
+    if (!selectedChapter?.chapter) {
+      return []
+    }
+
+    const items = Array.isArray(selectedChapterLesson?.suggestedQuestions)
+      ? selectedChapterLesson.suggestedQuestions
+      : []
+
+    return items
+      .map((item) => ({
+        question: String(item?.question ?? '').trim(),
+        answer: String(item?.answer ?? '').trim(),
+      }))
+      .filter((item) => item.question)
+  }, [selectedChapter, selectedChapterLesson])
+
+  const effectivePineconeIndexId = useMemo(() => {
+    if (activePineconeIndexId) {
+      return activePineconeIndexId
+    }
+
+    const lessonChatIndexId = String(
+      selectedChapterLesson?.chatIndexId ?? '',
+    ).trim()
+    if (lessonChatIndexId) {
+      return lessonChatIndexId
+    }
+
+    if (selectedChapter?.chatIndexId) {
+      return String(selectedChapter.chatIndexId).trim()
+    }
+
+    return null
+  }, [
+    activePineconeIndexId,
+    selectedChapter,
+    selectedChapterLesson,
+  ])
 
     const [question, setQuestion] = useState("");
     const [messages, setMessages] = useState([]);
@@ -103,13 +348,35 @@ function HomeScreen() {
     const abortControllerRef = useRef(null);
     const audioUrlRef = useRef(null);
     const audioEventHandlersRef = useRef({ onended: null, onerror: null });
-    const [predefinedQuestion, setPredefinedQuestion] = useState("");
-    const [learningMaterial, setLearningMaterial] = useState("");
+    const [predefinedQuestion, setPredefinedQuestion] = useState('');
+    const [learningMaterial, setLearningMaterial] = useState(
+      '¿Qué vas a aprender hoy?',
+    );
     const [showQuestions, setShowQuestions] = useState(false);
     const [hasSentQueryFromUrl, setHasSentQueryFromUrl] = useState(false);
     const hasMountedRef = useRef(false);
 
     const [getChat, { isLoading }] = useGetChatMutation();
+
+    const sendChatQuestion = async (questionText) => {
+      const trimmedQuestion = String(questionText ?? '').trim()
+      if (!trimmedQuestion) {
+        return null
+      }
+
+      const pineconeIndexId = String(effectivePineconeIndexId ?? '').trim()
+      if (!pineconeIndexId) {
+        toast.error(
+          'Selecciona un capítulo antes de hacer una pregunta.',
+        )
+        return null
+      }
+
+      return getChat({
+        question: trimmedQuestion,
+        id: pineconeIndexId,
+      })
+    }
 
     useEffect(() => {
       if (!studentInfo) {
@@ -205,13 +472,11 @@ function HomeScreen() {
             const sendFromUrl = async () => {
                 const userMessage = { type: 'question', content: trimmedQuery };
                 setMessages(prev => [...prev, userMessage]);
-                let res;
                 try {
-                    if (id == undefined) {
-                        res = await getChat({ question: trimmedQuery, 'id': 'unidad1' });
-                    }
-                    if (id != undefined) {
-                        res = await getChat({ question: trimmedQuery, id });
+                    const res = await sendChatQuestion(trimmedQuery)
+                    if (!res) {
+                      setMessages((prev) => prev.slice(0, -1))
+                      return
                     }
 
                     const aiMessage = { type: 'answer', content: res.data.message };
@@ -238,6 +503,7 @@ function HomeScreen() {
       getChat,
       canUseAiTutor,
       isLoadingProfile,
+      effectivePineconeIndexId,
     ]);
 
 
@@ -251,20 +517,91 @@ function HomeScreen() {
 
     useEffect(() => {
       if (id == 'langchain-docs') {
-        setPredefinedQuestion("suggest me some questions to ask about Warren Buffett Shareholder Report");
-        setLearningMaterial("What would you like to learn today?")
+        setPredefinedQuestion(
+          'Sugiéreme algunas preguntas sobre el '
+          + 'informe de accionistas de Warren Buffett',
+        );
+        setLearningMaterial('¿Qué vas a aprender hoy?');
       } else {
         setPredefinedQuestion(
-          'Soy un Tutor de AI especializado \n En el libro de Ciudadania y Valores 9 grado El Salvador,\n Sugiereme algo que preguntar '
+          'Soy un Tutor de AI especializado \n En el libro de Ciudadania y Valores 9 grado El Salvador,\n Sugiereme algo que preguntar ',
         );
-        setLearningMaterial("Que vas a aprender hoy?")
+        setLearningMaterial('¿Qué vas a aprender hoy?');
       }
-
     }, [id]);
 
+    useEffect(() => {
+      if (!id) {
+        return
+      }
 
+      for (const subject of subscribedSubjects) {
+        const subjectId = String(subject._id)
+        const chapters = getSubjectChapters(subject, mySubjectsById)
 
+        for (const chapter of chapters) {
+          if (isChapterBubbleActive(id, chapter, subjectId)) {
+            setSelectedSubjectId(subjectId)
+            return
+          }
+        }
+      }
+    }, [id, subscribedSubjects, mySubjectsById]);
 
+    useEffect(() => {
+      const shouldShowQuestions = searchParams.get('questions') === '1'
+      const subjectIdParam = String(searchParams.get('subjectId') ?? '').trim()
+      const chapterIdParam = String(searchParams.get('chapterId') ?? '').trim()
+
+      if (!shouldShowQuestions || !subjectIdParam || !chapterIdParam) {
+        return
+      }
+
+      if (isLoadingProfile || isLoadingMySubjects) {
+        return
+      }
+
+      const subject = subscribedSubjects.find(
+        (item) => String(item._id) === subjectIdParam,
+      )
+      if (!subject) {
+        return
+      }
+
+      const chapters = getSubjectChapters(subject, mySubjectsById)
+      const chapter = chapters.find(
+        (item) => String(item._id) === chapterIdParam,
+      )
+      if (!chapter) {
+        return
+      }
+
+      setSelectedSubjectId(subjectIdParam)
+      setSelectedChapter({
+        chapter,
+        subjectId: subjectIdParam,
+        chatIndexId: resolveChapterChatIndexId(chapter, subjectIdParam),
+        title: String(chapter?.ChapterTitle || '').trim(),
+      })
+
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('questions')
+      nextParams.delete('subjectId')
+      nextParams.delete('chapterId')
+      const nextSearch = nextParams.toString()
+      navigate(
+        `${location.pathname}${nextSearch ? `?${nextSearch}` : ''}`,
+        { replace: true },
+      )
+    }, [
+      searchParams,
+      subscribedSubjects,
+      mySubjectsById,
+      isLoadingProfile,
+      isLoadingMySubjects,
+      navigate,
+      location.pathname,
+    ]);
 
     // Clear chat history and cleanup audio when switching subjects (but not on first mount)
     useEffect(() => {
@@ -296,26 +633,20 @@ function HomeScreen() {
           return;
         }
 
-        // Add the question to messages immediately
         const userMessage = { type: 'question', content: question };
         setMessages(prev => [...prev, userMessage]);
         
         const currentQuestion = question;
-        setQuestion(""); // Clear input
-        let res;
+        setQuestion("");
         try {
-          if(id == undefined){
-             res = await getChat({ question: currentQuestion, 'id': 'unidad1' });
+          const res = await sendChatQuestion(currentQuestion)
+          if (!res) {
+            setMessages((prev) => prev.slice(0, -1))
+            return
           }
-          if (id != undefined){
-             res = await getChat({ question: currentQuestion, id });
-          }
-            // const res = await getChat({ question: currentQuestion, id });
-            console.log(res);
-            
-            // Add the answer to messages
-            const aiMessage = { type: 'answer', content: res.data.message };
-            setMessages(prev => [...prev, aiMessage]);
+
+          const aiMessage = { type: 'answer', content: res.data.message };
+          setMessages(prev => [...prev, aiMessage]);
         } catch (error) {
             console.error(error);
             const errorMessage = {
@@ -324,6 +655,42 @@ function HomeScreen() {
             };
             setMessages(prev => [...prev, errorMessage]);
         }
+    }
+
+    const handleSubjectBubbleClick = (subject) => {
+      if (!canUseAiTutor) {
+        toast.error(aiTutorBlockReason)
+        return
+      }
+
+      const subjectId = String(subject._id)
+      setSelectedChapter(null)
+      setSelectedSubjectId(subjectId)
+    }
+
+    const handleBackToSubjects = () => {
+      setSelectedSubjectId(null)
+      setSelectedChapter(null)
+    }
+
+    const handleBackToChapters = () => {
+      setSelectedChapter(null)
+    }
+
+    const handleChapterBubbleClick = (chapter, subjectId) => {
+      if (!canUseAiTutor) {
+        toast.error(aiTutorBlockReason)
+        return
+      }
+
+      const chatIndexId = resolveChapterChatIndexId(chapter, subjectId)
+
+      setSelectedChapter({
+        chapter,
+        subjectId: String(subjectId),
+        chatIndexId,
+        title: String(chapter?.ChapterTitle || '').trim(),
+      })
     }
 
     const handleQuestionClick = async (selectedQuestion) => {
@@ -337,19 +704,14 @@ function HomeScreen() {
         setMessages(prev => [...prev, userMessage]);
 
         try {
-          if(id == undefined){
-            const res = await getChat({ question: selectedQuestion, 'id': 'unidad1' });
-            // Add the answer to messages
-            const aiMessage = { type: 'answer', content: res.data.message };
-            setMessages(prev => [...prev, aiMessage]);
+          const res = await sendChatQuestion(selectedQuestion)
+          if (!res) {
+            setMessages((prev) => prev.slice(0, -1))
+            return
           }
 
-          if (id != undefined){
-            const res = await getChat({ question: selectedQuestion, id });
-            // Add the answer to messages
-            const aiMessage = { type: 'answer', content: res.data.message };
-            setMessages(prev => [...prev, aiMessage]);
-          }
+          const aiMessage = { type: 'answer', content: res.data.message };
+          setMessages(prev => [...prev, aiMessage]);
         } catch (error) {
             console.error(error);
             const errorMessage = {
@@ -393,7 +755,7 @@ function HomeScreen() {
             });
 
             if (!response.ok) {
-                let message = 'Failed to generate speech';
+                let message = 'No se pudo generar el audio';
                 try {
                     const errBody = await response.json();
                     if (errBody?.message) {
@@ -464,22 +826,16 @@ function HomeScreen() {
 
           <div className="content-area content-area--home">
             {!isLoadingProfile && !canUseAiTutor ? (
-              <div className="ask-subscription-notice ask-subscription-notice--home">
-                <p className="ask-subscription-notice__title">
-                  Subscription required
-                </p>
-                <p className="ask-subscription-notice__text">
-                  {aiTutorBlockReason}
-                  {' '}
-                  An active subscription unlocks the AI tutor on this page.
-                </p>
-                <Link
-                  to="/students/subscription"
-                  className="ask-subscription-notice__link"
-                >
-                  View plans & subscribe
-                </Link>
-              </div>
+              <StudentSubscriptionNotice
+                subscription={currentSubscription}
+                className="ask-subscription-notice--home"
+                extraText={
+                  subscriptionNeedsSubjectSelection(currentSubscription)
+                    ? undefined
+                    : 'Una suscripción activa desbloquea el tutor de IA '
+                      + 'en esta página.'
+                }
+              />
             ) : null}
 
             {messages.length === 0 ? (
@@ -487,8 +843,232 @@ function HomeScreen() {
                 <div className="home-hub__card">
                   <div className="home-hub__accent" aria-hidden />
                   <div className="home-hub__hero">
-                    <h1 className="home-hub__title heading-gradient">{learningMaterial}</h1>
-                    {canUseAiTutor && showSubheading && !showQuestions && !isExamRoute && (
+                    <h1 className="home-hub__title heading-gradient">
+                      {learningMaterial}
+                    </h1>
+                    <div className="home-hub__subjects-wrap">
+                      {isLoadingProfile || isLoadingMySubjects ? (
+                        <div
+                          className="home-hub__subjects home-hub__subjects--loading"
+                          aria-hidden
+                        >
+                          <span className="home-hub__subject-bubble home-hub__subject-bubble--skeleton" />
+                          <span className="home-hub__subject-bubble home-hub__subject-bubble--skeleton" />
+                          <span className="home-hub__subject-bubble home-hub__subject-bubble--skeleton" />
+                        </div>
+                      ) : subscribedSubjects.length > 0 ? (
+                        <div className="home-hub__subjects">
+                          {selectedSubject ? (
+                            <>
+                              <button
+                                type="button"
+                                className="home-hub__back-btn animate-fade-in"
+                                onClick={
+                                  selectedChapter
+                                    ? handleBackToChapters
+                                    : handleBackToSubjects
+                                }
+                              >
+                                {selectedChapter
+                                  ? '← Volver a capítulos'
+                                  : '← Volver a materias'}
+                              </button>
+                              {selectedChapter ? (
+                                <div
+                                  className={
+                                    'home-hub__questions ' +
+                                    'home-hub__questions--solo animate-fade-in'
+                                  }
+                                >
+                                  <p className="home-hub__questions-label">
+                                    Preguntas sugeridas
+                                  </p>
+                                  <p className="home-hub__questions-subtitle">
+                                    {selectedChapter.title}
+                                  </p>
+                                  {isLoadingBookLessons ? (
+                                    <div
+                                      className="home-hub__questions-list"
+                                      aria-hidden
+                                    >
+                                      {Array.from({ length: 6 }).map(
+                                        (_, index) => (
+                                          <span
+                                            key={index}
+                                            className={
+                                              'home-hub__question-bubble ' +
+                                              'home-hub__question-bubble--skeleton'
+                                            }
+                                          />
+                                        ),
+                                      )}
+                                    </div>
+                                  ) : isBookLessonsError ? (
+                                    <p className="home-hub__questions-empty">
+                                      No se pudieron cargar las preguntas de
+                                      este capítulo. Intenta de nuevo.
+                                    </p>
+                                  ) : selectedChapterQuestions.length > 0 ? (
+                                    <div
+                                      className="home-hub__questions-list"
+                                      role="list"
+                                      aria-label={
+                                        `Preguntas sugeridas de ${
+                                          selectedChapter.title
+                                        }`
+                                      }
+                                    >
+                                      {selectedChapterQuestions.map(
+                                        (item, index) => (
+                                          <button
+                                            key={`${index}-${item.question.slice(
+                                              0,
+                                              24,
+                                            )}`}
+                                            type="button"
+                                            role="listitem"
+                                            className="home-hub__question-bubble"
+                                            onClick={() => handleQuestionClick(
+                                              item.question,
+                                            )}
+                                          >
+                                            <span
+                                              className={
+                                                'home-hub__question-bubble-index'
+                                              }
+                                              aria-hidden
+                                            >
+                                              {index + 1}
+                                            </span>
+                                            <span
+                                              className={
+                                                'home-hub__question-bubble-text'
+                                              }
+                                            >
+                                              {item.question}
+                                            </span>
+                                          </button>
+                                        ),
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <p className="home-hub__questions-empty">
+                                      Este capítulo aún no tiene preguntas
+                                      sugeridas disponibles.
+                                    </p>
+                                  )}
+                                </div>
+                              ) : selectedSubjectChapters.length > 0 ? (
+                                <div
+                                  className={
+                                    'home-hub__chapters ' +
+                                    'home-hub__chapters--solo animate-fade-in'
+                                  }
+                                >
+                                  <p className="home-hub__chapters-label">
+                                    Capítulos de {selectedSubject.title}
+                                  </p>
+                                  <div
+                                    className="home-hub__chapters-list"
+                                    role="list"
+                                    aria-label={
+                                      `Capítulos de ${selectedSubject.title}`
+                                    }
+                                  >
+                                    {selectedSubjectChapters.map((chapter) => {
+                                      const chapterKey = String(
+                                        chapter._id
+                                        || chapter.ChapterNumber
+                                        || chapter.ChapterTitle,
+                                      )
+                                      const isChapterActive = (
+                                        isChapterBubbleActive(
+                                          id,
+                                          chapter,
+                                          selectedSubject._id,
+                                        )
+                                      )
+                                      return (
+                                        <button
+                                          key={chapterKey}
+                                          type="button"
+                                          role="listitem"
+                                          className={
+                                            'home-hub__subject-bubble ' +
+                                            'home-hub__subject-bubble--chapter' +
+                                            (isChapterActive
+                                              ? ' home-hub__subject-bubble--active'
+                                              : '')
+                                          }
+                                          onClick={() => handleChapterBubbleClick(
+                                            chapter,
+                                            selectedSubject._id,
+                                          )}
+                                          aria-pressed={isChapterActive}
+                                        >
+                                          <span
+                                            className={
+                                              'home-hub__subject-bubble-dot'
+                                            }
+                                            aria-hidden
+                                          />
+                                          {chapter.ChapterTitle}
+                                        </button>
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                              ) : (
+                                <p
+                                  className={
+                                    'home-hub__chapters-empty animate-fade-in'
+                                  }
+                                >
+                                  Este libro aún no tiene capítulos disponibles.
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <div
+                              className="home-hub__subjects-list"
+                              role="list"
+                              aria-label="Tus materias"
+                            >
+                              {subscribedSubjects.map((subject) => {
+                                const subjectId = String(subject._id)
+                                return (
+                                  <button
+                                    key={subjectId}
+                                    type="button"
+                                    role="listitem"
+                                    className="home-hub__subject-bubble"
+                                    onClick={() => handleSubjectBubbleClick(
+                                      subject,
+                                    )}
+                                  >
+                                    <span
+                                      className="home-hub__subject-bubble-dot"
+                                      aria-hidden
+                                    />
+                                    {subject.title}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="home-hub__subjects-empty">
+                          Tus materias aparecerán aquí cuando te inscribas
+                          en un plan.
+                        </p>
+                      )}
+                    </div>
+                    {canUseAiTutor
+                      && showSubheading
+                      && !showQuestions
+                      && !isExamRoute
+                      && subscribedSubjects.length === 0 && (
                       <button
                         type="button"
                         className="home-hub__prompt animate-fade-in"
@@ -497,26 +1077,17 @@ function HomeScreen() {
                         {predefinedQuestion}
                       </button>
                     )}
-                    {canUseAiTutor && (showQuestions || isExamRoute) && (
+                    {canUseAiTutor && showQuestions && !isExamRoute ? (
                       <div className="home-suggested animate-fade-in">
                         <p className="home-suggested__label">
                           Preguntas sugeridas
                         </p>
-                        <ul className="home-suggested__list" role="list">
-                          {SUGGESTED_QUESTIONS.map((q, i) => (
-                            <li key={i}>
-                              <button
-                                type="button"
-                                className="home-suggested__item"
-                                onClick={() => handleQuestionClick(q)}
-                              >
-                                {q}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
+                        <p className="home-hub__questions-empty">
+                          Selecciona una materia y un capítulo para ver
+                          preguntas sugeridas.
+                        </p>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -555,8 +1126,20 @@ function HomeScreen() {
                       <button 
                         className="voice-button"
                         onClick={() => playAudio(message.content, index)}
-                        aria-label={loadingAudio === index ? "Loading audio" : playingAudio === index ? "Stop audio" : "Play audio"}
-                        title={loadingAudio === index ? "Loading audio..." : playingAudio === index ? "Stop audio" : "Play audio"}
+                        aria-label={
+                          loadingAudio === index
+                            ? 'Cargando audio'
+                            : playingAudio === index
+                              ? 'Detener audio'
+                              : 'Reproducir audio'
+                        }
+                        title={
+                          loadingAudio === index
+                            ? 'Cargando audio...'
+                            : playingAudio === index
+                              ? 'Detener audio'
+                              : 'Reproducir audio'
+                        }
                         disabled={
                           !canUseAiTutor
                           || (loadingAudio !== null && loadingAudio !== index)
@@ -609,20 +1192,22 @@ function HomeScreen() {
                 className="input-field"
                 name="home-chat-message"
                 placeholder={
-                  canUseAiTutor
-                    ? 'Ask anything…'
-                    : 'Subscribe to use the AI tutor'
+                  !canUseAiTutor
+                    ? 'Suscríbete para usar el tutor de IA'
+                    : effectivePineconeIndexId
+                      ? 'Pregunta lo que quieras…'
+                      : 'Selecciona un capítulo para preguntar'
                 }
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                aria-label="Your question"
+                aria-label="Tu pregunta"
                 disabled={inputDisabled}
               />
               <button
                 type="submit"
                 className="send-button send-button--home"
                 disabled={inputDisabled || !question.trim()}
-                aria-label="Send message"
+                aria-label="Enviar mensaje"
               >
                 <SendButtonIcon />
               </button>

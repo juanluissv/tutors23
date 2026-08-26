@@ -78,6 +78,123 @@ const bookLessonsSchema = mongoose.Schema({
 		required: false,
 	},
 	content: [lessonElementSchema],
+	suggestedQuestions: [
+		{
+			question: {
+				type: String,
+				required: false,
+			},
+			answer: {
+				type: String,
+				required: false,
+			},
+		},
+	],
+	videoScript: {
+		title: {
+			type: String,
+			required: false,
+		},
+		language: {
+			type: String,
+			required: false,
+			default: 'es',
+		},
+		fullNarration: {
+			type: String,
+			required: false,
+		},
+		estimatedDurationSeconds: {
+			type: Number,
+			required: false,
+		},
+		audioDurationSeconds: {
+			type: Number,
+			required: false,
+		},
+		scenes: [
+			{
+				sceneNumber: { type: Number, required: false },
+				type: {
+					type: String,
+					required: false,
+					enum: [
+						'title',
+						'objectives',
+						'concept',
+						'definition',
+						'chart',
+						'map',
+						'bulletList',
+						'regional',
+						'summary',
+						'outro',
+					],
+				},
+				title: { type: String, required: false },
+				subtitle: { type: String, required: false },
+				narration: { type: String, required: false },
+				durationSeconds: { type: Number, required: false },
+				visualNotes: { type: String, required: false },
+				imagePrompt: { type: String, required: false },
+				illustrationFileId: { type: String, required: false },
+				illustrationGeneratedAt: { type: Date, required: false },
+				term: { type: String, required: false },
+				definition: { type: String, required: false },
+				items: [
+					{
+						title: { type: String, required: false },
+						body: { type: String, required: false },
+						label: { type: String, required: false },
+						value: { type: String, required: false },
+					},
+				],
+				data: [
+					{
+						label: { type: String, required: false },
+						value: { type: Number, required: false },
+					},
+				],
+				regions: [{ type: String, required: false }],
+			},
+		],
+		generatedAt: {
+			type: Date,
+			required: false,
+		},
+		audioGeneratedAt: {
+			type: Date,
+			required: false,
+		},
+		audioVoice: {
+			type: String,
+			required: false,
+		},
+		illustrationsGeneratedAt: {
+			type: Date,
+			required: false,
+		},
+		videoRenderedAt: {
+			type: Date,
+			required: false,
+		},
+	},
+	videoScriptAudioFileId: {
+		type: String,
+		required: false,
+	},
+	creatomateRenderId: {
+		type: String,
+		required: false,
+	},
+	creatomateRenderStatus: {
+		type: String,
+		required: false,
+	},
+	creatomateRenderRequestedAt: {
+		type: Date,
+		required: false,
+	},
 	dateCreated: {
 		type: Date,
 		required: false,

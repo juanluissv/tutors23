@@ -62,6 +62,7 @@ function teacherProfileResponse (teacherDoc) {
         lastname: teacherDoc.lastname,
         email: teacherDoc.email,
         image: teacherDoc.image,
+        schoolType: teacherDoc.schoolType,
         subjects: teacherDoc.subjects ?? [],
     };
 }
@@ -144,6 +145,7 @@ const authTeacher = asyncHandler(async (req, res) => {
             lastname: fresh.lastname,
             email: fresh.email,
             image: fresh.image,
+            schoolType: fresh.schoolType,
             subjects: fresh.subjects ?? [],
         })
     } else {
@@ -228,6 +230,7 @@ const registerTeacher = asyncHandler(async (req, res) => {
         lastname: saved.lastname,
         email: saved.email,
         image: saved.image,
+        schoolType: saved.schoolType,
         subjects: saved.subjects ?? [],
         accountCompleted: completedPendingAccount,
     });

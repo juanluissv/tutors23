@@ -1,0 +1,391 @@
+{
+  "output_format": "mp4",
+  "gif_quality": "best",
+  "gif_compression": 100,
+  "width": 1280,
+  "height": 720,
+  "duration": 9.5,
+  "snapshot_time": 3.18,
+  "emoji_style": "apple",
+  "fill_color": "#ffffff",
+  "elements": [
+    {
+      "id": "77deac6b-1966-48a2-b76a-2edcb6ab440d",
+      "type": "composition",
+      "track": 1,
+      "time": 0,
+      "duration": 4.5,
+      "fill_color": "rgba(243,207,86,1)",
+      "clip": true,
+      "elements": [
+        {
+          "id": "5f85a87e-44f8-41f3-80f5-98335b518295",
+          "type": "composition",
+          "track": 1,
+          "time": 0,
+          "duration": 1,
+          "width": "200%",
+          "height": "355.5556%",
+          "elements": [
+            {
+              "id": "4b002ca0-6fb0-4621-9b47-2a49cdcfc1d7",
+              "type": "shape",
+              "track": 1,
+              "time": 0,
+              "width": [
+                {
+                  "time": 0,
+                  "value": "0 vmax"
+                },
+                {
+                  "time": 0.5,
+                  "value": "200 vmax"
+                }
+              ],
+              "height": [
+                {
+                  "time": 0,
+                  "value": "0 vmax"
+                },
+                {
+                  "time": 0.5,
+                  "value": "200 vmax"
+                }
+              ],
+              "x_anchor": "50%",
+              "y_anchor": "50%",
+              "path": "M 50 0 C 77.61 0 100 22.39 100 50 C 100 77.61 77.61 100 50 100 C 22.39 100 0 77.61 0 50 C 0 22.39 22.39 0 50 0 Z",
+              "fill_color": "rgba(60,174,163,1)"
+            },
+            {
+              "id": "46634e88-ac9d-48bd-8c97-f205a016682c",
+              "type": "shape",
+              "track": 2,
+              "time": 0.162,
+              "width": [
+                {
+                  "time": 0,
+                  "value": "0 vmax"
+                },
+                {
+                  "time": 0.5,
+                  "value": "200 vmax"
+                }
+              ],
+              "height": [
+                {
+                  "time": 0,
+                  "value": "0 vmax"
+                },
+                {
+                  "time": 0.5,
+                  "value": "200 vmax"
+                }
+              ],
+              "x_anchor": "50%",
+              "y_anchor": "50%",
+              "path": "M 50 0 C 77.61 0 100 22.39 100 50 C 100 77.61 77.61 100 50 100 C 22.39 100 0 77.61 0 50 C 0 22.39 22.39 0 50 0 Z",
+              "fill_color": "rgba(253,75,75,1)"
+            },
+            {
+              "id": "04d090ed-fcc8-4ea6-92b9-f06122f8fdb0",
+              "type": "shape",
+              "track": 3,
+              "time": 0.345,
+              "width": [
+                {
+                  "time": 0,
+                  "value": "0 vmax"
+                },
+                {
+                  "time": 0.5,
+                  "value": "200 vmax"
+                }
+              ],
+              "height": [
+                {
+                  "time": 0,
+                  "value": "0 vmax"
+                },
+                {
+                  "time": 0.5,
+                  "value": "200 vmax"
+                }
+              ],
+              "x_anchor": "50%",
+              "y_anchor": "50%",
+              "path": "M 50 0 C 77.61 0 100 22.39 100 50 C 100 77.61 77.61 100 50 100 C 22.39 100 0 77.61 0 50 C 0 22.39 22.39 0 50 0 Z",
+              "fill_color": "rgba(243,207,86,1)"
+            }
+          ]
+        },
+        {
+          "id": "7871adaf-fdb2-4306-a6ff-5bc8f13554d7",
+          "name": "Name",
+          "type": "text",
+          "track": 2,
+          "time": 0.5,
+          "y": "42.3833%",
+          "width": "79.7626%",
+          "height": "18.3576%",
+          "x_alignment": "50%",
+          "y_alignment": "50%",
+          "text": "Hi {{name}}!",
+          "font_family": "Inter",
+          "font_weight": "800",
+          "text_wrap": false,
+          "dynamic": true,
+          "animations": [
+            {
+              "time": -0.015,
+              "duration": 0.363,
+              "easing": "quadratic-out",
+              "type": "scale",
+              "track": 0,
+              "x_anchor": "50%",
+              "y_anchor": "50%"
+            },
+            {
+              "easing": "linear",
+              "type": "scale",
+              "fade": false,
+              "scope": "element",
+              "end_scale": "70%",
+              "start_scale": "100%"
+            }
+          ]
+        },
+        {
+          "id": "e00f01bb-9758-4fb7-9a7d-10a078ab9285",
+          "type": "text",
+          "track": 3,
+          "time": 1,
+          "y": "59.0863%",
+          "width": "95.2506%",
+          "height": "15.7805%",
+          "x_alignment": "50%",
+          "y_alignment": "50%",
+          "text": "Welcome to Creatomate 🎉",
+          "font_family": "Inter",
+          "font_weight": "700",
+          "line_height": "100%",
+          "fill_color": "rgba(0,0,0,1)",
+          "color_filter": "hue",
+          "animations": [
+            {
+              "easing": "linear",
+              "type": "scale",
+              "fade": false,
+              "scope": "element",
+              "start_scale": "70%"
+            },
+            {
+              "time": 0,
+              "duration": 1,
+              "easing": "back-in-out",
+              "type": "text-scale",
+              "split": "letter",
+              "track": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c0e06b2a-bfc6-408d-b80e-625c5e8872b2",
+      "type": "composition",
+      "track": 1,
+      "time": 3.5,
+      "duration": 4,
+      "fill_color": "rgba(73,128,241,1)",
+      "clip": true,
+      "animations": [
+        {
+          "time": 0,
+          "duration": 1,
+          "transition": true,
+          "type": "circular-wipe"
+        }
+      ],
+      "elements": [
+        {
+          "id": "8000fb1a-0a2e-4498-8577-ddd9f0be3738",
+          "type": "text",
+          "track": 1,
+          "time": 0.5,
+          "width": "79.7626%",
+          "height": "37.8471%",
+          "x_alignment": "50%",
+          "y_alignment": "50%",
+          "text": "Let your video automation journey begin today. 🚀",
+          "font_family": "Inter",
+          "font_weight": "700",
+          "line_height": "100%",
+          "fill_color": "#ffffff",
+          "animations": [
+            {
+              "easing": "linear",
+              "type": "scale",
+              "fade": false,
+              "scope": "element",
+              "start_scale": "70%"
+            },
+            {
+              "time": 0,
+              "duration": 1,
+              "easing": "back-in-out",
+              "type": "text-scale",
+              "split": "letter",
+              "track": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "73b19f55-5fb9-44cb-8516-73447eb877a9",
+      "type": "composition",
+      "track": 1,
+      "time": 6.5,
+      "fill_color": "#ffffff",
+      "clip": true,
+      "animations": [
+        {
+          "time": 0,
+          "duration": 1,
+          "transition": true,
+          "type": "circular-wipe"
+        }
+      ],
+      "elements": [
+        {
+          "id": "be1cb8f4-0158-46ca-95bf-79a29fca4573",
+          "type": "composition",
+          "track": 1,
+          "time": 0,
+          "x": "50.6724%",
+          "width": "55.1818%",
+          "height": "38.8635%",
+          "x_scale": "80%",
+          "y_scale": "80%",
+          "elements": [
+            {
+              "id": "f0300e65-44f9-4a81-bc8b-fab689cea75f",
+              "type": "composition",
+              "track": 1,
+              "time": 0,
+              "x": [
+                {
+                  "time": 1.3,
+                  "easing": "cubic-out",
+                  "value": "48.0817%"
+                },
+                {
+                  "time": 2.3,
+                  "easing": "cubic-out",
+                  "value": "4.947%"
+                }
+              ],
+              "width": "39.6161%",
+              "aspect_ratio": 1,
+              "animations": [
+                {
+                  "time": 0,
+                  "duration": 1,
+                  "easing": "quadratic-out",
+                  "type": "spin",
+                  "rotation": "360°"
+                },
+                {
+                  "time": 0,
+                  "duration": 1,
+                  "easing": "quadratic-out",
+                  "type": "scale",
+                  "x_anchor": "50%",
+                  "y_anchor": "50%"
+                }
+              ],
+              "elements": [
+                {
+                  "id": "62d3907e-dbe4-4b58-84e9-d273e1bfa7dc",
+                  "type": "shape",
+                  "track": 1,
+                  "x": "56.0021%",
+                  "y": "78.4937%",
+                  "width": "87.5625%",
+                  "height": "43.1375%",
+                  "x_anchor": "50%",
+                  "y_anchor": "50%",
+                  "path": "M 24.749 27.9436 C 29.8977 36.9458 36.5073 42.0071 43.4023 42.0071 C 56.4502 42.0071 67.4518 24.2538 70.8732 0 L 100 0 C 96.1646 56.4957 72.2865 100 43.4023 100 C 26.7 100 10.8446 85.1637 0 59.4417 L 24.749 27.9436 Z",
+                  "fill_color": "#ee5253"
+                },
+                {
+                  "id": "827c837c-4db8-40e1-aca3-72c8296df723",
+                  "type": "shape",
+                  "track": 2,
+                  "x": "56.0125%",
+                  "y": "21.6396%",
+                  "width": "87.5833%",
+                  "height": "43.2792%",
+                  "x_anchor": "50%",
+                  "y_anchor": "50%",
+                  "path": "M 0 40.4255 L 24.7431 71.8205 C 29.8906 62.8382 36.4986 57.803 43.392 57.803 C 56.4986 57.803 67.5404 75.6523 70.9039 100 L 100 100 C 96.2417 43.5352 72.3311 0 43.392 0 C 26.6936 0 10.8421 14.7877 0 40.4255 Z",
+                  "fill_color": "#4980f1"
+                },
+                {
+                  "id": "45847a2a-9f37-49a7-869c-896b4eac9768",
+                  "type": "shape",
+                  "track": 3,
+                  "x": "23.8125%",
+                  "y": "50.0312%",
+                  "width": "47.2333%",
+                  "height": "59.2208%",
+                  "x_anchor": "50%",
+                  "y_anchor": "50%",
+                  "path": "M 100 49.9965 L 0 0 L 0 100 L 100 49.9965 Z",
+                  "fill_color": "#f1c40f"
+                }
+              ]
+            },
+            {
+              "id": "68c5e489-0218-40b7-9dae-27ece27f01b3",
+              "type": "text",
+              "track": 2,
+              "time": 1.3,
+              "x": [
+                {
+                  "time": 0,
+                  "easing": "cubic-out",
+                  "value": "115.9607%"
+                },
+                {
+                  "time": 1,
+                  "easing": "cubic-out",
+                  "value": "72.8261%"
+                }
+              ],
+              "width": "79.1962%",
+              "height": "47.9648%",
+              "y_alignment": "50%",
+              "text": "Creatomate",
+              "font_family": "Inter",
+              "font_weight": "600",
+              "letter_spacing": "-31%",
+              "fill_color": "rgba(0,0,0,1)",
+              "clip": true,
+              "animations": [
+                {
+                  "time": 0,
+                  "duration": 1,
+                  "easing": "cubic-out",
+                  "type": "slide",
+                  "scope": "element"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

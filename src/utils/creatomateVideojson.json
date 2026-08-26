@@ -1,0 +1,2889 @@
+{
+  "id": "f62989d2-6e23-416f-8630-f5ab936c916f",
+  "status": "succeeded",
+  "url": "https://f002.backblazeb2.com/file/creatomate-c8xg3hsxdu/f62989d2-6e23-416f-8630-f5ab936c916f.mp4",
+  "output_format": "mp4",
+  "render_scale": 1,
+  "width": 1280,
+  "height": 720,
+  "frame_rate": 60,
+  "duration": 248.9,
+  "file_size": 19527797,
+  "source": {
+    "width": 1280,
+    "height": 720,
+    "duration": 248.9,
+    "elements": [
+      {
+        "time": 0,
+        "type": "audio",
+        "track": 2,
+        "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-video-audio-unidad-1-semana-1-1a0fcaae22310c5b.mp3",
+        "duration": 248.9
+      },
+      {
+        "clip": true,
+        "time": 0,
+        "type": "composition",
+        "track": 1,
+        "duration": 6.14,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#38bdf8"
+          },
+          {
+            "x": "88%",
+            "y": "8%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "55%",
+            "height": "70%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "fill_color": "rgba(56,189,248,0.22)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#38bdf8"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "PORTADA",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "rgba(224,242,254,0.9)",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Unidad 1 · Semana 1",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#ffffff",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-1-illust-unidad-1-semana-1-58fd75643ef6.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 5.9399999999999995,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          },
+          {
+            "x": "50%",
+            "y": "88%",
+            "text": "• Tierra, recursos hídricos y seguridad alimentaria",
+            "time": 0.55,
+            "type": "text",
+            "track": 5,
+            "width": "84%",
+            "height": "14%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.4,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#e0f2fe",
+            "font_family": "Inter",
+            "font_weight": "600",
+            "line_height": "125%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          }
+        ],
+        "fill_color": "#075985"
+      },
+      {
+        "clip": true,
+        "time": 6.14,
+        "type": "composition",
+        "track": 1,
+        "duration": 26.45,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Regiones afectadas por la deforestación en bosques tropicales",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-2-illust-unidad-1-semana-1-512463845162.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 26.25,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 32.589999999999996,
+        "type": "composition",
+        "track": 1,
+        "duration": 10.65,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Objetivos de aprendizaje",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-3-illust-unidad-1-semana-1-5607c6014834.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 10.450000000000001,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 43.239999999999995,
+        "type": "composition",
+        "track": 1,
+        "duration": 30.95,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Importancia de los bosques",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-4-illust-unidad-1-semana-1-ca6cac46b7dc.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 30.75,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 74.19,
+        "type": "composition",
+        "track": 1,
+        "duration": 20.06,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Características de los bosques tropicales",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-5-illust-unidad-1-semana-1-696e877be030.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 19.86,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 94.25,
+        "type": "composition",
+        "track": 1,
+        "duration": 19.3,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Biodiversidad en los bosques tropicales",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-6-illust-unidad-1-semana-1-d5cb94e4d9db.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 19.1,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 113.55,
+        "type": "composition",
+        "track": 1,
+        "duration": 9.52,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Distribución mundial de los bosques",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-7-illust-unidad-1-semana-1-4b6ede7ecc4d.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 9.32,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 123.07,
+        "type": "composition",
+        "track": 1,
+        "duration": 8.02,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#0284c7"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#0284c7"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "DATOS",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Gráfico: Distribución mundial de los bosques por zona climática",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-8-illust-unidad-1-semana-1-5390e1886c3f.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 7.819999999999999,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 131.09,
+        "type": "composition",
+        "track": 1,
+        "duration": 14.04,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Problemáticas de los bosques tropicales",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-9-illust-unidad-1-semana-1-88d467561f85.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 13.84,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 145.13,
+        "type": "composition",
+        "track": 1,
+        "duration": 12.16,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Causas de la deforestación",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-10-illust-unidad-1-semana-1-e1bf5f021b99.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 11.96,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 157.29,
+        "type": "composition",
+        "track": 1,
+        "duration": 13.28,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#0284c7"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#0284c7"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "DATOS",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Gráfico: Impacto de las actividades productivas en la deforestación",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-11-illust-unidad-1-semana-1-2c609f6c2099.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 13.08,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 170.57,
+        "type": "composition",
+        "track": 1,
+        "duration": 12.16,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#0284c7"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#0284c7"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "MAPA",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#0369a1",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Mapa de actividades productivas",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#0c4a6e",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-12-illust-unidad-1-semana-1-808152f64037.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 11.96,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#f4f9fd"
+      },
+      {
+        "clip": true,
+        "time": 182.73,
+        "type": "composition",
+        "track": 1,
+        "duration": 13.66,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CONCEPTO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Región: América del Sur",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-13-illust-unidad-1-semana-1-8c05b581e81d.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 13.46,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 196.39,
+        "type": "composition",
+        "track": 1,
+        "duration": 13.28,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#1d6f76"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#1d6f76"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "REGIONES",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#1d6f76",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Centro de África",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#1b4332",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-14-illust-unidad-1-semana-1-e06c34400e8f.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 13.08,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#f1f8f8"
+      },
+      {
+        "clip": true,
+        "time": 209.67,
+        "type": "composition",
+        "track": 1,
+        "duration": 10.28,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#1d6f76"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#1d6f76"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "REGIONES",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#1d6f76",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Sudeste asiático",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#1b4332",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-15-illust-unidad-1-semana-1-1f5a6aac7c6c.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 10.08,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#f1f8f8"
+      },
+      {
+        "clip": true,
+        "time": 219.95,
+        "type": "composition",
+        "track": 1,
+        "duration": 2.38,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "GLOSARIO",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Glosario",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-16-illust-unidad-1-semana-1-ad83575953d4.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 3.8,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#f8fbf9"
+      },
+      {
+        "clip": true,
+        "time": 222.32999999999998,
+        "type": "composition",
+        "track": 1,
+        "duration": 14.04,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#40916c"
+          },
+          {
+            "x": "50%",
+            "y": "0%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "100%",
+            "height": "28%",
+            "x_anchor": "50%",
+            "y_anchor": "0%",
+            "fill_color": "rgba(241,245,249,0.55)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#40916c"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "RESUMEN",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#2d6a4f",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Resumen",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#245741",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-17-illust-unidad-1-semana-1-6ea59df17b6e.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 13.84,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#ffffff"
+      },
+      {
+        "clip": true,
+        "time": 236.36999999999998,
+        "type": "composition",
+        "track": 1,
+        "duration": 12.53,
+        "elements": [
+          {
+            "x": "0%",
+            "y": "50%",
+            "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 12,
+            "width": "0.7%",
+            "height": "100%",
+            "x_anchor": "0%",
+            "y_anchor": "50%",
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "88%",
+            "y": "8%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0,
+            "type": "shape",
+            "track": 11,
+            "width": "55%",
+            "height": "70%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "fill_color": "rgba(56,189,248,0.22)"
+          },
+          {
+            "x": "8.5%",
+            "y": "9.5%",
+            "path": "M 50 0 C 77 0 100 23 100 50 C 100 77 77 100 50 100 C 23 100 0 77 0 50 C 0 23 23 0 50 0 Z",
+            "time": 0.15,
+            "type": "shape",
+            "track": 1,
+            "width": "1.1%",
+            "height": "1.8%",
+            "x_anchor": "50%",
+            "y_anchor": "50%",
+            "animations": [
+              {
+                "time": 0.1,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#52b788"
+          },
+          {
+            "x": "54%",
+            "y": "9.5%",
+            "text": "CIERRE",
+            "time": 0.2,
+            "type": "text",
+            "track": 2,
+            "width": "78%",
+            "height": "5%",
+            "font_size": "18 px",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0.15,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#95d5b2",
+            "font_family": "Inter",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "0%",
+            "y_alignment": "50%",
+            "letter_spacing": "12%"
+          },
+          {
+            "x": "50%",
+            "y": "18%",
+            "text": "Cierre",
+            "time": 0.25,
+            "type": "text",
+            "track": 3,
+            "width": "84%",
+            "height": "12%",
+            "text_wrap": true,
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "track": 0,
+                "easing": "quadratic-out",
+                "duration": 0.55,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "100%",
+                "start_scale": "96%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.45
+              }
+            ],
+            "fill_color": "#ffffff",
+            "font_family": "Georgia",
+            "font_weight": "700",
+            "line_height": "115%",
+            "x_alignment": "50%",
+            "y_alignment": "50%"
+          },
+          {
+            "y": "48%",
+            "fit": "contain",
+            "time": 0.2,
+            "type": "image",
+            "track": 4,
+            "width": "70%",
+            "height": "54%",
+            "source": "https://bucketeer-f3a53e81-2e13-49e9-82ca-c504e025aced.s3.amazonaws.com/public/books/6a29d978f0980d2359a5a559/chapters/6a3979883d65fb098299e07c-scene-18-illust-unidad-1-semana-1-517e0c31e607.png",
+            "animations": [
+              {
+                "time": 0,
+                "type": "scale",
+                "scope": "element",
+                "easing": "linear",
+                "duration": 12.33,
+                "x_anchor": "50%",
+                "y_anchor": "50%",
+                "end_scale": "106%",
+                "start_scale": "100%"
+              },
+              {
+                "time": 0,
+                "type": "fade",
+                "easing": "quadratic-out",
+                "duration": 0.55
+              }
+            ],
+            "border_radius": "18 px"
+          }
+        ],
+        "animations": [
+          {
+            "time": 0,
+            "type": "fade",
+            "duration": 0.7,
+            "transition": true
+          }
+        ],
+        "fill_color": "#245741"
+      }
+    ],
+    "fill_color": "#f1f5f9",
+    "output_format": "mp4"
+  }
+}

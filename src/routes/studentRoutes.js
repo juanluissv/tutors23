@@ -8,7 +8,7 @@ import {
         updateStudentProfile,
         getMySubjects,
 } from '../controllers/studentController.js';
-import { subscribeStudent } from '../controllers/subscriptionController.js';
+import { subscribeStudent, getAvailableSubscriptionSubjects, selectSubscriptionSubjects } from '../controllers/subscriptionController.js';
 
 const router = express.Router();
 
@@ -21,5 +21,9 @@ router.route('/profile').get(protectStudent, GetStudentProfile);
 router.route('/profile').put(protectStudent, updateStudentProfile);
 router.route('/mysubjects').get(protectStudent, getMySubjects);
 router.route('/subscribe').post(protectStudent, subscribeStudent);
+router.route('/subscriptions/:subscriptionId/available-subjects')
+    .get(protectStudent, getAvailableSubscriptionSubjects);
+router.route('/subscriptions/:subscriptionId/subjects')
+    .put(protectStudent, selectSubscriptionSubjects);
 
 export default router;

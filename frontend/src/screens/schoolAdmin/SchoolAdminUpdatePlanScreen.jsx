@@ -9,7 +9,14 @@ import {
 } from '../../slices/admin/schoolAdminApiSlice'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import PlanSemesterFields from '../../components/PlanSemesterFields'
 import { getGradeLevelLabel, getSubjectGradeLevelNames } from '../../utils/gradeLevel'
+import { getSubjectProgramsLabel } from '../../utils/universityProgram'
+import {
+	resizeSemesterRows,
+	semestersFromPlan,
+	validateSemesterForm,
+} from '../../utils/planSemester'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
@@ -45,6 +52,7 @@ function SchoolAdminUpdatePlanScreen () {
 	const [totalQuestions, setTotalQuestions] = useState('')
 	const [selectedSubjectIds, setSelectedSubjectIds] = useState([])
 	const [isPlanActive, setIsPlanActive] = useState(true)
+	const [semesters, setSemesters] = useState([])
 	const [formReady, setFormReady] = useState(false)
 
 	const {
@@ -74,10 +82,17 @@ function SchoolAdminUpdatePlanScreen () {
 	const subjectsBusy = subjectsLoading || subjectsFetching
 	const isBusy = planLoading || isSaving
 
-	const planGradeLabel = useMemo(
-		() => getGradeLevelLabel(plan?.gradesLevel, 'Not set'),
+	const isUniversityPlan = useMemo(
+		() => Boolean(plan?.program),
 		[plan],
 	)
+
+	const planCohortLabel = useMemo(() => {
+		if (isUniversityPlan) {
+			return getSubjectProgramsLabel(plan?.program, 'Not set')
+		}
+		return getGradeLevelLabel(plan?.gradesLevel, 'Not set')
+	}, [plan, isUniversityPlan])
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -96,12 +111,16 @@ function SchoolAdminUpdatePlanScreen () {
 		setPrice(String(plan.price ?? ''))
 		setTotalQuestions(String(plan.totalQuestions ?? ''))
 		setIsPlanActive(plan.active !== false)
-		const ids = Array.isArray(plan.subjects)
-			? plan.subjects.map((s) =>
-				String(typeof s === 'object' && s?._id ? s._id : s),
-			)
-			: []
+		const isUni = Boolean(plan.program)
+		const ids = isUni
+			? []
+			: Array.isArray(plan.subjects)
+				? plan.subjects.map((s) =>
+					String(typeof s === 'object' && s?._id ? s._id : s),
+				)
+				: []
 		setSelectedSubjectIds(ids)
+		setSemesters(semestersFromPlan(plan))
 		setFormReady(true)
 	}, [plan])
 
@@ -109,6 +128,18 @@ function SchoolAdminUpdatePlanScreen () {
 		const id = String(subjectId)
 		setSelectedSubjectIds((prev) =>
 			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+		)
+	}
+
+	const handleSemesterCountChange = (value) => {
+		setSemesters((prev) => resizeSemesterRows(prev, value))
+	}
+
+	const handleSemesterDateChange = (index, field, value) => {
+		setSemesters((prev) =>
+			prev.map((row, i) =>
+				i === index ? { ...row, [field]: value } : row,
+			),
 		)
 	}
 
@@ -136,8 +167,14 @@ function SchoolAdminUpdatePlanScreen () {
 			return
 		}
 
-		if (selectedSubjectIds.length === 0) {
+		if (!isUniversityPlan && selectedSubjectIds.length === 0) {
 			toast.error('Select at least one subject included in this plan')
+			return
+		}
+
+		const semesterError = validateSemesterForm(semesters)
+		if (semesterError) {
+			toast.error(semesterError)
 			return
 		}
 
@@ -146,8 +183,9 @@ function SchoolAdminUpdatePlanScreen () {
 				id: String(planId),
 				price: priceNum,
 				totalQuestions: totalNum,
-				subjects: selectedSubjectIds,
+				subjects: isUniversityPlan ? [] : selectedSubjectIds,
 				active: isPlanActive,
+				semesters,
 			}).unwrap()
 			toast.success('Plan updated')
 			navigate('/schooladmins/plans', { replace: true })
@@ -257,9 +295,9 @@ function SchoolAdminUpdatePlanScreen () {
 										Edit plan
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										View and update this subscription plan. Change
-										price, question quota, included subjects, or
-										whether the plan is active.
+										{isUniversityPlan
+											? 'View and update this subscription plan. Change price, question quota, or whether the plan is active. Students choose their subjects after subscribing.'
+											: 'View and update this subscription plan. Change price, question quota, included subjects, or whether the plan is active.'}
 										{' '}
 										<Link to='/schooladmins/plans'>
 											Back to plans
@@ -348,21 +386,28 @@ function SchoolAdminUpdatePlanScreen () {
 													setTotalQuestions(e.target.value)}
 											/>
 										</div>
+										<PlanSemesterFields
+											semesters={semesters}
+											disabled={isBusy}
+											idPrefix='schooladmin-update-plan-semester'
+											onCountChange={handleSemesterCountChange}
+											onDateChange={handleSemesterDateChange}
+										/>
 										<div className='login-field'>
 											<span
 												className='login-label'
-												id='schooladmin-update-plan-grade-label'
+												id='schooladmin-update-plan-cohort-label'
 											>
-												Grade level
+												{isUniversityPlan ? 'Program' : 'Grade level'}
 											</span>
 											<div
 												className='plan-grade-level'
 												role='group'
-												aria-labelledby='schooladmin-update-plan-grade-label'
+												aria-labelledby='schooladmin-update-plan-cohort-label'
 											>
 												<span
 													className='plan-grade-level__badge'
-													aria-label={`Plan grade level: ${planGradeLabel}`}
+													aria-label={`Plan ${isUniversityPlan ? 'program' : 'grade level'}: ${planCohortLabel}`}
 												>
 													<span
 														className='plan-grade-level__icon'
@@ -383,7 +428,7 @@ function SchoolAdminUpdatePlanScreen () {
 														</svg>
 													</span>
 													<span className='plan-grade-level__text'>
-														{planGradeLabel}
+														{planCohortLabel}
 													</span>
 												</span>
 												<p className='plan-grade-level__hint'>
@@ -392,98 +437,110 @@ function SchoolAdminUpdatePlanScreen () {
 												</p>
 											</div>
 										</div>
-										<div className='login-field'>
-											<span className='login-label'>
-												Subjects in this plan
-											</span>
-											{subjectsBusy && (
-												<p className='login-card__subtitle login-card__subtitle--wide'>
-													Loading subjects…
+										{isUniversityPlan ? (
+											<div className='login-field'>
+												<p className='school-grades-levels__hint'>
+													Students subscribed to this plan will
+													choose up to {plan.maxSubjects ?? 5}{' '}
+													subjects from this program after
+													payment, and again when a new
+													semester starts.
 												</p>
-											)}
-											{subjectsError && !subjectsBusy && (
-												<div className='login-field'>
+											</div>
+										) : (
+											<div className='login-field'>
+												<span className='login-label'>
+													Subjects in this plan
+												</span>
+												{subjectsBusy && (
 													<p className='login-card__subtitle login-card__subtitle--wide'>
-														Could not load subjects.
+														Loading subjects…
 													</p>
-													<button
-														type='button'
-														className='login-submit'
-														style={{ marginTop: '0.5rem' }}
-														disabled={isBusy}
-														onClick={() => refetchSubjects()}
+												)}
+												{subjectsError && !subjectsBusy && (
+													<div className='login-field'>
+														<p className='login-card__subtitle login-card__subtitle--wide'>
+															Could not load subjects.
+														</p>
+														<button
+															type='button'
+															className='login-submit'
+															style={{ marginTop: '0.5rem' }}
+															disabled={isBusy}
+															onClick={() => refetchSubjects()}
+														>
+															Retry loading subjects
+														</button>
+													</div>
+												)}
+												{!subjectsBusy && subjectsList.length === 0 && (
+													<p className='login-card__subtitle login-card__subtitle--wide'>
+														No subjects yet.{' '}
+														<Link to='/schooladmins/createsubject'>
+															Create a subject
+														</Link>{' '}
+														first.
+													</p>
+												)}
+												{!subjectsBusy && subjectsList.length > 0 && (
+													<div
+														className='login-field login-field--stack'
+														style={{
+															maxHeight: '220px',
+															overflowY: 'auto',
+															marginTop: '0.5rem',
+															padding: '0.5rem 0',
+															borderTop:
+																'1px solid rgba(148,163,184,0.35)',
+															borderBottom:
+																'1px solid rgba(148,163,184,0.35)',
+														}}
+														role='group'
+														aria-label='Subjects included in plan'
 													>
-														Retry loading subjects
-													</button>
-												</div>
-											)}
-											{!subjectsBusy && subjectsList.length === 0 && (
-												<p className='login-card__subtitle login-card__subtitle--wide'>
-													No subjects yet.{' '}
-													<Link to='/schooladmins/createsubject'>
-														Create a subject
-													</Link>{' '}
-													first.
-												</p>
-											)}
-											{!subjectsBusy && subjectsList.length > 0 && (
-												<div
-													className='login-field login-field--stack'
-													style={{
-														maxHeight: '220px',
-														overflowY: 'auto',
-														marginTop: '0.5rem',
-														padding: '0.5rem 0',
-														borderTop:
-															'1px solid rgba(148,163,184,0.35)',
-														borderBottom:
-															'1px solid rgba(148,163,184,0.35)',
-													}}
-													role='group'
-													aria-label='Subjects included in plan'
-												>
-													{subjectsList.map((sub) => {
-														const sid = String(sub._id)
-														const gradeLabel = (() => {
-															const names = getSubjectGradeLevelNames(
-																sub.gradesLevel,
+														{subjectsList.map((sub) => {
+															const sid = String(sub._id)
+															const gradeLabel = (() => {
+																const names = getSubjectGradeLevelNames(
+																	sub.gradesLevel,
+																)
+																return names !== ''
+																	? ` · Grade ${names}`
+																	: ''
+															})()
+															return (
+																<label
+																	key={sid}
+																	className='login-remember'
+																	htmlFor={`schooladmin-update-plan-subject-${sid}`}
+																	style={{
+																		display: 'flex',
+																		alignItems: 'flex-start',
+																		marginBottom: '0.65rem',
+																	}}
+																>
+																	<input
+																		type='checkbox'
+																		id={`schooladmin-update-plan-subject-${sid}`}
+																		className='login-checkbox'
+																		checked={selectedSubjectIds.includes(
+																			sid,
+																		)}
+																		disabled={isBusy}
+																		onChange={() =>
+																			handleToggleSubject(sid)}
+																	/>
+																	<span className='login-remember__text'>
+																		{sub.title}
+																		{gradeLabel}
+																	</span>
+																</label>
 															)
-															return names !== ''
-																? ` · Grade ${names}`
-																: ''
-														})()
-														return (
-															<label
-																key={sid}
-																className='login-remember'
-																htmlFor={`schooladmin-update-plan-subject-${sid}`}
-																style={{
-																	display: 'flex',
-																	alignItems: 'flex-start',
-																	marginBottom: '0.65rem',
-																}}
-															>
-																<input
-																	type='checkbox'
-																	id={`schooladmin-update-plan-subject-${sid}`}
-																	className='login-checkbox'
-																	checked={selectedSubjectIds.includes(
-																		sid,
-																	)}
-																	disabled={isBusy}
-																	onChange={() =>
-																		handleToggleSubject(sid)}
-																/>
-																<span className='login-remember__text'>
-																	{sub.title}
-																	{gradeLabel}
-																</span>
-															</label>
-														)
-													})}
-												</div>
-											)}
-										</div>
+														})}
+													</div>
+												)}
+											</div>
+										)}
 										<div className='login-field login-field--row'>
 											<label
 												className='login-remember'
@@ -512,8 +569,9 @@ function SchoolAdminUpdatePlanScreen () {
 											className='login-submit'
 											disabled={
 												isBusy
-												|| subjectsBusy
-												|| subjectsList.length === 0
+												|| (!isUniversityPlan
+													&& (subjectsBusy
+														|| subjectsList.length === 0))
 											}
 										>
 											{isSaving ? 'Saving…' : 'Save changes'}

@@ -12,7 +12,10 @@ import {
     getQuestionVideoKeyPrefix,
     getPublicBookUrlFromKey,
 } from '../config/s3Client.js'
-import { getStudentActiveSubscription } from './subscriptionController.js'
+import {
+    getStudentActiveSubscription,
+    universitySubscriptionNeedsSubjects,
+} from './subscriptionController.js'
 
 // POST /api/questions/student — enrolled student asks a question
 const createStudentQuestion = asyncHandler(async (req, res) => {
@@ -49,6 +52,12 @@ const createStudentQuestion = asyncHandler(async (req, res) => {
         res.status(403)
         throw new Error(
             'An active subscription is required to ask questions',
+        )
+    }
+    if (universitySubscriptionNeedsSubjects(subscription)) {
+        res.status(403)
+        throw new Error(
+            'Choose your subjects for this semester before asking a question',
         )
     }
 

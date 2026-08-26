@@ -10,6 +10,11 @@ import {
 } from '../../slices/teachers/teacherApiSlice'
 import { SUBJECTS_URL } from '../../constants'
 import { getSubjectGradeLevelNames } from '../../utils/gradeLevel'
+import {
+	getSubjectProgramsLabel,
+	normalizeSubjectPrograms,
+} from '../../utils/universityProgram'
+import { isUniversitySchool } from '../../utils/schoolType'
 import '../../App.css'
 
 const BookUploadGlyph = () => (
@@ -160,9 +165,21 @@ function TeacherEditSubjectScreen () {
 		? bookDisplayName(String(currentSubject.bookId))
 		: ''
 
+	const isUniversity = isUniversitySchool(teacherInfo?.schoolType)
+		|| normalizeSubjectPrograms(currentSubject?.program).length > 0
+		|| currentSubject?.semester != null
+
 	const gradeDisplayLabel = getSubjectGradeLevelNames(
 		currentSubject?.gradesLevel,
 	) || '—'
+	const programDisplayLabel = getSubjectProgramsLabel(
+		currentSubject?.program,
+		'—',
+	)
+	const semesterDisplayLabel = currentSubject?.semester != null
+		&& String(currentSubject.semester).trim() !== ''
+		? String(currentSubject.semester)
+		: '—'
 
 	const openBookHref = hasStoredBook && currentSubject?.bookUrl
 		? String(currentSubject.bookUrl)
@@ -404,10 +421,22 @@ function TeacherEditSubjectScreen () {
 										Edit subject
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Update how this course appears to students.
-										Grade level is set by your school and
-										cannot be changed here. Attach an optional
-										course book — PDF, up to 25 MB.
+										Update how this course appears to
+										students.
+										{isUniversity
+											? (
+												' Program and semester are set '
+												+ 'by your school and cannot '
+												+ 'be changed here.'
+											)
+											: (
+												' Grade level is set by your '
+												+ 'school and cannot be '
+												+ 'changed here.'
+											)}
+										{' '}
+										Attach an optional course book — PDF,
+										up to 25 MB.
 									</p>
 								</div>
 								<form
@@ -435,23 +464,62 @@ function TeacherEditSubjectScreen () {
 											onChange={(e) => setTitle(e.target.value)}
 										/>
 									</div>
-									<div className='login-field'>
-										<label
-											className='login-label'
-											htmlFor='edit-subject-grade'
-										>
-											Grade level
-										</label>
-										<input
-											type='text'
-											id='edit-subject-grade'
-											className='login-input'
-											value={gradeDisplayLabel}
-											readOnly
-											tabIndex={-1}
-											aria-readonly='true'
-										/>
-									</div>
+									{isUniversity ? (
+										<>
+											<div className='login-field'>
+												<label
+													className='login-label'
+													htmlFor='edit-subject-program'
+												>
+													Program
+												</label>
+												<input
+													type='text'
+													id='edit-subject-program'
+													className='login-input'
+													value={programDisplayLabel}
+													readOnly
+													tabIndex={-1}
+													aria-readonly='true'
+												/>
+											</div>
+											<div className='login-field'>
+												<label
+													className='login-label'
+													htmlFor='edit-subject-semester'
+												>
+													Semester
+												</label>
+												<input
+													type='text'
+													id='edit-subject-semester'
+													className='login-input'
+													value={semesterDisplayLabel}
+													readOnly
+													tabIndex={-1}
+													aria-readonly='true'
+												/>
+											</div>
+										</>
+									) : (
+										<div className='login-field'>
+											<label
+												className='login-label'
+												htmlFor='edit-subject-grade'
+											>
+												Grade level
+											</label>
+											<input
+												type='text'
+												id='edit-subject-grade'
+												className='login-input'
+												value={gradeDisplayLabel}
+												readOnly
+												tabIndex={-1}
+												aria-readonly='true'
+											/>
+										</div>
+									)}
 									<div className='login-field'>
 										<label
 											className='login-label'
@@ -579,6 +647,115 @@ function TeacherEditSubjectScreen () {
 												</button>
 											) : null}
 										</div>
+									</div>
+									<div className='subject-book-tools'>
+										<div className='subject-book-tools__header'>
+											<span className='subject-book-tools__eyebrow'>
+												Course book
+											</span>
+											<h3 className='subject-book-tools__title'>
+												Once you have a course book please generate book chapters
+											</h3>
+											<p className='subject-book-tools__desc'>
+												{hasStoredBook
+													? 'Split your PDF into chapters with page ranges for each section.'
+													: 'Save a course book above to unlock chapter splitting.'}
+											</p>
+										</div>
+										{hasStoredBook ? (
+											<Link
+												to={`/teachers/bookchapters/${subjectId}`}
+												className={
+													'subject-book-tools__card '
+													+ 'subject-book-tools__card--chapters'
+												}
+											>
+												<span
+													className='subject-book-tools__icon'
+													aria-hidden
+												>
+													<svg
+														width='22'
+														height='22'
+														viewBox='0 0 24 24'
+														fill='none'
+														stroke='currentColor'
+														strokeWidth='1.75'
+													>
+														<path
+															d='M4 6a2 2 0 012-2h5v16H6a2 2 0 01-2-2V6z'
+															strokeLinejoin='round'
+														/>
+														<path
+															d='M13 4h5a2 2 0 012 2v10a2 2 0 01-2 2h-5V4z'
+															strokeLinejoin='round'
+														/>
+														<path
+															d='M9 8h2M9 12h2M9 16h2'
+															strokeLinecap='round'
+														/>
+													</svg>
+												</span>
+												<span className='subject-book-tools__body'>
+													<span className='subject-book-tools__label'>
+														Generate Book chapters
+													</span>
+													<span className='subject-book-tools__hint'>
+														Define page ranges per chapter
+													</span>
+												</span>
+												<span
+													className='subject-book-tools__arrow'
+													aria-hidden
+												>
+													→
+												</span>
+											</Link>
+										) : (
+											<span
+												className={
+													'subject-book-tools__card '
+													+ 'subject-book-tools__card--chapters '
+													+ 'subject-book-tools__card--disabled'
+												}
+												aria-disabled='true'
+											>
+												<span
+													className='subject-book-tools__icon'
+													aria-hidden
+												>
+													<svg
+														width='22'
+														height='22'
+														viewBox='0 0 24 24'
+														fill='none'
+														stroke='currentColor'
+														strokeWidth='1.75'
+													>
+														<path
+															d='M4 6a2 2 0 012-2h5v16H6a2 2 0 01-2-2V6z'
+															strokeLinejoin='round'
+														/>
+														<path
+															d='M13 4h5a2 2 0 012 2v10a2 2 0 01-2 2h-5V4z'
+															strokeLinejoin='round'
+														/>
+														<path
+															d='M9 8h2M9 12h2M9 16h2'
+															strokeLinecap='round'
+														/>
+													</svg>
+												</span>
+												<span className='subject-book-tools__body'>
+													<span className='subject-book-tools__label'>
+														Generate Book chapters
+													</span>
+													<span className='subject-book-tools__hint'>
+														Requires a saved course book PDF
+													</span>
+												</span>
+											</span>
+										)}
 									</div>
 									<button
 										type='submit'
