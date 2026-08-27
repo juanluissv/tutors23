@@ -124,6 +124,12 @@
     width: 72px;
   }
 
+  .sidebar-slot--closed .sidebar:not(.sidebar-hover-expanded) {
+    width: 72px;
+    min-width: 72px;
+    max-width: 72px;
+  }
+
   .sidebar-slot--open {
     width: 256px;
   }
@@ -141,19 +147,40 @@
   }
 
   .sidebar-closed.sidebar-hover-expanded .nav-button span,
-  .sidebar-closed.sidebar-hover-expanded .sidebar-nav-link__label,
-  .sidebar-closed.sidebar-hover-expanded .sidebar-nav-link__body,
   .sidebar-closed.sidebar-hover-expanded .section-heading,
   .sidebar-closed.sidebar-hover-expanded .sidebar-content > .nav-button-link,
-  .sidebar-closed.sidebar-hover-expanded .navButton22,
-  .sidebar-closed.sidebar-hover-expanded .sidebar-nav-link__label-wrap {
+  .sidebar-closed.sidebar-hover-expanded .navButton22 {
     display: revert !important;
+  }
+
+  .sidebar-closed.sidebar-hover-expanded .sidebar-nav-link__label {
+    display: block !important;
+  }
+
+  .sidebar-closed.sidebar-hover-expanded .sidebar-nav-link__body {
+    display: flex !important;
+  }
+
+  .sidebar-closed.sidebar-hover-expanded .sidebar-nav-link__label-wrap {
+    display: flex !important;
   }
 
   .sidebar-closed.sidebar-hover-expanded .navigation .nav-button-link,
   .sidebar-closed.sidebar-hover-expanded .navigation .sidebar-nav-link {
     justify-content: flex-start;
     padding: 11px 13px;
+  }
+
+  .sidebar-closed.sidebar-hover-expanded .sidebar-valores-hub-row .sidebar-nav-link--valores-hub {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    justify-content: flex-start;
+    padding: 11px 13px;
+  }
+
+  .sidebar-closed.sidebar-hover-expanded .sidebar-valores-hub-block {
+    margin-bottom: 12px;
   }
 
   .sidebar-closed.sidebar-hover-expanded .sidebar-valores-accordion:not([hidden]) {
@@ -409,6 +436,11 @@
   min-width: 0;
 }
 
+.sidebar-nav-link__label-wrap .sidebar-nav-link__label {
+  flex: 1;
+  min-width: 0;
+}
+
 .sidebar-new-answers-badge {
   flex-shrink: 0;
   box-sizing: border-box;
@@ -459,6 +491,10 @@
   margin-bottom: 12px;
 }
 
+.sidebar-valores-hub-block + .sidebar-valores-hub-block {
+  margin-top: 0;
+}
+
 .sidebar-valores-hub-row {
   display: flex;
   align-items: stretch;
@@ -470,6 +506,26 @@
   min-width: 0;
   margin-top: 0;
   margin-bottom: 0;
+}
+
+/* Collapsed rail: hub subject icons must center like primary nav */
+.sidebar-closed .sidebar-valores-hub-row {
+  justify-content: center;
+}
+
+.sidebar-closed .sidebar-valores-hub-row .sidebar-nav-link--valores-hub {
+  flex: none;
+  width: auto;
+  justify-content: center;
+  padding: 10px;
+}
+
+.sidebar-closed .sidebar-valores-hub-block {
+  margin-bottom: 8px;
+}
+
+.sidebar-closed .sidebar-valores-hub-block + .sidebar-valores-hub-block {
+  margin-top: 0;
 }
 
 .sidebar-nav-link--valores-hub .sidebar-nav-link__title,
@@ -8502,7 +8558,7 @@ a.qa-timeline__video {
 
 /* Tablet landscape (1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .sidebar {
+  .sidebar.sidebar-open {
     width: 220px;
   }
 
