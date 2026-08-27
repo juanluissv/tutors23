@@ -11173,6 +11173,14 @@ a.upload-card {
   margin: 0;
 }
 
+.sidebar-valores-weeks--solo {
+  padding: 6px;
+}
+
+.sidebar-valores-weeks--solo .sidebar-valores-week-link {
+  padding-left: 14px;
+}
+
 .sidebar-valores-week-link {
   display: block;
   padding: 8px 10px 8px 38px;

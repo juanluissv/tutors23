@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { VALORES_SECTIONS } from '../screens/9/valores/valoresNavData'
 import { useGetStudentNewAnswersQuery } from '../slices/student/studentAnswersSlice'
 import {
   resolveCurrentSubscription,
@@ -150,13 +149,6 @@ const IconTeacherAnswers = () => (
   </svg>
 );
 
-function getActiveValoresUnit (pathname) {
-  const section = VALORES_SECTIONS.find((s) =>
-    s.weeks.some((w) => w.to === pathname)
-  );
-  return section ? section.unit : null;
-}
-
 const IconSubjects = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sidebar-nav-icon">
     <path d="M4 6h16v12H4V6z" stroke="url(#book-stroke)" strokeWidth="2" strokeLinejoin="round" fill="url(#book-fill)"/>
@@ -208,7 +200,6 @@ function Sidebar ({ isOpen, toggleSidebar }) {
     [studentNewAnswers],
   )
 
-  const [expandedValoresUnit, setExpandedValoresUnit] = useState(1)
   const [isValoresAccordionOpen, setIsValoresAccordionOpen] = useState(true)
   const [isHoverExpanded, setIsHoverExpanded] = useState(false)
 
@@ -237,19 +228,6 @@ function Sidebar ({ isOpen, toggleSidebar }) {
 
   const handleSidebarMouseLeave = () => {
     setIsHoverExpanded(false)
-  }
-
-  useEffect(() => {
-    const active = getActiveValoresUnit(location.pathname)
-    if (active !== null) {
-      setExpandedValoresUnit(active)
-    } else if (location.pathname === '/9/valores') {
-      setExpandedValoresUnit(1)
-    }
-  }, [location.pathname])
-
-  const handleValoresUnitToggle = (unit) => {
-    setExpandedValoresUnit((prev) => (prev === unit ? null : unit))
   }
 
   const handleValoresAccordionToggle = () => {
@@ -442,65 +420,25 @@ function Sidebar ({ isOpen, toggleSidebar }) {
             id="sidebar-valores-accordion"
             role="region"
             aria-labelledby="sidebar-valores-hub-expand"
-            aria-label="Ciudadanía y Valores — unidades y semanas"
+            aria-label="Ciudadanía y Valores — semanas"
             hidden={!isValoresAccordionOpen}
           >
-            {VALORES_SECTIONS.map((section) => (
-              <div key={section.unit} className="sidebar-valores-unit">
-                <button
-                  type="button"
-                  className="sidebar-valores-toggle"
-                  aria-expanded={expandedValoresUnit === section.unit}
-                  aria-controls={`sidebar-valores-panel-${section.unit}`}
-                  id={`sidebar-valores-head-${section.unit}`}
-                  onClick={() => handleValoresUnitToggle(section.unit)}
-                >
-                  <span className="sidebar-valores-unit-badge">
-                    {section.unit}
-                  </span>
-                  <span className="sidebar-valores-unit-label">
-                    {section.label}
-                  </span>
-                  <span className="sidebar-valores-chevron" aria-hidden="true">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </span>
-                </button>
-                {expandedValoresUnit === section.unit && (
-                  <ul
-                    className="sidebar-valores-weeks"
-                    id={`sidebar-valores-panel-${section.unit}`}
-                    role="region"
-                    aria-labelledby={`sidebar-valores-head-${section.unit}`}
+            <div className="sidebar-valores-unit">
+              <ul className="sidebar-valores-weeks sidebar-valores-weeks--solo">
+                <li>
+                  <Link
+                    to="/9/valores/unidad1/semana1"
+                    className={`sidebar-valores-week-link${
+                      location.pathname === '/9/valores/unidad1/semana1'
+                        ? ' sidebar-valores-link-active'
+                        : ''
+                    }`}
                   >
-                    {section.weeks.map((w) => (
-                      <li key={w.to}>
-                        <Link
-                          to={w.to}
-                          className={`sidebar-valores-week-link${
-                            location.pathname === w.to
-                              ? ' sidebar-valores-link-active'
-                              : ''
-                          }`}
-                        >
-                          {w.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
+                    Semana 1
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 

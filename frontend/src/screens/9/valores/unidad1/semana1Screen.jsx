@@ -647,7 +647,7 @@ function Semana1Screen () {
 								className='valores-semana1-exam-btn'
 							>
 							<Link
-								to="/examen"
+								to="/?subjectId=6a29d978f0980d2359a5a559&chapterId=6a3979883d65fb098299e07c&questions=1"
 								className="valores-semana1-exam-btn-link"
 								target="_blank"
 								rel="noopener noreferrer"
