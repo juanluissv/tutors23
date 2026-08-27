@@ -7,6 +7,9 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
+import SuggestedQuestionsPanel, {
+	SparklesIcon,
+} from '../../components/SuggestedQuestionsPanel'
 import { useGetBookLessonByIdQuery } from '../../slices/student/studentApiSlice'
 import { useGetBookLessonByIdForSchoolAdminQuery } from '../../slices/admin/schoolAdminApiSlice'
 import { useGetBookLessonByIdForTeacherQuery } from '../../slices/teachers/teacherApiSlice'
@@ -757,6 +760,8 @@ function StudentLessonPageScreen () {
 	const [videoLoading, setVideoLoading] = useState(true)
 	const [isClassVideoPlaying, setIsClassVideoPlaying] = useState(false)
 	const [questionText, setQuestionText] = useState('')
+	const [isSuggestedPanelOpen, setIsSuggestedPanelOpen] = useState(false)
+	const [expandedQuestionIndex, setExpandedQuestionIndex] = useState(null)
 
 	const contentRef = useRef(null)
 	const classVideoRef = useRef(null)
@@ -850,15 +855,20 @@ function StudentLessonPageScreen () {
 		lesson?.chapterTranscribeFileId || lesson?.chapterTranscribeFileUrl,
 	)
 
-	const hasSuggestedQuestions = Boolean(
-		lesson?.hasSuggestedQuestions
-		|| (
-			Array.isArray(lesson?.suggestedQuestions)
-			&& lesson.suggestedQuestions.some(
-				(item) => String(item?.question ?? '').trim(),
-			)
-		),
-	)
+	const suggestedQuestions = useMemo(() => {
+		const items = Array.isArray(lesson?.suggestedQuestions)
+			? lesson.suggestedQuestions
+			: []
+
+		return items
+			.map((item) => ({
+				question: String(item?.question ?? '').trim(),
+				answer: String(item?.answer ?? '').trim(),
+			}))
+			.filter((item) => item.question)
+	}, [lesson])
+
+	const hasSuggestedQuestions = suggestedQuestions.length > 0
 
 	const chatIndexId = lesson?.chatIndexId
 		? String(lesson.chatIndexId).trim()
@@ -1215,6 +1225,53 @@ function StudentLessonPageScreen () {
 		params.set('questions', '1')
 		window.open(`/?${params.toString()}`, '_blank', 'noopener,noreferrer')
 	}
+
+	const handleCloseSuggestedPanel = useCallback(() => {
+		setIsSuggestedPanelOpen(false)
+		setExpandedQuestionIndex(null)
+	}, [])
+
+	const handleOpenSuggestedPanel = () => {
+		if (classVideoRef.current) {
+			classVideoRef.current.pause()
+			setIsClassVideoPlaying(false)
+		}
+
+		setExpandedQuestionIndex(null)
+		setIsSuggestedPanelOpen(true)
+	}
+
+	const handleToggleSuggestedQuestion = (index) => {
+		setExpandedQuestionIndex((current) => (
+			current === index ? null : index
+		))
+	}
+
+	useEffect(() => {
+		if (!isSuggestedPanelOpen) {
+			return undefined
+		}
+
+		const scroller = contentRef.current
+		const previousOverflow = scroller?.style.overflow || ''
+		if (scroller) {
+			scroller.style.overflow = 'hidden'
+		}
+
+		const handleKeyDown = (event) => {
+			if (event.key === 'Escape') {
+				handleCloseSuggestedPanel()
+			}
+		}
+
+		window.addEventListener('keydown', handleKeyDown)
+		return () => {
+			if (scroller) {
+				scroller.style.overflow = previousOverflow
+			}
+			window.removeEventListener('keydown', handleKeyDown)
+		}
+	}, [isSuggestedPanelOpen, handleCloseSuggestedPanel])
 
 	// Split the flat element stream into "paper sheets", starting a new sheet
 	// at every learning phase (Exploración, Profundización, …) just like the
@@ -1576,42 +1633,79 @@ function StudentLessonPageScreen () {
 						</button>
 					</div>
 					{hasSuggestedQuestions && !isStaffView ? (
-						<button
-							type='button'
-							className='lesson-doc-suggested-link'
-							onClick={handleOpenSuggestedQuestions}
-						>
-							<span
-								className='lesson-doc-suggested-link__icon'
-								aria-hidden
+						<>
+							{/*
+							<button
+								type='button'
+								className='lesson-doc-suggested-link'
+								onClick={handleOpenSuggestedQuestions}
 							>
-								<svg
-									width='18'
-									height='18'
-									viewBox='0 0 24 24'
-									fill='none'
-									stroke='currentColor'
-									strokeWidth='2'
-									strokeLinecap='round'
-									strokeLinejoin='round'
+								<span
+									className='lesson-doc-suggested-link__icon'
+									aria-hidden
 								>
-									<circle cx='12' cy='12' r='10' />
-									<path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3' />
-									<line x1='12' y1='17' x2='12.01' y2='17' />
-								</svg>
-							</span>
-							<span className='lesson-doc-suggested-link__text'>
-								Examen de práctica
-							</span>
-							<span
-								className='lesson-doc-suggested-link__arrow'
-								aria-hidden
+									<svg
+										width='18'
+										height='18'
+										viewBox='0 0 24 24'
+										fill='none'
+										stroke='currentColor'
+										strokeWidth='2'
+										strokeLinecap='round'
+										strokeLinejoin='round'
+									>
+										<circle cx='12' cy='12' r='10' />
+										<path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3' />
+										<line x1='12' y1='17' x2='12.01' y2='17' />
+									</svg>
+								</span>
+								<span className='lesson-doc-suggested-link__text'>
+									Examen de práctica
+								</span>
+								<span
+									className='lesson-doc-suggested-link__arrow'
+									aria-hidden
+								>
+									→
+								</span>
+							</button>
+							*/}
+							<button
+								type='button'
+								className='lesson-doc-suggested-link'
+								onClick={handleOpenSuggestedPanel}
+								aria-haspopup='dialog'
 							>
-								→
-							</span>
-						</button>
+								<span
+									className='lesson-doc-suggested-link__icon'
+									aria-hidden
+								>
+									<SparklesIcon size={16} />
+								</span>
+								<span className='lesson-doc-suggested-link__text'>
+									Examen de práctica
+									
+								</span>
+								<span
+									className='lesson-doc-suggested-link__arrow'
+									aria-hidden
+								>
+									→
+								</span>
+							</button>
+						</>
 					) : null}
 				</div>
+			) : null}
+
+			{isSuggestedPanelOpen && hasSuggestedQuestions ? (
+				<SuggestedQuestionsPanel
+					lessonTitle={unitTheme || mainTitle}
+					questions={suggestedQuestions}
+					expandedIndex={expandedQuestionIndex}
+					onToggle={handleToggleSuggestedQuestion}
+					onClose={handleCloseSuggestedPanel}
+				/>
 			) : null}
 		</>,
 	)

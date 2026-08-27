@@ -1,8 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux'
 import Sidebar from '../../../../components/Sidebar'
 import Header from '../../../../components/Header'
+import SuggestedQuestionsPanel, {
+	SparklesIcon,
+} from '../../../../components/SuggestedQuestionsPanel'
+import { useGetBookLessonByIdQuery } from '../../../../slices/student/studentApiSlice'
 import '../../../../App.css'
+
+const SEMANA1_LESSON_ID = '6a3979882d6dcf3adc9b6ef4'
 
 function Semana1Screen () {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
@@ -12,12 +19,38 @@ function Semana1Screen () {
     const [videoLoading, setVideoLoading] = useState(true);
     const [isClassVideoPlaying, setIsClassVideoPlaying] = useState(false);
     const [questionText, setQuestionText] = useState('');
+    const [isSuggestedPanelOpen, setIsSuggestedPanelOpen] = useState(false);
+    const [expandedQuestionIndex, setExpandedQuestionIndex] = useState(null);
     
     const audioRef = useRef(null);
     const contentRef = useRef(null);
     const classVideoRef = useRef(null);
     const questionTextareaRef = useRef(null);
     const navigate = useNavigate();
+    const { studentInfo } = useSelector((state) => state.authStudent)
+
+    const { data: lesson } = useGetBookLessonByIdQuery(SEMANA1_LESSON_ID, {
+        skip: !studentInfo,
+    })
+
+    const suggestedQuestions = useMemo(() => {
+        const items = Array.isArray(lesson?.suggestedQuestions)
+            ? lesson.suggestedQuestions
+            : []
+
+        return items
+            .map((item) => ({
+                question: String(item?.question ?? '').trim(),
+                answer: String(item?.answer ?? '').trim(),
+            }))
+            .filter((item) => item.question)
+    }, [lesson])
+
+    const hasSuggestedQuestions = suggestedQuestions.length > 0
+
+    const lessonTitle = lesson?.unitTheme
+        || lesson?.mainTitle
+        || 'Los bosques tropicales en el mundo'
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -175,7 +208,59 @@ function Semana1Screen () {
         }
     };
 
+    const handleCloseSuggestedPanel = useCallback(() => {
+        setIsSuggestedPanelOpen(false)
+        setExpandedQuestionIndex(null)
+    }, [])
+
+    const handleOpenSuggestedPanel = () => {
+        if (!hasSuggestedQuestions) {
+            return
+        }
+
+        if (classVideoRef.current) {
+            classVideoRef.current.pause()
+            setIsClassVideoPlaying(false)
+        }
+
+        setExpandedQuestionIndex(null)
+        setIsSuggestedPanelOpen(true)
+    }
+
+    const handleToggleSuggestedQuestion = (index) => {
+        setExpandedQuestionIndex((current) => (
+            current === index ? null : index
+        ))
+    }
+
+    useEffect(() => {
+        if (!isSuggestedPanelOpen) {
+            return undefined
+        }
+
+        const scroller = contentRef.current
+        const previousOverflow = scroller?.style.overflow || ''
+        if (scroller) {
+            scroller.style.overflow = 'hidden'
+        }
+
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                handleCloseSuggestedPanel()
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => {
+            if (scroller) {
+                scroller.style.overflow = previousOverflow
+            }
+            window.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [isSuggestedPanelOpen, handleCloseSuggestedPanel])
+
 	return (
+		<>
 		<div className='chat-app chat-app--valores-semana1'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -643,17 +728,29 @@ function Semana1Screen () {
 							</div>
 
 							<button
-								type="button"
-								className='valores-semana1-exam-btn'
+								type='button'
+								className='lesson-doc-suggested-link valores-semana1-suggested-link'
+								onClick={handleOpenSuggestedPanel}
+								aria-haspopup='dialog'
+								disabled={!hasSuggestedQuestions}
 							>
-							<Link
-								to="/?subjectId=6a29d978f0980d2359a5a559&chapterId=6a3979883d65fb098299e07c&questions=1"
-								className="valores-semana1-exam-btn-link"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								Examen <br /> de práctica
-							</Link>
+								<span
+									className='lesson-doc-suggested-link__icon'
+									aria-hidden
+								>
+									<SparklesIcon size={16} />
+								</span>
+								<span className='lesson-doc-suggested-link__text'>
+									Examen
+									<br />
+									de práctica
+								</span>
+								<span
+									className='lesson-doc-suggested-link__arrow'
+									aria-hidden
+								>
+									→
+								</span>
 							</button>
 						</div>
 						<div className="valores-semana1-feature-wrap">
@@ -676,6 +773,16 @@ function Semana1Screen () {
 				</div>
 			</div>
 		</div>
+		{isSuggestedPanelOpen && hasSuggestedQuestions ? (
+			<SuggestedQuestionsPanel
+				lessonTitle={lessonTitle}
+				questions={suggestedQuestions}
+				expandedIndex={expandedQuestionIndex}
+				onToggle={handleToggleSuggestedQuestion}
+				onClose={handleCloseSuggestedPanel}
+			/>
+		) : null}
+		</>
 	)
 }
 
