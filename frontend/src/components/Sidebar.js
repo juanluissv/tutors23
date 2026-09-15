@@ -961,94 +961,6 @@ function Sidebar ({ isOpen, toggleSidebar }) {
         <div className="sidebar-valores-hub-block">
           <div className="sidebar-valores-hub-row">
             <NavLink
-              to={MATEMATICAS_SEMANA1_PATH}
-              className={({ isActive }) =>
-                `sidebar-nav-link sidebar-nav-link--valores-hub${isActive
-                  ? ' sidebar-nav-link--active sidebar-nav-link--subject'
-                  : ''
-                }`
-              }
-            >
-              <span className="sidebar-nav-link__icon-well" aria-hidden="true">
-                <IconMath />
-              </span>
-              <span className="sidebar-nav-link__body">
-                <span className="sidebar-nav-link__title">
-                  Matematicas
-                </span>
-              </span>
-            </NavLink>
-            {isSidebarExpanded ? (
-            <button
-              type="button"
-              className={`sidebar-valores-hub-expand${
-                isMatematicasAccordionOpen
-                  ? ' sidebar-valores-hub-expand--open'
-                  : ''
-              }`}
-              aria-expanded={isMatematicasAccordionOpen}
-              aria-controls="sidebar-matematicas-accordion"
-              id="sidebar-matematicas-hub-expand"
-              onClick={handleMatematicasAccordionToggle}
-              aria-label={
-                isMatematicasAccordionOpen
-                  ? 'Hide Matemáticas weeks'
-                  : 'Show Matemáticas weeks'
-              }
-              title={
-                isMatematicasAccordionOpen
-                  ? 'Hide weeks'
-                  : 'Show weeks'
-              }
-            >
-              <span className="sidebar-valores-hub-expand__icon" aria-hidden="true">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </span>
-            </button>
-            ) : null}
-          </div>
-
-          <div
-            className="sidebar-valores-accordion"
-            id="sidebar-matematicas-accordion"
-            role="region"
-            aria-labelledby="sidebar-matematicas-hub-expand"
-            aria-label="Matemáticas — semanas"
-            hidden={!isMatematicasAccordionOpen}
-          >
-            <div className="sidebar-valores-unit">
-              <ul className="sidebar-valores-weeks sidebar-valores-weeks--solo">
-                <li>
-                  <Link
-                    to={MATEMATICAS_SEMANA1_PATH}
-                    className={`sidebar-valores-week-link${
-                      location.pathname === MATEMATICAS_SEMANA1_PATH
-                        ? ' sidebar-valores-link-active'
-                        : ''
-                    }`}
-                  >
-                    Semana 1
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="sidebar-valores-hub-block">
-          <div className="sidebar-valores-hub-row">
-            <NavLink
               to={LENGUA_SEMANA1_PATH}
               className={({ isActive }) =>
                 `sidebar-nav-link sidebar-nav-link--valores-hub${isActive
@@ -1122,6 +1034,94 @@ function Sidebar ({ isOpen, toggleSidebar }) {
                     to={LENGUA_SEMANA1_PATH}
                     className={`sidebar-valores-week-link${
                       location.pathname === LENGUA_SEMANA1_PATH
+                        ? ' sidebar-valores-link-active'
+                        : ''
+                    }`}
+                  >
+                    Semana 1
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="sidebar-valores-hub-block">
+          <div className="sidebar-valores-hub-row">
+            <NavLink
+              to={MATEMATICAS_SEMANA1_PATH}
+              className={({ isActive }) =>
+                `sidebar-nav-link sidebar-nav-link--valores-hub${isActive
+                  ? ' sidebar-nav-link--active sidebar-nav-link--subject'
+                  : ''
+                }`
+              }
+            >
+              <span className="sidebar-nav-link__icon-well" aria-hidden="true">
+                <IconMath />
+              </span>
+              <span className="sidebar-nav-link__body">
+                <span className="sidebar-nav-link__title">
+                  Matematicas
+                </span>
+              </span>
+            </NavLink>
+            {isSidebarExpanded ? (
+            <button
+              type="button"
+              className={`sidebar-valores-hub-expand${
+                isMatematicasAccordionOpen
+                  ? ' sidebar-valores-hub-expand--open'
+                  : ''
+              }`}
+              aria-expanded={isMatematicasAccordionOpen}
+              aria-controls="sidebar-matematicas-accordion"
+              id="sidebar-matematicas-hub-expand"
+              onClick={handleMatematicasAccordionToggle}
+              aria-label={
+                isMatematicasAccordionOpen
+                  ? 'Hide Matemáticas weeks'
+                  : 'Show Matemáticas weeks'
+              }
+              title={
+                isMatematicasAccordionOpen
+                  ? 'Hide weeks'
+                  : 'Show weeks'
+              }
+            >
+              <span className="sidebar-valores-hub-expand__icon" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </span>
+            </button>
+            ) : null}
+          </div>
+
+          <div
+            className="sidebar-valores-accordion"
+            id="sidebar-matematicas-accordion"
+            role="region"
+            aria-labelledby="sidebar-matematicas-hub-expand"
+            aria-label="Matemáticas — semanas"
+            hidden={!isMatematicasAccordionOpen}
+          >
+            <div className="sidebar-valores-unit">
+              <ul className="sidebar-valores-weeks sidebar-valores-weeks--solo">
+                <li>
+                  <Link
+                    to={MATEMATICAS_SEMANA1_PATH}
+                    className={`sidebar-valores-week-link${
+                      location.pathname === MATEMATICAS_SEMANA1_PATH
                         ? ' sidebar-valores-link-active'
                         : ''
                     }`}
