@@ -6,6 +6,7 @@ import { useRegisterTeacherMutation } from '../../slices/teachers/teacherApiSlic
 import { setTeacherCredentials } from '../../slices/teachers/authTeacherSlice'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 function TeacherRegisterScreen () {
@@ -31,27 +32,27 @@ function TeacherRegisterScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (firstname === '') {
-			toast.error('Please enter your first name')
+			toast.error('Por favor ingresa tu nombre')
 			return
 		}
 		if (lastname === '') {
-			toast.error('Please enter your last name')
+			toast.error('Por favor ingresa tu apellido')
 			return
 		}
 		if (email === '') {
-			toast.error('Please enter email')
+			toast.error('Por favor ingresa tu correo electrónico')
 			return
 		}
 		if (password === '') {
-			toast.error('Please enter password')
+			toast.error('Por favor ingresa tu contraseña')
 			return
 		}
 		if (confirmPassword === '') {
-			toast.error('Please enter confirm password')
+			toast.error('Por favor confirma tu contraseña')
 			return
 		}
 		if (password !== confirmPassword) {
-			toast.error('Passwords do not match')
+			toast.error('Las contraseñas no coinciden')
 			return
 		}
 		try {
@@ -64,12 +65,17 @@ function TeacherRegisterScreen () {
 			dispatch(setTeacherCredentials({ ...res }))
 			toast.success(
 				res?.accountCompleted
-					? 'Account completed — welcome to Ask to Learn'
-					: 'Registration successful',
+					? 'Cuenta completada — bienvenido a Ask to Learn'
+					: 'Cuenta creada',
 			)
 			navigate(redirect.startsWith('/teachers') ? redirect : '/teachers/newquestions')
 		} catch (err) {
-			toast.error(err?.data?.message || err?.error?.message)
+			toast.error(
+				localizeApiError(
+					err,
+					'No se pudo crear la cuenta. Intenta de nuevo.',
+				),
+			)
 		}
 	}
 
@@ -86,15 +92,18 @@ function TeacherRegisterScreen () {
 						toggleSidebar={handleToggleSidebar}
 					/>
 					<div className='content-area content-area--login'>
-						<div className='center-content2 login-screen'>
+						<div className='center-content2 login-screen login-screen--register login-screen--offset-10'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
-									<h1 className='login-card__title'>Create a teacher account</h1>
+									<h1 className='login-card__title'>
+										Crea una cuenta de profesor
+									</h1>
 									<p className='login-card__subtitle'>
-										Sign up to start teaching on Ask to Learn.
-										If your school admin already added you,
-										use the same email to finish your account.
+										Regístrate para empezar a enseñar en
+										Ask to Learn. Si tu administrador
+										escolar ya te agregó, usa el mismo
+										correo para completar tu cuenta.
 									</p>
 								</div>
 								<form
@@ -108,14 +117,14 @@ function TeacherRegisterScreen () {
 											className='login-label'
 											htmlFor='teacher-register-firstname'
 										>
-											First name
+											Nombre
 										</label>
 										<input
 											type='text'
 											id='teacher-register-firstname'
 											name='firstname'
 											className='login-input'
-											placeholder='Jane'
+											placeholder='Nombre'
 											autoComplete='given-name'
 											onChange={(e) => setFirstname(e.target.value)}
 											value={firstname}
@@ -127,14 +136,14 @@ function TeacherRegisterScreen () {
 											className='login-label'
 											htmlFor='teacher-register-lastname'
 										>
-											Last name
+											Apellido
 										</label>
 										<input
 											type='text'
 											id='teacher-register-lastname'
 											name='lastname'
 											className='login-input'
-											placeholder='Doe'
+											placeholder='Apellido'
 											autoComplete='family-name'
 											onChange={(e) => setLastname(e.target.value)}
 											value={lastname}
@@ -146,14 +155,14 @@ function TeacherRegisterScreen () {
 											className='login-label'
 											htmlFor='teacher-register-email'
 										>
-											Email
+											Correo electrónico
 										</label>
 										<input
 											type='email'
 											id='teacher-register-email'
 											name='email'
 											className='login-input'
-											placeholder='you@example.com'
+											placeholder='tucorreo@ejemplo.com'
 											autoComplete='email'
 											onChange={(e) => setEmail(e.target.value)}
 											value={email}
@@ -165,7 +174,7 @@ function TeacherRegisterScreen () {
 											className='login-label'
 											htmlFor='teacher-register-password'
 										>
-											Password
+											Contraseña
 										</label>
 										<input
 											type='password'
@@ -184,7 +193,7 @@ function TeacherRegisterScreen () {
 											className='login-label'
 											htmlFor='teacher-register-confirm-password'
 										>
-											Confirm password
+											Confirmar contraseña
 										</label>
 										<input
 											type='password'
@@ -205,16 +214,18 @@ function TeacherRegisterScreen () {
 										className='login-submit'
 										disabled={isLoading}
 									>
-										{isLoading ? 'Creating account…' : 'Sign up'}
+										{isLoading
+											? 'Creando cuenta…'
+											: 'Registrarse'}
 									</button>
 								</form>
 								<p className='login-card__footer'>
-									Already have an account?{' '}
+									¿Ya tienes una cuenta?{' '}
 									<Link
 										to='/teachers/login'
 										className='login-card__link'
 									>
-										Sign in
+										Iniciar sesión
 									</Link>
 								</p>
 							</div>

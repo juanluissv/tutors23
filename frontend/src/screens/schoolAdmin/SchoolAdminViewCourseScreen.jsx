@@ -93,7 +93,12 @@ function SchoolAdminViewCourseScreen () {
 	const [selectedLessonKey, setSelectedLessonKey] = useState(null)
 
 	const sectionGroups = useMemo(
-		() => (course ? buildSectionGroups(course) : []),
+		() => (course
+			? buildSectionGroups(course, {
+				section: 'Sección',
+				otherLessons: 'Otras lecciones',
+			})
+			: []),
 		[course],
 	)
 
@@ -107,6 +112,10 @@ function SchoolAdminViewCourseScreen () {
 	}, [sectionGroups])
 
 	const firstLessonKey = firstLesson ? lessonKey(firstLesson) : null
+	const lessonCount = sectionGroups.reduce(
+		(n, group) => n + group.lessons.length,
+		0,
+	)
 
 	useEffect(() => {
 		if (!schoolAdminInfo) {
@@ -187,12 +196,12 @@ function SchoolAdminViewCourseScreen () {
 						<div className='center-content2 course-preview'>
 							{!courseIdOk && (
 								<p className='course-preview__alert'>
-									Invalid course link.
+									Enlace de curso no válido.
 								</p>
 							)}
 							{courseIdOk && isLoading && (
 								<p className='course-preview__muted'>
-									Loading course…
+									Cargando curso…
 								</p>
 							)}
 							{courseIdOk && isError && (
@@ -200,14 +209,14 @@ function SchoolAdminViewCourseScreen () {
 									<p>
 										{error?.data?.message
 											|| error?.error
-											|| 'Could not load this course.'}
+											|| 'No pudimos cargar este curso.'}
 									</p>
 									<button
 										type='button'
 										className='course-preview__btn course-preview__btn--ghost'
 										onClick={() => refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -217,7 +226,7 @@ function SchoolAdminViewCourseScreen () {
 										<div>
 											<div className='course-preview__title-row'>
 												<p className='course-preview__eyebrow'>
-													Course viewer
+													Visor del curso
 												</p>
 												<span
 													className={
@@ -228,8 +237,8 @@ function SchoolAdminViewCourseScreen () {
 													}
 												>
 													{isCoursePublished
-														? 'Published'
-														: 'Draft'}
+														? 'Publicado'
+														: 'Borrador'}
 												</span>
 											</div>
 											<h1 className='course-preview__course-title'>
@@ -246,7 +255,7 @@ function SchoolAdminViewCourseScreen () {
 												to={backToCoursesPath}
 												className='course-preview__btn course-preview__btn--ghost'
 											>
-												Back to courses
+												Volver a los cursos
 											</Link>
 										</div>
 									</header>
@@ -264,25 +273,27 @@ function SchoolAdminViewCourseScreen () {
 															preload='metadata'
 															src={selectedLesson.videoUrl}
 														>
-															Your browser does not support
-															video playback.
+															Tu navegador no admite la
+															reproducción de video.
 														</video>
 													) : (
 														<div className='course-preview__video-placeholder'>
 															{selectedLesson
 																? (
 																	<p>
-																		Video URL is not
-																		available. Check S3
-																		configuration or
-																		public base URL.
+																		La URL del video no
+																		está disponible.
+																		Revisa la
+																		configuración de S3
+																		o la URL pública
+																		base.
 																	</p>
 																)
 																: (
 																	<p>
-																		Select a lesson
-																		from the outline
-																		to watch it.
+																		Selecciona una
+																		lección del temario
+																		para verla.
 																	</p>
 																)}
 														</div>
@@ -291,7 +302,7 @@ function SchoolAdminViewCourseScreen () {
 												<div className='course-preview__lesson-meta'>
 													<h2 className='course-preview__lesson-title'>
 														{selectedLesson?.title
-															|| 'No lesson selected'}
+															|| 'Ninguna lección seleccionada'}
 													</h2>
 													{selectedLesson?.description && (
 														<p className='course-preview__lesson-body'>
@@ -304,22 +315,23 @@ function SchoolAdminViewCourseScreen () {
 
 										<aside
 											className='course-preview__sidebar'
-											aria-label='Course outline'
+											aria-label='Temario del curso'
 										>
 											<div className='course-preview__sidebar-head'>
-												<h2>Outline</h2>
+												<h2>Temario</h2>
 												<p>
-													{sectionGroups.reduce(
-														(n, group) => n + group.lessons.length,
-														0,
-													)}{' '}
-													lessons
+													{lessonCount}{' '}
+													{lessonCount === 1
+														? 'lección'
+														: 'lecciones'}
 												</p>
 											</div>
 											{sectionGroups.length === 0 && (
 												<p className='course-preview__muted'>
-													No sections yet. Teachers can add
-													sections and lessons from their portal.
+													Aún no hay secciones. Los
+													profesores pueden agregar
+													secciones y lecciones desde su
+													portal.
 												</p>
 											)}
 											<ul className='course-preview__accordion'>
@@ -355,8 +367,8 @@ function SchoolAdminViewCourseScreen () {
 																	{group.lessons.length
 																		=== 0 && (
 																		<li className='course-preview__empty-section'>
-																			No lessons in
-																			this section
+																			No hay lecciones
+																			en esta sección
 																		</li>
 																	)}
 																	{group.lessons.map(
@@ -387,7 +399,7 @@ function SchoolAdminViewCourseScreen () {
 																						<PlayGlyph />
 																						<span className='course-preview__lesson-name'>
 																							{lesson.title
-																								|| 'Untitled lesson'}
+																								|| 'Lección sin título'}
 																						</span>
 																					</button>
 																				</li>

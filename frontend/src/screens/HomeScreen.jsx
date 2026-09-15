@@ -71,6 +71,76 @@ function resolveChapterChatIndexId (chapter, subjectId) {
   return String(subjectId)
 }
 
+function bookDisplayName (bookId) {
+  if (!bookId || typeof bookId !== 'string') {
+    return ''
+  }
+  const trimmed = bookId.trim()
+  const parts = trimmed.split('/')
+  const last = parts[parts.length - 1]
+  return last && last.length > 0 ? last : trimmed
+}
+
+function stripPdfExtension (name) {
+  const trimmed = String(name ?? '').trim()
+  if (!trimmed) {
+    return trimmed
+  }
+  return trimmed.replace(/\.pdf$/i, '')
+}
+
+function documentDisplayName (doc) {
+  if (doc?.fileName) {
+    return stripPdfExtension(String(doc.fileName))
+  }
+  if (doc?.label) {
+    return stripPdfExtension(String(doc.label))
+  }
+  if (doc?.fileId) {
+    return stripPdfExtension(bookDisplayName(String(doc.fileId)))
+  }
+  return 'Document'
+}
+
+function getDocumentKey (doc) {
+  if (doc?._id) {
+    return String(doc._id)
+  }
+  if (doc?.fileId) {
+    return String(doc.fileId)
+  }
+  return ''
+}
+
+function getSubjectDocuments (subject) {
+  if (Array.isArray(subject?.documents) && subject.documents.length > 0) {
+    return subject.documents
+  }
+  if (subject?.bookId && String(subject.bookId).trim() !== '') {
+    return [{
+      _id: null,
+      fileId: String(subject.bookId).trim(),
+      fileName: bookDisplayName(String(subject.bookId)),
+      fileUrl: subject.bookUrl,
+    }]
+  }
+  return []
+}
+
+function chapterBelongsToDocument (
+  chapter,
+  documentKey,
+  requiresSourceDocument,
+) {
+  if (!requiresSourceDocument) {
+    return true
+  }
+  if (!documentKey) {
+    return false
+  }
+  return String(chapter.sourceDocumentId || '') === String(documentKey)
+}
+
 function getSubjectChapters (subject, mySubjectsById) {
   const subjectId = String(subject?._id ?? '')
   const fullSubject = mySubjectsById.get(subjectId) || subject
@@ -88,6 +158,41 @@ function getSubjectChapters (subject, mySubjectsById) {
       }
       return 0
     })
+}
+
+function getDocumentChapters (
+  subject,
+  documentKey,
+  mySubjectsById,
+) {
+  const subjectId = String(subject?._id ?? '')
+  const fullSubject = mySubjectsById.get(subjectId) || subject
+  const documents = getSubjectDocuments(fullSubject)
+  const requiresSourceDocument = documents.length > 1
+  const allChapters = getSubjectChapters(subject, mySubjectsById)
+
+  return allChapters.filter((chapter) => chapterBelongsToDocument(
+    chapter,
+    documentKey,
+    requiresSourceDocument,
+  ))
+}
+
+function resolveChapterDocumentId (chapter, subject, mySubjectsById) {
+  const subjectId = String(subject?._id ?? '')
+  const fullSubject = mySubjectsById.get(subjectId) || subject
+  const documents = getSubjectDocuments(fullSubject)
+  const sourceDocumentId = String(chapter?.sourceDocumentId ?? '').trim()
+
+  if (sourceDocumentId) {
+    return sourceDocumentId
+  }
+
+  if (documents.length === 1) {
+    return getDocumentKey(documents[0])
+  }
+
+  return null
 }
 
 function isChapterBubbleActive (routeId, chapter, subjectId) {
@@ -251,6 +356,7 @@ function HomeScreen() {
   ])
 
   const [selectedSubjectId, setSelectedSubjectId] = useState(null)
+  const [selectedDocumentId, setSelectedDocumentId] = useState(null)
   const [selectedChapter, setSelectedChapter] = useState(null)
 
   const selectedSubject = useMemo(() => {
@@ -265,13 +371,38 @@ function HomeScreen() {
     )
   }, [selectedSubjectId, subscribedSubjects])
 
-  const selectedSubjectChapters = useMemo(() => {
+  const selectedSubjectDocuments = useMemo(() => {
     if (!selectedSubject) {
       return []
     }
 
-    return getSubjectChapters(selectedSubject, mySubjectsById)
+    const fullSubject = (
+      mySubjectsById.get(String(selectedSubject._id)) || selectedSubject
+    )
+    return getSubjectDocuments(fullSubject)
   }, [selectedSubject, mySubjectsById])
+
+  const selectedDocument = useMemo(() => {
+    if (!selectedDocumentId) {
+      return null
+    }
+
+    return selectedSubjectDocuments.find(
+      (doc) => getDocumentKey(doc) === String(selectedDocumentId),
+    ) || null
+  }, [selectedDocumentId, selectedSubjectDocuments])
+
+  const selectedDocumentChapters = useMemo(() => {
+    if (!selectedSubject || !selectedDocumentId) {
+      return []
+    }
+
+    return getDocumentChapters(
+      selectedSubject,
+      selectedDocumentId,
+      mySubjectsById,
+    )
+  }, [selectedSubject, selectedDocumentId, mySubjectsById])
 
   const activePineconeIndexId = useMemo(() => {
     const routeIndexId = String(id ?? '').trim()
@@ -542,6 +673,14 @@ function HomeScreen() {
         for (const chapter of chapters) {
           if (isChapterBubbleActive(id, chapter, subjectId)) {
             setSelectedSubjectId(subjectId)
+            const documentId = resolveChapterDocumentId(
+              chapter,
+              subject,
+              mySubjectsById,
+            )
+            if (documentId) {
+              setSelectedDocumentId(documentId)
+            }
             return
           }
         }
@@ -577,6 +716,14 @@ function HomeScreen() {
       }
 
       setSelectedSubjectId(subjectIdParam)
+      const documentId = resolveChapterDocumentId(
+        chapter,
+        subject,
+        mySubjectsById,
+      )
+      if (documentId) {
+        setSelectedDocumentId(documentId)
+      }
       setSelectedChapter({
         chapter,
         subjectId: subjectIdParam,
@@ -665,16 +812,33 @@ function HomeScreen() {
 
       const subjectId = String(subject._id)
       setSelectedChapter(null)
+      setSelectedDocumentId(null)
       setSelectedSubjectId(subjectId)
     }
 
     const handleBackToSubjects = () => {
       setSelectedSubjectId(null)
+      setSelectedDocumentId(null)
+      setSelectedChapter(null)
+    }
+
+    const handleBackToDocuments = () => {
+      setSelectedDocumentId(null)
       setSelectedChapter(null)
     }
 
     const handleBackToChapters = () => {
       setSelectedChapter(null)
+    }
+
+    const handleDocumentBubbleClick = (doc) => {
+      if (!canUseAiTutor) {
+        toast.error(aiTutorBlockReason)
+        return
+      }
+
+      setSelectedChapter(null)
+      setSelectedDocumentId(getDocumentKey(doc))
     }
 
     const handleChapterBubbleClick = (chapter, subjectId) => {
@@ -866,12 +1030,16 @@ function HomeScreen() {
                                 onClick={
                                   selectedChapter
                                     ? handleBackToChapters
-                                    : handleBackToSubjects
+                                    : selectedDocumentId
+                                      ? handleBackToDocuments
+                                      : handleBackToSubjects
                                 }
                               >
                                 {selectedChapter
                                   ? '← Volver a capítulos'
-                                  : '← Volver a materias'}
+                                  : selectedDocumentId
+                                    ? '← Volver a documentos'
+                                    : '← Volver a materias'}
                               </button>
                               {selectedChapter ? (
                                 <div
@@ -958,7 +1126,91 @@ function HomeScreen() {
                                     </p>
                                   )}
                                 </div>
-                              ) : selectedSubjectChapters.length > 0 ? (
+                              ) : selectedDocumentId ? (
+                                selectedDocumentChapters.length > 0 ? (
+                                  <div
+                                    className={
+                                      'home-hub__chapters ' +
+                                      'home-hub__chapters--solo animate-fade-in'
+                                    }
+                                  >
+                                    <p className="home-hub__chapters-label">
+                                      Capítulos de{' '}
+                                      {selectedDocument
+                                        ? documentDisplayName(selectedDocument)
+                                        : selectedSubject.title}
+                                    </p>
+                                    <div
+                                      className="home-hub__chapters-list"
+                                      role="list"
+                                      aria-label={
+                                        `Capítulos de ${
+                                          selectedDocument
+                                            ? documentDisplayName(
+                                              selectedDocument,
+                                            )
+                                            : selectedSubject.title
+                                        }`
+                                      }
+                                    >
+                                      {selectedDocumentChapters.map(
+                                        (chapter) => {
+                                          const chapterKey = String(
+                                            chapter._id
+                                            || chapter.ChapterNumber
+                                            || chapter.ChapterTitle,
+                                          )
+                                          const isChapterActive = (
+                                            isChapterBubbleActive(
+                                              id,
+                                              chapter,
+                                              selectedSubject._id,
+                                            )
+                                          )
+                                          return (
+                                            <button
+                                              key={chapterKey}
+                                              type="button"
+                                              role="listitem"
+                                              className={
+                                                'home-hub__subject-bubble ' +
+                                                'home-hub__subject-bubble--chapter' +
+                                                (isChapterActive
+                                                  ? ' home-hub__subject-bubble--active'
+                                                  : '')
+                                              }
+                                              onClick={() => (
+                                                handleChapterBubbleClick(
+                                                  chapter,
+                                                  selectedSubject._id,
+                                                )
+                                              )}
+                                              aria-pressed={isChapterActive}
+                                            >
+                                              <span
+                                                className={
+                                                  'home-hub__subject-bubble-dot'
+                                                }
+                                                aria-hidden
+                                              />
+                                              {chapter.ChapterTitle}
+                                            </button>
+                                          )
+                                        },
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p
+                                    className={
+                                      'home-hub__chapters-empty animate-fade-in'
+                                    }
+                                  >
+                                    Este documento aún no tiene capítulos
+                                    disponibles.
+                                  </p>
+                                )
+                              ) : selectedSubjectDocuments.length > 0 ? (
                                 <div
                                   className={
                                     'home-hub__chapters ' +
@@ -966,45 +1218,34 @@ function HomeScreen() {
                                   }
                                 >
                                   <p className="home-hub__chapters-label">
-                                    Capítulos de {selectedSubject.title}
+                                    Documentos de {selectedSubject.title}
                                   </p>
                                   <div
-                                    className="home-hub__chapters-list"
+                                    className="home-hub__subjects-list"
                                     role="list"
                                     aria-label={
-                                      `Capítulos de ${selectedSubject.title}`
+                                      `Documentos de ${selectedSubject.title}`
                                     }
                                   >
-                                    {selectedSubjectChapters.map((chapter) => {
-                                      const chapterKey = String(
-                                        chapter._id
-                                        || chapter.ChapterNumber
-                                        || chapter.ChapterTitle,
-                                      )
-                                      const isChapterActive = (
-                                        isChapterBubbleActive(
-                                          id,
-                                          chapter,
-                                          selectedSubject._id,
-                                        )
-                                      )
+                                    {selectedSubjectDocuments.map((doc) => {
+                                      const docKey = getDocumentKey(doc)
+                                      const chapterCount = getDocumentChapters(
+                                        selectedSubject,
+                                        docKey,
+                                        mySubjectsById,
+                                      ).length
                                       return (
                                         <button
-                                          key={chapterKey}
+                                          key={docKey}
                                           type="button"
                                           role="listitem"
                                           className={
                                             'home-hub__subject-bubble ' +
-                                            'home-hub__subject-bubble--chapter' +
-                                            (isChapterActive
-                                              ? ' home-hub__subject-bubble--active'
-                                              : '')
+                                            'home-hub__subject-bubble--document'
                                           }
-                                          onClick={() => handleChapterBubbleClick(
-                                            chapter,
-                                            selectedSubject._id,
+                                          onClick={() => handleDocumentBubbleClick(
+                                            doc,
                                           )}
-                                          aria-pressed={isChapterActive}
                                         >
                                           <span
                                             className={
@@ -1012,7 +1253,25 @@ function HomeScreen() {
                                             }
                                             aria-hidden
                                           />
-                                          {chapter.ChapterTitle}
+                                          <span
+                                            className={
+                                              'home-hub__document-bubble-text'
+                                            }
+                                          >
+                                            {documentDisplayName(doc)}
+                                          </span>
+                                          {chapterCount > 0 ? (
+                                            <span
+                                              className={
+                                                'home-hub__document-bubble-count'
+                                              }
+                                              aria-label={
+                                                `${chapterCount} capítulos`
+                                              }
+                                            >
+                                              {chapterCount}
+                                            </span>
+                                          ) : null}
                                         </button>
                                       )
                                     })}
@@ -1024,7 +1283,8 @@ function HomeScreen() {
                                     'home-hub__chapters-empty animate-fade-in'
                                   }
                                 >
-                                  Este libro aún no tiene capítulos disponibles.
+                                  Esta materia aún no tiene documentos
+                                  disponibles.
                                 </p>
                               )}
                             </>
@@ -1083,8 +1343,8 @@ function HomeScreen() {
                           Preguntas sugeridas
                         </p>
                         <p className="home-hub__questions-empty">
-                          Selecciona una materia y un capítulo para ver
-                          preguntas sugeridas.
+                          Selecciona una materia, un documento y un capítulo
+                          para ver preguntas sugeridas.
                         </p>
                       </div>
                     ) : null}
@@ -1196,7 +1456,11 @@ function HomeScreen() {
                     ? 'Suscríbete para usar el tutor de IA'
                     : effectivePineconeIndexId
                       ? 'Pregunta lo que quieras…'
-                      : 'Selecciona un capítulo para preguntar'
+                      : selectedDocumentId
+                        ? 'Selecciona un capítulo para preguntar'
+                        : selectedSubjectId
+                          ? 'Selecciona un documento para continuar'
+                          : 'Selecciona una materia para empezar'
                 }
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}

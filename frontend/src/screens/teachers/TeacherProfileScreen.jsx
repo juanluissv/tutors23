@@ -8,6 +8,7 @@ import {
 	useUpdateTeacherProfileMutation,
 } from '../../slices/teachers/teacherApiSlice'
 import { setTeacherCredentials } from '../../slices/teachers/authTeacherSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 function TeacherProfileScreen () {
@@ -59,16 +60,18 @@ function TeacherProfileScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (fn === '' || ln === '') {
-			toast.error('First and last name are required')
+			toast.error('El nombre y el apellido son obligatorios')
 			return
 		}
 		if (newPassword !== '' || confirmPassword !== '') {
 			if (newPassword.length < 6) {
-				toast.error('New password must be at least 6 characters')
+				toast.error(
+					'La nueva contraseña debe tener al menos 6 caracteres',
+				)
 				return
 			}
 			if (newPassword !== confirmPassword) {
-				toast.error('Passwords do not match')
+				toast.error('Las contraseñas no coinciden')
 				return
 			}
 		}
@@ -98,9 +101,11 @@ function TeacherProfileScreen () {
 			)
 			setNewPassword('')
 			setConfirmPassword('')
-			toast.success('Profile updated successfully')
+			toast.success('Perfil actualizado correctamente')
 		} catch (err) {
-			toast.error(err?.data?.message || err?.error || 'Update failed')
+			toast.error(
+				localizeApiError(err, 'No se pudo actualizar'),
+			)
 		}
 	}
 
@@ -120,9 +125,9 @@ function TeacherProfileScreen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area content-area--login'>
-						<div className='center-content2 login-screen login-screen--wide'><br /><br /><br />
-							<div className='login-card'><br /><br /><br />
+					<div className='content-area content-area--login content-area--login-scroll'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form login-screen--offset-profile'>
+							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<div className='tp-avatar-wrapper'>
@@ -131,30 +136,33 @@ function TeacherProfileScreen () {
 										</div>
 									</div>
 									<h1 className='login-card__title'>
-										My Profile
+										Mi perfil
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										View and update your account details.
+										Consulta y actualiza los datos de tu
+										cuenta.
 									</p>
 								</div>
 
 								{!teacherInfo && (
 									<p className='login-card__subtitle'>
-										Sign in to manage your profile.
+										Inicia sesión para administrar tu
+										perfil.
 									</p>
 								)}
 
 								{teacherInfo && isLoading && (
 									<p className='login-card__subtitle'>
-										Loading profile…
+										Cargando perfil…
 									</p>
 								)}
 
 								{teacherInfo && isError && (
 									<p className='login-card__subtitle' role='alert'>
-										{error?.data?.message
-											|| error?.error
-											|| 'Could not load profile.'}
+										{localizeApiError(
+											error,
+											'No se pudo cargar el perfil.',
+										)}
 									</p>
 								)}
 
@@ -171,14 +179,14 @@ function TeacherProfileScreen () {
 												className='login-label'
 												htmlFor='profile-first-name'
 											>
-												First name
+												Nombre
 											</label>
 											<input
 												type='text'
 												id='profile-first-name'
 												name='firstname'
 												className='login-input'
-												placeholder='First name'
+												placeholder='Nombre'
 												autoComplete='given-name'
 												value={firstname}
 												disabled={isBusy}
@@ -191,14 +199,14 @@ function TeacherProfileScreen () {
 												className='login-label'
 												htmlFor='profile-last-name'
 											>
-												Last name
+												Apellido
 											</label>
 											<input
 												type='text'
 												id='profile-last-name'
 												name='lastname'
 												className='login-input'
-												placeholder='Last name'
+												placeholder='Apellido'
 												autoComplete='family-name'
 												value={lastname}
 												disabled={isBusy}
@@ -213,14 +221,14 @@ function TeacherProfileScreen () {
 											className='login-label'
 											htmlFor='profile-email'
 										>
-											Email address
+											Correo electrónico
 										</label>
 										<input
 											type='email'
 											id='profile-email'
 											name='email'
 											className='login-input'
-											placeholder='you@school.edu'
+											placeholder='tu@escuela.edu'
 											autoComplete='email'
 											value={email}
 											disabled={isBusy}
@@ -234,7 +242,7 @@ function TeacherProfileScreen () {
 											className='login-label'
 											htmlFor='profile-image'
 										>
-											Profile image URL
+											Enlace de la imagen de perfil
 										</label>
 										<input
 											type='url'
@@ -256,14 +264,16 @@ function TeacherProfileScreen () {
 												className='login-label'
 												htmlFor='profile-new-password'
 											>
-												New password
+												Nueva contraseña
 											</label>
 											<input
 												type='password'
 												id='profile-new-password'
 												name='newPassword'
 												className='login-input'
-												placeholder='Leave blank to keep current'
+												placeholder={
+													'Déjalo en blanco para mantener la actual'
+												}
 												autoComplete='new-password'
 												value={newPassword}
 												disabled={isBusy}
@@ -276,14 +286,14 @@ function TeacherProfileScreen () {
 												className='login-label'
 												htmlFor='profile-confirm-password'
 											>
-												Confirm new password
+												Confirmar nueva contraseña
 											</label>
 											<input
 												type='password'
 												id='profile-confirm-password'
 												name='confirmPassword'
 												className='login-input'
-												placeholder='Confirm'
+												placeholder='Confirmar'
 												autoComplete='new-password'
 												value={confirmPassword}
 												disabled={isBusy}
@@ -298,7 +308,7 @@ function TeacherProfileScreen () {
 									{subjects.length > 0 && (
 										<div className='login-field'>
 											<span className='login-label'>
-												Your subjects
+												Tus materias
 											</span>
 											<ul
 												className='login-card__subtitle'
@@ -310,7 +320,7 @@ function TeacherProfileScreen () {
 												{subjects.map((sub) => (
 													<li key={sub._id}>
 														{sub.title
-															|| 'Untitled subject'}
+															|| 'Materia sin título'}
 													</li>
 												))}
 											</ul>
@@ -322,7 +332,9 @@ function TeacherProfileScreen () {
 										className='login-submit'
 										disabled={isBusy}
 									>
-										{isBusy ? 'Saving…' : 'Save changes'}
+										{isBusy
+											? 'Guardando…'
+											: 'Guardar cambios'}
 									</button>
 								</form>
 								)}

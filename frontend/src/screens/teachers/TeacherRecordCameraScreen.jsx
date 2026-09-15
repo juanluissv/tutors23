@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useUploadTeacherAnswerVideoMutation } from '../../slices/teachers/teacherAnswersSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 const recIconSrc = `${process.env.PUBLIC_URL}/assets/img/rec3.png`
@@ -129,7 +130,7 @@ function TeacherRecordCameraScreen () {
 				setRecordedBlob(normalized)
 			} catch (e) {
 				console.error(e)
-				toast.error('Could not process recording.')
+				toast.error('No se pudo procesar la grabación.')
 				setRecordedBlob(null)
 			}
 			setshowVideo(true)
@@ -141,7 +142,7 @@ function TeacherRecordCameraScreen () {
 
 	const handleSaveVideo = async () => {
 		if (!recordedBlob || !id) {
-			toast.error('No recording to save.')
+			toast.error('No hay grabación para guardar.')
 			return
 		}
 		try {
@@ -150,12 +151,12 @@ function TeacherRecordCameraScreen () {
 				videoBlob: recordedBlob,
 				teacherId,
 			}).unwrap()
-			toast.success('Video saved')
+			toast.success('Video guardado')
 			setRecordedBlob(null)
 			navigate('/teachers/newquestions')
 		} catch (err) {
 			toast.error(
-				err?.data?.message || err?.error || 'Upload failed',
+				localizeApiError(err, 'No se pudo subir el video'),
 			)
 		}
 	}
@@ -186,15 +187,16 @@ function TeacherRecordCameraScreen () {
 									/>
 									<header className='student-camera__header'>
 										<h1 className='student-camera__title'>
-											Record your answer (camera)
+											Graba tu respuesta (cámara)
 										</h1>
 										<p className='student-camera__subtitle'>
-											When you continue, your browser will ask for
-											camera (and microphone) permission. Allow it
-											so we can capture your response.
+											Al continuar, el navegador te
+											pedirá permiso para la cámara (y
+											el micrófono). Acéptalo para
+											capturar tu respuesta.
 										</p>
 										<p className='student-camera__meta'>
-											Maximum length: 5 minutes
+											Duración máxima: 5 minutos
 										</p>
 									</header>
 									<button
@@ -210,7 +212,7 @@ function TeacherRecordCameraScreen () {
 											/>
 										</span>
 										<span className='student-camera__cta-label'>
-											Start recording
+											Empezar a grabar
 										</span>
 									</button>
 								</div>
@@ -231,7 +233,7 @@ function TeacherRecordCameraScreen () {
 													className='student-camera__preview-placeholder'
 													role='status'
 												>
-													Starting camera…
+													Iniciando cámara…
 												</div>
 											)}
 											<div
@@ -240,7 +242,7 @@ function TeacherRecordCameraScreen () {
 												aria-live='polite'
 											>
 												<span className='student-camera__rec-dot' />
-												Recording
+												Grabando
 											</div>
 											{/* <div className='student-camera__timer'>
 												{formatTimeLeft()}
@@ -260,7 +262,7 @@ function TeacherRecordCameraScreen () {
 											/>
 										</span>
 										<span className='student-camera__cta-label'>
-											Stop and finish
+											Detener y terminar
 										</span>
 									</button>
 								</div>
@@ -274,10 +276,11 @@ function TeacherRecordCameraScreen () {
 									/>
 									<header className='student-camera__header student-camera__header--compact'>
 										<h1 className='student-camera__title'>
-											Preview your recording
+											Previsualiza tu grabación
 										</h1>
 										<p className='student-camera__subtitle'>
-											Replay it below, then save or record again.
+											Reprodúcela abajo y luego guarda o
+											graba de nuevo.
 										</p>
 									</header>
 									<div className='student-camera__preview-shell'>
@@ -299,7 +302,7 @@ function TeacherRecordCameraScreen () {
 											reloadDocument
 											className='student-camera__btn student-camera__btn--secondary student-camera__action-link'
 										>
-											Record again
+											Grabar de nuevo
 										</Button>
 										<div className='student-camera__action-link'>
 											<Button
@@ -311,8 +314,8 @@ function TeacherRecordCameraScreen () {
 												onClick={() => void handleSaveVideo()}
 											>
 												{isUploading
-													? 'Saving…'
-													: 'Save video'}
+													? 'Guardando…'
+													: 'Guardar video'}
 											</Button>
 										</div>
 									</div>

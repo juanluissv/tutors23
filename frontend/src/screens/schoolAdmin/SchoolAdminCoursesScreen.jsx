@@ -99,11 +99,11 @@ function SchoolAdminCoursesScreen () {
 						<div className='content-area'>
 							<div className='teacher-subjects-page'>
 								<p className='teacher-subjects-page__subtitle'>
-									Invalid subject link.
+									Enlace de materia no válido.
 								</p>
 								<p className='teacher-subjects-page__subtitle'>
 									<Link to='/schooladmins/mysubjects'>
-										Back to my subjects
+										Volver a mis materias
 									</Link>
 								</p>
 							</div>
@@ -115,8 +115,8 @@ function SchoolAdminCoursesScreen () {
 	}
 
 	const pageTitle = subjectTitle
-		? `Courses · ${subjectTitle}`
-		: 'Courses'
+		? `Cursos · ${subjectTitle}`
+		: 'Cursos'
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
@@ -134,16 +134,18 @@ function SchoolAdminCoursesScreen () {
 						<TeacherCoursesGrid
 							pageTitle={pageTitle}
 							pageSubtitle={
-								'All courses for this subject. Teachers create ' +
-								'and manage course content from their account.'
+								'Todos los cursos de esta materia. Los '
+								+ 'profesores crean y administran el '
+								+ 'contenido desde su cuenta.'
 							}
 							backLink={{
 								to: '/schooladmins/mysubjects',
-								label: '← Back to my subjects',
+								label: '← Volver a mis materias',
 							}}
 							emptyMessage={
-								'No courses yet for this subject. Assigned ' +
-								'teachers can create courses from their portal.'
+								'Aún no hay cursos para esta materia. Los '
+								+ 'profesores asignados pueden crear cursos '
+								+ 'desde su portal.'
 							}
 							courses={courses}
 							isLoading={isLoading}
@@ -155,7 +157,7 @@ function SchoolAdminCoursesScreen () {
 										to={`/schooladmins/courses/${String(course._id)}/preview`}
 										className='teacher-subject-card__btn'
 									>
-										Watch course
+										Ver curso
 									</Link>
 								</div>
 							)}

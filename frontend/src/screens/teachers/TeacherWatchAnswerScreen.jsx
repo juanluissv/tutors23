@@ -14,6 +14,7 @@ import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetTeacherAnswerByIdQuery } from '../../slices/teachers/teacherAnswersSlice'
 import { ANSWERS_URL } from '../../constants'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 const SUBJECT_THEME_CYCLE = ['sky', 'teal', 'indigo']
@@ -42,10 +43,10 @@ function isLikelyMongoId (value) {
 
 function studentDisplayName (student) {
 	if (!student || typeof student !== 'object') {
-		return 'Student'
+		return 'Estudiante'
 	}
 	const parts = [student.firstname, student.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Student'
+	return parts.length > 0 ? parts.join(' ') : 'Estudiante'
 }
 
 function formatAnswerDate (value) {
@@ -56,7 +57,7 @@ function formatAnswerDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return ''
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
@@ -155,7 +156,7 @@ function TeacherWatchAnswerScreen () {
 	const subjectTitle =
 		answer?.subject && typeof answer.subject === 'object'
 			? answer.subject.title
-			: 'Subject'
+			: 'Materia'
 	const subjectColor = answer
 		? subjectThemeForAnswerId(answer._id)
 		: 'sky'
@@ -171,7 +172,7 @@ function TeacherWatchAnswerScreen () {
 				return String(qt).trim()
 			}
 		}
-		return 'Your answer'
+		return 'Tu respuesta'
 	}, [answer])
 
 	const questionIdForLinks = useMemo(() => {
@@ -191,6 +192,7 @@ function TeacherWatchAnswerScreen () {
 	const [duration, setDuration] = useState(0)
 	const videoRef = useRef(null)
 	const videoAreaRef = useRef(null)
+	const progressRef = useRef(null)
 
 	const [volume, setVolume] = useState(1)
 	const [isMuted, setIsMuted] = useState(false)
@@ -236,26 +238,48 @@ function TeacherWatchAnswerScreen () {
 	}, [videoSrc, answerId])
 
 	useEffect(() => {
-		const onFsChange = () => {
-			const area = videoAreaRef.current
+		const isVideoFullscreen = (video) => {
+			if (!video) {
+				return false
+			}
 			const doc = document
-			const active = area
-				&& (
-					doc.fullscreenElement === area
-					|| doc.webkitFullscreenElement === area
-				)
-			setIsFullscreen(!!active)
+			return (
+				doc.fullscreenElement === video
+				|| doc.webkitFullscreenElement === video
+				|| video.webkitDisplayingFullscreen === true
+			)
+		}
+		const onFsChange = () => {
+			const v = videoRef.current
+			const active = isVideoFullscreen(v)
+			setIsFullscreen(active)
+			if (v) {
+				v.controls = active
+			}
 		}
 		document.addEventListener('fullscreenchange', onFsChange)
 		document.addEventListener('webkitfullscreenchange', onFsChange)
+		const v = videoRef.current
+		if (v) {
+			v.addEventListener('webkitbeginfullscreen', onFsChange)
+			v.addEventListener('webkitendfullscreen', onFsChange)
+		}
 		return () => {
 			document.removeEventListener('fullscreenchange', onFsChange)
 			document.removeEventListener(
 				'webkitfullscreenchange',
 				onFsChange,
 			)
+			if (v) {
+				v.removeEventListener(
+					'webkitbeginfullscreen',
+					onFsChange,
+				)
+				v.removeEventListener('webkitendfullscreen', onFsChange)
+				v.controls = false
+			}
 		}
-	}, [])
+	}, [videoSrc, answerId])
 
 	useEffect(() => {
 		setIsPlaying(false)
@@ -307,6 +331,76 @@ function TeacherWatchAnswerScreen () {
 		}
 	}
 
+	const seekFromClientX = (clientX) => {
+		const v = videoRef.current
+		const bar = progressRef.current
+		if (!v || !bar || !videoSrc) {
+			return
+		}
+		const dur = v.duration
+		if (!Number.isFinite(dur) || dur <= 0) {
+			return
+		}
+		const rect = bar.getBoundingClientRect()
+		if (rect.width <= 0) {
+			return
+		}
+		const ratio = Math.min(
+			1,
+			Math.max(0, (clientX - rect.left) / rect.width),
+		)
+		const nextTime = ratio * dur
+		v.currentTime = nextTime
+		setCurrentTime(nextTime)
+		setProgressPct(ratio * 100)
+	}
+
+	const handleSeek = (e) => {
+		const v = videoRef.current
+		if (!v || !videoSrc) {
+			return
+		}
+		const dur = v.duration
+		if (!Number.isFinite(dur) || dur <= 0) {
+			return
+		}
+		const ratio = parseFloat(e.target.value)
+		if (!Number.isFinite(ratio)) {
+			return
+		}
+		const nextTime = Math.min(dur, Math.max(0, ratio * dur))
+		v.currentTime = nextTime
+		setCurrentTime(nextTime)
+		setProgressPct((nextTime / dur) * 100)
+	}
+
+	const handleProgressPointerDown = (e) => {
+		if (!videoSrc) {
+			return
+		}
+		if (e.pointerType === 'mouse' && e.button !== 0) {
+			return
+		}
+		e.preventDefault()
+		const bar = progressRef.current
+		if (bar && typeof bar.setPointerCapture === 'function') {
+			bar.setPointerCapture(e.pointerId)
+		}
+		seekFromClientX(e.clientX)
+	}
+
+	const handleProgressPointerMove = (e) => {
+		const bar = progressRef.current
+		if (
+			!bar
+			|| typeof bar.hasPointerCapture !== 'function'
+			|| !bar.hasPointerCapture(e.pointerId)
+		) {
+			return
+		}
+		seekFromClientX(e.clientX)
+	}
+
 	const handleVolumeChange = (e) => {
 		const v = videoRef.current
 		if (!v || !videoSrc) {
@@ -326,23 +420,31 @@ function TeacherWatchAnswerScreen () {
 	}
 
 	const handleFullscreenToggle = () => {
-		const area = videoAreaRef.current
-		if (!area || !videoSrc) {
+		const v = videoRef.current
+		if (!v || !videoSrc) {
 			return
 		}
 		const doc = document
-		const active = doc.fullscreenElement === area
-			|| doc.webkitFullscreenElement === area
+		const active = doc.fullscreenElement === v
+			|| doc.webkitFullscreenElement === v
+			|| v.webkitDisplayingFullscreen === true
 		if (active) {
 			if (doc.exitFullscreen) {
 				void doc.exitFullscreen()
 			} else if (doc.webkitExitFullscreen) {
 				void doc.webkitExitFullscreen()
+			} else if (v.webkitExitFullscreen) {
+				v.webkitExitFullscreen()
 			}
-		} else if (area.requestFullscreen) {
-			void area.requestFullscreen()
-		} else if (area.webkitRequestFullscreen) {
-			void area.webkitRequestFullscreen()
+			return
+		}
+		v.controls = true
+		if (v.requestFullscreen) {
+			void v.requestFullscreen()
+		} else if (v.webkitRequestFullscreen) {
+			void v.webkitRequestFullscreen()
+		} else if (v.webkitEnterFullscreen) {
+			v.webkitEnterFullscreen()
 		}
 	}
 
@@ -350,9 +452,12 @@ function TeacherWatchAnswerScreen () {
 		duration > 0 ? Math.max(0, duration - currentTime) : 0
 	const timeLabel =
 		duration > 0 ? `-${formatPlaybackClock(remaining)}` : '0:00'
+	const seekValue = duration > 0 ? currentTime / duration : 0
 
-	const errorMessage =
-		error?.data?.message || error?.error || 'Could not load this answer.'
+	const errorMessage = localizeApiError(
+		error,
+		'No se pudo cargar esta respuesta.',
+	)
 
 	if (!teacherInfo) {
 		return null
@@ -376,14 +481,15 @@ function TeacherWatchAnswerScreen () {
 								to='/teachers/oldquestions'
 								className='watch-new__back'
 							>
-								&#8592; Q&amp;A history
+								&#8592; Preguntas anteriores
 							</Link> */}
 
 							{!canFetch && (
 								<>
 									<p className='watch-new__description'>
-										Missing or invalid answer link. Open an
-										answer from Q&amp;A history.
+										El enlace de la respuesta falta o no es
+										válido. Abre una respuesta desde
+										preguntas anteriores.
 									</p>
 									<Link
 										to='/teachers/oldquestions'
@@ -393,14 +499,14 @@ function TeacherWatchAnswerScreen () {
 											display: 'inline-block',
 										}}
 									>
-										Go to Q&amp;A history
+										Ir a preguntas anteriores
 									</Link>
 								</>
 							)}
 
 							{canFetch && isLoading && (
 								<p className='watch-new__description'>
-									Loading answer…
+									Cargando respuesta…
 								</p>
 							)}
 
@@ -415,7 +521,7 @@ function TeacherWatchAnswerScreen () {
 										style={{ marginTop: '0.5rem' }}
 										onClick={() => refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -453,18 +559,6 @@ function TeacherWatchAnswerScreen () {
 											role={videoSrc ? 'button' : undefined}
 											tabIndex={videoSrc ? 0 : undefined}
 										>
-											{videoSrc && isFullscreen ? (
-												<button
-													type='button'
-													className='watch-new__fs-exit'
-													onClick={(e) => {
-														e.stopPropagation()
-														handleFullscreenToggle()
-													}}
-												>
-													Exit full screen
-												</button>
-											) : null}
 											<video
 												key={`${answerId}-${videoSrc ? '1' : '0'}`}
 												ref={videoRef}
@@ -476,12 +570,15 @@ function TeacherWatchAnswerScreen () {
 												onLoadedMetadata={
 													handleLoadedMetadata
 												}
+												onDurationChange={
+													handleLoadedMetadata
+												}
 											/>
 											{!videoSrc && (
 												<div className='watch-new__video-placeholder'>
 													<p className='watch-new__description'>
-														No video uploaded for this
-														answer yet.
+														Aún no hay video para esta
+														respuesta.
 													</p>
 													<div className='watch-new__placeholder-lines'>
 														<div className='watch-new__ph-line' />
@@ -491,7 +588,7 @@ function TeacherWatchAnswerScreen () {
 													</div>
 												</div>
 											)}
-											{videoSrc && (
+											{videoSrc && !isFullscreen && (
 												<button
 													type='button'
 													className={
@@ -505,7 +602,9 @@ function TeacherWatchAnswerScreen () {
 														handlePlayToggle()
 													}}
 													aria-label={
-														isPlaying ? 'Pause' : 'Play'
+														isPlaying
+															? 'Pausar'
+															: 'Reproducir'
 													}
 												>
 													<PlayIconLarge />
@@ -513,15 +612,16 @@ function TeacherWatchAnswerScreen () {
 											)}
 										</div>
 
-										{!isFullscreen ? (
-											<div className='watch-new__controls'>
+										<div className='watch-new__controls'>
 												<button
 													type='button'
 													className='watch-new__ctrl-btn'
 													onClick={handlePlayToggle}
 													disabled={!videoSrc}
 													aria-label={
-														isPlaying ? 'Pause' : 'Play'
+														isPlaying
+															? 'Pausar'
+															: 'Reproducir'
 													}
 												>
 													{isPlaying ? (
@@ -535,7 +635,16 @@ function TeacherWatchAnswerScreen () {
 														</svg>
 													)}
 												</button>
-												<div className='watch-new__progress'>
+												<div
+													ref={progressRef}
+													className='watch-new__progress'
+													onPointerDown={
+														handleProgressPointerDown
+													}
+													onPointerMove={
+														handleProgressPointerMove
+													}
+												>
 													<div className='watch-new__progress-bar'>
 														<div
 															className='watch-new__progress-fill'
@@ -544,6 +653,17 @@ function TeacherWatchAnswerScreen () {
 															}}
 														/>
 													</div>
+													<input
+														type='range'
+														className='watch-new__seek'
+														min={0}
+														max={1}
+														step={0.001}
+														value={seekValue}
+														disabled={!videoSrc}
+														onChange={handleSeek}
+														aria-label='Buscar'
+													/>
 												</div>
 												<div className='watch-new__volume-wrap'>
 													<button
@@ -553,8 +673,8 @@ function TeacherWatchAnswerScreen () {
 														disabled={!videoSrc}
 														aria-label={
 															isMuted
-																? 'Unmute'
-																: 'Mute'
+																? 'Activar sonido'
+																: 'Silenciar'
 														}
 													>
 														{isMuted || volume === 0
@@ -570,7 +690,7 @@ function TeacherWatchAnswerScreen () {
 														value={isMuted ? 0 : volume}
 														onChange={handleVolumeChange}
 														disabled={!videoSrc}
-														aria-label='Volume'
+														aria-label='Volumen'
 													/>
 												</div>
 												<button
@@ -578,13 +698,12 @@ function TeacherWatchAnswerScreen () {
 													className='watch-new__ctrl-btn'
 													onClick={handleFullscreenToggle}
 													disabled={!videoSrc}
-													aria-label='Full screen'
+													aria-label='Pantalla completa'
 												>
 													<IconFullscreen />
 												</button>
 												<span className='watch-new__time'>{timeLabel}</span>
 											</div>
-										) : null}
 									</div>
 
 									<div className='watch-new__info'>
@@ -596,11 +715,11 @@ function TeacherWatchAnswerScreen () {
 												&& String(answer.description)
 													.trim() !== ''
 												? answer.description
-												: 'You replied with text '
-													+ 'and/or video above.'}
+												: 'Respondiste con texto '
+													+ 'y/o video arriba.'}
 										</p>
 										<span className='watch-new__meta'>
-											for{' '}
+											de{' '}
 											{studentDisplayName(answer.student)}
 											{formatAnswerDate(
 												answer.dateCreated
@@ -629,7 +748,7 @@ function TeacherWatchAnswerScreen () {
 													display: 'inline-block',
 												}}
 											>
-												View student&apos;s question
+												Ver pregunta del estudiante
 											</Link>
 										)
 										: null} */}
@@ -638,7 +757,7 @@ function TeacherWatchAnswerScreen () {
 										to='/teachers/oldquestions'
 										className='watch-new__answer-btn'
 									>
-										Back to Q&amp;A history
+										Volver a preguntas anteriores
 									</Link> */}
 								</>
 							)}

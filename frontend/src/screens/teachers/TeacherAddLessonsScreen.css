@@ -51,6 +51,7 @@
 	grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
 	gap: clamp(1.25rem, 3vw, 2rem);
 	align-items: stretch;
+	margin-top: -30px;
 }
 
 .course-builder__panel {

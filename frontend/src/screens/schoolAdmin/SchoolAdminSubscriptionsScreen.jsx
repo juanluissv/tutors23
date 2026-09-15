@@ -29,7 +29,7 @@ function formatCurrency (value) {
 		return String(value)
 	}
 	try {
-		return new Intl.NumberFormat(undefined, {
+		return new Intl.NumberFormat('es', {
 			style: 'currency',
 			currency: 'USD',
 			minimumFractionDigits: 0,
@@ -48,7 +48,7 @@ function formatDisplayDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return '—'
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
@@ -87,11 +87,11 @@ function summarizeSubjects (subjects, maxLabels = 4) {
 		)
 		.filter(Boolean)
 	if (titles.length === 0) {
-		return 'No subjects linked'
+		return 'Sin materias vinculadas'
 	}
 	const shown = titles.slice(0, maxLabels)
 	const extra = titles.length - shown.length
-	const suffix = extra > 0 ? ` +${extra} more` : ''
+	const suffix = extra > 0 ? ` +${extra} más` : ''
 	return `${shown.join(' · ')}${suffix}`
 }
 
@@ -99,12 +99,12 @@ function summarizePlanCoverage (plan) {
 	if (plan?.program) {
 		const programName = getSubjectProgramsLabel(
 			plan.program,
-			'this program',
+			'este programa',
 		)
 		const max = Number(plan.maxSubjects) || 5
 		return (
-			`Students choose up to ${max} subjects from ` +
-			`${programName} after subscribing.`
+			`Los estudiantes eligen hasta ${max} materias de ` +
+			`${programName} después de suscribirse.`
 		)
 	}
 	return summarizeSubjects(plan?.subjects)
@@ -112,9 +112,9 @@ function summarizePlanCoverage (plan) {
 
 function planCohortLabel (plan) {
 	if (plan?.program) {
-		return getSubjectProgramsLabel(plan.program, 'Program')
+		return getSubjectProgramsLabel(plan.program, 'Programa')
 	}
-	return getGradeLevelLabel(plan?.gradesLevel, 'All grades')
+	return getGradeLevelLabel(plan?.gradesLevel, 'Todos los grados')
 }
 
 function studentCohortLabel (student, plan) {
@@ -129,15 +129,15 @@ function studentCohortLabel (student, plan) {
 
 function subscriptionStatusLabel (subscription) {
 	if (!subscription) {
-		return { label: 'No subscription', tone: 'muted' }
+		return { label: 'Sin suscripción', tone: 'muted' }
 	}
 	if (subscription.pastDue) {
-		return { label: 'Past due', tone: 'warning' }
+		return { label: 'Vencido', tone: 'warning' }
 	}
 	if (subscription.active) {
-		return { label: 'Active', tone: 'active' }
+		return { label: 'Activo', tone: 'active' }
 	}
-	return { label: 'Inactive', tone: 'muted' }
+	return { label: 'Inactivo', tone: 'muted' }
 }
 
 function usagePercent (subscription) {
@@ -214,12 +214,12 @@ function SchoolAdminSubscriptionsScreen () {
 						<div className='content-area'>
 							<div className='plan-subscriptions-page'>
 								<div className='plan-subscriptions-page__empty'>
-									<p>Invalid plan link.</p>
+									<p>Enlace de plan no válido.</p>
 									<Link
 										to='/schooladmins/plans'
 										className='teacher-subjects-page__add-btn'
 									>
-										Back to plans
+										Volver a planes
 									</Link>
 								</div>
 							</div>
@@ -247,25 +247,25 @@ function SchoolAdminSubscriptionsScreen () {
 									className='plan-subscriptions-page__back'
 								>
 									<span aria-hidden>←</span>
-									All plans
+									Todos los planes
 								</Link>
 							</div>
 
 							{isLoading && (
 								<p className='teacher-subjects-page__subtitle'>
-									Loading subscribers…
+									Cargando suscriptores…
 								</p>
 							)}
 
 							{isError && !isLoading && (
 								<div className='plan-subscriptions-page__empty'>
-									<p>We couldn&apos;t load subscribers for this plan.</p>
+									<p>No pudimos cargar los suscriptores de este plan.</p>
 									<button
 										type='button'
 										className='login-submit'
 										onClick={() => void refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -274,7 +274,7 @@ function SchoolAdminSubscriptionsScreen () {
 								<>
 									<section
 										className='plan-subscriptions-hero'
-										aria-label='Plan summary'
+										aria-label='Resumen del plan'
 									>
 										<div
 											className='plan-subscriptions-hero__orb'
@@ -291,19 +291,19 @@ function SchoolAdminSubscriptionsScreen () {
 											<div className='plan-subscriptions-hero__head'>
 												<div>
 													<p className='plan-subscriptions-hero__eyebrow'>
-														Plan subscribers
+														Suscriptores del plan
 													</p>
 													<h1 className='plan-subscriptions-hero__title heading-gradient'>
 														{formatCurrency(plan.price)}
 													</h1>
 													<p className='plan-subscriptions-hero__meta'>
 														{plan.totalQuestions ?? '—'}{' '}
-														questions ·{' '}
+														preguntas ·{' '}
 														{planCohortLabel(plan)}
 														{' · '}
 														{plan.active === true
-															? 'Active plan'
-															: 'Inactive plan'}
+															? 'Plan activo'
+															: 'Plan inactivo'}
 													</p>
 												</div>
 												<span
@@ -315,8 +315,8 @@ function SchoolAdminSubscriptionsScreen () {
 													}
 												>
 													{plan.active === true
-														? 'Live'
-														: 'Paused'}
+														? 'Activo'
+														: 'Pausado'}
 												</span>
 											</div>
 											<p className='plan-subscriptions-hero__subjects'>
@@ -327,7 +327,7 @@ function SchoolAdminSubscriptionsScreen () {
 													to={`/schooladmins/updateplan/${planId}`}
 													className='plan-subscriptions-hero__btn'
 												>
-													Edit plan
+													Editar plan
 												</Link>
 											</div>
 										</div>
@@ -340,8 +340,8 @@ function SchoolAdminSubscriptionsScreen () {
 											</span>
 											<span className='plan-subscriptions-stat__label'>
 												{summary.totalStudents === 1
-													? 'Subscriber'
-													: 'Subscribers'}
+													? 'Suscriptor'
+													: 'Suscriptores'}
 											</span>
 										</article>
 										<article className='plan-subscriptions-stat'>
@@ -349,7 +349,7 @@ function SchoolAdminSubscriptionsScreen () {
 												{summary.activeSubscriptions}
 											</span>
 											<span className='plan-subscriptions-stat__label'>
-												Active now
+												Activos ahora
 											</span>
 										</article>
 										<article className='plan-subscriptions-stat'>
@@ -357,22 +357,22 @@ function SchoolAdminSubscriptionsScreen () {
 												{summary.totalSubscriptions}
 											</span>
 											<span className='plan-subscriptions-stat__label'>
-												Total subscriptions
+												Suscripciones totales
 											</span>
 										</article>
 									</div>
 
 									<section
 										className='plan-subscriptions-roster'
-										aria-label='Students subscribed to this plan'
+										aria-label='Estudiantes suscritos a este plan'
 									>
 										<div className='plan-subscriptions-roster__header'>
 											<h2 className='plan-subscriptions-roster__title'>
-												Students on this plan
+												Estudiantes en este plan
 											</h2>
 											<span
 												className='plan-subscriptions-roster__count'
-												aria-label={`${students.length} students`}
+												aria-label={`${students.length} estudiantes`}
 											>
 												{students.length}
 											</span>
@@ -381,9 +381,10 @@ function SchoolAdminSubscriptionsScreen () {
 										{students.length === 0 && (
 											<div className='plan-subscriptions-roster__empty'>
 												<p>
-													No students have subscribed to this plan
-													yet. Assign the plan when adding students,
-													then they can activate it from their account.
+													Aún no hay estudiantes suscritos a
+													este plan. Asigna el plan al agregar
+													estudiantes; luego podrán activarlo
+													desde su cuenta.
 												</p>
 												{schoolId && (
 													<Link
@@ -396,7 +397,7 @@ function SchoolAdminSubscriptionsScreen () {
 														>
 															+
 														</span>
-														<span>Add a student</span>
+														<span>Agregar un estudiante</span>
 													</Link>
 												)}
 											</div>
@@ -460,11 +461,12 @@ function SchoolAdminSubscriptionsScreen () {
 																		<div className='plan-subscriptions-roster__usage-head'>
 																			<span>
 																				{sub.questionsAsked ?? 0}{' '}
-																				of {sub.totalQuestions ?? 0}{' '}
-																				questions used
+																				de {sub.totalQuestions ?? 0}{' '}
+																				preguntas usadas
 																			</span>
 																			<span>
-																				{sub.questionsLeft ?? 0} left
+																				{sub.questionsLeft ?? 0}{' '}
+																				restantes
 																			</span>
 																		</div>
 																		<div
@@ -474,7 +476,7 @@ function SchoolAdminSubscriptionsScreen () {
 																			aria-valuemin={0}
 																			aria-valuemax={100}
 																			aria-label={
-																				`${percent}% of questions used`
+																				`${percent}% de preguntas usadas`
 																			}
 																		>
 																			<div
@@ -489,16 +491,16 @@ function SchoolAdminSubscriptionsScreen () {
 
 																<div className='plan-subscriptions-roster__dates'>
 																	<span>
-																		Started{' '}
+																		Inicio{' '}
 																		{formatDisplayDate(sub?.startDate)}
 																	</span>
 																	<span>
-																		Renews / ends{' '}
+																		Renueva / termina{' '}
 																		{formatDisplayDate(sub?.endDate)}
 																	</span>
 																	{sub?.renewal && (
 																		<span className='plan-subscriptions-roster__renewal'>
-																			Auto-renew on
+																			Renovación automática activada
 																		</span>
 																	)}
 																</div>

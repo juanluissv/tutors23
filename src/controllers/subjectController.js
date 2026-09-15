@@ -54,6 +54,205 @@ function normalizeTeacherEmailsForJson (val) {
     return [String(val)];
 }
 
+async function ensureDocumentsMigrated (subject) {
+    const docs = Array.isArray(subject.documents) ? subject.documents : [];
+    if (docs.length > 0) {
+        return;
+    }
+
+    const bookId = subject.bookId && String(subject.bookId).trim() !== ''
+        ? String(subject.bookId).trim()
+        : null;
+    if (!bookId) {
+        return;
+    }
+
+    subject.documents = [{
+        fileId: bookId,
+        fileName: 'Course book',
+        label: 'Course book',
+        uploadedAt: subject.dateCreated || subject.createdAt || new Date(),
+    }];
+    await subject.save();
+}
+
+function getPersistedDocuments (subject) {
+    return Array.isArray(subject.documents) ? subject.documents : [];
+}
+
+function documentToJson (doc) {
+    const fileId = doc.fileId && String(doc.fileId).trim() !== ''
+        ? String(doc.fileId).trim()
+        : undefined;
+    return {
+        _id: doc._id,
+        fileId,
+        fileName: doc.fileName && String(doc.fileName).trim() !== ''
+            ? String(doc.fileName).trim()
+            : undefined,
+        label: doc.label && String(doc.label).trim() !== ''
+            ? String(doc.label).trim()
+            : undefined,
+        fileUrl: fileId
+            ? getPublicBookUrlFromKey(fileId) || undefined
+            : undefined,
+        uploadedAt: doc.uploadedAt || undefined,
+    };
+}
+
+function getEffectiveDocuments (subject) {
+    const docs = getPersistedDocuments(subject);
+    if (docs.length > 0) {
+        return docs.map((doc) => documentToJson(doc));
+    }
+
+    const bookId = subject.bookId && String(subject.bookId).trim() !== ''
+        ? String(subject.bookId).trim()
+        : null;
+    if (!bookId) {
+        return [];
+    }
+
+    return [{
+        _id: undefined,
+        fileId: bookId,
+        fileName: 'Course book',
+        label: 'Course book',
+        fileUrl: getPublicBookUrlFromKey(bookId) || undefined,
+        uploadedAt: subject.dateCreated || subject.createdAt || undefined,
+    }];
+}
+
+//Picks which PDF a chapter should use when generating
+function resolveChapterSourceDocument (subject, chapter) {
+    const docs = getPersistedDocuments(subject);
+
+    if (chapter?.sourceDocumentId) {
+        const sourceId = String(chapter.sourceDocumentId);
+        const matched = docs.find(
+            (doc) => doc._id && String(doc._id) === sourceId,
+        );
+        if (matched?.fileId && String(matched.fileId).trim() !== '') {
+            return matched;
+        }
+    }
+
+    if (docs.length === 1 && docs[0]?.fileId) {
+        return docs[0];
+    }
+
+    if (docs.length === 0) {
+        const bookId = subject.bookId && String(subject.bookId).trim() !== ''
+            ? String(subject.bookId).trim()
+            : null;
+        if (bookId) {
+            return { fileId: bookId, _id: null };
+        }
+    }
+
+    return null;
+}
+//Validates optional Mongo IDs like sourceDocumentId
+function parseOptionalObjectId (value) {
+    if (value == null || String(value).trim() === '') {
+        return undefined;
+    }
+    const id = String(value).trim();
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return null;
+    }
+    return id;
+}
+//Shared 302 redirect to public URL or signed S3 URL
+function redirectToPdfKey (res, fileKey) {
+    const key = String(fileKey).trim();
+    const direct = getPublicBookUrlFromKey(key);
+    if (direct) {
+        return res.redirect(302, direct);
+    }
+
+    const s3 = getS3();
+    const bucket = getBookBucketName();
+    if (!s3 || !bucket) {
+        res.status(503);
+        throw new Error(
+            'File storage is not configured. Set AWS credentials and '
+            + 'AWS_S3_BUCKET.',
+        );
+    }
+
+    const url = s3.getSignedUrl('getObject', {
+        Bucket: bucket,
+        Key: key,
+        Expires: 60 * 30,
+        ResponseContentType: 'application/pdf',
+    });
+    return res.redirect(302, url);
+}
+//Uploads PDF to S3 under {prefix}/{subjectId}/documents/...
+async function uploadSubjectDocumentFile ({
+    subjectId,
+    uploaderSegment,
+    buffer,
+    originalName,
+    label,
+    uploadedBy,
+}) {
+    const s3 = getS3();
+    const bucket = getBookBucketName();
+    if (!s3 || !bucket) {
+        const err = new Error(
+            'File storage is not configured. Set AWS credentials and '
+            + 'AWS_S3_BUCKET.',
+        );
+        err.statusCode = 503;
+        throw err;
+    }
+
+    const prefix = getBookKeyPrefix();
+    const random = crypto.randomBytes(8).toString('hex');
+    const key = `${prefix}/${String(subjectId)}/documents/${String(
+        uploaderSegment,
+    )}-${random}.pdf`;
+
+    const upload = await s3.upload({
+        Bucket: bucket,
+        Key: key,
+        Body: buffer,
+        ContentType: 'application/pdf',
+    }).promise();
+
+    const fileName = originalName && String(originalName).trim() !== ''
+        ? String(originalName).trim()
+        : 'Document.pdf';
+
+    return {
+        fileId: upload.Key,
+        fileName,
+        label: label && String(label).trim() !== ''
+            ? String(label).trim()
+            : fileName.replace(/\.pdf$/i, ''),
+        uploadedBy,
+    };
+}
+//Pushes a new entry into documents[] and saves the subject
+async function appendSubjectDocument (subject, documentFields) {
+    if (!Array.isArray(subject.documents)) {
+        subject.documents = [];
+    }
+
+    subject.documents.push({
+        ...documentFields,
+        uploadedAt: new Date(),
+    });
+
+    if (!subject.bookId || String(subject.bookId).trim() === '') {
+        subject.bookId = documentFields.fileId;
+    }
+
+    await subject.save();
+}
+
 function bookChapterToJson (chapter) {
     const fileId = chapter.ChapterFileId
         && String(chapter.ChapterFileId).trim() !== ''
@@ -71,6 +270,7 @@ function bookChapterToJson (chapter) {
         : undefined;
     return {
         _id: chapter._id,
+        sourceDocumentId: chapter.sourceDocumentId || undefined,
         ChapterNumber: chapter.ChapterNumber,
         ChapterTitle: chapter.ChapterTitle,
         ChapterBeginPage: chapter.ChapterBeginPage,
@@ -118,6 +318,19 @@ function mergeBookChaptersUpdate (incoming, existing = []) {
 
         return {
             _id: existingChapter?._id,
+            sourceDocumentId: (() => {
+                if (raw.sourceDocumentId === null) {
+                    return undefined;
+                }
+                if (raw.sourceDocumentId !== undefined) {
+                    const parsed = parseOptionalObjectId(raw.sourceDocumentId);
+                    if (parsed === null) {
+                        return existingChapter?.sourceDocumentId;
+                    }
+                    return parsed;
+                }
+                return existingChapter?.sourceDocumentId;
+            })(),
             ChapterNumber: Number.isFinite(chapterNumber)
                 ? chapterNumber
                 : index + 1,
@@ -305,7 +518,12 @@ async function deleteChapterFileFromS3 (fileKey) {
 }
 
 const subjectToJson = (subject) => {
-    const bookId = subject.bookId;
+    const documents = getEffectiveDocuments(subject);
+    const firstDocument = documents[0];
+    const bookId = firstDocument?.fileId
+        || (subject.bookId && String(subject.bookId).trim() !== ''
+            ? String(subject.bookId).trim()
+            : undefined);
     const bookUrl = bookId
         ? getPublicBookUrlFromKey(bookId) || undefined
         : undefined;
@@ -323,6 +541,7 @@ const subjectToJson = (subject) => {
         teacherEmail: normalizeTeacherEmailsForJson(subject.teacherEmail),
         bookId,
         bookUrl,
+        documents,
         bookChapters: Array.isArray(subject.bookChapters)
             ? subject.bookChapters.map(bookChapterToJson)
             : [],
@@ -522,33 +741,14 @@ const getSubjectBookForTeacher = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to open this book');
     }
 
-    if (!subject.bookId || String(subject.bookId).trim() === '') {
+    await ensureDocumentsMigrated(subject);
+    const sourceDoc = resolveChapterSourceDocument(subject, {});
+    if (!sourceDoc?.fileId) {
         res.status(404);
         throw new Error('No book uploaded for this subject');
     }
 
-    const direct = getPublicBookUrlFromKey(subject.bookId);
-    if (direct) {
-        return res.redirect(302, direct);
-    }
-
-    const s3 = getS3();
-    const bucket = getBookBucketName();
-    if (!s3 || !bucket) {
-        res.status(503);
-        throw new Error(
-            'File storage is not configured. Set AWS credentials and '
-            + 'AWS_S3_BUCKET.',
-        );
-    }
-
-    const url = s3.getSignedUrl('getObject', {
-        Bucket: bucket,
-        Key: subject.bookId,
-        Expires: 60 * 30,
-        ResponseContentType: 'application/pdf',
-    });
-    return res.redirect(302, url);
+    return redirectToPdfKey(res, sourceDoc.fileId);
 });
 
 // GET /api/subjects/:id/school-admin/book — use with protectSchoolAdmin; 302 to S3 PDF
@@ -594,33 +794,14 @@ const getSubjectBookForSchoolAdmin = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to open this book');
     }
 
-    if (!subject.bookId || String(subject.bookId).trim() === '') {
+    await ensureDocumentsMigrated(subject);
+    const sourceDoc = resolveChapterSourceDocument(subject, {});
+    if (!sourceDoc?.fileId) {
         res.status(404);
         throw new Error('No book uploaded for this subject');
     }
 
-    const direct = getPublicBookUrlFromKey(subject.bookId);
-    if (direct) {
-        return res.redirect(302, direct);
-    }
-
-    const s3 = getS3();
-    const bucket = getBookBucketName();
-    if (!s3 || !bucket) {
-        res.status(503);
-        throw new Error(
-            'File storage is not configured. Set AWS credentials and '
-            + 'AWS_S3_BUCKET.',
-        );
-    }
-
-    const url = s3.getSignedUrl('getObject', {
-        Bucket: bucket,
-        Key: subject.bookId,
-        Expires: 60 * 30,
-        ResponseContentType: 'application/pdf',
-    });
-    return res.redirect(302, url);
+    return redirectToPdfKey(res, sourceDoc.fileId);
 });
 
 function startOfCurrentMonth (now = new Date()) {
@@ -947,34 +1128,22 @@ const createSubject = asyncHandler(async (req, res) => {
     });
 
     if (req.file) {
-        const s3 = getS3();
-        const bucket = getBookBucketName();
-        if (!s3 || !bucket) {
-            res.status(503);
-            throw new Error(
-                'File storage is not configured. Set AWS credentials and '
-                + 'AWS_S3_BUCKET.',
-            );
-        }
-
-        const prefix = getBookKeyPrefix();
-        const random = crypto.randomBytes(8).toString('hex');
-        const key = `${prefix}/${String(createdSubject._id)}/school-admin-${String(
-            req.schoolAdmin._id,
-        )}-${random}.pdf`;
         try {
-            const upload = await s3.upload({
-                Bucket: bucket,
-                Key: key,
-                Body: req.file.buffer,
-                ContentType: 'application/pdf',
-            }).promise();
-            createdSubject.bookId = upload.Key;
-            await createdSubject.save();
+            const documentFields = await uploadSubjectDocumentFile({
+                subjectId: createdSubject._id,
+                uploaderSegment: `school-admin-${String(req.schoolAdmin._id)}`,
+                buffer: req.file.buffer,
+                originalName: req.file.originalname,
+                label: req.body?.label,
+                uploadedBy: req.schoolAdmin._id,
+            });
+            await appendSubjectDocument(createdSubject, documentFields);
         } catch (err) {
             console.error(err);
-            res.status(502);
-            throw new Error('Failed to upload the PDF to storage.');
+            res.status(err.statusCode || 502);
+            throw new Error(
+                err.message || 'Failed to upload the PDF to storage.',
+            );
         }
     }
 
@@ -1128,55 +1297,23 @@ const updateSubjectById = asyncHandler(async (req, res) => {
     }
 
     if (req.file) {
-        const s3 = getS3();
-        const bucket = getBookBucketName();
-        if (!s3 || !bucket) {
-            res.status(503);
-            throw new Error(
-                'File storage is not configured. Set AWS credentials and '
-                + 'AWS_S3_BUCKET.',
-            );
-        }
-
-        const previousBookKey = subject.bookId
-            && String(subject.bookId).trim() !== ''
-            ? String(subject.bookId).trim()
-            : null;
-
-        const prefix = getBookKeyPrefix();
-        const random = crypto.randomBytes(8).toString('hex');
-        const key = `${prefix}/${id}/school-admin-${String(
-            req.schoolAdmin._id,
-        )}-${random}.pdf`;
+        await ensureDocumentsMigrated(subject);
         try {
-            const upload = await s3.upload({
-                Bucket: bucket,
-                Key: key,
-                Body: req.file.buffer,
-                ContentType: 'application/pdf',
-            }).promise();
-            subject.bookId = upload.Key;
-
-            if (
-                previousBookKey
-                && previousBookKey !== upload.Key
-            ) {
-                try {
-                    await s3.deleteObject({
-                        Bucket: bucket,
-                        Key: previousBookKey,
-                    }).promise();
-                } catch (delErr) {
-                    console.error(
-                        'Could not delete previous book from S3:',
-                        delErr,
-                    );
-                }
-            }
+            const documentFields = await uploadSubjectDocumentFile({
+                subjectId: id,
+                uploaderSegment: `school-admin-${String(req.schoolAdmin._id)}`,
+                buffer: req.file.buffer,
+                originalName: req.file.originalname,
+                label: req.body?.label,
+                uploadedBy: req.schoolAdmin._id,
+            });
+            await appendSubjectDocument(subject, documentFields);
         } catch (err) {
             console.error(err);
-            res.status(502);
-            throw new Error('Failed to upload the PDF to storage.');
+            res.status(err.statusCode || 502);
+            throw new Error(
+                err.message || 'Failed to upload the PDF to storage.',
+            );
         }
     }
 
@@ -1227,53 +1364,22 @@ const updateSubjectByTeacher = asyncHandler(async (req, res) => {
     }
 
     if (req.file) {
-        const s3 = getS3();
-        const bucket = getBookBucketName();
-        if (!s3 || !bucket) {
-            res.status(503);
-            throw new Error(
-                'File storage is not configured. Set AWS credentials and '
-                + 'AWS_S3_BUCKET.',
-            );
-        }
-
-        const previousBookKey = subject.bookId
-            && String(subject.bookId).trim() !== ''
-            ? String(subject.bookId).trim()
-            : null;
-
-        const prefix = getBookKeyPrefix();
-        const random = crypto.randomBytes(8).toString('hex');
-        const key = `${prefix}/${id}/${String(teacherId)}-${random}.pdf`;
+        await ensureDocumentsMigrated(subject);
         try {
-            const upload = await s3.upload({
-                Bucket: bucket,
-                Key: key,
-                Body: req.file.buffer,
-                ContentType: 'application/pdf',
-            }).promise();
-            subject.bookId = upload.Key;
-
-            if (
-                previousBookKey
-                && previousBookKey !== upload.Key
-            ) {
-                try {
-                    await s3.deleteObject({
-                        Bucket: bucket,
-                        Key: previousBookKey,
-                    }).promise();
-                } catch (delErr) {
-                    console.error(
-                        'Could not delete previous book from S3:',
-                        delErr,
-                    );
-                }
-            }
+            const documentFields = await uploadSubjectDocumentFile({
+                subjectId: id,
+                uploaderSegment: String(teacherId),
+                buffer: req.file.buffer,
+                originalName: req.file.originalname,
+                label: req.body?.label,
+            });
+            await appendSubjectDocument(subject, documentFields);
         } catch (err) {
             console.error(err);
-            res.status(502);
-            throw new Error('Failed to upload the PDF to storage.');
+            res.status(err.statusCode || 502);
+            throw new Error(
+                err.message || 'Failed to upload the PDF to storage.',
+            );
         }
     }
 
@@ -1456,10 +1562,24 @@ const generateSubjectBookChapterPdf = asyncHandler(async (req, res) => {
         throw new Error('Chapter not found');
     }
 
-    if (!subject.bookId || String(subject.bookId).trim() === '') {
+    await ensureDocumentsMigrated(subject);
+    const persistedDocs = getPersistedDocuments(subject);
+
+    if (
+        persistedDocs.length > 1
+        && !chapter.sourceDocumentId
+    ) {
         res.status(400);
         throw new Error(
-            'Upload the full course book before generating chapter PDFs',
+            'Select which source document this chapter uses before generating',
+        );
+    }
+
+    const sourceDoc = resolveChapterSourceDocument(subject, chapter);
+    if (!sourceDoc?.fileId || String(sourceDoc.fileId).trim() === '') {
+        res.status(400);
+        throw new Error(
+            'Upload a source document for this subject before generating chapter PDFs',
         );
     }
 
@@ -1487,13 +1607,13 @@ const generateSubjectBookChapterPdf = asyncHandler(async (req, res) => {
     try {
         const object = await s3.getObject({
             Bucket: bucket,
-            Key: String(subject.bookId).trim(),
+            Key: String(sourceDoc.fileId).trim(),
         }).promise();
         fullBookBytes = object.Body;
     } catch (err) {
         console.error(err);
         res.status(502);
-        throw new Error('Could not load the full course book from storage.');
+        throw new Error('Could not load the source document from storage.');
     }
 
     let extractedBuffer;
@@ -1666,18 +1786,240 @@ const deleteSubjectBookChapter = asyncHandler(async (req, res) => {
     res.status(200).json(subjectToJson(updated));
 });
 
+async function loadSubjectDocumentForRedirect ({
+    req,
+    res,
+    subjectId,
+    documentId,
+}) {
+    const { subject } = await loadSubjectForBookChapters(req, res, subjectId);
+    await ensureDocumentsMigrated(subject);
+
+    if (!mongoose.Types.ObjectId.isValid(documentId)) {
+        res.status(400);
+        throw new Error('Invalid document id');
+    }
+
+    const doc = subject.documents.id(documentId);
+    if (!doc?.fileId || String(doc.fileId).trim() === '') {
+        res.status(404);
+        throw new Error('Document not found');
+    }
+
+    return { subject, doc };
+}
+
+// GET /api/subjects/:id/school-admin/documents/:documentId
+const getSubjectDocumentForSchoolAdmin = asyncHandler(async (req, res) => {
+    const { id, documentId } = req.params;
+    const { doc } = await loadSubjectDocumentForRedirect({
+        req,
+        res,
+        subjectId: id,
+        documentId,
+    });
+    return redirectToPdfKey(res, doc.fileId);
+});
+
+// GET /api/subjects/:id/teacher/documents/:documentId
+const getSubjectDocumentForTeacher = asyncHandler(async (req, res) => {
+    const { id, documentId } = req.params;
+    const { doc } = await loadSubjectDocumentForRedirect({
+        req,
+        res,
+        subjectId: id,
+        documentId,
+    });
+    return redirectToPdfKey(res, doc.fileId);
+});
+
+// POST /api/subjects/:id/documents — protectSchoolAdmin
+const uploadSubjectDocument = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+
+    if (!req.file) {
+        res.status(400);
+        throw new Error('PDF file is required');
+    }
+
+    await ensureDocumentsMigrated(subject);
+
+    try {
+        const documentFields = await uploadSubjectDocumentFile({
+            subjectId: id,
+            uploaderSegment: `school-admin-${String(req.schoolAdmin._id)}`,
+            buffer: req.file.buffer,
+            originalName: req.file.originalname,
+            label: req.body?.label,
+            uploadedBy: req.schoolAdmin._id,
+        });
+        await appendSubjectDocument(subject, documentFields);
+    } catch (err) {
+        console.error(err);
+        res.status(err.statusCode || 502);
+        throw new Error(
+            err.message || 'Failed to upload the PDF to storage.',
+        );
+    }
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(201).json(subjectToJson(updated));
+});
+
+// POST /api/subjects/:id/teacher/documents — protectTeacher
+const uploadSubjectDocumentByTeacher = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { subject, teacher } = await loadSubjectForTeacher(req, res, id);
+
+    if (!req.file) {
+        res.status(400);
+        throw new Error('PDF file is required');
+    }
+
+    await ensureDocumentsMigrated(subject);
+
+    try {
+        const documentFields = await uploadSubjectDocumentFile({
+            subjectId: id,
+            uploaderSegment: String(teacher._id),
+            buffer: req.file.buffer,
+            originalName: req.file.originalname,
+            label: req.body?.label,
+        });
+        await appendSubjectDocument(subject, documentFields);
+    } catch (err) {
+        console.error(err);
+        res.status(err.statusCode || 502);
+        throw new Error(
+            err.message || 'Failed to upload the PDF to storage.',
+        );
+    }
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(201).json(subjectToJson(updated));
+});
+
+// DELETE /api/subjects/:id/documents/:documentId — protectSchoolAdmin
+const deleteSubjectDocument = asyncHandler(async (req, res) => {
+    const { id, documentId } = req.params;
+    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+    await ensureDocumentsMigrated(subject);
+
+    if (!mongoose.Types.ObjectId.isValid(documentId)) {
+        res.status(400);
+        throw new Error('Invalid document id');
+    }
+
+    const doc = subject.documents.id(documentId);
+    if (!doc) {
+        res.status(404);
+        throw new Error('Document not found');
+    }
+
+    const inUse = (subject.bookChapters || []).some(
+        (chapter) => chapter.sourceDocumentId
+            && String(chapter.sourceDocumentId) === String(documentId),
+    );
+    if (inUse) {
+        res.status(400);
+        throw new Error(
+            'Cannot delete: one or more chapters reference this document',
+        );
+    }
+
+    const fileKey = doc.fileId && String(doc.fileId).trim() !== ''
+        ? String(doc.fileId).trim()
+        : null;
+
+    subject.documents.pull(documentId);
+
+    const firstDoc = subject.documents[0];
+    if (firstDoc?.fileId && String(firstDoc.fileId).trim() !== '') {
+        subject.bookId = String(firstDoc.fileId).trim();
+    } else {
+        subject.set('bookId', undefined);
+    }
+
+    await subject.save();
+
+    if (fileKey) {
+        await deleteChapterFileFromS3(fileKey);
+    }
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(200).json(subjectToJson(updated));
+});
+
+// DELETE /api/subjects/:id/teacher/documents/:documentId — protectTeacher
+const deleteSubjectDocumentByTeacher = asyncHandler(async (req, res) => {
+    const { id, documentId } = req.params;
+    const { subject } = await loadSubjectForTeacher(req, res, id);
+    await ensureDocumentsMigrated(subject);
+
+    if (!mongoose.Types.ObjectId.isValid(documentId)) {
+        res.status(400);
+        throw new Error('Invalid document id');
+    }
+
+    const doc = subject.documents.id(documentId);
+    if (!doc) {
+        res.status(404);
+        throw new Error('Document not found');
+    }
+
+    const inUse = (subject.bookChapters || []).some(
+        (chapter) => chapter.sourceDocumentId
+            && String(chapter.sourceDocumentId) === String(documentId),
+    );
+    if (inUse) {
+        res.status(400);
+        throw new Error(
+            'Cannot delete: one or more chapters reference this document',
+        );
+    }
+
+    const fileKey = doc.fileId && String(doc.fileId).trim() !== ''
+        ? String(doc.fileId).trim()
+        : null;
+
+    subject.documents.pull(documentId);
+
+    const firstDoc = subject.documents[0];
+    if (firstDoc?.fileId && String(firstDoc.fileId).trim() !== '') {
+        subject.bookId = String(firstDoc.fileId).trim();
+    } else {
+        subject.set('bookId', undefined);
+    }
+
+    await subject.save();
+
+    if (fileKey) {
+        await deleteChapterFileFromS3(fileKey);
+    }
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(200).json(subjectToJson(updated));
+});
+
 export {
     createSubject,
     getSubjectsBySchool,
     getSubjectsByTeacherId,
     getSubjectBookForTeacher,
     getSubjectBookForSchoolAdmin,
+    getSubjectDocumentForSchoolAdmin,
+    getSubjectDocumentForTeacher,
     getSubjectStudentsForTeacher,
     getSubjectStudentsForSchoolAdmin,
     updateSubjectById,
     updateSubjectByTeacher,
     updateSubjectBookChapters,
     generateSubjectBookChapterPdf,
+    uploadSubjectDocument,
+    uploadSubjectDocumentByTeacher,
+    deleteSubjectDocument,
+    deleteSubjectDocumentByTeacher,
     uploadSubjectBookChapterFile,
     deleteSubjectBookChapter,
     addSubjectStudentEmailForTeacher,

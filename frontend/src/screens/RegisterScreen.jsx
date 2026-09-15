@@ -87,8 +87,8 @@ function RegisterScreen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={handleToggleSidebar}
 					/>
-					<div className='content-area content-area--login'>
-						<div className='center-content2 login-screen'>
+					<div className='content-area content-area--login content-area--login-scroll'>
+						<div className='center-content2 login-screen login-screen--register login-screen--offset-up-10'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
@@ -203,7 +203,7 @@ function RegisterScreen () {
 									</button>
 								</form>
 								<p className='login-card__footer'>
-									Already have an account?{' '}
+									¿Ya tienes una cuenta?{' '}
 									<Link to='/login' className='login-card__link'>
 										Iniciar sesión
 									</Link>

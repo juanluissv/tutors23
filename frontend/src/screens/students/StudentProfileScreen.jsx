@@ -526,7 +526,8 @@ function StudentProfileScreen () {
 					<div className='content-area content-area--login content-area--login-scroll'>
 						<div
 							className={
-								'center-content2 login-screen login-screen--wide'
+								'center-content2 login-screen login-screen--wide '
+								+ 'login-screen--subject-form'
 							}
 						>
 							<div className='login-card'>

@@ -15,11 +15,21 @@ import {
 	useGetSubjectsBySchoolQuery,
 	useUploadChapterTutorVideoMutation,
 	useUploadChapterTutorTranscribeMutation,
+	useUploadSuggestedQuestionVideoMutation,
 } from '../../slices/admin/schoolAdminApiSlice'
 import { buildBookIndex } from '../../utils/buildBookIndex'
+import { SUBJECTS_URL } from '../../constants'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
+
+const BOOK_INDEX_LABELS = {
+	chapterFallback: (n) => `Capítulo ${n}`,
+	pagesRange: (start, end) => `Páginas ${start}–${end}`,
+	fromPage: (start) => `Desde la página ${start}`,
+	throughPage: (end) => `Hasta la página ${end}`,
+	otherChapters: 'Otros capítulos',
+}
 
 function resolveSchoolId (school) {
 	if (!school) {
@@ -33,6 +43,179 @@ function resolveSchoolId (school) {
 	}
 	return null
 }
+
+function bookDisplayName (bookId) {
+	if (!bookId || typeof bookId !== 'string') {
+		return ''
+	}
+	const trimmed = bookId.trim()
+	const parts = trimmed.split('/')
+	const last = parts[parts.length - 1]
+	return last && last.length > 0 ? last : trimmed
+}
+
+function documentDisplayName (doc) {
+	if (doc?.fileName) {
+		return String(doc.fileName)
+	}
+	if (doc?.label) {
+		return String(doc.label)
+	}
+	if (doc?.fileId) {
+		return bookDisplayName(String(doc.fileId))
+	}
+	return 'Documento'
+}
+
+function isVideoAddedToLessonMessage (message) {
+	const lower = String(message || '').toLowerCase()
+	return lower.includes('added to the lesson')
+		|| lower.includes('añadió a la lección')
+		|| lower.includes('añadido a la lección')
+}
+
+function getDocumentKey (doc) {
+	if (doc?._id) {
+		return String(doc._id)
+	}
+	if (doc?.fileId) {
+		return String(doc.fileId)
+	}
+	return ''
+}
+
+function chapterBelongsToDocument (
+	chapter,
+	documentKey,
+	requiresSourceDocument,
+) {
+	if (!requiresSourceDocument) {
+		return true
+	}
+	if (!documentKey) {
+		return false
+	}
+	return String(chapter.sourceDocumentId || '') === String(documentKey)
+}
+
+function getSubjectDocuments (subject) {
+	if (Array.isArray(subject?.documents) && subject.documents.length > 0) {
+		return subject.documents
+	}
+	if (subject?.bookId && String(subject.bookId).trim() !== '') {
+		return [{
+			_id: null,
+			fileId: String(subject.bookId).trim(),
+			fileName: bookDisplayName(String(subject.bookId)),
+			fileUrl: subject.bookUrl,
+		}]
+	}
+	return []
+}
+
+const BookGlyph = () => (
+	<svg
+		width='40'
+		height='40'
+		viewBox='0 0 24 24'
+		fill='none'
+		xmlns='http://www.w3.org/2000/svg'
+		className='book-chapters__book-glyph'
+		aria-hidden
+	>
+		<path
+			d='M4 6a2 2 0 012-2h5v16H6a2 2 0 01-2-2V6z'
+			fill='url(#create-tutor-book-fill-a)'
+		/>
+		<path
+			d='M13 4h5a2 2 0 012 2v10a2 2 0 01-2 2h-5V4z'
+			fill='url(#create-tutor-book-fill-b)'
+		/>
+		<path
+			d='M12 4v16'
+			stroke='url(#create-tutor-book-stroke)'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+		/>
+		<defs>
+			<linearGradient
+				id='create-tutor-book-fill-a'
+				x1='4'
+				y1='4'
+				x2='11'
+				y2='18'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#e0f2fe' />
+				<stop offset='1' stopColor='#bae6fd' />
+			</linearGradient>
+			<linearGradient
+				id='create-tutor-book-fill-b'
+				x1='13'
+				y1='4'
+				x2='20'
+				y2='18'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#f0f9ff' />
+				<stop offset='1' stopColor='#7dd3fc' />
+			</linearGradient>
+			<linearGradient
+				id='create-tutor-book-stroke'
+				x1='12'
+				y1='4'
+				x2='12'
+				y2='20'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#0284c7' />
+				<stop offset='1' stopColor='#0ea5e9' />
+			</linearGradient>
+		</defs>
+	</svg>
+)
+
+const DocumentPdfGlyph = () => (
+	<svg
+		width='32'
+		height='32'
+		viewBox='0 0 24 24'
+		fill='none'
+		xmlns='http://www.w3.org/2000/svg'
+		aria-hidden
+	>
+		<path
+			d='M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z'
+			fill='url(#create-tutor-doc-pdf-fill)'
+		/>
+		<path
+			d='M14 2v6h6'
+			stroke='#0284c7'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+			strokeLinejoin='round'
+		/>
+		<path
+			d='M8 13h8M8 17h5'
+			stroke='#0369a1'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+		/>
+		<defs>
+			<linearGradient
+				id='create-tutor-doc-pdf-fill'
+				x1='4'
+				y1='2'
+				x2='20'
+				y2='22'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#e0f2fe' />
+				<stop offset='1' stopColor='#7dd3fc' />
+			</linearGradient>
+		</defs>
+	</svg>
+)
 
 const TutorGenerateGlyph = () => (
 	<svg
@@ -112,6 +295,362 @@ const TutorTranscribeUploadGlyph = () => (
 	</svg>
 )
 
+const PracticeCopyGlyph = () => (
+	<svg
+		width='13'
+		height='13'
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<rect x='9' y='9' width='13' height='13' rx='2' />
+		<path d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1' />
+	</svg>
+)
+
+function practiceUploadKey (chapterId, questionIndex, videoKind) {
+	return `${chapterId}:${questionIndex}:${videoKind}`
+}
+
+function clipCountsFromQuestions (items) {
+	const questions = Array.isArray(items) ? items : []
+	let clipCount = 0
+	let completeCount = 0
+	for (const item of questions) {
+		const hasQuestion = Boolean(
+			String(item?.questionVideoUrl || '').trim(),
+		)
+		const hasAnswer = Boolean(
+			String(item?.answerVideoUrl || '').trim(),
+		)
+		if (hasQuestion) {
+			clipCount += 1
+		}
+		if (hasAnswer) {
+			clipCount += 1
+		}
+		if (hasQuestion && hasAnswer) {
+			completeCount += 1
+		}
+	}
+	return {
+		questionCount: questions.length,
+		clipCount,
+		clipTotal: questions.length * 2,
+		completeCount,
+	}
+}
+
+function PracticeClipSlot ({
+	label,
+	hint,
+	videoUrl,
+	isUploading,
+	error,
+	disabled,
+	variant,
+	onUploadClick,
+	onDropFile,
+}) {
+	const [isDragOver, setIsDragOver] = useState(false)
+	const hasVideo = Boolean(String(videoUrl || '').trim())
+
+	const handleDragOver = (event) => {
+		event.preventDefault()
+		if (!disabled && !isUploading) {
+			setIsDragOver(true)
+		}
+	}
+
+	const handleDragLeave = () => {
+		setIsDragOver(false)
+	}
+
+	const handleDrop = (event) => {
+		event.preventDefault()
+		setIsDragOver(false)
+		if (disabled || isUploading) {
+			return
+		}
+		const file = event.dataTransfer.files?.[0]
+		if (file) {
+			onDropFile(file)
+		}
+	}
+
+	return (
+		<div
+			className={
+				'create-tutor__practice-slot' +
+				` create-tutor__practice-slot--${variant}` +
+				(hasVideo
+					? ' create-tutor__practice-slot--ready'
+					: '') +
+				(isDragOver
+					? ' create-tutor__practice-slot--drag'
+					: '') +
+				(isUploading
+					? ' create-tutor__practice-slot--busy'
+					: '')
+			}
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDrop={handleDrop}
+		>
+			<p className='create-tutor__practice-slot-kicker'>
+				{label}
+			</p>
+			{isUploading ? (
+				<p className='create-tutor__practice-slot-status'>
+					Subiendo clip de HeyGen…
+				</p>
+			) : hasVideo ? (
+				<div className='create-tutor__practice-slot-ready'>
+					<a
+						href={videoUrl}
+						className='create-tutor__practice-preview'
+						target='_blank'
+						rel='noopener noreferrer'
+					>
+						Vista previa
+						<span aria-hidden> ↗</span>
+					</a>
+					<button
+						type='button'
+						className='create-tutor__practice-replace'
+						disabled={disabled}
+						onClick={onUploadClick}
+					>
+						Reemplazar
+					</button>
+				</div>
+			) : (
+				<button
+					type='button'
+					className='create-tutor__practice-choose'
+					disabled={disabled}
+					onClick={onUploadClick}
+				>
+					<span className='create-tutor__practice-choose-title'>
+						Subir MP4
+					</span>
+					<span className='create-tutor__practice-choose-hint'>
+						{hint}
+					</span>
+				</button>
+			)}
+			{error ? (
+				<p className='create-tutor__practice-slot-error'>
+					{error}
+				</p>
+			) : null}
+		</div>
+	)
+}
+
+function PracticeVideosPanel ({
+	chapterId,
+	questions,
+	uploadingPracticeKey,
+	practiceVideoErrors,
+	onUploadClick,
+	onDropFile,
+}) {
+	const [copiedKey, setCopiedKey] = useState('')
+	const counts = clipCountsFromQuestions(questions)
+	const percent = counts.clipTotal > 0
+		? Math.round((counts.clipCount / counts.clipTotal) * 100)
+		: 0
+
+	const handleCopy = async (key, text) => {
+		try {
+			await navigator.clipboard.writeText(text)
+			setCopiedKey(key)
+			window.setTimeout(() => {
+				setCopiedKey((current) => (
+					current === key ? '' : current
+				))
+			}, 1600)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	return (
+		<div className='create-tutor__practice-panel'>
+			<div className='create-tutor__practice-panel-head'>
+				<div>
+					<p className='create-tutor__practice-panel-title'>
+						Videos de práctica de HeyGen
+					</p>
+					<p className='create-tutor__practice-panel-copy'>
+						Graba un clip de pregunta y uno de respuesta en
+						HeyGen para cada consigna, luego sube los MP4 aquí.
+						Puedes hacer clic o soltar un archivo en cada
+						espacio.
+					</p>
+				</div>
+				<p className='create-tutor__practice-panel-count'>
+					{counts.clipCount}/{counts.clipTotal} clips
+				</p>
+			</div>
+			<div
+				className='create-tutor__practice-progress'
+				role='progressbar'
+				aria-valuemin={0}
+				aria-valuemax={100}
+				aria-valuenow={percent}
+				aria-label='Progreso de subida de videos de práctica'
+			>
+				<span
+					className='create-tutor__practice-progress-bar'
+					style={{ width: `${percent}%` }}
+				/>
+			</div>
+			<p className='create-tutor__practice-panel-meta'>
+				{counts.completeCount} de {counts.questionCount} preguntas
+				tienen ambos videos
+			</p>
+			<ol className='create-tutor__practice-list'>
+				{questions.map((item, questionIndex) => {
+					const questionText = String(item?.question || '').trim()
+					const answerText = String(item?.answer || '').trim()
+					const questionKind = 'question-video'
+					const answerKind = 'answer-video'
+					const questionKey = practiceUploadKey(
+						chapterId,
+						questionIndex,
+						questionKind,
+					)
+					const answerKey = practiceUploadKey(
+						chapterId,
+						questionIndex,
+						answerKind,
+					)
+					const copyQuestionKey = `${chapterId}:q:${questionIndex}`
+					const copyAnswerKey = `${chapterId}:a:${questionIndex}`
+
+					return (
+						<li
+							key={`${chapterId}-practice-${questionIndex}`}
+							className='create-tutor__practice-card'
+						>
+							<div className='create-tutor__practice-card-top'>
+								<span className='create-tutor__practice-num'>
+									{String(questionIndex + 1).padStart(2, '0')}
+								</span>
+								<div className='create-tutor__practice-texts'>
+									<div className='create-tutor__practice-text-row'>
+										<p className='create-tutor__practice-question'>
+											{questionText}
+										</p>
+										<button
+											type='button'
+											className='create-tutor__practice-copy'
+											onClick={() => {
+												void handleCopy(
+													copyQuestionKey,
+													questionText,
+												)
+											}}
+											aria-label='Copiar pregunta para HeyGen'
+										>
+											<PracticeCopyGlyph />
+											{copiedKey === copyQuestionKey
+												? 'Copiado'
+												: 'Copiar'}
+										</button>
+									</div>
+									{answerText ? (
+										<div className='create-tutor__practice-text-row'>
+											<p className='create-tutor__practice-answer'>
+												<span className='create-tutor__practice-answer-label'>
+													Respuesta
+												</span>
+												{answerText}
+											</p>
+											<button
+												type='button'
+												className='create-tutor__practice-copy'
+												onClick={() => {
+													void handleCopy(
+														copyAnswerKey,
+														answerText,
+													)
+												}}
+												aria-label='Copiar respuesta para HeyGen'
+											>
+												<PracticeCopyGlyph />
+												{copiedKey === copyAnswerKey
+													? 'Copiado'
+													: 'Copiar'}
+											</button>
+										</div>
+									) : null}
+								</div>
+							</div>
+							<div className='create-tutor__practice-slots'>
+								<PracticeClipSlot
+									label='Video de la pregunta'
+									hint='Suelta el MP4 de HeyGen o explora'
+									variant='question'
+									videoUrl={item?.questionVideoUrl}
+									isUploading={
+										uploadingPracticeKey === questionKey
+									}
+									error={practiceVideoErrors[questionKey]}
+									disabled={Boolean(uploadingPracticeKey)}
+									onUploadClick={() => {
+										onUploadClick(
+											questionIndex,
+											questionKind,
+										)
+									}}
+									onDropFile={(file) => {
+										onDropFile(
+											questionIndex,
+											questionKind,
+											file,
+										)
+									}}
+								/>
+								<PracticeClipSlot
+									label='Video de la respuesta'
+									hint='Suelta el MP4 de HeyGen o explora'
+									variant='answer'
+									videoUrl={item?.answerVideoUrl}
+									isUploading={
+										uploadingPracticeKey === answerKey
+									}
+									error={practiceVideoErrors[answerKey]}
+									disabled={Boolean(uploadingPracticeKey)}
+									onUploadClick={() => {
+										onUploadClick(
+											questionIndex,
+											answerKind,
+										)
+									}}
+									onDropFile={(file) => {
+										onDropFile(
+											questionIndex,
+											answerKind,
+											file,
+										)
+									}}
+								/>
+							</div>
+						</li>
+					)
+				})}
+			</ol>
+		</div>
+	)
+}
+
 function SchoolAdminCreateTutor () {
 	const navigate = useNavigate()
 	const { subjectId } = useParams()
@@ -123,6 +662,7 @@ function SchoolAdminCreateTutor () {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
 	)
+	const [selectedDocumentId, setSelectedDocumentId] = useState('')
 	const [generatingChapterId, setGeneratingChapterId] = useState(null)
 	const [generatingQuestionsChapterId, setGeneratingQuestionsChapterId] =
 		useState(null)
@@ -144,6 +684,11 @@ function SchoolAdminCreateTutor () {
 	const [pendingUploadChapterId, setPendingUploadChapterId] = useState(null)
 	const [pendingTranscribeChapterId, setPendingTranscribeChapterId] =
 		useState(null)
+	const [expandedPracticeChapterId, setExpandedPracticeChapterId] =
+		useState(null)
+	const [uploadingPracticeKey, setUploadingPracticeKey] = useState(null)
+	const [practiceVideoErrors, setPracticeVideoErrors] = useState({})
+	const [pendingPracticeUpload, setPendingPracticeUpload] = useState(null)
 	const [chapterErrors, setChapterErrors] = useState({})
 	const [questionErrors, setQuestionErrors] = useState({})
 	const [videoScriptErrors, setVideoScriptErrors] = useState({})
@@ -155,6 +700,7 @@ function SchoolAdminCreateTutor () {
 	const [transcribeErrors, setTranscribeErrors] = useState({})
 	const videoInputRef = useRef(null)
 	const transcribeInputRef = useRef(null)
+	const practiceVideoInputRef = useRef(null)
 
 	const [generateTutorTxt] = useGenerateChapterTutorTxtFromLessonMutation()
 	const [generateSuggestedQuestions] =
@@ -172,6 +718,8 @@ function SchoolAdminCreateTutor () {
 	const [uploadChapterTutorVideo] = useUploadChapterTutorVideoMutation()
 	const [uploadChapterTutorTranscribe] =
 		useUploadChapterTutorTranscribeMutation()
+	const [uploadSuggestedQuestionVideo] =
+		useUploadSuggestedQuestionVideoMutation()
 
 	const isValidSubjectParam =
 		subjectId != null && OBJECT_ID_RE.test(String(subjectId))
@@ -208,6 +756,41 @@ function SchoolAdminCreateTutor () {
 		return currentSubject.bookChapters
 	}, [currentSubject])
 
+	const subjectDocuments = useMemo(
+		() => getSubjectDocuments(currentSubject),
+		[currentSubject],
+	)
+	const hasDocuments = subjectDocuments.length > 0
+	const requiresSourceDocument = subjectDocuments.length > 1
+
+	const selectedDocument = useMemo(() => {
+		if (!selectedDocumentId) {
+			return undefined
+		}
+		return subjectDocuments.find(
+			(doc) => getDocumentKey(doc) === selectedDocumentId,
+		)
+	}, [subjectDocuments, selectedDocumentId])
+
+	const filteredBookChapters = useMemo(() => {
+		if (!hasDocuments) {
+			return []
+		}
+		if (!selectedDocumentId && requiresSourceDocument) {
+			return []
+		}
+		return bookChapters.filter((chapter) => chapterBelongsToDocument(
+			chapter,
+			selectedDocumentId,
+			requiresSourceDocument,
+		))
+	}, [
+		bookChapters,
+		hasDocuments,
+		requiresSourceDocument,
+		selectedDocumentId,
+	])
+
 	const lessonsByChapterId = useMemo(() => {
 		const map = new Map()
 		for (const lesson of bookLessons) {
@@ -220,8 +803,12 @@ function SchoolAdminCreateTutor () {
 	}, [bookLessons])
 
 	const { rows, groups } = useMemo(
-		() => buildBookIndex(bookChapters, lessonsByChapterId),
-		[bookChapters, lessonsByChapterId],
+		() => buildBookIndex(
+			filteredBookChapters,
+			lessonsByChapterId,
+			BOOK_INDEX_LABELS,
+		),
+		[filteredBookChapters, lessonsByChapterId],
 	)
 
 	const readyCount = rows.filter((row) => row.hasWebVersion).length
@@ -253,8 +840,6 @@ function SchoolAdminCreateTutor () {
 		return map
 	}, [bookChapters])
 
-	const tutorTxtReadyCount = chapterTxtByChapterId.size
-
 	const suggestedQuestionsByChapterId = useMemo(() => {
 		const map = new Map()
 		for (const lesson of bookLessons) {
@@ -262,19 +847,33 @@ function SchoolAdminCreateTutor () {
 			if (!chapterId) {
 				continue
 			}
-			const count = Array.isArray(lesson?.suggestedQuestions)
-				? lesson.suggestedQuestions.length
-				: 0
-			if (count > 0 || lesson?.hasSuggestedQuestions) {
+			const items = Array.isArray(lesson?.suggestedQuestions)
+				? lesson.suggestedQuestions
+					.map((item) => ({
+						question: String(item?.question ?? '').trim(),
+						answer: String(item?.answer ?? '').trim(),
+						questionVideoUrl: String(
+							item?.questionVideoUrl ?? '',
+						).trim(),
+						answerVideoUrl: String(
+							item?.answerVideoUrl ?? '',
+						).trim(),
+					}))
+					.filter((item) => item.question)
+				: []
+			if (items.length > 0 || lesson?.hasSuggestedQuestions) {
+				const counts = clipCountsFromQuestions(items)
 				map.set(String(chapterId), {
-					count: count || 10,
+					count: items.length || counts.questionCount || 10,
+					items,
+					clipCount: counts.clipCount,
+					clipTotal: counts.clipTotal,
+					completeCount: counts.completeCount,
 				})
 			}
 		}
 		return map
 	}, [bookLessons])
-
-	const suggestedQuestionsReadyCount = suggestedQuestionsByChapterId.size
 
 	const videoScriptByChapterId = useMemo(() => {
 		const map = new Map()
@@ -301,8 +900,6 @@ function SchoolAdminCreateTutor () {
 		return map
 	}, [bookLessons])
 
-	const videoScriptReadyCount = videoScriptByChapterId.size
-
 	const videoAudioByChapterId = useMemo(() => {
 		const map = new Map()
 		for (const lesson of bookLessons) {
@@ -324,8 +921,6 @@ function SchoolAdminCreateTutor () {
 		}
 		return map
 	}, [bookLessons])
-
-	const videoAudioReadyCount = videoAudioByChapterId.size
 
 	const sceneIllustrationsByChapterId = useMemo(() => {
 		const map = new Map()
@@ -351,8 +946,6 @@ function SchoolAdminCreateTutor () {
 		}
 		return map
 	}, [bookLessons])
-
-	const sceneIllustrationsReadyCount = sceneIllustrationsByChapterId.size
 
 	const creatomatePendingByChapterId = useMemo(() => {
 		const map = new Map()
@@ -394,8 +987,6 @@ function SchoolAdminCreateTutor () {
 		return map
 	}, [bookLessons])
 
-	const tutorVideoReadyCount = chapterVideoByChapterId.size
-
 	const chapterTranscribeByChapterId = useMemo(() => {
 		const map = new Map()
 		for (const lesson of bookLessons) {
@@ -417,7 +1008,95 @@ function SchoolAdminCreateTutor () {
 		return map
 	}, [bookLessons])
 
-	const tutorTranscribeReadyCount = chapterTranscribeByChapterId.size
+	const filteredChapterIds = useMemo(
+		() => new Set(
+			filteredBookChapters
+				.filter((chapter) => chapter._id)
+				.map((chapter) => String(chapter._id)),
+		),
+		[filteredBookChapters],
+	)
+
+	const countForFilteredChapters = (map) => {
+		let count = 0
+		for (const chapterId of filteredChapterIds) {
+			if (map.has(chapterId)) {
+				count += 1
+			}
+		}
+		return count
+	}
+
+	const filteredTutorTxtReadyCount = countForFilteredChapters(
+		chapterTxtByChapterId,
+	)
+	const filteredSuggestedQuestionsReadyCount = countForFilteredChapters(
+		suggestedQuestionsByChapterId,
+	)
+	const filteredVideoScriptReadyCount = countForFilteredChapters(
+		videoScriptByChapterId,
+	)
+	const filteredVideoAudioReadyCount = countForFilteredChapters(
+		videoAudioByChapterId,
+	)
+	const filteredSceneIllustrationsReadyCount = countForFilteredChapters(
+		sceneIllustrationsByChapterId,
+	)
+	const filteredTutorVideoReadyCount = countForFilteredChapters(
+		chapterVideoByChapterId,
+	)
+	const filteredTutorTranscribeReadyCount = countForFilteredChapters(
+		chapterTranscribeByChapterId,
+	)
+
+	const filteredPracticeVideosReadyCount = useMemo(() => {
+		let ready = 0
+		for (const chapterId of filteredChapterIds) {
+			const meta = suggestedQuestionsByChapterId.get(chapterId)
+			if (meta?.count > 0 && meta.completeCount === meta.count) {
+				ready += 1
+			}
+		}
+		return ready
+	}, [filteredChapterIds, suggestedQuestionsByChapterId])
+
+	const getDocumentChapters = (documentKey) => bookChapters.filter(
+		(chapter) => chapterBelongsToDocument(
+			chapter,
+			documentKey,
+			requiresSourceDocument,
+		),
+	)
+
+	const getDocumentOpenHref = (doc) => {
+		if (doc?.fileUrl) {
+			return String(doc.fileUrl)
+		}
+		if (doc?._id && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/school-admin/documents/${doc._id}`
+		}
+		if (hasDocuments && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/school-admin/book`
+		}
+		return ''
+	}
+
+	const getDocumentChapterCount = (documentKey) =>
+		getDocumentChapters(documentKey).length
+
+	const getDocumentWebLessonCount = (documentKey) => {
+		const chapters = getDocumentChapters(documentKey)
+		const { rows: docRows } = buildBookIndex(chapters, lessonsByChapterId)
+		return docRows.filter((row) => row.hasWebVersion).length
+	}
+
+	const getDocumentTutorTxtCount = (documentKey) => {
+		const chapters = getDocumentChapters(documentKey)
+		return chapters.filter(
+			(chapter) => chapter._id
+				&& chapterTxtByChapterId.has(String(chapter._id)),
+		).length
+	}
 
 	useEffect(() => {
 		if (!schoolAdminInfo) {
@@ -425,8 +1104,31 @@ function SchoolAdminCreateTutor () {
 		}
 	}, [schoolAdminInfo, navigate])
 
+	useEffect(() => {
+		if (subjectDocuments.length === 0) {
+			setSelectedDocumentId('')
+			return
+		}
+		setSelectedDocumentId((prev) => {
+			if (
+				prev
+				&& subjectDocuments.some(
+					(doc) => getDocumentKey(doc) === prev,
+				)
+			) {
+				return prev
+			}
+			return getDocumentKey(subjectDocuments[0])
+		})
+	}, [subjectDocuments])
+
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
+	}
+
+	const handleSelectDocument = (documentKey) => {
+		setSelectedDocumentId(String(documentKey))
+		setExpandedPracticeChapterId(null)
 	}
 
 	const handleGenerateTutorTxt = async (chapterId) => {
@@ -451,7 +1153,7 @@ function SchoolAdminCreateTutor () {
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not generate the tutor text file. Please try again.'
+				|| 'No se pudo generar el archivo de texto del tutor. Intenta de nuevo.'
 			setChapterErrors((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -479,10 +1181,11 @@ function SchoolAdminCreateTutor () {
 				chapterId: String(chapterId),
 			}).unwrap()
 			await refetchLessons()
+			setExpandedPracticeChapterId(String(chapterId))
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not generate suggested questions. Please try again.'
+				|| 'No se pudieron generar las preguntas sugeridas. Intenta de nuevo.'
 			setQuestionErrors((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -513,7 +1216,7 @@ function SchoolAdminCreateTutor () {
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not generate video script. Please try again.'
+				|| 'No se pudo generar el guion de video. Intenta de nuevo.'
 			setVideoScriptErrors((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -544,7 +1247,7 @@ function SchoolAdminCreateTutor () {
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not generate video narration audio. Please try again.'
+				|| 'No se pudo generar el audio de narración. Intenta de nuevo.'
 			setVideoAudioErrors((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -576,7 +1279,7 @@ function SchoolAdminCreateTutor () {
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not generate scene illustrations. Please try again.'
+				|| 'No se pudieron generar las ilustraciones de escena. Intenta de nuevo.'
 			setIllustrationErrors((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -605,7 +1308,7 @@ function SchoolAdminCreateTutor () {
 			}).unwrap()
 			await refetchLessons()
 			const message = result?.message
-				|| 'Creatomate render started. Use Check video status when ready.'
+				|| 'El render de Creatomate comenzó. Usa Revisar estado del video cuando esté listo.'
 			setAnimatedVideoStatusMessages((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -613,7 +1316,7 @@ function SchoolAdminCreateTutor () {
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not generate animated video. Please try again.'
+				|| 'No se pudo generar el video animado. Intenta de nuevo.'
 			setAnimatedVideoErrors((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -643,8 +1346,8 @@ function SchoolAdminCreateTutor () {
 			await refetchLessons()
 			const message = result?.message
 				|| (result?.addedToLesson
-					? 'Video is ready and added to the lesson.'
-					: 'Video is still processing on Creatomate.')
+					? 'El video está listo y se añadió a la lección.'
+					: 'El video aún se está procesando en Creatomate.')
 			setAnimatedVideoStatusMessages((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -652,7 +1355,7 @@ function SchoolAdminCreateTutor () {
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not check video status. Please try again.'
+				|| 'No se pudo revisar el estado del video. Intenta de nuevo.'
 			setAnimatedVideoErrors((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -728,7 +1431,7 @@ function SchoolAdminCreateTutor () {
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not upload the tutor video. Please try again.'
+				|| 'No se pudo subir el video del tutor. Intenta de nuevo.'
 			setVideoErrors((prev) => ({
 				...prev,
 				[chapterId]: message,
@@ -736,6 +1439,92 @@ function SchoolAdminCreateTutor () {
 		} finally {
 			setUploadingChapterId(null)
 		}
+	}
+
+	const handleTogglePracticePanel = (chapterId) => {
+		const nextId = String(chapterId)
+		setExpandedPracticeChapterId((current) => (
+			current === nextId ? null : nextId
+		))
+	}
+
+	const uploadPracticeVideoFile = async (
+		chapterId,
+		questionIndex,
+		videoKind,
+		file,
+	) => {
+		if (!subjectId || !chapterId || !file) {
+			return
+		}
+
+		const uploadKey = practiceUploadKey(
+			chapterId,
+			questionIndex,
+			videoKind,
+		)
+
+		setUploadingPracticeKey(uploadKey)
+		setPracticeVideoErrors((prev) => {
+			const next = { ...prev }
+			delete next[uploadKey]
+			return next
+		})
+
+		try {
+			await uploadSuggestedQuestionVideo({
+				id: subjectId,
+				chapterId,
+				questionIndex,
+				videoKind,
+				video: file,
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'No se pudo subir el video de HeyGen. Intenta de nuevo.'
+			setPracticeVideoErrors((prev) => ({
+				...prev,
+				[uploadKey]: message,
+			}))
+		} finally {
+			setUploadingPracticeKey(null)
+		}
+	}
+
+	const handlePracticeUploadClick = (
+		chapterId,
+		questionIndex,
+		videoKind,
+	) => {
+		if (!subjectId || !chapterId || uploadingPracticeKey) {
+			return
+		}
+		setPendingPracticeUpload({
+			chapterId: String(chapterId),
+			questionIndex,
+			videoKind,
+		})
+		practiceVideoInputRef.current?.click()
+	}
+
+	const handlePracticeVideoFileChange = async (event) => {
+		const file = event.target.files?.[0]
+		const pending = pendingPracticeUpload
+		event.target.value = ''
+		setPendingPracticeUpload(null)
+
+		if (!file || !pending) {
+			return
+		}
+
+		await uploadPracticeVideoFile(
+			pending.chapterId,
+			pending.questionIndex,
+			pending.videoKind,
+			file,
+		)
 	}
 
 	const handleTranscribeFileChange = async (event) => {
@@ -766,7 +1555,7 @@ function SchoolAdminCreateTutor () {
 		} catch (err) {
 			const message = err?.data?.message
 				|| err?.message
-				|| 'Could not upload the video captions. Please try again.'
+				|| 'No se pudieron subir los subtítulos. Intenta de nuevo.'
 			setTranscribeErrors((prev) => ({
 				...prev,
 				[chapterId]: message,
@@ -794,19 +1583,19 @@ function SchoolAdminCreateTutor () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
-											Invalid subject
+											Materia no válida
 										</h1>
 										<p className='login-card__back'>
 											<Link
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</p>
 									</div>
@@ -833,19 +1622,19 @@ function SchoolAdminCreateTutor () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
-											Subject not found
+											Materia no encontrada
 										</h1>
 										<p className='login-card__back'>
 											<Link
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</p>
 									</div>
@@ -860,7 +1649,7 @@ function SchoolAdminCreateTutor () {
 
 	const subjectTitle = currentSubject?.title
 		? String(currentSubject.title)
-		: 'Subject'
+		: 'Materia'
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
@@ -879,7 +1668,7 @@ function SchoolAdminCreateTutor () {
 						'content-area--login-scroll'
 					}
 					>
-						<div className='center-content2 login-screen login-screen--wide'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className={
 								'login-card book-chapters view-book create-tutor'
 							}
@@ -891,28 +1680,27 @@ function SchoolAdminCreateTutor () {
 											to='/schooladmins/mysubjects'
 											className='login-card__link'
 										>
-											← Back to subjects
+											← Volver a las materias
 										</Link>
 									</p>
 									<h1 className='login-card__title'>
-										Create AI tutor
+										Crear tutor con IA
 									</h1>
 									<p className={
 										'login-card__subtitle ' +
 										'login-card__subtitle--wide'
 									}
 									>
-										Generate an AI tutor for each web lesson
-										in{' '}
-										<strong>{subjectTitle}</strong>. Pick a
-										chapter below to start.
+										Elige un PDF fuente y crea tutores con IA
+										para cada lección web de{' '}
+										<strong>{subjectTitle}</strong>.
 									</p>
 									<p className='create-tutor__book-link-wrap'>
 										<Link
 											to={`/schooladmins/viewbook/${subjectId}`}
 											className='create-tutor__book-link'
 										>
-											Open web book index →
+											Abrir índice del libro web →
 										</Link>
 									</p>
 								</div>
@@ -920,8 +1708,8 @@ function SchoolAdminCreateTutor () {
 								{isSubjectsError || isLessonsError ? (
 									<div className='book-chapters__alert'>
 										<p className='book-chapters__alert-text'>
-											We could not load the lessons.
-											Please try again.
+											No pudimos cargar las lecciones.
+											Intenta de nuevo.
 										</p>
 										<button
 											type='button'
@@ -931,57 +1719,249 @@ function SchoolAdminCreateTutor () {
 												void refetchLessons()
 											}}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								) : null}
 
 								<section
-									className='view-book__summary create-tutor__summary'
-									aria-label='Lessons ready for AI tutor'
+									className='book-chapters__book-section'
+									aria-labelledby='create-tutor-doc-heading'
 								>
-									<div className='view-book__summary-card create-tutor__summary-card'>
-										<p className='view-book__summary-label'>
-											Web lessons ready
-										</p>
-										<p className='view-book__summary-value'>
-											{readyCount}/{rows.length}
-										</p>
-										<p className='view-book__summary-hint'>
-											{readyCount === 0
-												? 'Generate web lessons first, then create AI tutors from them.'
-												: `${tutorTxtReadyCount} of ${readyCount} lessons have tutor text files ready · ${suggestedQuestionsReadyCount} have suggested questions · ${videoScriptReadyCount} have video scripts · ${videoAudioReadyCount} have video narration audio · ${sceneIllustrationsReadyCount} have scene illustrations · ${tutorVideoReadyCount} have tutor videos uploaded · ${tutorTranscribeReadyCount} have captions.`}
+									<div className='book-chapters__section-intro'>
+										<h2
+											id='create-tutor-doc-heading'
+											className='book-chapters__section-title'
+										>
+											1. Elegir documento fuente
+										</h2>
+										<p className='book-chapters__section-desc'>
+											Selecciona el PDF cuyos capítulos quieres
+											convertir en tutores con IA. Cada
+											documento tiene su propio flujo abajo.
 										</p>
 									</div>
-									<Link
-										to={`/schooladmins/generatelessons/${subjectId}`}
-										className='view-book__summary-link'
-									>
-										Manage lessons →
-									</Link>
+
+									{isLoadingSubjects && !currentSubject ? (
+										<p className='book-chapters__loading'>
+											Cargando documentos…
+										</p>
+									) : hasDocuments ? (
+										<div
+											className='book-chapters__doc-picker'
+											role='listbox'
+											aria-label='Documentos fuente'
+										>
+											{subjectDocuments.map((doc) => {
+												const docKey = getDocumentKey(doc)
+												const openHref = getDocumentOpenHref(doc)
+												const isSelected =
+													selectedDocumentId === docKey
+												const chapterCount =
+													getDocumentChapterCount(docKey)
+												const webLessonCount =
+													getDocumentWebLessonCount(docKey)
+												const tutorTxtCount =
+													getDocumentTutorTxtCount(docKey)
+
+												return (
+													<button
+														key={docKey}
+														type='button'
+														role='option'
+														aria-selected={isSelected}
+														className={
+															'book-chapters__doc-card' +
+															(isSelected
+																? ' book-chapters__doc-card--selected'
+																: '')
+														}
+														onClick={() =>
+															handleSelectDocument(docKey)}
+													>
+														{isSelected ? (
+															<span
+																className='book-chapters__doc-card-check'
+																aria-hidden
+															>
+																✓
+															</span>
+														) : null}
+														<span className='book-chapters__doc-card-icon'>
+															<DocumentPdfGlyph />
+														</span>
+														<span className='book-chapters__doc-card-body'>
+															<span className='book-chapters__doc-card-name'>
+																{documentDisplayName(doc)}
+															</span>
+															<span className='book-chapters__doc-card-meta'>
+																<span className='book-chapters__doc-card-count'>
+																	{webLessonCount}/
+																	{chapterCount}{' '}
+																	{chapterCount === 1
+																		? 'lección'
+																		: 'lecciones'}
+																</span>
+																{tutorTxtCount > 0 ? (
+																	<span className='create-tutor__doc-card-tutors'>
+																		{tutorTxtCount}{' '}
+																		{tutorTxtCount === 1
+																			? 'tutor'
+																			: 'tutores'}
+																	</span>
+																) : null}
+																{openHref ? (
+																	<a
+																		href={openHref}
+																		className='book-chapters__doc-card-link'
+																		target='_blank'
+																		rel='noopener noreferrer'
+																		onClick={(e) =>
+																			e.stopPropagation()}
+																	>
+																		Abrir PDF
+																		<span
+																			className='teacher-book-upload__open-link-icon'
+																			aria-hidden
+																		>
+																			↗
+																		</span>
+																	</a>
+																) : null}
+															</span>
+														</span>
+													</button>
+												)
+											})}
+										</div>
+									) : (
+										<div
+											className='book-chapters__empty-book'
+											role='status'
+										>
+											<div className='book-chapters__empty-book-icon'>
+												<BookGlyph />
+											</div>
+											<p className='book-chapters__empty-book-title'>
+												Aún no hay PDFs fuente subidos
+											</p>
+											<p className='book-chapters__empty-book-text'>
+												Sube PDFs en la página de editar
+												materia antes de crear tutores con IA.
+											</p>
+											<Link
+												to={`/schooladmins/editsubject/${subjectId}`}
+												className='book-chapters__empty-book-link'
+											>
+												Ir a editar materia
+											</Link>
+										</div>
+									)}
 								</section>
 
-								{isLoadingSubjects || isLoadingLessons ? (
-									<p className='book-chapters__loading'>
-										Loading lessons…
-									</p>
-								) : readyCount === 0 ? (
-									<div className='book-chapters__empty-chapters'>
-										<p className='book-chapters__empty-chapters-title'>
-											No web lessons yet
-										</p>
-										<p className='book-chapters__empty-chapters-text'>
-											Generate web versions from chapter
-											PDFs before creating AI tutors.
-										</p>
+								<section
+									className={
+										'book-chapters__list-section' +
+										(!hasDocuments
+											? ' book-chapters__list-section--hidden'
+											: '')
+									}
+									aria-labelledby='create-tutor-workflow-heading'
+								>
+									<div className='book-chapters__list-header'>
+										<div>
+											<h2
+												id='create-tutor-workflow-heading'
+												className='book-chapters__section-title'
+											>
+												2. Crear flujo del tutor con IA
+											</h2>
+											<p className='book-chapters__section-desc'>
+												{selectedDocument
+													? (
+														<>
+															Creando tutores con IA de{' '}
+															<strong>
+																{documentDisplayName(
+																	selectedDocument,
+																)}
+															</strong>
+															. Genera el texto del
+															tutor, videos de práctica,
+															guiones y archivos por
+															capítulo.
+														</>
+													)
+													: 'Selecciona un documento fuente arriba para empezar el flujo del tutor.'}
+											</p>
+										</div>
+										{rows.length > 0 ? (
+											<span className='book-chapters__count'>
+												{readyCount}/{rows.length}{' '}
+												listas
+											</span>
+										) : null}
+									</div>
+
+									<section
+										className='view-book__summary create-tutor__summary'
+										aria-label='Lecciones listas para el tutor con IA'
+									>
+										<div className='view-book__summary-card create-tutor__summary-card'>
+											<p className='view-book__summary-label'>
+												Lecciones web listas
+											</p>
+											<p className='view-book__summary-value'>
+												{readyCount}/{rows.length}
+											</p>
+											<p className='view-book__summary-hint'>
+												{readyCount === 0
+													? 'Primero genera lecciones web para este documento y luego crea tutores con IA a partir de ellas.'
+													: `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas · ${filteredPracticeVideosReadyCount} tienen todos los videos de práctica de HeyGen · ${filteredVideoScriptReadyCount} tienen guion de video · ${filteredVideoAudioReadyCount} tienen audio de narración · ${filteredSceneIllustrationsReadyCount} tienen ilustraciones de escena · ${filteredTutorVideoReadyCount} tienen video del tutor · ${filteredTutorTranscribeReadyCount} tienen subtítulos.`}
+											</p>
+										</div>
 										<Link
 											to={`/schooladmins/generatelessons/${subjectId}`}
-											className='book-chapters__empty-chapters-link'
+											className='view-book__summary-link'
 										>
-											Go to generate lessons
+											Gestionar lecciones →
 										</Link>
-									</div>
-								) : (
+									</section>
+
+									{!hasDocuments ? null : isLoadingSubjects || isLoadingLessons ? (
+										<p className='book-chapters__loading'>
+											Cargando lecciones…
+										</p>
+									) : !selectedDocumentId && requiresSourceDocument ? (
+										<div className='book-chapters__select-doc-prompt'>
+											<p className='book-chapters__select-doc-prompt-title'>
+												Elige un documento para continuar
+											</p>
+											<p className='book-chapters__select-doc-prompt-text'>
+												Selecciona uno de tus PDFs fuente
+												arriba para empezar el flujo del
+												tutor con IA de sus capítulos.
+											</p>
+										</div>
+									) : readyCount === 0 ? (
+										<div className='book-chapters__empty-chapters'>
+											<p className='book-chapters__empty-chapters-title'>
+												Aún no hay lecciones web para este
+												documento
+											</p>
+											<p className='book-chapters__empty-chapters-text'>
+												Genera las versiones web a partir
+												de los PDF de capítulo antes de
+												crear tutores con IA.
+											</p>
+											<Link
+												to={`/schooladmins/generatelessons/${subjectId}`}
+												className='book-chapters__empty-chapters-link'
+											>
+												Ir a generar lecciones
+											</Link>
+										</div>
+									) : (
 									<>
 										<input
 											ref={videoInputRef}
@@ -999,6 +1979,17 @@ function SchoolAdminCreateTutor () {
 											className='create-tutor__video-input'
 											onChange={(event) => {
 												void handleTranscribeFileChange(event)
+											}}
+										/>
+										<input
+											ref={practiceVideoInputRef}
+											type='file'
+											accept='video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov'
+											className='create-tutor__video-input'
+											onChange={(event) => {
+												void handlePracticeVideoFileChange(
+													event,
+												)
 											}}
 										/>
 										<div className='view-book__groups'>
@@ -1069,6 +2060,18 @@ function SchoolAdminCreateTutor () {
 														)
 														const hasSuggestedQuestions = Boolean(
 															questionsMeta?.count > 0,
+														)
+														const practiceQuestions = Array.isArray(
+															questionsMeta?.items,
+														)
+															? questionsMeta.items
+															: []
+														const isPracticePanelOpen =
+															expandedPracticeChapterId === chapterKey
+														const arePracticeVideosComplete = Boolean(
+															questionsMeta?.count > 0
+															&& questionsMeta.completeCount
+																=== questionsMeta.count,
 														)
 														const hasVideoScript = Boolean(
 															videoScriptMeta?.sceneCount > 0,
@@ -1148,7 +2151,12 @@ function SchoolAdminCreateTutor () {
 																row.chapterId
 																|| `chapter-${row.chapterNumber}`
 															}
-															className='view-book__item create-tutor__item'
+															className={
+																'view-book__item create-tutor__item' +
+																(isPracticePanelOpen
+																	? ' create-tutor__item--practice-open'
+																	: '')
+															}
 														>
 															<div className='view-book__item-main'>
 																<span className='view-book__item-num'>
@@ -1177,7 +2185,7 @@ function SchoolAdminCreateTutor () {
 																		target='_blank'
 																		rel='noopener noreferrer'
 																	>
-																		Preview web lesson
+																		Vista previa de la lección web
 																		<span
 																			className='teacher-book-upload__open-link-icon'
 																			aria-hidden
@@ -1193,7 +2201,7 @@ function SchoolAdminCreateTutor () {
 																				target='_blank'
 																				rel='noopener noreferrer'
 																			>
-																				Open tutor text file
+																				Abrir archivo de texto del tutor
 																				<span
 																					className='teacher-book-upload__open-link-icon'
 																					aria-hidden
@@ -1211,7 +2219,7 @@ function SchoolAdminCreateTutor () {
 																				target='_blank'
 																				rel='noopener noreferrer'
 																			>
-																				Open tutor video
+																				Abrir video del tutor
 																				<span
 																					className='teacher-book-upload__open-link-icon'
 																					aria-hidden
@@ -1232,7 +2240,7 @@ function SchoolAdminCreateTutor () {
 																				target='_blank'
 																				rel='noopener noreferrer'
 																			>
-																				Open video captions
+																				Abrir subtítulos del video
 																				<span
 																					className='teacher-book-upload__open-link-icon'
 																					aria-hidden
@@ -1254,9 +2262,11 @@ function SchoolAdminCreateTutor () {
 																	) : null}
 																	{hasSuggestedQuestions ? (
 																		<p className='create-tutor__questions-status'>
-																			{questionsMeta.count} suggested
-																			{' '}
-																			questions ready for students
+																			{questionsMeta.count}{' '}
+																			preguntas sugeridas listas
+																			{questionsMeta.clipTotal > 0
+																				? ` · ${questionsMeta.clipCount}/${questionsMeta.clipTotal} clips de HeyGen subidos`
+																				: ''}
 																		</p>
 																	) : null}
 																	{videoScriptError ? (
@@ -1266,9 +2276,12 @@ function SchoolAdminCreateTutor () {
 																	) : null}
 																	{hasVideoScript ? (
 																		<p className='create-tutor__video-script-status'>
-																			Video script ready
+																			Guion de video listo
 																			{' '}
-																			({videoScriptMeta.sceneCount} scenes
+																			({videoScriptMeta.sceneCount}{' '}
+																			{videoScriptMeta.sceneCount === 1
+																				? 'escena'
+																				: 'escenas'}
 																			{videoScriptMeta.estimatedDurationSeconds > 0
 																				? ` · ~${Math.round(
 																					videoScriptMeta.estimatedDurationSeconds / 60,
@@ -1284,7 +2297,7 @@ function SchoolAdminCreateTutor () {
 																	) : null}
 																	{hasVideoAudio ? (
 																		<p className='create-tutor__video-audio-status'>
-																			Video narration audio ready
+																			Audio de narración listo
 																			{videoAudioMeta?.videoScriptAudioFileUrl ? (
 																				<>
 																					{' '}
@@ -1297,7 +2310,7 @@ function SchoolAdminCreateTutor () {
 																						target='_blank'
 																						rel='noopener noreferrer'
 																					>
-																						listen
+																						escuchar
 																					</a>
 																					)
 																				</>
@@ -1311,43 +2324,45 @@ function SchoolAdminCreateTutor () {
 																	) : null}
 																	{hasAnySceneIllustrations ? (
 																		<p className='create-tutor__illustrations-status'>
-																			Scene illustrations ready
+																			Ilustraciones de escena listas
 																			{' '}
 																			({illustrationsMeta.count}
 																			{illustrationsMeta.total > 0
-																				? ` of ${illustrationsMeta.total}`
+																				? ` de ${illustrationsMeta.total}`
 																				: ''}
 																			{' '}
-																			scenes
+																			{illustrationsMeta.total === 1
+																				? 'escena'
+																				: 'escenas'}
 																			{hasSceneIllustrations
 																				? ''
-																				: ' · incomplete'}
+																				: ' · incompleto'}
 																			)
 																		</p>
 																	) : null}
 																	{hasCreatomatePending ? (
 																		<p className='create-tutor__creatomate-pending-status'>
-																			Creatomate render in progress
+																			Render de Creatomate en curso
 																			{creatomatePendingMeta?.creatomateRenderStatus
 																				? ` (${creatomatePendingMeta.creatomateRenderStatus})`
 																				: ''}
 																			{' '}
-																			— use Check video status.
+																			— usa Revisar estado del video.
 																		</p>
 																	) : null}
 																	{animatedVideoStatusMessage ? (
 																		<p className={
-																			animatedVideoStatusMessage
-																				.toLowerCase()
-																				.includes('added to the lesson')
+																			isVideoAddedToLessonMessage(
+																				animatedVideoStatusMessage,
+																			)
 																				? 'create-tutor__animated-video-success'
 																				: 'create-tutor__creatomate-pending-status'
 																		}
 																		>
 																			{animatedVideoStatusMessage}
-																			{animatedVideoStatusMessage
-																				.toLowerCase()
-																				.includes('added to the lesson')
+																			{isVideoAddedToLessonMessage(
+																				animatedVideoStatusMessage,
+																			)
 																				&& videoMeta?.chapterVideoFileUrl ? (
 																					<>
 																						{' '}
@@ -1360,7 +2375,7 @@ function SchoolAdminCreateTutor () {
 																							target='_blank'
 																							rel='noopener noreferrer'
 																						>
-																							watch
+																							ver
 																						</a>
 																						)
 																					</>
@@ -1408,10 +2423,10 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingThis
-																			? 'Extracting lesson text…'
+																			? 'Extrayendo texto de la lección…'
 																			: hasTutorTxt
-																				? 'Regenerate AI tutor for this lesson'
-																				: 'Generate AI tutor for this lesson'}
+																				? 'Regenerar tutor con IA para esta lección'
+																				: 'Generar tutor con IA para esta lección'}
 																	</span>
 																</button>
 																<button
@@ -1434,11 +2449,52 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingQuestionsThis
-																			? 'Generating questions…'
+																			? 'Generando preguntas…'
 																			: hasSuggestedQuestions
-																				? 'Regenerate 10 suggested questions'
-																				: 'Generate 10 suggested questions'}
+																				? 'Regenerar 10 preguntas sugeridas'
+																				: 'Generar 10 preguntas sugeridas'}
 																	</span>
+																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--practice' +
+																		(!hasSuggestedQuestions
+																			? ' create-tutor__generate-btn--disabled'
+																			: '')
+																	}
+																	disabled={!hasSuggestedQuestions}
+																	title={
+																		!hasSuggestedQuestions
+																			? 'Primero genera las 10 preguntas'
+																			: undefined
+																	}
+																	onClick={() => {
+																		handleTogglePracticePanel(
+																			chapterKey,
+																		)
+																	}}
+																>
+																	<span className='create-tutor__generate-btn-icon'>
+																		<TutorVideoUploadGlyph />
+																	</span>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isPracticePanelOpen
+																			? 'Ocultar videos de práctica de HeyGen'
+																			: (arePracticeVideosComplete
+																				? 'Revisar videos de práctica de HeyGen'
+																				: 'Subir videos de práctica de HeyGen')}
+																	</span>
+																	{hasSuggestedQuestions ? (
+																		<span className='create-tutor__generate-btn-hint'>
+																			{questionsMeta.completeCount}/{questionsMeta.count} preguntas completas
+																		</span>
+																	) : (
+																		<span className='create-tutor__generate-btn-hint'>
+																			1 video de pregunta + 1 video de respuesta
+																		</span>
+																	)}
 																</button>
 																<button
 																	type='button'
@@ -1460,10 +2516,10 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingVideoScriptThis
-																			? 'Generating video script…'
+																			? 'Generando guion de video…'
 																			: hasVideoScript
-																				? 'Regenerate video script'
-																				: 'Generate video script'}
+																				? 'Regenerar guion de video'
+																				: 'Generar guion de video'}
 																	</span>
 																</button>
 																<button
@@ -1478,7 +2534,7 @@ function SchoolAdminCreateTutor () {
 																	disabled={videoAudioDisabled}
 																	title={
 																		!hasVideoScript
-																			? 'Generate the video script first'
+																			? 'Primero genera el guion de video'
 																			: undefined
 																	}
 																	onClick={() =>
@@ -1491,10 +2547,10 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingVideoAudioThis
-																			? 'Generating video audio…'
+																			? 'Generando audio del video…'
 																			: hasVideoAudio
-																				? 'Regenerate video narration audio'
-																				: 'Generate video narration audio'}
+																				? 'Regenerar audio de narración'
+																				: 'Generar audio de narración'}
 																	</span>
 																</button>
 																<button
@@ -1509,8 +2565,8 @@ function SchoolAdminCreateTutor () {
 																	disabled={illustrationsDisabled}
 																	title={
 																		!hasVideoScript
-																			? 'Generate the video script first'
-																			: 'Uses OpenAI gpt-image-1-mini (~$0.10–0.20 per chapter)'
+																			? 'Primero genera el guion de video'
+																			: 'Usa OpenAI gpt-image-1-mini (~$0.10–0.20 por capítulo)'
 																	}
 																	onClick={() =>
 																		void handleGenerateSceneIllustrations(
@@ -1523,15 +2579,15 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingIllustrationsThis
-																			? 'Generating scene illustrations…'
+																			? 'Generando ilustraciones de escena…'
 																			: hasSceneIllustrations
-																				? 'Regenerate scene illustrations'
+																				? 'Regenerar ilustraciones de escena'
 																				: hasAnySceneIllustrations
-																					? 'Finish remaining illustrations'
-																					: 'Generate scene illustrations'}
+																					? 'Terminar ilustraciones restantes'
+																					: 'Generar ilustraciones de escena'}
 																	</span>
 																	<span className='create-tutor__generate-btn-hint'>
-																		OpenAI images · one illustration per scene
+																		Imágenes de OpenAI · una ilustración por escena
 																	</span>
 																</button>
 																<button
@@ -1546,10 +2602,10 @@ function SchoolAdminCreateTutor () {
 																	disabled={animatedVideoDisabled}
 																	title={
 																		!hasVideoAudio
-																			? 'Generate the video narration audio first'
+																			? 'Primero genera el audio de narración'
 																			: !hasSceneIllustrations
-																				? 'Tip: generate scene illustrations first for richer visuals'
-																				: 'Renders with Creatomate (may take several minutes)'
+																				? 'Consejo: genera primero las ilustraciones de escena para un visual más rico'
+																				: 'Se renderiza con Creatomate (puede tardar varios minutos)'
 																	}
 																	onClick={() =>
 																		void handleGenerateAnimatedVideo(
@@ -1561,15 +2617,15 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingAnimatedVideoThis
-																			? 'Starting Creatomate render…'
+																			? 'Iniciando render en Creatomate…'
 																			: hasCreatomatePending
-																				? 'Start new Creatomate render'
+																				? 'Iniciar un render nuevo en Creatomate'
 																				: hasTutorVideo
-																					? 'Regenerate Creatomate video'
-																					: 'Generate Creatomate video'}
+																					? 'Regenerar video de Creatomate'
+																					: 'Generar video de Creatomate'}
 																	</span>
 																	<span className='create-tutor__generate-btn-hint'>
-																		Starts render on Creatomate · then Check video status
+																		Inicia el render en Creatomate · luego revisa el estado del video
 																	</span>
 																</button>
 																<button
@@ -1584,8 +2640,8 @@ function SchoolAdminCreateTutor () {
 																	disabled={checkVideoStatusDisabled}
 																	title={
 																		!hasCreatomatePending
-																			? 'Start a Creatomate render first'
-																			: 'Check if Creatomate finished and add video to lesson'
+																			? 'Primero inicia un render en Creatomate'
+																			: 'Revisa si Creatomate terminó y añade el video a la lección'
 																	}
 																	onClick={() =>
 																		void handleCheckVideoStatus(
@@ -1597,8 +2653,8 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isCheckingVideoStatusThis
-																			? 'Checking video status…'
-																			: 'Check video status'}
+																			? 'Revisando estado del video…'
+																			: 'Revisar estado del video'}
 																	</span>
 																</button>
 																<button
@@ -1612,7 +2668,7 @@ function SchoolAdminCreateTutor () {
 																	disabled={uploadDisabled}
 																	title={
 																		!hasTutorTxt
-																			? 'Generate the tutor text file first'
+																			? 'Primero genera el archivo de texto del tutor'
 																			: undefined
 																	}
 																	onClick={() =>
@@ -1623,13 +2679,13 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__upload-video-btn-title'>
 																		{isUploadingThis
-																			? 'Uploading video…'
+																			? 'Subiendo video…'
 																			: hasTutorVideo
-																				? 'Replace tutor video'
-																				: 'Upload HeyGen video'}
+																				? 'Reemplazar video del tutor'
+																				: 'Subir video de HeyGen'}
 																	</span>
 																	<span className='create-tutor__upload-video-btn-hint'>
-																		MP4, WebM or MOV · up to 500 MB
+																		MP4, WebM o MOV · hasta 500 MB
 																	</span>
 																</button>
 																<button
@@ -1643,7 +2699,7 @@ function SchoolAdminCreateTutor () {
 																	disabled={transcribeUploadDisabled}
 																	title={
 																		!hasTutorVideo
-																			? 'Upload the tutor video first'
+																			? 'Primero sube el video del tutor'
 																			: undefined
 																	}
 																	onClick={() =>
@@ -1654,16 +2710,51 @@ function SchoolAdminCreateTutor () {
 																	</span>
 																	<span className='create-tutor__upload-transcribe-btn-title'>
 																		{isUploadingTranscribeThis
-																			? 'Uploading captions…'
+																			? 'Subiendo subtítulos…'
 																			: hasTutorTranscribe
-																				? 'Replace video captions'
-																				: 'Upload video captions'}
+																				? 'Reemplazar subtítulos'
+																				: 'Subir subtítulos del video'}
 																	</span>
 																	<span className='create-tutor__upload-transcribe-btn-hint'>
-																		SRT from HeyGen · converted to VTT
+																		SRT de HeyGen · se convierte a VTT
 																	</span>
 																</button>
 															</div>
+															{isPracticePanelOpen
+																&& hasSuggestedQuestions ? (
+																<PracticeVideosPanel
+																	chapterId={chapterKey}
+																	questions={practiceQuestions}
+																	uploadingPracticeKey={
+																		uploadingPracticeKey
+																	}
+																	practiceVideoErrors={
+																		practiceVideoErrors
+																	}
+																	onUploadClick={(
+																		questionIndex,
+																		videoKind,
+																	) => {
+																		handlePracticeUploadClick(
+																			chapterKey,
+																			questionIndex,
+																			videoKind,
+																		)
+																	}}
+																	onDropFile={(
+																		questionIndex,
+																		videoKind,
+																		file,
+																	) => {
+																		void uploadPracticeVideoFile(
+																			chapterKey,
+																			questionIndex,
+																			videoKind,
+																			file,
+																		)
+																	}}
+																/>
+															) : null}
 														</li>
 														)
 													})}
@@ -1673,6 +2764,7 @@ function SchoolAdminCreateTutor () {
 										</div>
 									</>
 								)}
+								</section>
 							</div>
 						</div>
 					</div>

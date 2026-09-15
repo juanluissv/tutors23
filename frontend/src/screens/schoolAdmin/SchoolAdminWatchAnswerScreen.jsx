@@ -42,10 +42,10 @@ function isLikelyMongoId (value) {
 
 function teacherDisplayName (teacher) {
 	if (!teacher || typeof teacher !== 'object') {
-		return 'Teacher'
+		return 'Profesor'
 	}
 	const parts = [teacher.firstname, teacher.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Teacher'
+	return parts.length > 0 ? parts.join(' ') : 'Profesor'
 }
 
 function formatAnswerDate (value) {
@@ -56,7 +56,7 @@ function formatAnswerDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return ''
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
@@ -155,7 +155,7 @@ function SchoolAdminWatchAnswerScreen () {
 	const subjectTitle =
 		answer?.subject && typeof answer.subject === 'object'
 			? answer.subject.title
-			: 'Subject'
+			: 'Materia'
 	const subjectColor = answer
 		? subjectThemeForAnswerId(answer._id)
 		: 'sky'
@@ -170,7 +170,7 @@ function SchoolAdminWatchAnswerScreen () {
 		const t = answer?.title
 		return t != null && String(t).trim() !== ''
 			? String(t).trim()
-			: 'Question'
+			: 'Pregunta'
 	}, [answer])
 
 	const [isPlaying, setIsPlaying] = useState(false)
@@ -179,6 +179,7 @@ function SchoolAdminWatchAnswerScreen () {
 	const [duration, setDuration] = useState(0)
 	const videoRef = useRef(null)
 	const videoAreaRef = useRef(null)
+	const progressRef = useRef(null)
 
 	const [volume, setVolume] = useState(1)
 	const [isMuted, setIsMuted] = useState(false)
@@ -224,23 +225,48 @@ function SchoolAdminWatchAnswerScreen () {
 	}, [videoSrc, answerId])
 
 	useEffect(() => {
-		const onFsChange = () => {
-			const area = videoAreaRef.current
+		const isVideoFullscreen = (video) => {
+			if (!video) {
+				return false
+			}
 			const doc = document
-			const active = area
-				&& (
-					doc.fullscreenElement === area
-					|| doc.webkitFullscreenElement === area
-				)
-			setIsFullscreen(!!active)
+			return (
+				doc.fullscreenElement === video
+				|| doc.webkitFullscreenElement === video
+				|| video.webkitDisplayingFullscreen === true
+			)
+		}
+		const onFsChange = () => {
+			const v = videoRef.current
+			const active = isVideoFullscreen(v)
+			setIsFullscreen(active)
+			if (v) {
+				v.controls = active
+			}
 		}
 		document.addEventListener('fullscreenchange', onFsChange)
 		document.addEventListener('webkitfullscreenchange', onFsChange)
+		const v = videoRef.current
+		if (v) {
+			v.addEventListener('webkitbeginfullscreen', onFsChange)
+			v.addEventListener('webkitendfullscreen', onFsChange)
+		}
 		return () => {
 			document.removeEventListener('fullscreenchange', onFsChange)
-			document.removeEventListener('webkitfullscreenchange', onFsChange)
+			document.removeEventListener(
+				'webkitfullscreenchange',
+				onFsChange,
+			)
+			if (v) {
+				v.removeEventListener(
+					'webkitbeginfullscreen',
+					onFsChange,
+				)
+				v.removeEventListener('webkitendfullscreen', onFsChange)
+				v.controls = false
+			}
 		}
-	}, [])
+	}, [videoSrc, answerId])
 
 	useEffect(() => {
 		setIsPlaying(false)
@@ -292,6 +318,76 @@ function SchoolAdminWatchAnswerScreen () {
 		}
 	}
 
+	const seekFromClientX = (clientX) => {
+		const v = videoRef.current
+		const bar = progressRef.current
+		if (!v || !bar || !videoSrc) {
+			return
+		}
+		const dur = v.duration
+		if (!Number.isFinite(dur) || dur <= 0) {
+			return
+		}
+		const rect = bar.getBoundingClientRect()
+		if (rect.width <= 0) {
+			return
+		}
+		const ratio = Math.min(
+			1,
+			Math.max(0, (clientX - rect.left) / rect.width),
+		)
+		const nextTime = ratio * dur
+		v.currentTime = nextTime
+		setCurrentTime(nextTime)
+		setProgressPct(ratio * 100)
+	}
+
+	const handleSeek = (e) => {
+		const v = videoRef.current
+		if (!v || !videoSrc) {
+			return
+		}
+		const dur = v.duration
+		if (!Number.isFinite(dur) || dur <= 0) {
+			return
+		}
+		const ratio = parseFloat(e.target.value)
+		if (!Number.isFinite(ratio)) {
+			return
+		}
+		const nextTime = Math.min(dur, Math.max(0, ratio * dur))
+		v.currentTime = nextTime
+		setCurrentTime(nextTime)
+		setProgressPct((nextTime / dur) * 100)
+	}
+
+	const handleProgressPointerDown = (e) => {
+		if (!videoSrc) {
+			return
+		}
+		if (e.pointerType === 'mouse' && e.button !== 0) {
+			return
+		}
+		e.preventDefault()
+		const bar = progressRef.current
+		if (bar && typeof bar.setPointerCapture === 'function') {
+			bar.setPointerCapture(e.pointerId)
+		}
+		seekFromClientX(e.clientX)
+	}
+
+	const handleProgressPointerMove = (e) => {
+		const bar = progressRef.current
+		if (
+			!bar
+			|| typeof bar.hasPointerCapture !== 'function'
+			|| !bar.hasPointerCapture(e.pointerId)
+		) {
+			return
+		}
+		seekFromClientX(e.clientX)
+	}
+
 	const handleVolumeChange = (e) => {
 		const v = videoRef.current
 		if (!v || !videoSrc) {
@@ -311,23 +407,31 @@ function SchoolAdminWatchAnswerScreen () {
 	}
 
 	const handleFullscreenToggle = () => {
-		const area = videoAreaRef.current
-		if (!area || !videoSrc) {
+		const v = videoRef.current
+		if (!v || !videoSrc) {
 			return
 		}
 		const doc = document
-		const active = doc.fullscreenElement === area
-			|| doc.webkitFullscreenElement === area
+		const active = doc.fullscreenElement === v
+			|| doc.webkitFullscreenElement === v
+			|| v.webkitDisplayingFullscreen === true
 		if (active) {
 			if (doc.exitFullscreen) {
 				void doc.exitFullscreen()
 			} else if (doc.webkitExitFullscreen) {
 				void doc.webkitExitFullscreen()
+			} else if (v.webkitExitFullscreen) {
+				v.webkitExitFullscreen()
 			}
-		} else if (area.requestFullscreen) {
-			void area.requestFullscreen()
-		} else if (area.webkitRequestFullscreen) {
-			void area.webkitRequestFullscreen()
+			return
+		}
+		v.controls = true
+		if (v.requestFullscreen) {
+			void v.requestFullscreen()
+		} else if (v.webkitRequestFullscreen) {
+			void v.webkitRequestFullscreen()
+		} else if (v.webkitEnterFullscreen) {
+			v.webkitEnterFullscreen()
 		}
 	}
 
@@ -335,9 +439,11 @@ function SchoolAdminWatchAnswerScreen () {
 		duration > 0 ? Math.max(0, duration - currentTime) : 0
 	const timeLabel =
 		duration > 0 ? `-${formatPlaybackClock(remaining)}` : '0:00'
+	const seekValue = duration > 0 ? currentTime / duration : 0
 
 	const errorMessage =
-		error?.data?.message || error?.error || 'Could not load this answer.'
+		error?.data?.message || error?.error
+		|| 'No se pudo cargar esta respuesta.'
 
 	if (!schoolAdminInfo) {
 		return null
@@ -356,25 +462,27 @@ function SchoolAdminWatchAnswerScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area'>
-						<div className='watch-new'>
+						<div className='watch-new watch-new--medium-player'>
 							{!canFetch && (
 								<>
 									<p className='watch-new__description'>
-										Missing or invalid answer link. Open an answer from the
-										list.
+										El enlace de la respuesta falta o no es
+										válido. Abre una respuesta desde la lista.
 									</p>
 									<Link
 										to='/schooladmins/mysubjects'
 										className='watch-new__answer-btn'
 										style={{ marginTop: '1rem', display: 'inline-block' }}
 									>
-										Go to My Subjects
+										Ir a mis materias
 									</Link>
 								</>
 							)}
 
 							{canFetch && isLoading && (
-								<p className='watch-new__description'>Loading answer…</p>
+								<p className='watch-new__description'>
+									Cargando respuesta…
+								</p>
 							)}
 
 							{canFetch && isError && (
@@ -386,7 +494,7 @@ function SchoolAdminWatchAnswerScreen () {
 										style={{ marginTop: '0.5rem' }}
 										onClick={() => refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -424,18 +532,6 @@ function SchoolAdminWatchAnswerScreen () {
 											role={videoSrc ? 'button' : undefined}
 											tabIndex={videoSrc ? 0 : undefined}
 										>
-											{videoSrc && isFullscreen ? (
-												<button
-													type='button'
-													className='watch-new__fs-exit'
-													onClick={(e) => {
-														e.stopPropagation()
-														handleFullscreenToggle()
-													}}
-												>
-													Exit full screen
-												</button>
-											) : null}
 											<video
 												key={`${answerId}-${videoSrc ? '1' : '0'}`}
 												ref={videoRef}
@@ -445,11 +541,13 @@ function SchoolAdminWatchAnswerScreen () {
 												preload='metadata'
 												onTimeUpdate={handleTimeUpdate}
 												onLoadedMetadata={handleLoadedMetadata}
+												onDurationChange={handleLoadedMetadata}
 											/>
 											{!videoSrc && (
 												<div className='watch-new__video-placeholder'>
 													<p className='watch-new__description'>
-														No video uploaded for this answer yet.
+														Aún no hay video para esta
+														respuesta.
 													</p>
 													<div className='watch-new__placeholder-lines'>
 														<div className='watch-new__ph-line' />
@@ -459,7 +557,7 @@ function SchoolAdminWatchAnswerScreen () {
 													</div>
 												</div>
 											)}
-											{videoSrc && (
+											{videoSrc && !isFullscreen && (
 												<button
 													type='button'
 													className={
@@ -472,21 +570,28 @@ function SchoolAdminWatchAnswerScreen () {
 														e.stopPropagation()
 														handlePlayToggle()
 													}}
-													aria-label={isPlaying ? 'Pause' : 'Play'}
+													aria-label={
+														isPlaying
+															? 'Pausar'
+															: 'Reproducir'
+													}
 												>
 													<PlayIconLarge />
 												</button>
 											)}
 										</div>
 
-										{!isFullscreen ? (
-											<div className='watch-new__controls'>
+										<div className='watch-new__controls'>
 												<button
 													type='button'
 													className='watch-new__ctrl-btn'
 													onClick={handlePlayToggle}
 													disabled={!videoSrc}
-													aria-label={isPlaying ? 'Pause' : 'Play'}
+													aria-label={
+														isPlaying
+															? 'Pausar'
+															: 'Reproducir'
+													}
 												>
 													{isPlaying ? (
 														<svg width='16' height='16' viewBox='0 0 24 24' fill='#475569'>
@@ -499,7 +604,16 @@ function SchoolAdminWatchAnswerScreen () {
 														</svg>
 													)}
 												</button>
-												<div className='watch-new__progress'>
+												<div
+													ref={progressRef}
+													className='watch-new__progress'
+													onPointerDown={
+														handleProgressPointerDown
+													}
+													onPointerMove={
+														handleProgressPointerMove
+													}
+												>
 													<div className='watch-new__progress-bar'>
 														<div
 															className='watch-new__progress-fill'
@@ -508,6 +622,17 @@ function SchoolAdminWatchAnswerScreen () {
 															}}
 														/>
 													</div>
+													<input
+														type='range'
+														className='watch-new__seek'
+														min={0}
+														max={1}
+														step={0.001}
+														value={seekValue}
+														disabled={!videoSrc}
+														onChange={handleSeek}
+														aria-label='Buscar'
+													/>
 												</div>
 												<div className='watch-new__volume-wrap'>
 													<button
@@ -516,7 +641,9 @@ function SchoolAdminWatchAnswerScreen () {
 														onClick={handleMuteToggle}
 														disabled={!videoSrc}
 														aria-label={
-															isMuted ? 'Unmute' : 'Mute'
+															isMuted
+																? 'Activar sonido'
+																: 'Silenciar'
 														}
 													>
 														{isMuted || volume === 0
@@ -532,7 +659,7 @@ function SchoolAdminWatchAnswerScreen () {
 														value={isMuted ? 0 : volume}
 														onChange={handleVolumeChange}
 														disabled={!videoSrc}
-														aria-label='Volume'
+														aria-label='Volumen'
 													/>
 												</div>
 												<button
@@ -540,13 +667,12 @@ function SchoolAdminWatchAnswerScreen () {
 													className='watch-new__ctrl-btn'
 													onClick={handleFullscreenToggle}
 													disabled={!videoSrc}
-													aria-label='Full screen'
+													aria-label='Pantalla completa'
 												>
 													<IconFullscreen />
 												</button>
 												<span className='watch-new__time'>{timeLabel}</span>
 											</div>
-										) : null}
 									</div>
 
 									<div className='watch-new__info'>
@@ -556,7 +682,7 @@ function SchoolAdminWatchAnswerScreen () {
 										<p className='watch-new__description'>
 											{answer.description && String(answer.description).trim() !== ''
 												? answer.description
-												: 'The teacher replied with text and/or video above.'}
+												: 'El profesor respondió con texto y/o video arriba.'}
 										</p>
 										<span className='watch-new__meta'>
 											{`${teacherDisplayName(answer.teacher)}`}

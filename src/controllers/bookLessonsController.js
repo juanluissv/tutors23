@@ -7,6 +7,8 @@ import {
 	getS3,
 	getBookBucketName,
 	getBookKeyPrefix,
+	getQuestionVideoKeyPrefix,
+	getAnswerVideoKeyPrefix,
 	getPublicBookUrlFromKey,
 	getLessonPlaybackUrl,
 } from '../config/s3Client.js'
@@ -171,6 +173,37 @@ function creatomateFieldsForLessonJson (lesson) {
 	}
 }
 
+function storedPracticeVideoKey (value) {
+	const raw = String(value ?? '').trim()
+	if (!raw) {
+		return null
+	}
+	if (!/^https?:\/\//i.test(raw)) {
+		return raw
+	}
+	try {
+		const pathname = decodeURIComponent(
+			new URL(raw).pathname.replace(/^\//, ''),
+		)
+		return pathname || null
+	} catch (err) {
+		return null
+	}
+}
+
+function playbackUrlFromStoredPracticeVideo (value) {
+	const raw = String(value ?? '').trim()
+	if (!raw) {
+		return ''
+	}
+	if (/^https?:\/\//i.test(raw)) {
+		return raw
+	}
+	return getLessonPlaybackUrl(raw)
+		|| getPublicBookUrlFromKey(raw)
+		|| ''
+}
+
 function formatSuggestedQuestions (lesson) {
 	const items = Array.isArray(lesson?.suggestedQuestions)
 		? lesson.suggestedQuestions
@@ -180,6 +213,12 @@ function formatSuggestedQuestions (lesson) {
 		.map((item) => ({
 			question: item?.question ? String(item.question).trim() : '',
 			answer: item?.answer ? String(item.answer).trim() : '',
+			questionVideoUrl: playbackUrlFromStoredPracticeVideo(
+				item?.questionVideoUrl,
+			),
+			answerVideoUrl: playbackUrlFromStoredPracticeVideo(
+				item?.answerVideoUrl,
+			),
 		}))
 		.filter((item) => item.question)
 }
@@ -1682,6 +1721,136 @@ const uploadChapterTutorVideo = asyncHandler(async (req, res) => {
 	}
 })
 
+// PUT /api/subjects/:id/book-chapters/:chapterId/suggested-questions/:questionIndex/:videoKind
+const uploadSuggestedQuestionVideo = asyncHandler(async (req, res) => {
+	const { id, chapterId, questionIndex, videoKind } = req.params
+	const { subject } = await loadSubjectForBookChapters(req, res, id)
+
+	if (!mongoose.Types.ObjectId.isValid(chapterId)) {
+		res.status(400)
+		throw new Error('Invalid chapter id')
+	}
+
+	const kind = String(videoKind || '').trim().toLowerCase()
+	if (kind !== 'question-video' && kind !== 'answer-video') {
+		res.status(400)
+		throw new Error(
+			'Video kind must be question-video or answer-video.',
+		)
+	}
+
+	const index = Number.parseInt(String(questionIndex), 10)
+	if (!Number.isInteger(index) || index < 0) {
+		res.status(400)
+		throw new Error('Invalid suggested question index')
+	}
+
+	const chapterIndex = (subject.bookChapters || []).findIndex(
+		(item) => String(item._id) === String(chapterId),
+	)
+
+	if (chapterIndex < 0) {
+		res.status(404)
+		throw new Error('Chapter not found')
+	}
+
+	const chapter = subject.bookChapters[chapterIndex]
+	const lesson = await BookLessons.findOne({
+		subject: subject._id,
+		'bookChapter.chapterId': chapter._id,
+	})
+
+	if (!lesson) {
+		res.status(400)
+		throw new Error(
+			'This chapter has no web lesson yet. Generate the web lesson first.',
+		)
+	}
+
+	const questions = Array.isArray(lesson.suggestedQuestions)
+		? lesson.suggestedQuestions
+		: []
+
+	if (index >= questions.length || !questions[index]) {
+		res.status(404)
+		throw new Error(
+			'Suggested question not found. Generate the 10 questions first.',
+		)
+	}
+
+	if (!req.file?.buffer) {
+		res.status(400)
+		throw new Error('Video file is required')
+	}
+
+	const s3 = getS3()
+	const bucket = getBookBucketName()
+	if (!s3 || !bucket) {
+		res.status(503)
+		throw new Error(
+			'File storage is not configured. Set AWS credentials and '
+			+ 'AWS_S3_BUCKET.',
+		)
+	}
+
+	const field = kind === 'answer-video'
+		? 'answerVideoUrl'
+		: 'questionVideoUrl'
+	const previousFileKey = storedPracticeVideoKey(questions[index][field])
+	const prefix = kind === 'answer-video'
+		? getAnswerVideoKeyPrefix()
+		: getQuestionVideoKeyPrefix()
+	const random = crypto.randomBytes(8).toString('hex')
+	const slug = sanitizeChapterPdfSlug(
+		chapter.ChapterTitle,
+		chapter.ChapterNumber ?? chapterIndex + 1,
+	)
+	const ext = videoExtFromMime(
+		req.file.mimetype,
+		req.file.originalname,
+	)
+	const clipLabel = kind === 'answer-video' ? 'answer' : 'question'
+	const key = `${prefix}/${id}/chapters/${chapterId}`
+		+ `-${clipLabel}-${index + 1}-${slug}-${random}${ext}`
+
+	const contentType = req.file.mimetype
+		&& String(req.file.mimetype).trim() !== ''
+		? req.file.mimetype
+		: 'video/mp4'
+
+	try {
+		const upload = await s3.upload({
+			Bucket: bucket,
+			Key: key,
+			Body: req.file.buffer,
+			ContentType: contentType,
+		}).promise()
+
+		questions[index][field] = upload.Key
+		lesson.suggestedQuestions = questions
+		lesson.markModified('suggestedQuestions')
+		await lesson.save()
+
+		if (previousFileKey && previousFileKey !== upload.Key) {
+			await deleteChapterFileFromS3(previousFileKey)
+		}
+
+		res.status(200).json({
+			chapterId: String(chapter._id),
+			lessonId: String(lesson._id),
+			questionIndex: index,
+			videoKind: kind,
+			suggestedQuestions: formatSuggestedQuestions(lesson),
+		})
+	} catch (uploadErr) {
+		console.error(uploadErr)
+		res.status(502)
+		throw new Error(
+			'Failed to upload the practice video to storage.',
+		)
+	}
+})
+
 // PUT /api/subjects/:id/book-chapters/:chapterId/tutor-transcribe
 const uploadChapterTutorTranscribe = asyncHandler(async (req, res) => {
 	const { id, chapterId } = req.params
@@ -1924,5 +2093,6 @@ export {
 	checkAnimatedVideoStatusFromLesson,
 	uploadChapterTutorVideo,
 	uploadChapterTutorTranscribe,
+	uploadSuggestedQuestionVideo,
 	bookLessonToJson,
 }

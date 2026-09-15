@@ -8,7 +8,6 @@ import {
 } from '../../slices/admin/schoolAdminApiSlice'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
-import { formatSemesterRange } from '../../utils/planSemester'
 import { getSubjectProgramsLabel } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
 import '../../App.css'
@@ -81,7 +80,7 @@ function formatCurrency (value) {
 		return String(value)
 	}
 	try {
-		return new Intl.NumberFormat(undefined, {
+		return new Intl.NumberFormat('es', {
 			style: 'currency',
 			currency: 'USD',
 			minimumFractionDigits: 0,
@@ -100,44 +99,48 @@ function summarizeSubjects (subjects, maxLabels = 3) {
 		)
 		.filter(Boolean)
 	if (titles.length === 0) {
-		return 'No subjects'
+		return 'Sin materias'
 	}
 	const shown = titles.slice(0, maxLabels)
 	const extra = titles.length - shown.length
-	const suffix = extra > 0 ? ` +${extra} more` : ''
+	const suffix = extra > 0 ? ` +${extra} más` : ''
 	return `${shown.join(' · ')}${suffix}`
 }
 
 function summarizePlanCoverage (plan) {
 	if (plan?.program) {
-		const programName = getSubjectProgramsLabel(
-			plan.program,
-			'this program',
-		)
 		const max = Number(plan.maxSubjects) || 5
-		return (
-			`Students choose up to ${max} subjects `
-		)
+		return `Los estudiantes eligen hasta ${max} materias`
 	}
 	return summarizeSubjects(plan?.subjects)
 }
 
+function formatSemesterRangeEs (semesters) {
+	const list = Array.isArray(semesters) ? semesters : []
+	if (list.length === 0) {
+		return ''
+	}
+	return list.length === 1
+		? '1 semestre'
+		: `${list.length} semestres`
+}
+
 function planMetaLine (plan) {
 	const questions = plan.totalQuestions ?? '—'
-	const semesterLabel = formatSemesterRange(plan.semesters)
-	const active = plan.active === true ? 'Active' : 'Inactive'
+	const semesterLabel = formatSemesterRangeEs(plan.semesters)
+	const active = plan.active === true ? 'Activo' : 'Inactivo'
 	const isUniversityPlan = Boolean(plan.program)
 
 	if (isUniversityPlan) {
 		const programName = getSubjectProgramsLabel(
 			plan.program,
-			'Program',
+			'Programa',
 		)
 		const max = Number(plan.maxSubjects) || 5
 		const parts = [
-			`${questions} questions included`,
+			`${questions} preguntas incluidas`,
 			programName,
-			`Students choose up to ${max}`,
+			`Los estudiantes eligen hasta ${max} materias`,
 		]
 		if (semesterLabel) {
 			parts.push(semesterLabel)
@@ -150,10 +153,10 @@ function planMetaLine (plan) {
 		? plan.subjects.length
 		: 0
 	const subjectLabel = `${subjectCount} ${
-		subjectCount === 1 ? 'subject' : 'subjects'
+		subjectCount === 1 ? 'materia' : 'materias'
 	}`
 	const parts = [
-		`${questions} questions included`,
+		`${questions} preguntas incluidas`,
 		subjectLabel,
 	]
 	if (semesterLabel) {
@@ -233,16 +236,17 @@ function SchoolAdminPlansScreen () {
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											view and manage subscription plans.
+											Registra tu escuela primero; después
+											podrás ver y administrar los planes
+											de suscripción.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registrar tu escuela
 										</Link>
 									</p>
 								</div>
@@ -266,20 +270,23 @@ function SchoolAdminPlansScreen () {
 					<div className='content-area'>
 						<div className='teacher-subjects-page'>
 							<h1 className='teacher-subjects-page__title heading-gradient'>
-								School plans
+								Planes de suscripción
 							</h1>
 							<p className='teacher-subjects-page__subtitle'>
 								{isUniversity
 									? (
-										'All subscription plans for your institution. '
-										+ 'Each plan sets price, question quota, '
-										+ 'program, and semester dates. Students '
-										+ 'choose their subjects after subscribing.'
+										'Todos los planes de suscripción de tu '
+										+ 'institución. Cada plan define el '
+										+ 'precio, el numero de preguntas incluidas, el '
+										+ 'programa y las fechas del semestre. '
+										+ 'Los estudiantes eligen sus materias '
+										+ 'después de suscribirse.'
 									)
 									: (
-										'All subscription plans for your school. '
-										+ 'Each plan sets price, included question '
-										+ 'quota, and linked subjects.'
+										'Todos los planes de suscripción de tu '
+										+ 'institución. Cada plan define el precio, '
+										+ 'el numero de preguntas incluidas y '
+										+ 'las materias vinculadas.'
 									)}
 							</p>
 							{!isPageLoading
@@ -298,26 +305,26 @@ function SchoolAdminPlansScreen () {
 										>
 											+
 										</span>
-										<span>Create plan</span>
+										<span>Crear plan</span>
 									</Link>
 								</div>
 							)}
 
 							{isPageLoading && (
 								<p className='teacher-subjects-page__subtitle'>
-									Loading plans…
+									Cargando planes…
 								</p>
 							)}
 
 							{isError && !isPageLoading && (
 								<div className='teacher-subjects-page__subtitle'>
-									<p>We couldn&apos;t load plans.</p>
+									<p>No pudimos cargar los planes.</p>
 									<button
 										type='button'
 										className='login-submit'
 										onClick={() => void refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -329,8 +336,8 @@ function SchoolAdminPlansScreen () {
 								&& !hasSubjects && (
 								<div className='teacher-subjects-page__empty'>
 									<p className='teacher-subjects-page__empty-text'>
-										Add at least one subject before you can
-										create a subscription plan.
+										Agrega al menos una materia antes de
+										poder crear un plan de suscripción.
 									</p>
 									<Link
 										to='/schooladmins/createsubject'
@@ -342,7 +349,7 @@ function SchoolAdminPlansScreen () {
 										>
 											+
 										</span>
-										<span>Create your first subject</span>
+										<span>Crea tu primera materia</span>
 									</Link>
 								</div>
 							)}
@@ -354,8 +361,8 @@ function SchoolAdminPlansScreen () {
 								&& hasSubjects && (
 								<div className='teacher-subjects-page__empty'>
 									<p className='teacher-subjects-page__empty-text'>
-										No plans yet. Start by creating your
-										first subscription plan.
+										Aún no hay planes. Empieza creando tu
+										primer plan de suscripción.
 									</p>
 									<Link
 										to='/schooladmins/createplan'
@@ -367,7 +374,7 @@ function SchoolAdminPlansScreen () {
 										>
 											+
 										</span>
-										<span>Create your first plan</span>
+										<span>Crea tu primer plan</span>
 									</Link>
 								</div>
 							)}
@@ -413,8 +420,8 @@ function SchoolAdminPlansScreen () {
 															<StudentsIcon />
 															{studentCount}{' '}
 															{studentCount === 1
-																? 'student'
-																: 'students'}
+																? 'estudiante'
+																: 'estudiantes'}
 														</span>
 														<p className='teacher-subject-card__meta'>
 															{planMetaLine(plan)}
@@ -437,13 +444,13 @@ function SchoolAdminPlansScreen () {
 															to={`/schooladmins/subscriptions/${id}`}
 															className='teacher-subject-card__btn'
 														>
-															Subscribers
+															Suscriptores
 														</Link>
 														<Link
 															to={`/schooladmins/updateplan/${id}`}
 															className='teacher-subject-card__btn'
 														>
-															Edit plan
+															Editar plan
 														</Link>
 													</div>
 												</div>

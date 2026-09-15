@@ -53,24 +53,26 @@ function SchoolAdminProfileScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (firstname.trim() === '') {
-			toast.error('Please enter your first name')
+			toast.error('Ingresa tu nombre')
 			return
 		}
 		if (lastname.trim() === '') {
-			toast.error('Please enter your last name')
+			toast.error('Ingresa tu apellido')
 			return
 		}
 		if (email.trim() === '') {
-			toast.error('Please enter your email')
+			toast.error('Ingresa tu correo electrónico')
 			return
 		}
 		if (newPassword !== '' || confirmPassword !== '') {
 			if (newPassword !== confirmPassword) {
-				toast.error('New passwords do not match')
+				toast.error('Las contraseñas no coinciden')
 				return
 			}
 			if (newPassword.length < 6) {
-				toast.error('New password must be at least 6 characters')
+				toast.error(
+					'La nueva contraseña debe tener al menos 6 caracteres',
+				)
 				return
 			}
 		}
@@ -96,9 +98,13 @@ function SchoolAdminProfileScreen () {
 			)
 			setNewPassword('')
 			setConfirmPassword('')
-			toast.success('Profile updated')
+			toast.success('Perfil actualizado correctamente')
 		} catch (err) {
-			toast.error(err?.data?.message || err?.error?.message)
+			toast.error(
+				err?.data?.message
+					|| err?.error?.message
+					|| 'No se pudo actualizar',
+			)
 		}
 	}
 
@@ -119,17 +125,18 @@ function SchoolAdminProfileScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login content-area--login-scroll'>
-						<div className='center-content2 login-screen login-screen--wide'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>
-										Your profile
+										Tu perfil
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										View and update your school admin details.
-										Leave password fields blank to keep your
-										current password.
+										Consulta y actualiza los datos de tu
+										cuenta de administrador escolar. Deja los
+										campos de contraseña en blanco para
+										mantener la actual.
 									</p>
 								</div>
 								<form
@@ -144,14 +151,14 @@ function SchoolAdminProfileScreen () {
 												className='login-label'
 												htmlFor='schooladmin-profile-firstname'
 											>
-												First name
+												Nombre
 											</label>
 											<input
 												type='text'
 												id='schooladmin-profile-firstname'
 												name='firstname'
 												className='login-input'
-												placeholder='First name'
+												placeholder='Nombre'
 												autoComplete='given-name'
 												value={firstname}
 												disabled={isLoading}
@@ -164,14 +171,14 @@ function SchoolAdminProfileScreen () {
 												className='login-label'
 												htmlFor='schooladmin-profile-lastname'
 											>
-												Last name
+												Apellido
 											</label>
 											<input
 												type='text'
 												id='schooladmin-profile-lastname'
 												name='lastname'
 												className='login-input'
-												placeholder='Last name'
+												placeholder='Apellido'
 												autoComplete='family-name'
 												value={lastname}
 												disabled={isLoading}
@@ -185,14 +192,14 @@ function SchoolAdminProfileScreen () {
 											className='login-label'
 											htmlFor='schooladmin-profile-email'
 										>
-											Email address
+											Correo electrónico
 										</label>
 										<input
 											type='email'
 											id='schooladmin-profile-email'
 											name='email'
 											className='login-input'
-											placeholder='you@school.edu'
+											placeholder='tu@escuela.edu'
 											autoComplete='email'
 											value={email}
 											disabled={isLoading}
@@ -205,14 +212,14 @@ function SchoolAdminProfileScreen () {
 											className='login-label'
 											htmlFor='schooladmin-profile-jobtitle'
 										>
-											Job title
+											Cargo
 										</label>
 										<input
 											type='text'
 											id='schooladmin-profile-jobtitle'
 											name='jobtitle'
 											className='login-input'
-											placeholder='e.g. Principal, Registrar'
+											placeholder='p. ej. Director, Registrador'
 											autoComplete='organization-title'
 											value={jobtitle}
 											disabled={isLoading}
@@ -225,13 +232,13 @@ function SchoolAdminProfileScreen () {
 											className='login-label'
 											htmlFor='schooladmin-profile-about'
 										>
-											About
+											Acerca de
 										</label>
 										<textarea
 											id='schooladmin-profile-about'
 											name='about'
 											className='login-input login-textarea'
-											placeholder='A short note about your role or school…'
+											placeholder='Una breve descripción de tu rol o escuela…'
 											rows={5}
 											value={about}
 											disabled={isLoading}
@@ -245,14 +252,14 @@ function SchoolAdminProfileScreen () {
 												className='login-label'
 												htmlFor='schooladmin-profile-new-password'
 											>
-												New password (optional)
+												Nueva contraseña (opcional)
 											</label>
 											<input
 												type='password'
 												id='schooladmin-profile-new-password'
 												name='newPassword'
 												className='login-input'
-												placeholder='••••••••'
+												placeholder='Déjalo en blanco para mantener la actual'
 												autoComplete='new-password'
 												value={newPassword}
 												disabled={isLoading}
@@ -265,14 +272,14 @@ function SchoolAdminProfileScreen () {
 												className='login-label'
 												htmlFor='schooladmin-profile-confirm-password'
 											>
-												Confirm new password
+												Confirmar nueva contraseña
 											</label>
 											<input
 												type='password'
 												id='schooladmin-profile-confirm-password'
 												name='confirmPassword'
 												className='login-input'
-												placeholder='••••••••'
+												placeholder='Confirmar'
 												autoComplete='new-password'
 												value={confirmPassword}
 												disabled={isLoading}
@@ -289,7 +296,7 @@ function SchoolAdminProfileScreen () {
 										className='login-submit'
 										disabled={isLoading}
 									>
-										{isLoading ? 'Saving…' : 'Save changes'}
+										{isLoading ? 'Guardando…' : 'Guardar cambios'}
 									</button>
 								</form>
 							</div>

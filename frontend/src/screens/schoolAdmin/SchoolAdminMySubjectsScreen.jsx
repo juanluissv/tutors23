@@ -116,7 +116,7 @@ function getSubjectTeacherLabel (subject, teachersByEmail) {
 		.map((email) => email.toLowerCase())
 
 	if (emails.length === 0) {
-		return 'No teacher assigned'
+		return 'Sin profesor'
 	}
 
 	const names = emails
@@ -281,16 +281,17 @@ function SchoolAdminMySubjectsScreen () {
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											view and manage subjects.
+											Primero registra tu escuela; después
+											podrás ver y administrar las
+											materias.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registra tu escuela
 										</Link>
 									</p>
 								</div>
@@ -314,13 +315,15 @@ function SchoolAdminMySubjectsScreen () {
 					<div className='content-area'>
 						<div className='teacher-subjects-page'>
 							<h1 className='teacher-subjects-page__title heading-gradient'>
-								School subjects
+								{isUniversity
+									? 'Materias de la universidad'
+									: 'Materias de la escuela'}
 							</h1>
 							<p className='teacher-subjects-page__subtitle'>
-								All subjects in your {isUniversity
-									? 'institution'
-									: 'school'}. Create new ones or
-								manage existing subjects below.
+								Todas las materias de tu {isUniversity
+									? 'universidad'
+									: 'escuela'}. Crea nuevas o
+								administra las existentes abajo.
 							</p>
 							{!isPageLoading && !isError && subjectsList.length > 0 && canAddSubject && (
 								<div className='teacher-subjects-page__cta'>
@@ -334,7 +337,7 @@ function SchoolAdminMySubjectsScreen () {
 										>
 											+
 										</span>
-										<span>Add subject</span>
+										<span>Agregar materia</span>
 									</Link>
 								</div>
 							)}
@@ -344,8 +347,8 @@ function SchoolAdminMySubjectsScreen () {
 									className='teacher-subjects-page__grade-filter'
 									role='group'
 									aria-label={isUniversity
-										? 'Filter subjects by program'
-										: 'Filter subjects by grade level'}
+										? 'Filtrar materias por programa'
+										: 'Filtrar materias por grado'}
 								>
 									<div className='teacher-subjects-page__grade-filter-header'>
 										<span
@@ -356,13 +359,15 @@ function SchoolAdminMySubjectsScreen () {
 										</span>
 										<span className='teacher-subjects-page__grade-filter-label'>
 											{isUniversity
-												? 'Filter by program'
-												: 'Filter by grade'}
+												? 'Filtrar por programa'
+												: 'Filtrar por grado'}
 										</span>
 										{selectedCohortId !== '' && (
 											<span className='teacher-subjects-page__grade-filter-count'>
-												{filteredSubjects.length} subject
-												{filteredSubjects.length === 1 ? '' : 's'}
+												{filteredSubjects.length}{' '}
+												{filteredSubjects.length === 1
+													? 'materia'
+													: 'materias'}
 											</span>
 										)}
 									</div>
@@ -378,7 +383,9 @@ function SchoolAdminMySubjectsScreen () {
 											onClick={() => handleSelectCohortFilter('')}
 											aria-pressed={selectedCohortId === ''}
 										>
-											{isUniversity ? 'All programs' : 'All grades'}
+											{isUniversity
+												? 'Todos los programas'
+												: 'Todos los grados'}
 											<span className='teacher-subjects-page__grade-pill-count'>
 												{subjectsList.length}
 											</span>
@@ -404,7 +411,7 @@ function SchoolAdminMySubjectsScreen () {
 												>
 													{isUniversity
 														? cohort.name
-														: `Grade ${cohort.name}`}
+														: `Grado ${cohort.name}`}
 													{isUniversity && cohort.department
 														? ` (${cohort.department})`
 														: ''}
@@ -420,19 +427,19 @@ function SchoolAdminMySubjectsScreen () {
 
 							{isPageLoading && (
 								<p className='teacher-subjects-page__subtitle'>
-									Loading subjects…
+									Cargando materias…
 								</p>
 							)}
 
 							{isError && !isPageLoading && (
 								<div className='teacher-subjects-page__subtitle'>
-									<p>We couldn&apos;t load subjects.</p>
+									<p>No pudimos cargar las materias.</p>
 									<button
 										type='button'
 										className='login-submit'
 										onClick={() => void refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -442,9 +449,14 @@ function SchoolAdminMySubjectsScreen () {
 									{!hasCohorts ? (
 										<>
 											<p className='teacher-subjects-page__empty-text'>
-												Before you can add subjects, add the {isUniversity
-													? 'programs your institution offers'
-													: 'grade levels your school offers'} in My school.
+												Antes de agregar materias, agrega
+												{isUniversity
+													? ' los programas que ofrece tu universidad'
+													: ' los grados que ofrece tu escuela'}
+												{' '}
+												{isUniversity
+													? 'en Mi Universidad.'
+													: 'en Mi escuela.'}
 											</p>
 											<Link
 												to='/schooladmins/myschools'
@@ -458,16 +470,19 @@ function SchoolAdminMySubjectsScreen () {
 												</span>
 												<span>
 													{isUniversity
-														? 'Add programs first'
-														: 'Add grade levels first'}
+														? 'Agrega los programas primero'
+														: 'Agrega los grados primero'}
 												</span>
 											</Link>
 										</>
 									) : !hasTeachers ? (
 										<>
 											<p className='teacher-subjects-page__empty-text'>
-												Before you can add subjects, add at least
-												one teacher to your school.
+												Antes de agregar materias, agrega
+												al menos un profesor a tu
+												{isUniversity
+													? ' universidad.'
+													: ' escuela.'}
 											</p>
 											<Link
 												to='/schooladmins/addteacher'
@@ -479,14 +494,14 @@ function SchoolAdminMySubjectsScreen () {
 												>
 													+
 												</span>
-												<span>Add a teacher first</span>
+												<span>Agrega un profesor primero</span>
 											</Link>
 										</>
 									) : (
 										<>
 											<p className='teacher-subjects-page__empty-text'>
-												No subjects yet. Start by adding your
-												first subject.
+												Aún no hay materias. Empieza
+												agregando tu primera materia.
 											</p>
 											<Link
 												to='/schooladmins/createsubject'
@@ -498,7 +513,7 @@ function SchoolAdminMySubjectsScreen () {
 												>
 													+
 												</span>
-												<span>Create your first subject</span>
+												<span>Crea tu primera materia</span>
 											</Link>
 										</>
 									)}
@@ -508,9 +523,10 @@ function SchoolAdminMySubjectsScreen () {
 							{!isPageLoading && !isError && subjectsList.length > 0 && filteredSubjects.length === 0 && (
 								<div className='teacher-subjects-page__empty'>
 									<p className='teacher-subjects-page__empty-text'>
-										No subjects for this {isUniversity
-											? 'program'
-											: 'grade level'} yet.
+										Aún no hay materias para este
+										{isUniversity
+											? ' programa'
+											: ' grado'}.
 									</p>
 									<button
 										type='button'
@@ -519,8 +535,8 @@ function SchoolAdminMySubjectsScreen () {
 									>
 										<span>
 											{isUniversity
-												? 'Show all programs'
-												: 'Show all subjects'}
+												? 'Ver todos los programas'
+												: 'Ver todas las materias'}
 										</span>
 									</button>
 								</div>
@@ -542,7 +558,7 @@ function SchoolAdminMySubjectsScreen () {
 										? getSubjectProgramsLabel(subject.program)
 										: getSubjectGradeLevelsLabel(subject.gradesLevel)
 									const metaLabel = isUniversity && subject.semester
-										? `${cohortLabel} · Semester ${subject.semester}`
+										? `${cohortLabel} · Semestre ${subject.semester}`
 										: cohortLabel
 									const teacherLabel = getSubjectTeacherLabel(
 										subject,
@@ -576,7 +592,7 @@ function SchoolAdminMySubjectsScreen () {
 													</h2>
 													<span className='teacher-subject-card__students'>
 														<StudentsIcon />
-														{studentsCount} students
+														{studentsCount} estudiantes
 													</span>
 													<span className='teacher-subject-card__teacher'>
 														<TeacherIcon />
@@ -585,8 +601,8 @@ function SchoolAdminMySubjectsScreen () {
 													<p className='teacher-subject-card__meta'>
 														{metaLabel}
 														{subject.isCoursePublish
-															? ' · Published'
-															: ' · Draft'}
+															? ' · Publicado'
+															: ' · Borrador'}
 													</p>
 												</div>
 												<div className='teacher-subject-card__badge'>
@@ -608,19 +624,19 @@ function SchoolAdminMySubjectsScreen () {
 														to={`/schooladmins/courses/${id}`}
 														className='teacher-subject-card__btn'
 													>
-														Courses
+														Cursos
 													</Link>
 													<Link
 														to={`/schooladmins/editsubject/${id}`}
 														className='teacher-subject-card__btn'
 													>
-														Edit subject
+														Editar materia
 													</Link>
 													<Link
 														to={`/schooladmins/previousquestions/${id}`}
 														className='teacher-subject-card__btn'
 													>
-														Questions
+														Preguntas anteriores
 													</Link>
 												</div>
 											</div>

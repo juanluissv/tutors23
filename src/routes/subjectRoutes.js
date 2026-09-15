@@ -1,18 +1,24 @@
 import express from 'express';
 import { protectSchoolAdmin, protectTeacher } from '../middleware/authMiddleware.js';
-import { parseTeacherSubjectMultipart, parseChapterFileMultipart } from '../middleware/teacherSubjectUpload.js';
+import { parseTeacherSubjectMultipart, parseChapterFileMultipart, parseSubjectDocumentMultipart } from '../middleware/teacherSubjectUpload.js';
 import {
     createSubject,
     getSubjectsBySchool,
     getSubjectsByTeacherId,
     getSubjectBookForTeacher,
     getSubjectBookForSchoolAdmin,
+    getSubjectDocumentForSchoolAdmin,
+    getSubjectDocumentForTeacher,
     getSubjectStudentsForTeacher,
     getSubjectStudentsForSchoolAdmin,
     updateSubjectById,
     updateSubjectByTeacher,
     updateSubjectBookChapters,
     generateSubjectBookChapterPdf,
+    uploadSubjectDocument,
+    uploadSubjectDocumentByTeacher,
+    deleteSubjectDocument,
+    deleteSubjectDocumentByTeacher,
     uploadSubjectBookChapterFile,
     deleteSubjectBookChapter,
     addSubjectStudentEmailForTeacher,
@@ -34,6 +40,7 @@ import {
     getBookLessonTranscribeForSchoolAdmin,
     uploadChapterTutorVideo,
     uploadChapterTutorTranscribe,
+    uploadSuggestedQuestionVideo,
 } from '../controllers/bookLessonsController.js';
 
 const router = express.Router();
@@ -61,6 +68,44 @@ router.get(
     '/:id/school-admin/book',
     protectSchoolAdmin,
     getSubjectBookForSchoolAdmin,
+);
+
+router.get(
+    '/:id/school-admin/documents/:documentId',
+    protectSchoolAdmin,
+    getSubjectDocumentForSchoolAdmin,
+);
+
+router.post(
+    '/:id/documents',
+    protectSchoolAdmin,
+    parseSubjectDocumentMultipart,
+    uploadSubjectDocument,
+);
+
+router.delete(
+    '/:id/documents/:documentId',
+    protectSchoolAdmin,
+    deleteSubjectDocument,
+);
+
+router.get(
+    '/:id/teacher/documents/:documentId',
+    protectTeacher,
+    getSubjectDocumentForTeacher,
+);
+
+router.post(
+    '/:id/teacher/documents',
+    protectTeacher,
+    parseSubjectDocumentMultipart,
+    uploadSubjectDocumentByTeacher,
+);
+
+router.delete(
+    '/:id/teacher/documents/:documentId',
+    protectTeacher,
+    deleteSubjectDocumentByTeacher,
 );
 
 router.get(
@@ -167,6 +212,13 @@ router.put(
 );
 
 router.put(
+    '/:id/teacher/book-chapters/:chapterId/suggested-questions/:questionIndex/:videoKind',
+    protectTeacher,
+    parseChapterTutorVideo,
+    uploadSuggestedQuestionVideo,
+);
+
+router.put(
     '/:id/teacher/book-chapters/:chapterId/tutor-transcribe',
     protectTeacher,
     parseChapterTutorTranscribe,
@@ -238,6 +290,13 @@ router.put(
     protectSchoolAdmin,
     parseChapterTutorVideo,
     uploadChapterTutorVideo,
+);
+
+router.put(
+    '/:id/book-chapters/:chapterId/suggested-questions/:questionIndex/:videoKind',
+    protectSchoolAdmin,
+    parseChapterTutorVideo,
+    uploadSuggestedQuestionVideo,
 );
 
 router.put(

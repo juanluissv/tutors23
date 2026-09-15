@@ -7,9 +7,9 @@ import AdminHeader from '../../components/AdminHeader'
 import '../../App.css'
 
 const PERIOD_OPTIONS = [
-	{ value: 12, label: 'Past 12 months' },
-	{ value: 6, label: 'Past 6 months' },
-	{ value: 3, label: 'Past 3 months' },
+	{ value: 12, label: 'Últimos 12 meses' },
+	{ value: 6, label: 'Últimos 6 meses' },
+	{ value: 3, label: 'Últimos 3 meses' },
 ]
 
 function resolveSchoolId (school) {
@@ -31,7 +31,7 @@ function formatCurrency (value, { compact = false } = {}) {
 		return '$0.00'
 	}
 	try {
-		return new Intl.NumberFormat(undefined, {
+		return new Intl.NumberFormat('es', {
 			style: 'currency',
 			currency: 'USD',
 			minimumFractionDigits: compact && n >= 100 ? 0 : 2,
@@ -52,11 +52,61 @@ function formatShortDate (value) {
 	}
 	const now = new Date()
 	const sameYear = d.getFullYear() === now.getFullYear()
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		month: 'short',
 		day: 'numeric',
 		year: sameYear ? undefined : 'numeric',
 	})
+}
+
+function formatMonthLabel (item) {
+	if (!item?.key) {
+		return item?.label ?? ''
+	}
+	const parts = item.key.split('-')
+	const year = Number(parts[0])
+	const month = Number(parts[1])
+	if (!year || !month) {
+		return item.label ?? ''
+	}
+	const d = new Date(year, month - 1, 1)
+	return d.toLocaleDateString('es', {
+		month: 'short',
+		year: 'numeric',
+	})
+}
+
+function formatTransactionStatus (status) {
+	if (status === 'Succeeded') {
+		return 'Completado'
+	}
+	if (status === 'Past due') {
+		return 'Vencido'
+	}
+	return status
+}
+
+function formatTransactionType (type) {
+	if (type === 'Payment') {
+		return 'Pago'
+	}
+	return type
+}
+
+function formatActivityMessage (message) {
+	if (!message) {
+		return message
+	}
+	const match = String(message).match(
+		/^(.+) subscribed — ([\d.]+) USD earned$/,
+	)
+	if (match) {
+		const name = match[1] === 'A student'
+			? 'Un estudiante'
+			: match[1]
+		return `${name} se suscribió — ${match[2]} USD ganados`
+	}
+	return message
 }
 
 function formatPayoutDate (value) {
@@ -67,7 +117,7 @@ function formatPayoutDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return '—'
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		month: 'short',
 		day: 'numeric',
 	})
@@ -117,7 +167,7 @@ function SchoolAdminEarningsScreen () {
 
 	const periodLabel = PERIOD_OPTIONS.find(
 		(opt) => opt.value === months,
-	)?.label ?? `Past ${months} months`
+	)?.label ?? `Últimos ${months} meses`
 
 	const summary = data?.summary ?? {
 		lifetimeEarnings: 0,
@@ -187,27 +237,27 @@ function SchoolAdminEarningsScreen () {
 							{!schoolId && (
 								<div className='school-earnings-page__empty'>
 									<p>
-										Link a school to your account to view subscription
-										earnings.
+										Vincula una escuela a tu cuenta para ver las
+										ganancias por suscripciones.
 									</p>
 								</div>
 							)}
 
 							{schoolId && isLoading && (
 								<p className='school-earnings-page__loading'>
-									Loading earnings…
+									Cargando ganancias…
 								</p>
 							)}
 
 							{schoolId && isError && !isLoading && (
 								<div className='school-earnings-page__empty'>
-									<p>We couldn&apos;t load your earnings right now.</p>
+									<p>No pudimos cargar tus ganancias en este momento.</p>
 									<button
 										type='button'
 										className='login-submit'
 										onClick={() => void refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -217,22 +267,22 @@ function SchoolAdminEarningsScreen () {
 									<div className='school-earnings-page__main'>
 										<section
 											className='school-earnings-card school-earnings-chart'
-											aria-label='Recent earnings'
+											aria-label='Ganancias recientes'
 										>
 											<div className='school-earnings-card__head'>
 												<div className='school-earnings-card__title-wrap'>
 													<h1 className='school-earnings-card__title'>
-														Recent earnings
+														Ganancias recientes
 													</h1>
 													<span
 														className='school-earnings-card__info'
 														title={
-															'50% revenue share from student ' +
-															'subscription payments'
+															'50% de participación en los pagos ' +
+															'de suscripción de estudiantes'
 														}
 														aria-label={
-															'50% revenue share from student ' +
-															'subscription payments'
+															'50% de participación en los pagos ' +
+															'de suscripción de estudiantes'
 														}
 													>
 														i
@@ -240,7 +290,7 @@ function SchoolAdminEarningsScreen () {
 												</div>
 												<label className='school-earnings-period'>
 													<span className='visually-hidden'>
-														Earnings period
+														Período de ganancias
 													</span>
 													<select
 														className='school-earnings-period__select'
@@ -265,13 +315,13 @@ function SchoolAdminEarningsScreen () {
 												{formatCurrency(summary.periodEarnings)}
 											</p>
 											<p className='school-earnings-chart__subtitle'>
-												{periodLabel} · 50% revenue share
+												{periodLabel} · 50% de participación en ingresos
 											</p>
 
 											<div
 												className='school-earnings-chart__wrap'
 												role='img'
-												aria-label='Monthly earnings bar chart'
+												aria-label='Gráfico de barras de ganancias mensuales'
 											>
 												<div className='school-earnings-chart__y-axis'>
 													{yTicks.map((tick) => (
@@ -312,12 +362,12 @@ function SchoolAdminEarningsScreen () {
 																			)}%`,
 																		}}
 																		title={
-																			`${item.label}: ` +
+																			`${formatMonthLabel(item)}: ` +
 																			formatCurrency(amount)
 																		}
 																	/>
 																	<span className='school-earnings-chart__bar-label'>
-																		{item.label}
+																		{formatMonthLabel(item)}
 																	</span>
 																</div>
 															)
@@ -329,26 +379,27 @@ function SchoolAdminEarningsScreen () {
 
 										<section
 											className='school-earnings-card school-earnings-transactions'
-											aria-label='Recent transactions'
+											aria-label='Transacciones recientes'
 										>
 											<div className='school-earnings-card__head'>
 												<h2 className='school-earnings-card__title'>
-													Recent transactions
+													Transacciones recientes
 												</h2>
 												<span className='school-earnings-card__meta'>
 													{summary.totalPayments}{' '}
 													{summary.totalPayments === 1
-														? 'payment'
-														: 'payments'}
+														? 'pago'
+														: 'pagos'}
 												</span>
 											</div>
 
 											{transactions.length === 0 && (
 												<div className='school-earnings-transactions__empty'>
 													<p>
-														No subscription payments yet. Earnings
-														appear here when students subscribe to
-														your school plans.
+														Aún no hay pagos por suscripción. Las
+														ganancias aparecerán aquí cuando los
+														estudiantes se suscriban a los planes
+														de tu escuela.
 													</p>
 												</div>
 											)}
@@ -358,11 +409,11 @@ function SchoolAdminEarningsScreen () {
 													<table className='school-earnings-table'>
 														<thead>
 															<tr>
-																<th scope='col'>Date</th>
-																<th scope='col'>Status</th>
-																<th scope='col'>Type</th>
-																<th scope='col'>Amount</th>
-																<th scope='col'>Net</th>
+																<th scope='col'>Fecha</th>
+																<th scope='col'>Estado</th>
+																<th scope='col'>Tipo</th>
+																<th scope='col'>Monto</th>
+																<th scope='col'>Neto</th>
 															</tr>
 														</thead>
 														<tbody>
@@ -378,10 +429,10 @@ function SchoolAdminEarningsScreen () {
 																				`school-earnings-badge--${statusTone(tx.status)}`
 																			}
 																		>
-																			{tx.status}
+																			{formatTransactionStatus(tx.status)}
 																		</span>
 																	</td>
-																	<td>{tx.type}</td>
+																	<td>{formatTransactionType(tx.type)}</td>
 																	<td>
 																		{formatCurrency(
 																			tx.grossAmount,
@@ -404,21 +455,21 @@ function SchoolAdminEarningsScreen () {
 
 									<aside
 										className='school-earnings-page__aside'
-										aria-label='Balance and activity'
+										aria-label='Saldo y actividad'
 									>
 										<section className='school-earnings-card school-earnings-balance'>
 											<h2 className='school-earnings-card__title'>
-												Total balance
+												Saldo total
 											</h2>
 											<p className='school-earnings-balance__amount'>
 												{formatCurrency(lifetimeEarnings)}
 											</p>
 											<p className='school-earnings-balance__subtitle'>
-												All-time earnings
+												Ganancias totales
 											</p>
 											<dl className='school-earnings-balance__rows'>
 												<div className='school-earnings-balance__row'>
-													<dt>Available to pay out</dt>
+													<dt>Disponible para retirar</dt>
 													<dd>
 														{formatCurrency(
 															summary.availableToPayout,
@@ -426,7 +477,7 @@ function SchoolAdminEarningsScreen () {
 													</dd>
 												</div>
 												<div className='school-earnings-balance__row'>
-													<dt>Next payout scheduled for</dt>
+													<dt>Próximo pago programado para</dt>
 													<dd>
 														{formatPayoutDate(
 															summary.nextPayoutDate,
@@ -434,7 +485,7 @@ function SchoolAdminEarningsScreen () {
 													</dd>
 												</div>
 												<div className='school-earnings-balance__row'>
-													<dt>Revenue share</dt>
+													<dt>Participación en ingresos</dt>
 													<dd>50%</dd>
 												</div>
 											</dl>
@@ -442,16 +493,16 @@ function SchoolAdminEarningsScreen () {
 												type='button'
 												className='school-earnings-balance__btn'
 												disabled
-												title='Payout details coming soon'
+												title='Detalles de pago próximamente'
 											>
-												See details
+												Ver detalles
 											</button>
 										</section>
 
 										<section className='school-earnings-card school-earnings-activity'>
 											<div className='school-earnings-card__head'>
 												<h2 className='school-earnings-card__title'>
-													Activity
+													Actividad
 												</h2>
 											</div>
 
@@ -473,7 +524,7 @@ function SchoolAdminEarningsScreen () {
 															<path d='M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11' />
 														</svg>
 													</span>
-													<p>No activity</p>
+													<p>Sin actividad</p>
 												</div>
 											)}
 
@@ -487,7 +538,7 @@ function SchoolAdminEarningsScreen () {
 															<span className='school-earnings-activity__dot' />
 															<div>
 																<p className='school-earnings-activity__text'>
-																	{item.message}
+																	{formatActivityMessage(item.message)}
 																</p>
 																<time
 																	className='school-earnings-activity__time'

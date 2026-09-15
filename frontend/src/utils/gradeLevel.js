@@ -52,26 +52,26 @@ export function getGradeLevelId (gradeLevel) {
 	return normalizeGradeLevel(gradeLevel)?._id ?? ''
 }
 
-export function getGradeLevelLabel (gradeLevel, fallback = 'Grade —') {
+export function getGradeLevelLabel (gradeLevel, fallback = 'Grado —') {
 	const name = getGradeLevelName(gradeLevel)
 	if (name === '') {
 		return fallback
 	}
-	return `Grade ${name}`
+	return `Grado ${name}`
 }
 
 export function getSubjectGradeLevelsLabel (
 	gradesLevel,
-	fallback = 'Grade —',
+	fallback = 'Grado —',
 ) {
 	const levels = normalizeSubjectGradeLevels(gradesLevel)
 	if (levels.length === 0) {
 		return fallback
 	}
 	if (levels.length === 1) {
-		return `Grade ${levels[0].name}`
+		return `Grado ${levels[0].name}`
 	}
-	return `Grades ${levels.map((level) => level.name).join(', ')}`
+	return `Grados ${levels.map((level) => level.name).join(', ')}`
 }
 
 export function getSubjectGradeLevelNames (gradesLevel) {
@@ -105,10 +105,10 @@ export function subjectIncludesGradeLevel (subjectGradesLevel, selectedGradeLeve
 export function subjectGradeLabel (subject) {
 	const levels = normalizeSubjectGradeLevels(subject?.gradesLevel)
 	if (levels.length === 0) {
-		return 'All grades'
+		return 'Todos los grados'
 	}
 	if (levels.length === 1) {
-		return `Grade ${levels[0].name}`
+		return `Grado ${levels[0].name}`
 	}
-	return `Grades ${levels.map((level) => level.name).join(', ')}`
+	return `Grados ${levels.map((level) => level.name).join(', ')}`
 }

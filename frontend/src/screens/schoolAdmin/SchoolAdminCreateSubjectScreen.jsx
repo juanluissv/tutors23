@@ -231,7 +231,7 @@ function SchoolAdminCreateSubjectScreen () {
 				if (bookInputRef.current) {
 					bookInputRef.current.value = ''
 				}
-				toast.error('Please choose a PDF file')
+				toast.error('Elige un archivo PDF')
 				return
 			}
 			if (file.size > MAX_BOOK_BYTES) {
@@ -239,7 +239,7 @@ function SchoolAdminCreateSubjectScreen () {
 				if (bookInputRef.current) {
 					bookInputRef.current.value = ''
 				}
-				toast.error('PDF must be 200 MB or smaller')
+				toast.error('El PDF debe ser de 200 MB o menos')
 				return
 			}
 			setBookFile(file)
@@ -251,18 +251,20 @@ function SchoolAdminCreateSubjectScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (title.trim() === '') {
-			toast.error('Please enter the subject title')
+			toast.error('Ingresa el nombre de la materia')
 			return
 		}
 		if (!schoolId) {
 			return
 		}
 		if (!selectedTeacher?.email) {
-			toast.error('Please select a teacher for this subject')
+			toast.error('Selecciona un profesor para esta materia')
 			return
 		}
 		if (isUniversity && selectedCohortIds.length === 0) {
-			toast.error('Select at least one program for this subject')
+			toast.error(
+				'Selecciona al menos un programa para esta materia',
+			)
 			return
 		}
 
@@ -278,7 +280,9 @@ function SchoolAdminCreateSubjectScreen () {
 		if (isUniversity && semester.trim() !== '') {
 			const semesterNum = Number(semester)
 			if (!Number.isInteger(semesterNum) || semesterNum < 1) {
-				toast.error('Semester must be a positive whole number')
+				toast.error(
+					'El semestre debe ser un número entero positivo',
+				)
 				return
 			}
 			body.semester = semesterNum
@@ -298,15 +302,15 @@ function SchoolAdminCreateSubjectScreen () {
 			}).unwrap()
 			toast.success(
 				bookFile
-					? 'Subject created with PDF and teacher assigned'
-					: 'Subject created and teacher assigned',
+					? 'Materia creada con PDF y profesor asignado'
+					: 'Materia creada y profesor asignado',
 			)
 			navigate('/schooladmins/mysubjects', { replace: true })
 		} catch (err) {
 			toast.error(
 				err?.data?.message
 					|| err?.error?.message
-					|| 'Could not create subject',
+					|| 'No se pudo crear la materia',
 			)
 		}
 	}
@@ -326,22 +330,22 @@ function SchoolAdminCreateSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											add subjects.
+											Primero registra tu escuela; después
+											podrás agregar materias.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registra tu escuela
 										</Link>
 									</p>
 								</div>
@@ -364,31 +368,31 @@ function SchoolAdminCreateSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
 											{isUniversity
-												? 'Add programs first'
-												: 'Add grade levels first'}
+												? 'Agrega los programas primero'
+												: 'Agrega los grados primero'}
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Your {isUniversity
-												? 'institution needs at least one program'
-												: 'school needs at least one grade level'}
-											before you can create subjects. Add them in
-											My school, then come back here.
+											{isUniversity
+												? 'Tu institución necesita al menos un programa'
+												: 'Tu escuela necesita al menos un grado'}
+											{' '}antes de crear materias. Agrégalos
+											en Mi escuela y luego vuelve aquí.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/myschools'>
-											Go to My school
+											Ir a Mi escuela
 										</Link>
 										{' · '}
 										<Link to='/schooladmins/mysubjects'>
-											Back to subjects
+											Volver a las materias
 										</Link>
 									</p>
 								</div>
@@ -411,27 +415,28 @@ function SchoolAdminCreateSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											Add a teacher first
+											Agrega un profesor primero
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Your school needs at least one teacher
-											before you can create subjects. Add a
-											teacher, then come back here.
+											Tu escuela necesita al menos un
+											profesor antes de crear materias.
+											Agrega un profesor y luego vuelve
+											aquí.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/addteacher'>
-											Add a teacher
+											Agregar un profesor
 										</Link>
 										{' · '}
 										<Link to='/schooladmins/mysubjects'>
-											Back to subjects
+											Volver a las materias
 										</Link>
 									</p>
 								</div>
@@ -453,21 +458,26 @@ function SchoolAdminCreateSubjectScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login content-area--login-scroll'>
-						<div className='center-content2 login-screen login-screen--wide'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>
-										Create a subject
+										Crear una materia
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Add a new subject to your {isUniversity
-											? 'institution'
-											: 'school'}. Choose
-										{isUniversity ? ' programs' : ' grade levels'},
-										assign a teacher, and add
-										a short description. Attach an optional
-										course book — PDF, up to 200 MB.
+										Agrega una materia nueva a tu
+										{isUniversity
+											? ' institución'
+											: ' escuela'}. Elige
+										{isUniversity
+											? ' programas'
+											: ' grados'},
+										asigna un profesor y agrega una
+										descripción breve. Adjunta un
+										documento del curso opcional: sube tu
+										primer PDF. Puedes agregar más después
+										desde editar materia.
 									</p>
 								</div>
 								<form
@@ -481,14 +491,14 @@ function SchoolAdminCreateSubjectScreen () {
 											className='login-label'
 											htmlFor='schooladmin-create-subject-title'
 										>
-											Subject title
+											Nombre de la materia
 										</label>
 										<input
 											type='text'
 											id='schooladmin-create-subject-title'
 											name='title'
 											className='login-input'
-											placeholder='e.g. Algebra II'
+											placeholder='Ej. Álgebra II'
 											autoComplete='off'
 											value={title}
 											disabled={isBusy}
@@ -501,36 +511,39 @@ function SchoolAdminCreateSubjectScreen () {
 												className='login-label subject-grade-picker__title'
 												htmlFor='schooladmin-create-subject-cohort'
 											>
-												{isUniversity ? 'Programs' : 'Grade levels'}
+												{isUniversity
+													? 'Programas'
+													: 'Niveles de grado'}
 												{!isUniversity && (
 													<span className='subject-grade-picker__optional'>
-														(optional)
+														(opcional)
 													</span>
 												)}
 											</label>
 											{selectedCohortIds.length > 0 && (
 												<span className='subject-grade-picker__count'>
-													{selectedCohortIds.length} selected
+													{selectedCohortIds.length}{' '}
+													seleccionados
 												</span>
 											)}
 										</div>
 										{isLoadingSchool ? (
 											<p className='subject-grade-picker__hint'>
 												{isUniversity
-													? 'Loading programs…'
-													: 'Loading grade levels…'}
+													? 'Cargando programas…'
+													: 'Cargando grados…'}
 											</p>
 										) : cohorts.length === 0 ? (
 											<p className='subject-grade-picker__hint'>
-												No {isUniversity
-													? 'programs'
-													: 'grade levels'} on your {isUniversity
-													? 'institution'
-													: 'school'} yet.{' '}
+												Aún no hay {isUniversity
+													? 'programas'
+													: 'grados'} en tu {isUniversity
+													? 'institución'
+													: 'escuela'}.{' '}
 												<Link to='/schooladmins/myschools'>
-													Add them in My school
+													Agrégalos en Mi escuela
 												</Link>{' '}
-												first, then create subjects.
+												primero y luego crea materias.
 											</p>
 										) : (
 											<>
@@ -540,20 +553,20 @@ function SchoolAdminCreateSubjectScreen () {
 												>
 													{isUniversity
 														? (
-															'Choose at least one program '
-															+ 'this subject applies to.'
+															'Elige al menos un programa '
+															+ 'al que aplique esta materia.'
 														)
 														: (
-															'Choose one or more grades '
-															+ 'this subject applies to.'
+															'Elige uno o más grados a '
+															+ 'los que aplique esta materia.'
 														)}
 												</p>
 												<div
 													className='subject-grade-picker__grid'
 													role='group'
 													aria-label={isUniversity
-														? 'Programs for this subject'
-														: 'Grade levels for this subject'}
+														? 'Programas de esta materia'
+														: 'Grados de esta materia'}
 												>
 													{cohorts.map((item) => {
 														const levelId = String(item._id)
@@ -627,9 +640,9 @@ function SchoolAdminCreateSubjectScreen () {
 												className='login-label'
 												htmlFor='schooladmin-create-subject-semester'
 											>
-												Semester
+												Semestre
 												<span className='subject-grade-picker__optional'>
-													(optional)
+													(opcional)
 												</span>
 											</label>
 											<input
@@ -639,7 +652,7 @@ function SchoolAdminCreateSubjectScreen () {
 												className='login-input'
 												min='1'
 												step='1'
-												placeholder='e.g. 1'
+												placeholder='Ej. 1'
 												autoComplete='off'
 												value={semester}
 												disabled={isBusy}
@@ -647,8 +660,8 @@ function SchoolAdminCreateSubjectScreen () {
 													setSemester(e.target.value)}
 											/>
 											<p className='subject-grade-picker__hint'>
-												Which semester of the program this
-												subject belongs to.
+												El semestre del programa al que
+												pertenece esta materia.
 											</p>
 										</div>
 									)}
@@ -658,25 +671,25 @@ function SchoolAdminCreateSubjectScreen () {
 												className='login-label subject-teacher-picker__title'
 												id='schooladmin-create-subject-teacher-label'
 											>
-												Assign teacher
+												Asignar profesor
 											</label>
 											{selectedTeacher && (
 												<span className='subject-teacher-picker__badge'>
-													Selected
+													Seleccionado
 												</span>
 											)}
 										</div>
 										{isLoadingTeachers ? (
 											<p className='subject-teacher-picker__hint'>
-												Loading teachers…
+												Cargando profesores…
 											</p>
 										) : teachersList.length === 0 ? (
 											<p className='subject-teacher-picker__hint'>
-												No teachers yet.{' '}
+												Aún no hay profesores.{' '}
 												<Link to='/schooladmins/addteacher'>
-													Add a teacher
+													Agrega un profesor
 												</Link>{' '}
-												first, then create subjects.
+												primero y luego crea materias.
 											</p>
 										) : (
 											<>
@@ -684,7 +697,7 @@ function SchoolAdminCreateSubjectScreen () {
 													className='subject-teacher-picker__hint'
 													id='schooladmin-create-subject-teacher'
 												>
-													Choose who will teach this subject.
+													Elige quién impartirá esta materia.
 												</p>
 												<div
 													className='subject-teacher-picker__list'
@@ -778,13 +791,13 @@ function SchoolAdminCreateSubjectScreen () {
 											className='login-label'
 											htmlFor='schooladmin-create-subject-description'
 										>
-											Description (optional)
+											Descripción (opcional)
 										</label>
 										<textarea
 											id='schooladmin-create-subject-description'
 											name='description'
 											className='login-input login-textarea'
-											placeholder='What this subject covers…'
+											placeholder='De qué trata esta materia…'
 											rows={4}
 											value={description}
 											disabled={isBusy}
@@ -797,7 +810,7 @@ function SchoolAdminCreateSubjectScreen () {
 											className='login-label'
 											id='schooladmin-create-book-label'
 										>
-											Course book (optional)
+											Documento del curso (opcional)
 										</span>
 										<div className='teacher-book-upload'>
 											<input
@@ -824,10 +837,13 @@ function SchoolAdminCreateSubjectScreen () {
 												<span className='teacher-book-upload__title'>
 													{bookFile
 														? bookFile.name
-														: 'Drop a file or tap to browse'}
+														: (
+															'Subir un archivo  '
+															
+														)}
 												</span>
 												<span className='teacher-book-upload__hint'>
-													PDF only · up to 200 MB
+													Solo PDF · hasta 200 MB
 												</span>
 											</label>
 											{bookFile ? (
@@ -837,7 +853,7 @@ function SchoolAdminCreateSubjectScreen () {
 													onClick={handleClearBook}
 													disabled={isBusy}
 												>
-													Remove file
+													Quitar archivo
 												</button>
 											) : null}
 										</div>
@@ -855,10 +871,10 @@ function SchoolAdminCreateSubjectScreen () {
 										}
 									>
 										{isCreating || isAssigningTeacher
-											? 'Creating…'
+											? 'Creando…'
 											: isLoadingSchool || isLoadingTeachers
-												? 'Loading…'
-												: 'Create subject'}
+												? 'Cargando…'
+												: 'Crear materia'}
 									</button>
 								</form>
 							</div>

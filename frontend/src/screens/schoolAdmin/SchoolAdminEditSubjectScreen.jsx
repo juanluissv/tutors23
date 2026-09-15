@@ -7,6 +7,8 @@ import {
 	useGetSubjectsBySchoolQuery,
 	useGetTeachersBySchoolQuery,
 	useUpdateSubjectMutation,
+	useUploadSubjectDocumentMutation,
+	useDeleteSubjectDocumentMutation,
 } from '../../slices/admin/schoolAdminApiSlice'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
@@ -94,6 +96,34 @@ function bookDisplayName (bookId) {
 	return last && last.length > 0 ? last : trimmed
 }
 
+function documentDisplayName (doc) {
+	if (doc?.fileName) {
+		return String(doc.fileName)
+	}
+	if (doc?.label) {
+		return String(doc.label)
+	}
+	if (doc?.fileId) {
+		return bookDisplayName(String(doc.fileId))
+	}
+	return 'Documento'
+}
+
+function getSubjectDocuments (subject) {
+	if (Array.isArray(subject?.documents) && subject.documents.length > 0) {
+		return subject.documents
+	}
+	if (subject?.bookId && String(subject.bookId).trim() !== '') {
+		return [{
+			_id: null,
+			fileId: String(subject.bookId).trim(),
+			fileName: bookDisplayName(String(subject.bookId)),
+			fileUrl: subject.bookUrl,
+		}]
+	}
+	return []
+}
+
 function resolveSchoolId (school) {
 	if (!school) {
 		return null
@@ -161,6 +191,8 @@ function SchoolAdminEditSubjectScreen () {
 	const [title, setTitle] = useState('')
 	const [description, setDescription] = useState('')
 	const [bookFile, setBookFile] = useState(null)
+	const [documentLabel, setDocumentLabel] = useState('')
+	const [deletingDocumentId, setDeletingDocumentId] = useState(null)
 	const [selectedTeacherId, setSelectedTeacherId] = useState('')
 	const [selectedProgramIds, setSelectedProgramIds] = useState([])
 	const [semester, setSemester] = useState('')
@@ -196,10 +228,15 @@ function SchoolAdminEditSubjectScreen () {
 	)
 
 	const [updateSubject, { isLoading: isSaving }] = useUpdateSubjectMutation()
+	const [uploadSubjectDocument, { isLoading: isUploadingDocument }] =
+		useUploadSubjectDocumentMutation()
+	const [deleteSubjectDocument, { isLoading: isDeletingDocument }] =
+		useDeleteSubjectDocumentMutation()
 
 	const isUniversity = isUniversitySchool(schoolData?.schoolType)
 	const programs = normalizeUniversityPrograms(schoolData?.programs)
-	const isBusy = isLoadingList || isLoadingTeachers || isLoadingSchool || isSaving
+	const isBusy = isLoadingList || isLoadingTeachers || isLoadingSchool
+		|| isSaving || isUploadingDocument || isDeletingDocument
 
 	const isValidSubjectParam =
 		subjectId != null && OBJECT_ID_RE.test(String(subjectId))
@@ -331,25 +368,81 @@ function SchoolAdminEditSubjectScreen () {
 		currentSubject?.gradesLevel,
 	) || '—'
 
-	const hasStoredBook = Boolean(
-		currentSubject
-		&& currentSubject.bookId
-		&& String(currentSubject.bookId).trim() !== '',
+	const subjectDocuments = useMemo(
+		() => getSubjectDocuments(currentSubject),
+		[currentSubject],
 	)
-	const storedBookLabel = hasStoredBook
-		? bookDisplayName(String(currentSubject.bookId))
-		: ''
+	const hasDocuments = subjectDocuments.length > 0
 
-	const openBookHref = hasStoredBook && currentSubject?.bookUrl
-		? String(currentSubject.bookUrl)
-		: (hasStoredBook && subjectId
-			? `${SUBJECTS_URL}/${subjectId}/school-admin/book`
-			: '')
+	const getDocumentOpenHref = (doc) => {
+		if (doc?.fileUrl) {
+			return String(doc.fileUrl)
+		}
+		if (doc?._id && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/school-admin/documents/${doc._id}`
+		}
+		if (hasDocuments && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/school-admin/book`
+		}
+		return ''
+	}
 
 	const handleClearBook = () => {
 		setBookFile(null)
+		setDocumentLabel('')
 		if (bookInputRef.current) {
 			bookInputRef.current.value = ''
+		}
+	}
+
+	const handleUploadDocument = async () => {
+		if (!(bookFile instanceof File)) {
+			toast.error('Elige un PDF para subir')
+			return
+		}
+		if (!isValidSubjectParam) {
+			return
+		}
+
+		try {
+			await uploadSubjectDocument({
+				id: String(subjectId),
+				document: bookFile,
+				label: documentLabel.trim() !== '' ? documentLabel.trim() : undefined,
+			}).unwrap()
+			toast.success('PDF subido')
+			handleClearBook()
+			await refetchSubjects()
+		} catch (err) {
+			toast.error(
+				err?.data?.message
+					|| err?.error?.message
+					|| 'No se pudo subir el PDF',
+			)
+		}
+	}
+
+	const handleDeleteDocument = async (documentId) => {
+		if (!documentId || !isValidSubjectParam) {
+			return
+		}
+
+		setDeletingDocumentId(String(documentId))
+		try {
+			await deleteSubjectDocument({
+				id: String(subjectId),
+				documentId: String(documentId),
+			}).unwrap()
+			toast.success('PDF eliminado')
+			await refetchSubjects()
+		} catch (err) {
+			toast.error(
+				err?.data?.message
+					|| err?.error?.message
+					|| 'No se pudo eliminar el PDF',
+			)
+		} finally {
+			setDeletingDocumentId(null)
 		}
 	}
 
@@ -361,7 +454,7 @@ function SchoolAdminEditSubjectScreen () {
 				if (bookInputRef.current) {
 					bookInputRef.current.value = ''
 				}
-				toast.error('Please choose a PDF file')
+				toast.error('Elige un archivo PDF')
 				return
 			}
 			if (file.size > MAX_BOOK_BYTES) {
@@ -369,7 +462,7 @@ function SchoolAdminEditSubjectScreen () {
 				if (bookInputRef.current) {
 					bookInputRef.current.value = ''
 				}
-				toast.error('PDF must be 200 MB or smaller')
+				toast.error('El PDF debe ser de 200 MB o menos')
 				return
 			}
 			setBookFile(file)
@@ -381,18 +474,18 @@ function SchoolAdminEditSubjectScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (title.trim() === '') {
-			toast.error('Please enter a subject title')
+			toast.error('Ingresa el nombre de la materia')
 			return
 		}
 		if (!isValidSubjectParam) {
 			return
 		}
 		if (!selectedTeacher?.email) {
-			toast.error('Please select a teacher for this subject')
+			toast.error('Selecciona un profesor para esta materia')
 			return
 		}
 		if (isUniversity && selectedProgramIds.length === 0) {
-			toast.error('Select at least one program for this subject')
+			toast.error('Selecciona al menos un programa para esta materia')
 			return
 		}
 
@@ -406,15 +499,12 @@ function SchoolAdminEditSubjectScreen () {
 		} else {
 			body.description = ''
 		}
-		if (bookFile instanceof File) {
-			body.book = bookFile
-		}
 		if (isUniversity) {
 			body.program = selectedProgramIds
 			if (semester.trim() !== '') {
 				const semesterNum = Number(semester)
 				if (!Number.isInteger(semesterNum) || semesterNum < 1) {
-					toast.error('Semester must be a positive whole number')
+					toast.error('El semestre debe ser un número entero positivo')
 					return
 				}
 				body.semester = semesterNum
@@ -425,15 +515,13 @@ function SchoolAdminEditSubjectScreen () {
 
 		try {
 			await updateSubject(body).unwrap()
-			toast.success(
-				bookFile ? 'Subject and PDF saved.' : 'Subject updated',
-			)
+			toast.success('Materia actualizada')
 			navigate('/schooladmins/mysubjects', { replace: true })
 		} catch (err) {
 			toast.error(
 				err?.data?.message
 					|| err?.error?.message
-					|| 'Could not update subject',
+					|| 'No se pudo actualizar la materia',
 			)
 		}
 	}
@@ -453,22 +541,22 @@ function SchoolAdminEditSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											edit subjects.
+											Registra tu escuela primero; después
+											podrás editar materias.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registra tu escuela
 										</Link>
 									</p>
 								</div>
@@ -491,7 +579,7 @@ function SchoolAdminEditSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
@@ -500,12 +588,12 @@ function SchoolAdminEditSubjectScreen () {
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
-										<h1 className='login-card__title'>Invalid link</h1>
+										<h1 className='login-card__title'>Enlace no válido</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											This subject link is not valid.
+											Este enlace de materia no es válido.
 										</p>
 									</div>
 								</div>
@@ -528,7 +616,7 @@ function SchoolAdminEditSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
@@ -537,11 +625,11 @@ function SchoolAdminEditSubjectScreen () {
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											We couldn&apos;t load subjects.
+											No pudimos cargar las materias.
 										</p>
 									</div>
 									<button
@@ -549,7 +637,7 @@ function SchoolAdminEditSubjectScreen () {
 										className='login-submit'
 										onClick={() => void refetchSubjects()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							</div>
@@ -571,7 +659,7 @@ function SchoolAdminEditSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
@@ -580,13 +668,13 @@ function SchoolAdminEditSubjectScreen () {
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
-										<h1 className='login-card__title'>Subject not found</h1>
+										<h1 className='login-card__title'>Materia no encontrada</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											There is no subject with this id in your
-											school, or it may have been removed.
+											No hay una materia con este id en tu
+											escuela, o pudo haber sido eliminada.
 										</p>
 									</div>
 								</div>
@@ -608,28 +696,28 @@ function SchoolAdminEditSubjectScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login content-area--login-scroll'>
-					<div className='center-content2 login-screen login-screen--wide'>
+					<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 					<div className='login-card'> 
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									
 									<h1 className='login-card__title'>
-										Edit subject
+										Editar materia
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Update how this subject appears in your
-										{isUniversity ? ' institution' : ' school'}.
-										Change the title, description, or assigned
-										teacher; {isUniversity
-											? 'programs and semester'
-											: 'grade level'} can be updated below.
-										Attach an optional course book — PDF, up to
-										200 MB.
+										Actualiza cómo se muestra esta materia en tu
+										{isUniversity ? ' institución' : ' escuela'}.
+										Cambia el título, la descripción o el profesor
+										asignado; {isUniversity
+											? 'los programas y el semestre'
+											: 'el nivel de grado'} se pueden
+										actualizar abajo. Adjunta un documento del
+										curso opcional — PDF, hasta 200 MB.
 									</p>
 								</div>
 								{isLoadingList && !currentSubject ? (
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Loading…
+										Cargando…
 									</p>
 								) : (
 									<form
@@ -643,14 +731,14 @@ function SchoolAdminEditSubjectScreen () {
 												className='login-label'
 												htmlFor='schooladmin-edit-subject-title'
 											>
-												Subject name
+												Nombre de la materia
 											</label>
 											<input
 												type='text'
 												id='schooladmin-edit-subject-title'
 												name='title'
 												className='login-input'
-												placeholder='e.g. Algebra I'
+												placeholder='Ej. Álgebra I'
 												autoComplete='off'
 												value={title}
 												disabled={isBusy}
@@ -664,23 +752,24 @@ function SchoolAdminEditSubjectScreen () {
 														className='login-label subject-grade-picker__title'
 														htmlFor='schooladmin-edit-subject-program'
 													>
-														Programs
+														Programas
 													</label>
 													{selectedProgramIds.length > 0 && (
 														<span className='subject-grade-picker__count'>
-															{selectedProgramIds.length} selected
+															{selectedProgramIds.length}{' '}
+															seleccionados
 														</span>
 													)}
 												</div>
 												{isLoadingSchool ? (
 													<p className='subject-grade-picker__hint'>
-														Loading programs…
+														Cargando programas…
 													</p>
 												) : programs.length === 0 ? (
 													<p className='subject-grade-picker__hint'>
-														No programs on your institution yet.{' '}
+														Aún no hay programas en tu institución.{' '}
 														<Link to='/schooladmins/myschools'>
-															Add them in My school
+															Agrégalos en Mi escuela
 														</Link>
 													</p>
 												) : (
@@ -689,13 +778,13 @@ function SchoolAdminEditSubjectScreen () {
 															className='subject-grade-picker__hint'
 															id='schooladmin-edit-subject-program'
 														>
-															Choose at least one program this
-															subject applies to.
+															Elige al menos un programa al
+															que aplique esta materia.
 														</p>
 														<div
 															className='subject-grade-picker__grid'
 															role='group'
-															aria-label='Programs for this subject'
+															aria-label='Programas de esta materia'
 														>
 															{programs.map((item) => {
 																const programId = String(item._id)
@@ -772,7 +861,7 @@ function SchoolAdminEditSubjectScreen () {
 													className='login-label'
 													htmlFor='schooladmin-edit-subject-grade'
 												>
-													Grade level
+													Nivel de grado
 												</label>
 												<input
 													type='text'
@@ -791,9 +880,9 @@ function SchoolAdminEditSubjectScreen () {
 													className='login-label'
 													htmlFor='schooladmin-edit-subject-semester'
 												>
-													Semester
+													Semestre
 													<span className='subject-grade-picker__optional'>
-														(optional)
+														(opcional)
 													</span>
 												</label>
 												<input
@@ -803,7 +892,7 @@ function SchoolAdminEditSubjectScreen () {
 													className='login-input'
 													min='1'
 													step='1'
-													placeholder='e.g. 1'
+													placeholder='Ej. 1'
 													autoComplete='off'
 													value={semester}
 													disabled={isBusy}
@@ -818,11 +907,11 @@ function SchoolAdminEditSubjectScreen () {
 													className='login-label subject-teacher-picker__title'
 													id='schooladmin-edit-subject-teacher-label'
 												>
-													Assign teacher
+													Asignar profesor
 												</label>
 												{assignedTeacher ? (
 													<span className='subject-teacher-picker__badge subject-teacher-picker__badge--current'>
-														Current:{' '}
+														Actual:{' '}
 														{formatTeacherName(
 															assignedTeacher.firstname,
 															assignedTeacher.lastname,
@@ -830,21 +919,21 @@ function SchoolAdminEditSubjectScreen () {
 													</span>
 												) : selectedTeacher ? (
 													<span className='subject-teacher-picker__badge'>
-														Selected
+														Seleccionado
 													</span>
 												) : null}
 											</div>
 											{isLoadingTeachers ? (
 												<p className='subject-teacher-picker__hint'>
-													Loading teachers…
+													Cargando profesores…
 												</p>
 											) : teachersList.length === 0 ? (
 												<p className='subject-teacher-picker__hint'>
-													No teachers yet.{' '}
+													Aún no hay profesores.{' '}
 													<Link to='/schooladmins/addteacher'>
-														Add a teacher
+														Agrega un profesor
 													</Link>{' '}
-													first, then assign one here.
+													primero y luego asígnalo aquí.
 												</p>
 											) : (
 												<>
@@ -852,8 +941,9 @@ function SchoolAdminEditSubjectScreen () {
 														className='subject-teacher-picker__hint'
 														id='schooladmin-edit-subject-teacher'
 													>
-														Choose who teaches this subject.
-														The current teacher is marked below.
+														Elige quién impartirá esta materia.
+														El profesor actual aparece marcado
+														abajo.
 													</p>
 													<div
 														className='subject-teacher-picker__list'
@@ -921,7 +1011,7 @@ function SchoolAdminEditSubjectScreen () {
 																	</span>
 																	{isCurrent ? (
 																		<span className='subject-teacher-picker__tag'>
-																			Current
+																			Actual
 																		</span>
 																	) : null}
 																	<span
@@ -958,13 +1048,13 @@ function SchoolAdminEditSubjectScreen () {
 												className='login-label'
 												htmlFor='schooladmin-edit-subject-description'
 											>
-												Description (optional)
+												Descripción (opcional)
 											</label>
 											<textarea
 												id='schooladmin-edit-subject-description'
 												name='description'
 												className='login-input login-textarea'
-												placeholder='What will students learn? Who is it for?'
+												placeholder='De qué trata esta materia…'
 												rows={5}
 												value={description}
 												disabled={isBusy}
@@ -977,73 +1067,88 @@ function SchoolAdminEditSubjectScreen () {
 												className='login-label'
 												id='schooladmin-book-label'
 											>
-												Course book (optional)
+												Documentos del curso (opcional)
 											</span>
-											{hasStoredBook ? (
-												<div
-													className='teacher-book-upload__status'
-													role='status'
+											{hasDocuments ? (
+												<ul
+													className='subject-documents__list'
+													aria-label='PDFs subidos'
 												>
-													<span
-														className='teacher-book-upload__status-icon'
-														aria-hidden
-													>
-														<svg
-															width='20'
-															height='20'
-															viewBox='0 0 24 24'
-															fill='none'
-															stroke='currentColor'
-															strokeWidth='2'
-														>
-															<path
-																d='M20 6L9 17l-5-5'
-																strokeLinecap='round'
-																strokeLinejoin='round'
-															/>
-														</svg>
-													</span>
-													<div className='teacher-book-upload__status-body'>
-														<p className='teacher-book-upload__status-title'>
-															PDF already saved
-														</p>
-														{storedBookLabel ? (
-															<p className='teacher-book-upload__status-file'>
-																{storedBookLabel}
-															</p>
-														) : null}
-														{openBookHref ? (
-															<p className='teacher-book-upload__status-actions'>
-																<a
-																	href={openBookHref}
-																	className='teacher-book-upload__open-link'
-																	target='_blank'
-																	rel='noopener noreferrer'
-																>
-																	Open PDF in new tab
-																	<span
-																		className='teacher-book-upload__open-link-icon'
-																		aria-hidden
+													{subjectDocuments.map((doc) => {
+														const docKey = doc._id
+															? String(doc._id)
+															: String(doc.fileId)
+														const openHref = getDocumentOpenHref(doc)
+														const isDeletingThis =
+															deletingDocumentId === docKey
+
+														return (
+															<li
+																key={docKey}
+																className='subject-documents__item'
+															>
+																<div className='subject-documents__info'>
+																	<p className='subject-documents__name'>
+																		{documentDisplayName(doc)}
+																	</p>
+																	{openHref ? (
+																		<a
+																			href={openHref}
+																			className='teacher-book-upload__open-link'
+																			target='_blank'
+																			rel='noopener noreferrer'
+																		>
+																			Abrir PDF
+																		</a>
+																	) : null}
+																</div>
+																{doc._id ? (
+																	<button
+																		type='button'
+																		className='subject-documents__delete'
+																		disabled={isBusy || isDeletingThis}
+																		onClick={() =>
+																			void handleDeleteDocument(doc._id)}
 																	>
-																		↗
-																	</span>
-																</a>
-															</p>
-														) : null}
-														<p className='teacher-book-upload__status-hint'>
-															{bookFile
-																? `This save will replace it with “${bookFile.name}”.`
-																: 'Upload a new PDF below to replace it.'}
-														</p>
-													</div>
-												</div>
-											) : null}
+																		{isDeletingThis
+																			? 'Eliminando…'
+																			: 'Eliminar'}
+																	</button>
+																) : null}
+															</li>
+														)
+													})}
+												</ul>
+											) : (
+												<p className='teacher-book-upload__status-hint'>
+													Aún no hay PDFs. Agrega documentos
+													abajo — uno a la vez.
+												</p>
+											)}
+											<div className='login-field'>
+												<label
+													className='login-label'
+													htmlFor='schooladmin-edit-document-label'
+												>
+													Etiqueta del documento (opcional)
+												</label>
+												<input
+													type='text'
+													id='schooladmin-edit-document-label'
+													className='login-input'
+													placeholder='Ej. Libro unidad 1'
+													value={documentLabel}
+													disabled={isBusy}
+													onChange={(e) =>
+														setDocumentLabel(e.target.value)}
+												/>
+											</div>
 											<div className='teacher-book-upload'>
 												<input
 													ref={bookInputRef}
 													type='file'
 													id='schooladmin-edit-subject-book'
-													name='book'
+													name='document'
 													className='teacher-book-upload__input'
 													accept='application/pdf,.pdf'
 													disabled={isBusy}
@@ -1063,39 +1168,54 @@ function SchoolAdminEditSubjectScreen () {
 													<span className='teacher-book-upload__title'>
 														{bookFile
 															? bookFile.name
-															: 'Drop a file or tap to browse'}
+															: 'Subir un archivo'}
 													</span>
 													<span className='teacher-book-upload__hint'>
-														PDF only · up to 200 MB
+														Solo PDF · hasta 200 MB · se agrega
+														sin reemplazar los existentes
 													</span>
 												</label>
 												{bookFile ? (
-													<button
-														type='button'
-														className='teacher-book-upload__clear'
-														onClick={handleClearBook}
-														disabled={isBusy}
-													>
-														Remove file
-													</button>
+													<div className='subject-documents__actions'>
+														<button
+															type='button'
+															className='login-submit'
+															disabled={isBusy}
+															onClick={() =>
+																void handleUploadDocument()}
+														>
+															{isUploadingDocument
+																? 'Subiendo…'
+																: 'Subir PDF'}
+														</button>
+														<button
+															type='button'
+															className='teacher-book-upload__clear'
+															onClick={handleClearBook}
+															disabled={isBusy}
+														>
+															Quitar selección
+														</button>
+													</div>
 												) : null}
 											</div>
 										</div>
 										<div className='subject-book-tools'>
 											<div className='subject-book-tools__header'>
 												<span className='subject-book-tools__eyebrow'>
-													Course book
+													Documentos del curso
 												</span>
 												<h3 className='subject-book-tools__title'>
-													Once you have a course book please generate book chapters
+													Cuando tengas PDFs del curso,
+													genera los capítulos
 												</h3>
 												<p className='subject-book-tools__desc'>
-													{hasStoredBook
-														? 'Split your PDF into chapters with page ranges for each section.'
-														: 'Save a course book above to unlock chapter splitting.'}
+													{hasDocuments
+														? 'Divide tus PDFs en capítulos con rangos de páginas para cada sección.'
+														: 'Sube al menos un PDF arriba para desbloquear la división en capítulos.'}
 												</p>
 											</div>
-											{hasStoredBook ? (
+											{hasDocuments ? (
 												<Link
 													to={`/schooladmins/bookchapters/${subjectId}`}
 													className={
@@ -1131,10 +1251,10 @@ function SchoolAdminEditSubjectScreen () {
 													</span>
 													<span className='subject-book-tools__body'>
 														<span className='subject-book-tools__label'>
-															Generate Book chapters
+															Generar capítulos del libro
 														</span>
 														<span className='subject-book-tools__hint'>
-															Define page ranges per chapter
+															Define rangos de páginas por capítulo
 														</span>
 													</span>
 													<span
@@ -1181,10 +1301,10 @@ function SchoolAdminEditSubjectScreen () {
 													</span>
 													<span className='subject-book-tools__body'>
 														<span className='subject-book-tools__label'>
-															Generate Book chapters
+															Generar capítulos del libro
 														</span>
 														<span className='subject-book-tools__hint'>
-															Requires a saved PDF
+															Requiere al menos un PDF del curso
 														</span>
 													</span>
 												</span>
@@ -1201,7 +1321,7 @@ function SchoolAdminEditSubjectScreen () {
 													&& selectedProgramIds.length === 0)
 											}
 										>
-											{isSaving ? 'Saving…' : 'Save changes'}
+											{isSaving ? 'Guardando…' : 'Guardar cambios'}
 										</button>
 									</form>
 								)}

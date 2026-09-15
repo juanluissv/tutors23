@@ -10,6 +10,7 @@ import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetQuestionByIdForTeacherQuery } from '../../slices/teachers/teacherQuestionsSlice'
 import { useCreateTeacherAnswerMutation } from '../../slices/teachers/teacherAnswersSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 const TagIcon = () => (
@@ -146,20 +147,22 @@ function TeacherAnswerDetailsScreen () {
 		? `/teachers/watchnew?questionId=${encodeURIComponent(questionId)}`
 		: '/teachers/watchnew'
 
-	const questionErrorMessage =
-		questionError?.data?.message
-		|| questionError?.error
-		|| 'Could not load this question.'
+	const questionErrorMessage = localizeApiError(
+		questionError,
+		'No se pudo cargar esta pregunta.',
+	)
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (!canFetch) {
-			toast.error('Missing or invalid question.')
+			toast.error('Falta la pregunta o no es válida.')
 			return
 		}
 		const body = String(description ?? '').trim()
 		if (!body) {
-			toast.error('Please enter a description for your answer.')
+			toast.error(
+				'Por favor escribe una descripción para tu respuesta.',
+			)
 			return
 		}
 		try {
@@ -169,16 +172,16 @@ function TeacherAnswerDetailsScreen () {
 				teacherId,
 			}).unwrap()
 			const answerId = saved?._id
-			toast.success('Answer saved.')
+			toast.success('Respuesta guardada.')
 			if (answerId != null && String(answerId).trim() !== '') {
 				navigate(`/teachers/answer/${String(answerId)}`)
 			} else {
 				navigate('/teachers/newquestions')
 			}
 		} catch (err) {
-			const msg =
-				err?.data?.message || err?.error || 'Could not save the answer.'
-			toast.error(msg)
+			toast.error(
+				localizeApiError(err, 'No se pudo guardar la respuesta.'),
+			)
 		}
 	}
 
@@ -208,23 +211,25 @@ function TeacherAnswerDetailsScreen () {
 											to={watchBackHref}
 											className='login-card__link'
 										>
-											&#8592; Back to question
+											&#8592; Volver a la pregunta
 										</Link>
 									</div>
 									<h1 className='login-card__title answer-details__title'>
-										Answer New Question
+										Responder nueva pregunta
 									</h1>
 								</div>
 
 								{!canFetch && (
 									<p className='login-card__subtitle'>
-										Open this page from a question using the link from your
-										list (missing question id).
+										Abre esta página desde una pregunta de tu
+										lista (falta el id de la pregunta).
 									</p>
 								)}
 
 								{canFetch && isLoadingQuestion && (
-									<p className='login-card__subtitle'>Loading question…</p>
+									<p className='login-card__subtitle'>
+										Cargando pregunta…
+									</p>
 								)}
 
 								{canFetch && isQuestionError && (
@@ -263,7 +268,7 @@ function TeacherAnswerDetailsScreen () {
 												id='answer-description'
 												name='description'
 												className='answer-details__input answer-details__textarea'
-												placeholder='Write your answer…'
+												placeholder='Escribe tu respuesta…'
 												rows={4}
 												value={description}
 												disabled={isSubmitting}
@@ -277,7 +282,9 @@ function TeacherAnswerDetailsScreen () {
 											className='answer-details__submit'
 											disabled={isSubmitting || !titleDisplay}
 										>
-											{isSubmitting ? 'Saving…' : 'Upload a Video'}
+											{isSubmitting
+												? 'Guardando…'
+												: 'Subir un video'}
 										</button>
 									</form>
 								)}

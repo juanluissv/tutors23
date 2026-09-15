@@ -108,21 +108,22 @@ function SubjectsPagination ({
 }
 
 const DEFAULT_GRID_COPY = {
-	loading: 'Loading subjects…',
+	loading: 'Cargando materias…',
 	error:
-		'We couldn\'t load your subjects. Try again in a moment.',
-	retry: 'Try again',
-	students: 'students',
-	published: 'Published',
-	draft: 'Draft',
-	paginationAria: 'Subject pages',
-	showing: 'Showing',
-	of: 'of',
-	subjects: 'subjects',
-	prev: 'Prev',
-	next: 'Next',
-	pageAriaPrefix: 'Page',
-	noTeacher: 'No teacher assigned',
+		'No pudimos cargar tus materias. '
+		+ 'Intenta de nuevo en un momento.',
+	retry: 'Intentar de nuevo',
+	students: 'estudiantes',
+	published: 'Publicado',
+	draft: 'Borrador',
+	paginationAria: 'Páginas de materias',
+	showing: 'Mostrando',
+	of: 'de',
+	subjects: 'materias',
+	prev: 'Anterior',
+	next: 'Siguiente',
+	pageAriaPrefix: 'Página',
+	noTeacher: 'Sin profesor',
 	teacherPrefix: 'profesor  ',
 }
 
@@ -434,19 +435,19 @@ export function SubjectCardActionsDefault ({ subjectId }) {
 				to={`/teachers/courses/${subjectId}`}
 				className='teacher-subject-card__btn'
 			>
-				Courses
+				Cursos
 			</Link>
 			<Link
 				to={`/teachers/subjects/${subjectId}/edit`}
 				className='teacher-subject-card__btn'
 			>
-				Edit Subject
+				Editar materia
 			</Link>
 			<Link
 				to={`/teachers/previousquestions/${subjectId}`}
 				className='teacher-subject-card__btn'
 			>
-				Previous Questions
+				Preguntas anteriores
 			</Link>
 		</div>
 	)
@@ -467,7 +468,7 @@ export function SubjectCardActionsStudents ({ subjectId }) {
 					+ 'teacher-subject-card__btn--wide'
 				}
 			>
-				View students
+				Ver estudiantes
 			</Link>
 		</div>
 	)
@@ -488,7 +489,7 @@ export function SubjectCardActionsStudentsSchoolAdmin ({ subjectId }) {
 					+ 'teacher-subject-card__btn--wide'
 				}
 			>
-				View students
+				Ver estudiantes
 			</Link>
 		</div>
 	)

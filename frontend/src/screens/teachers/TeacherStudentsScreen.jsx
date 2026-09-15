@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetSubjectStudentsForTeacherQuery } from '../../slices/teachers/teacherApiSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i
@@ -27,7 +28,7 @@ const StatusDot = ({ isActive }) => (
 	<span
 		className={`ts-status-dot ${isActive ? 'ts-status-dot--active' : 'ts-status-dot--inactive'}`}
 	>
-		{isActive ? 'Active' : 'Inactive'}
+		{isActive ? 'Activa' : 'Inactiva'}
 	</span>
 )
 
@@ -99,7 +100,9 @@ function TeacherStudentsScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area'>
-							<p className='ts-page__subtitle'>Invalid subject link.</p>
+							<p className='ts-page__subtitle'>
+								Enlace de materia no válido.
+							</p>
 						</div>
 					</div>
 				</div>
@@ -107,12 +110,12 @@ function TeacherStudentsScreen () {
 		)
 	}
 
-	const errMessage =
-		isError && error?.data?.message
-			? String(error.data.message)
-			: isError
-				? 'Could not load students.'
-				: ''
+	const errMessage = isError
+		? localizeApiError(
+			error,
+			'No se pudieron cargar los estudiantes.',
+		)
+		: ''
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
@@ -129,7 +132,7 @@ function TeacherStudentsScreen () {
 					<div className='content-area'>
 						<div className='ts-page'>
 							<h1 className='ts-page__title heading-gradient'>
-								My Students
+								Mis estudiantes
 							</h1>
 							<p className='ts-page__subtitle'>
 								{subjectTitle && (
@@ -138,23 +141,28 @@ function TeacherStudentsScreen () {
 										{' · '}
 									</>
 								)}
-								{studentsList.length} students enrolled &middot;{' '}
-								{activeCount} with active subscription
+								{studentsList.length} estudiantes inscritos
+								{' '}&middot;{' '}
+								{activeCount} con suscripción activa
 							</p>
 
 							{isLoading && (
-								<p className='ts-page__subtitle'>Loading…</p>
+								<p className='ts-page__subtitle'>
+									Cargando…
+								</p>
 							)}
 
 							{isError && (
 								<div className='ts-table-wrapper'>
-									<p className='ts-page__subtitle'>{errMessage}</p>
+									<p className='ts-page__subtitle'>
+										{errMessage}
+									</p>
 									<button
 										type='button'
 										className='teacher-subject-card__btn'
 										onClick={() => refetch()}
 									>
-										Retry
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -179,7 +187,7 @@ function TeacherStudentsScreen () {
 										<input
 											type='text'
 											className='ts-search-bar__input'
-											placeholder='Search by name, email…'
+											placeholder='Buscar por nombre, correo…'
 											value={searchTerm}
 											onChange={(e) => setSearchTerm(e.target.value)}
 										/>
@@ -189,11 +197,11 @@ function TeacherStudentsScreen () {
 										<table className='ts-table'>
 											<thead>
 												<tr>
-													<th>Student</th>
-													<th>Subject</th>
-													<th>Questions this month</th>
-													<th>Subscription</th>
-													<th>Joined</th>
+													<th>Estudiante</th>
+													<th>Materia</th>
+													<th>Preguntas este mes</th>
+													<th>Suscripción</th>
+													<th>Ingreso</th>
 												</tr>
 											</thead>
 											<tbody>
@@ -236,8 +244,8 @@ function TeacherStudentsScreen () {
 													<tr>
 														<td colSpan='5' className='ts-empty'>
 															{studentsList.length === 0
-																? 'No students enrolled yet.'
-																: 'No students match your search'}
+																? 'Aún no hay estudiantes inscritos.'
+																: 'Ningún estudiante coincide con tu búsqueda'}
 														</td>
 													</tr>
 												)}

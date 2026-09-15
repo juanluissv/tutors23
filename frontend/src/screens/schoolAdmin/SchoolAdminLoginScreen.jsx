@@ -27,17 +27,17 @@ function SchoolAdminLoginScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (email === '') {
-			toast.error('Please enter email')
+			toast.error('Por favor ingresa tu correo electrónico')
 			return
 		}
 		if (password === '') {
-			toast.error('Please enter password')
+			toast.error('Por favor ingresa tu contraseña')
 			return
 		}
 		try {
 			const res = await loginSchoolAdmin({ email, password }).unwrap()
 			dispatch(setSchoolAdminCredentials({ ...res }))
-			toast.success('Login successful')
+			toast.success('Inicio de sesión exitoso')
 			const redirect = sp.get('redirect')
 			if (redirect) {
 				navigate(redirect.startsWith('/') ? redirect : `/${redirect}`)
@@ -66,9 +66,12 @@ function SchoolAdminLoginScreen () {
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
-									<h1 className='login-card__title'>Welcome back</h1>
+									<h1 className='login-card__title'>
+										Bienvenido de nuevo
+									</h1>
 									<p className='login-card__subtitle'>
-										Sign in to your school admin account to continue
+										Inicia sesión en tu cuenta de
+										administrador escolar para continuar
 									</p>
 								</div>
 								<form
@@ -79,14 +82,14 @@ function SchoolAdminLoginScreen () {
 								>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='schooladmin-email'>
-											Email
+											Correo electrónico
 										</label>
 										<input
 											type='email'
 											id='schooladmin-email'
 											name='email'
 											className='login-input'
-											placeholder='you@example.com'
+											placeholder='tucorreo@ejemplo.com'
 											autoComplete='email'
 											onChange={(e) => setEmail(e.target.value)}
 											value={email}
@@ -98,7 +101,7 @@ function SchoolAdminLoginScreen () {
 											className='login-label'
 											htmlFor='schooladmin-password'
 										>
-											Password
+											Contraseña
 										</label>
 										<input
 											type='password'
@@ -125,7 +128,8 @@ function SchoolAdminLoginScreen () {
 												disabled={isLoading}
 											/> */}
 											<span className='login-remember__text'>
-											Please click Sign in to enter demo 
+												Haz clic en Iniciar sesión para
+												entrar a la demo
 											</span>
 										</label>
 									</div>
@@ -136,16 +140,19 @@ function SchoolAdminLoginScreen () {
 										className='login-submit'
 										disabled={isLoading}
 									>
-										{isLoading ? 'Signing in…' : 'Sign in'}
+										{isLoading
+											? 'Iniciando sesión…'
+											: 'Iniciar sesión'}
 									</button>
 								</form>
 								<p className='login-card__footer'>
-									Don&apos;t have a school admin account?{' '}
+									¿No tienes una cuenta de administrador
+									escolar?{' '}
 									<Link
 										to='/schooladmins/register'
 										className='login-card__link'
 									>
-										Register
+										Regístrate
 									</Link>
 								</p>
 							</div>

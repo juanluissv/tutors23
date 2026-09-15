@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetQuestionsByTeacherIdQuery } from '../../slices/teachers/teacherQuestionsSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 const PAGE_SIZE = 2
@@ -135,10 +136,10 @@ const TimelineBadge = ({ theme, gradientId }) => {
 
 function studentDisplayName (student) {
 	if (!student || typeof student !== 'object') {
-		return 'Student'
+		return 'Estudiante'
 	}
 	const parts = [student.firstname, student.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Student'
+	return parts.length > 0 ? parts.join(' ') : 'Estudiante'
 }
 
 function formatQaDate (value) {
@@ -149,7 +150,7 @@ function formatQaDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return ''
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
@@ -181,7 +182,7 @@ function QuestionVideoThumb ({ watchTo, ariaLabel }) {
 		<Link
 			to={watchTo}
 			className='new-answers__video'
-			aria-label={ariaLabel ?? 'Watch question video'}
+			aria-label={ariaLabel ?? 'Ver video de la pregunta'}
 		>
 			<div className='new-answers__video-glow' />
 			<div className='new-answers__video-placeholder'>
@@ -205,7 +206,7 @@ function QuestionCard ({ item }) {
 	const category =
 		item.subject && typeof item.subject === 'object'
 			? item.subject.title
-			: 'Subject'
+			: 'Materia'
 	const watchPath = `/teachers/watchnew?questionId=${String(item._id)}`
 	const theme = themeForQuestionId(item._id)
 	const hasDescription =
@@ -217,7 +218,7 @@ function QuestionCard ({ item }) {
 				<span className='new-answers__tag'>{category}</span>
 				<span className='new-answers__pill'>
 					<span className='new-answers__pill-dot' />
-					New
+					Nueva
 				</span>
 			</div>
 
@@ -225,7 +226,7 @@ function QuestionCard ({ item }) {
 
 			<QuestionVideoThumb
 				watchTo={watchPath}
-				ariaLabel='Watch question video'
+				ariaLabel='Ver video de la pregunta'
 			/>
 
 			{hasDescription && (
@@ -239,7 +240,7 @@ function QuestionCard ({ item }) {
 			</span>
 
 			<Link to={watchPath} className='new-answers__watch'>
-				Watch question
+				Mira la pregunta
 				<PlayIconSmall />
 			</Link>
 		</div>
@@ -323,8 +324,10 @@ function TeacherNewQuestionsScreen () {
 		return null
 	}
 
-	const errorMessage =
-		error?.data?.message || error?.error || 'Could not load questions.'
+	const errorMessage = localizeApiError(
+		error,
+		'No se pudieron cargar las preguntas.',
+	)
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
@@ -342,22 +345,20 @@ function TeacherNewQuestionsScreen () {
 						<div className='center-content3'>
 							<div className='new-answers-page new-answers-page--centered'>
 								<h1 className='new-answers-page__title heading-gradient'>
-									New video questions from students
+									Nuevas preguntas en video de los estudiantes
 								</h1>
 								<p className='new-answers-page__subtitle'>
-									You have{' '}
-									<strong>{newQuestions.length}</strong>{' '}
-									new video{' '}
+									Tienes{' '}
+									<strong>{newQuestions.length}</strong>
+									{' '}
 									{newQuestions.length === 1
-										? 'question'
-										: 'questions'}{' '}
-									waiting for your reply. Watch them and record
-									your answer.
+										? 'nueva pregunta en video esperando tu respuesta. Mírala y graba tu respuesta.'
+										: 'nuevas preguntas en video esperando tu respuesta. Míralas y graba tu respuesta.'}
 								</p>
 
 								{isLoading && (
 									<p className='new-answers__status'>
-										Loading questions…
+										Cargando preguntas…
 									</p>
 								)}
 
@@ -370,7 +371,7 @@ function TeacherNewQuestionsScreen () {
 											style={{ marginTop: '0.75rem' }}
 											onClick={() => refetch()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								)}
@@ -382,9 +383,9 @@ function TeacherNewQuestionsScreen () {
 											<QuestionBadge />
 										</div>
 										<p className='new-answers__empty-text'>
-											No unanswered questions yet. When
-											students submit videos, they will
-											appear here.
+											Aún no hay preguntas sin responder.
+											Cuando los estudiantes envíen videos,
+											aparecerán aquí.
 										</p>
 									</div>
 								)}

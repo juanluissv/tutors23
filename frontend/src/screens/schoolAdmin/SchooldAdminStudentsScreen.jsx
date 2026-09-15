@@ -172,16 +172,16 @@ function SchooldAdminStudentsScreen () {
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											view students by subject.
+											Registra tu escuela primero; después
+											podrás ver estudiantes por materia.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registra tu escuela
 										</Link>
 									</p>
 								</div>
@@ -207,17 +207,17 @@ function SchooldAdminStudentsScreen () {
 					/>
 					<div className='content-area'>
 						<TeacherSubjectsGrid
-							pageTitle='Students by subject'
+							pageTitle='Estudiantes por materia'
 							pageSubtitle={
 								isUniversity
 									? (
-										'Pick a subject to see enrolled students '
-										+ 'and activity. Filter by program to '
-										+ 'narrow the list.'
+										'Elige una materia para ver los estudiantes '
+										+ 'inscritos y su actividad. Filtra por '
+										+ 'programa para acotar la lista.'
 									)
 									: (
-										'Pick a subject to see enrolled students '
-										+ 'and activity.'
+										'Elige una materia para ver los estudiantes '
+										+ 'inscritos y su actividad.'
 									)
 							}
 							afterSubtitle={
@@ -234,7 +234,7 @@ function SchooldAdminStudentsScreen () {
 												>
 													+
 												</span>
-												<span>Add students</span>
+												<span>Agregar estudiantes</span>
 											</Link>
 										</div>
 										{subjectsList.length > 0 && hasCohorts ? (
@@ -242,8 +242,8 @@ function SchooldAdminStudentsScreen () {
 												className='teacher-subjects-page__grade-filter'
 												role='group'
 												aria-label={isUniversity
-													? 'Filter subjects by program'
-													: 'Filter subjects by grade level'}
+													? 'Filtrar materias por programa'
+													: 'Filtrar materias por grado'}
 											>
 												<div className='teacher-subjects-page__grade-filter-header'>
 													<span
@@ -254,15 +254,15 @@ function SchooldAdminStudentsScreen () {
 													</span>
 													<span className='teacher-subjects-page__grade-filter-label'>
 														{isUniversity
-															? 'Filter by program'
-															: 'Filter by grade'}
+															? 'Filtrar por programa'
+															: 'Filtrar por grado'}
 													</span>
 													{selectedCohortId !== '' && (
 														<span className='teacher-subjects-page__grade-filter-count'>
-															{filteredSubjects.length} subject
+															{filteredSubjects.length}{' '}
 															{filteredSubjects.length === 1
-																? ''
-																: 's'}
+																? 'materia'
+																: 'materias'}
 														</span>
 													)}
 												</div>
@@ -280,8 +280,8 @@ function SchooldAdminStudentsScreen () {
 														aria-pressed={selectedCohortId === ''}
 													>
 														{isUniversity
-															? 'All programs'
-															: 'All grades'}
+															? 'Todos los programas'
+															: 'Todos los grados'}
 														<span className='teacher-subjects-page__grade-pill-count'>
 															{subjectsList.length}
 														</span>
@@ -313,7 +313,7 @@ function SchooldAdminStudentsScreen () {
 															>
 																{isUniversity
 																	? cohort.name
-																	: `Grade ${cohort.name}`}
+																	: ` ${cohort.name}`}
 																{isUniversity
 																	&& cohort.department
 																	? ` (${cohort.department})`
@@ -333,10 +333,10 @@ function SchooldAdminStudentsScreen () {
 							emptyMessage={
 								selectedCohortId !== '' && subjectsList.length > 0
 									? (isUniversity
-										? 'No subjects for this program yet.'
-										: 'No subjects for this grade level yet.')
-									: 'No subjects yet. Create subjects first, then ' +
-										'students enrolled in them will appear here.'
+										? 'Aún no hay materias para este programa.'
+										: 'Aún no hay materias para este grado.')
+									: 'Aún no hay materias. Crea materias primero; '
+										+ 'los estudiantes inscritos aparecerán aquí.'
 							}
 							subjects={filteredSubjects}
 							isLoading={isPageLoading}

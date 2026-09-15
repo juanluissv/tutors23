@@ -126,7 +126,7 @@ export function subjectIncludesProgram (subjectProgram, selectedProgram) {
 
 export function getSubjectProgramsLabel (
 	program,
-	fallback = 'Program —',
+	fallback = 'Programa —',
 ) {
 	const programs = normalizeSubjectPrograms(program)
 	if (programs.length === 0) {
@@ -141,7 +141,7 @@ export function getSubjectProgramsLabel (
 export function getSubjectCohortLabel (subject, options = {}) {
 	const {
 		isUniversity = false,
-		emptyProgramFallback = 'Program —',
+		emptyProgramFallback = 'Programa —',
 	} = options
 	const programs = normalizeSubjectPrograms(subject?.program)
 	const hasPrograms = programs.length > 0
@@ -158,7 +158,7 @@ export function getSubjectCohortLabel (subject, options = {}) {
 			emptyProgramFallback,
 		)
 		if (hasSemester) {
-			return `${programLabel} · Semester ${semesterValue}`
+			return `${programLabel} · Semestre ${semesterValue}`
 		}
 		return programLabel
 	}

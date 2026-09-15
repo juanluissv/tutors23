@@ -37,21 +37,21 @@ function TeacherAnswerScreen () {
 					<div className='content-area'>
 						<div className='center-content2'>
 							<h1 className='main-heading heading-gradient teacher-answer__heading'>
-								Record your answer
+								Graba tu respuesta
 							</h1>
 
 							<p className='upload-subtitle teacher-answer__subtitle'>
-								Choose how you want to record your answer
+								Elige cómo quieres grabar tu respuesta
 							</p>
 
 							<div className='upload-cards-container'>
 								<Link
 									to={recordScreenPath}
 									className='upload-card upload-card-sky'
-									aria-label='Record PC screen, up to 5 minutes'
+									aria-label='Grabar la pantalla de tu computadora, hasta 5 minutos'
 								>
 									<div className='upload-card-header'>
-										<h2>Record computer screen</h2>
+										<h2>Grabar pantalla de tu computadora</h2>
 										<div className='upload-card-icon'>
 											<svg
 												width='24'
@@ -76,17 +76,17 @@ function TeacherAnswerScreen () {
 										</div>
 									</div>
 									<p className='upload-card-subtitle'>
-										&#10022; Record up to a 5 minutes answer
+										&#10022; Graba una respuesta de hasta 5 minutos
 									</p>
 								</Link>
 
 								<Link
 									to={recordCameraPath}
 									className='upload-card upload-card-deepsky'
-									aria-label='Record with camera, up to 5 minutes'
+									aria-label='Grabar con la cámara, hasta 5 minutos'
 								>
 									<div className='upload-card-header'>
-										<h2>Record<br />Camera</h2>
+										<h2>Grabar<br />cámara</h2>
 										<div className='upload-card-icon'>
 											<svg
 												width='24'
@@ -104,7 +104,7 @@ function TeacherAnswerScreen () {
 										</div>
 									</div>
 									<p className='upload-card-subtitle'>
-										&#8593; Record up to a 5 minutes answer
+										&#8593; Graba una respuesta de hasta 5 minutos
 									</p>
 								</Link>
 							</div>

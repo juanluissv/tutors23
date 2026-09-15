@@ -58,15 +58,15 @@ function TeacherStudentsBySubjectScreen () {
 					/>
 					<div className='content-area'>
 						<TeacherSubjectsGrid
-							pageTitle='Students by subject'
+							pageTitle='Estudiantes por materia'
 							pageSubtitle={
-								'Pick a subject to see enrolled students ' +
-								'and activity.'
+								'Elige una materia para ver los '
+								+ 'estudiantes inscritos y su actividad.'
 							}
 							emptyMessage={
-								'You don\'t have any subjects yet. When ' +
-								'a school admin assigns you to subjects, they ' +
-								'will appear here.'
+								'Aún no tienes materias. Cuando un '
+								+ 'administrador escolar te asigne a '
+								+ 'materias, aparecerán aquí.'
 							}
 							subjects={subjects}
 							isLoading={isLoading}

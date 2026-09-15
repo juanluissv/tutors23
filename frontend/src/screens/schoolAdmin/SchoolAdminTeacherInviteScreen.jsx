@@ -94,7 +94,7 @@ function SchoolAdminTeacherInviteScreen () {
 		e.preventDefault()
 		const trimmed = email.trim().toLowerCase()
 		if (trimmed === '') {
-			toast.error('Please enter the teacher email')
+			toast.error('Ingresa el correo del profesor')
 			return
 		}
 		if (!isValidSubjectParam) {
@@ -105,7 +105,7 @@ function SchoolAdminTeacherInviteScreen () {
 				(saved) => saved.toLowerCase() === trimmed,
 			)
 		) {
-			toast.error('That email is already saved for this subject')
+			toast.error('Ese correo ya está guardado para esta materia')
 			return
 		}
 
@@ -114,13 +114,13 @@ function SchoolAdminTeacherInviteScreen () {
 				id: String(subjectId),
 				email: trimmed,
 			}).unwrap()
-			toast.success('Teacher email saved')
+			toast.success('Correo del profesor guardado')
 			navigate('/schooladmins/mysubjects', { replace: true })
 		} catch (err) {
 			toast.error(
 				err?.data?.message
 					|| err?.error?.message
-					|| 'Could not save teacher email',
+					|| 'No se pudo guardar el correo del profesor',
 			)
 		}
 	}
@@ -146,16 +146,16 @@ function SchoolAdminTeacherInviteScreen () {
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											invite teachers to subjects.
+											Registra tu escuela primero; después
+											podrás invitar profesores a las materias.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registra tu escuela
 										</Link>
 									</p>
 								</div>
@@ -187,12 +187,14 @@ function SchoolAdminTeacherInviteScreen () {
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
-										<h1 className='login-card__title'>Invalid link</h1>
+										<h1 className='login-card__title'>
+											Enlace no válido
+										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											This subject link is not valid.
+											Este enlace de materia no es válido.
 										</p>
 									</div>
 								</div>
@@ -224,11 +226,11 @@ function SchoolAdminTeacherInviteScreen () {
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											We couldn&apos;t load subjects.
+											No pudimos cargar las materias.
 										</p>
 									</div>
 									<button
@@ -236,7 +238,7 @@ function SchoolAdminTeacherInviteScreen () {
 										className='login-submit'
 										onClick={() => void refetchSubjects()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							</div>
@@ -267,13 +269,16 @@ function SchoolAdminTeacherInviteScreen () {
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
-										<h1 className='login-card__title'>Subject not found</h1>
+										<h1 className='login-card__title'>
+											Materia no encontrada
+										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											There is no subject with this id in your
-											school, or it may have been removed.
+											No hay una materia con este identificador
+											en tu escuela, o pudo haber sido
+											eliminada.
 										</p>
 									</div>
 								</div>
@@ -304,22 +309,26 @@ function SchoolAdminTeacherInviteScreen () {
 											to='/schooladmins/mysubjects'
 											className='login-card__link'
 										>
-											← Back to subjects
+											← Volver a las materias
 										</Link>
 									</div>
 									<h1 className='login-card__title'>
-										Add a teacher to this subject
+										Agregar un profesor a esta materia
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Add teacher emails for
-										<strong> {currentSubject?.title || 'this subject'}</strong>
-										. Saved invites appear below; you can add
-										more at any time.
+										Agrega correos de profesores para
+										<strong>
+											{' '}
+											{currentSubject?.title || 'esta materia'}
+										</strong>
+										. Las invitaciones guardadas aparecen
+										abajo; puedes añadir más en cualquier
+										momento.
 									</p>
 								</div>
 								{isLoadingList && !currentSubject ? (
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Loading…
+										Cargando…
 									</p>
 								) : (
 									<form
@@ -330,12 +339,12 @@ function SchoolAdminTeacherInviteScreen () {
 									>
 										<div className='subject-teacher-emails'>
 											<p className='subject-teacher-emails__label'>
-												Saved teacher emails
+												Correos de profesores guardados
 											</p>
 											{savedTeacherEmails.length > 0 ? (
 												<ul
 													className='subject-teacher-emails__list'
-													aria-label='Saved teacher emails for this subject'
+													aria-label='Correos de profesores guardados para esta materia'
 												>
 													{savedTeacherEmails.map(
 														(savedEmail) => (
@@ -350,8 +359,8 @@ function SchoolAdminTeacherInviteScreen () {
 												</ul>
 											) : (
 												<p className='subject-teacher-emails__empty'>
-													No teacher emails saved yet
-													for this subject.
+													Aún no hay correos de profesores
+													guardados para esta materia.
 												</p>
 											)}
 										</div>
@@ -360,14 +369,14 @@ function SchoolAdminTeacherInviteScreen () {
 												className='login-label'
 												htmlFor='schooladmin-teacher-invite-email'
 											>
-												Add teacher email
+												Agregar correo del profesor
 											</label>
 											<input
 												type='email'
 												id='schooladmin-teacher-invite-email'
 												name='email'
 												className='login-input'
-												placeholder='teacher@school.edu'
+												placeholder='profesor@escuela.edu'
 												autoComplete='email'
 												value={email}
 												disabled={isBusy}
@@ -380,7 +389,9 @@ function SchoolAdminTeacherInviteScreen () {
 											className='login-submit'
 											disabled={isBusy}
 										>
-											{isSaving ? 'Saving…' : 'Add email'}
+											{isSaving
+												? 'Guardando…'
+												: 'Agregar correo'}
 										</button>
 									</form>
 								)}

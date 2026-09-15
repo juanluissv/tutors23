@@ -6,6 +6,7 @@ import { useLoginTeacherMutation } from '../../slices/teachers/teacherApiSlice'
 import { setTeacherCredentials } from '../../slices/teachers/authTeacherSlice'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 function TeacherLoginScreen () {
@@ -28,20 +29,25 @@ function TeacherLoginScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (email === '') {
-			toast.error('Please enter email')
+			toast.error('Por favor ingresa tu correo electrónico')
 			return
 		}
 		if (password === '') {
-			toast.error('Please enter password')
+			toast.error('Por favor ingresa tu contraseña')
 			return
 		}
 		try {
 			const res = await loginTeacher({ email, password }).unwrap()
 			dispatch(setTeacherCredentials({ ...res }))
-			toast.success('Login successful')
+			toast.success('Inicio de sesión exitoso')
 			navigate('/teachers/newquestions')
 		} catch (err) {
-			toast.error(err?.data?.message || err?.error?.message)
+			toast.error(
+				localizeApiError(
+					err,
+					'No se pudo iniciar sesión. Intenta de nuevo.',
+				),
+			)
 		}
 	}
 
@@ -62,9 +68,9 @@ function TeacherLoginScreen () {
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
-									<h1 className='login-card__title'>Welcome back</h1>
+									<h1 className='login-card__title'>Bienvenido de nuevo</h1>
 									<p className='login-card__subtitle'>
-										Sign in to your teacher account to continue
+										Inicia sesión en tu cuenta de profesor para continuar
 									</p>
 								</div>
 								<form
@@ -75,14 +81,14 @@ function TeacherLoginScreen () {
 								>
 									<div className='login-field'>
 										<label className='login-label' htmlFor='teacher-email'>
-											Email
+											Correo electrónico
 										</label>
 										<input
 											type='email'
 											id='teacher-email'
 											name='email'
 											className='login-input'
-											placeholder='you@example.com'
+											placeholder='tucorreo@ejemplo.com'
 											autoComplete='email'
 											onChange={(e) => setEmail(e.target.value)}
 											value={email}
@@ -94,7 +100,7 @@ function TeacherLoginScreen () {
 											className='login-label'
 											htmlFor='teacher-password'
 										>
-											Password
+											Contraseña
 										</label>
 										<input
 											type='password'
@@ -121,7 +127,7 @@ function TeacherLoginScreen () {
 												disabled={isLoading}
 											/> */}
 											<span className='login-remember__text'>
-											Please click Sign in to enter demo 
+												Haz clic en Iniciar sesión para entrar a la demo
 											</span>
 										</label>
 									</div>
@@ -132,22 +138,22 @@ function TeacherLoginScreen () {
 										className='login-submit'
 										disabled={isLoading}
 									>
-										{isLoading ? 'Signing in…' : 'Sign in'}
+										{isLoading ? 'Iniciando sesión…' : 'Iniciar sesión'}
 									</button>
 								</form>
 								<p className='login-card__footer'>
-									Don&apos;t have a teacher account?{' '}
+									¿No tienes una cuenta de profesor?{' '}
 									<Link
 										to='/teachers/register'
 										className='login-card__link'
 									>
-										Register
+										Regístrate
 									</Link>
 								</p>
 								<div
 									className='login-card__teacher-gateway'
 									role='navigation'
-									aria-label='School admin sign-in'
+									aria-label='Inicio de sesión de profesor'
 								>
 									<div
 										className='login-card__teacher-gateway-accent'
@@ -155,7 +161,7 @@ function TeacherLoginScreen () {
 									/>{' '}
 									<br />
 									<p className='login-card__teacher-gateway-lead'>
-										Are you a school admin?
+										¿Eres administrador escolar?
 									</p>
 									<Link
 										to='/schooladmins/login'
@@ -184,7 +190,7 @@ function TeacherLoginScreen () {
 											</svg>
 										</span>
 										<span className='login-card__teacher-gateway-btn-label'>
-											School admin login
+											Acceso para administradores escolares
 										</span>
 										<span
 											className='login-card__teacher-gateway-btn-arrow'

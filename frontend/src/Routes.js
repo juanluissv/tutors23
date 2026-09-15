@@ -93,6 +93,7 @@ import TeacherWatchAnswerScreen from './screens/teachers/TeacherWatchAnswerScree
 import TeacherCoursesScreen from './screens/teachers/TeacherCoursesScreen';
 import TeacherBookChaptersScreen from './screens/teachers/TeacherBookChaptersScreen';
 import TeacherGenerateLessonsScreen from './screens/teachers/TeacherGenerateLessonsScreen';
+import TeacherViewBookScreen from './screens/teachers/TeacherViewBookScreen';
 import TeacherCreateTutorScreen from './screens/teachers/TeacherCreateTutorScreen';
 
 
@@ -104,7 +105,6 @@ import SchoolAdminMySchoolsScreen from './screens/schoolAdmin/SchoolAdminMySchoo
 import SchoolAdminCreateSubjectScreen from './screens/schoolAdmin/SchoolAdminCreateSubjectScreen';
 import SchoolAdminMySubjectsScreen from './screens/schoolAdmin/SchoolAdminMySubjectsScreen';
 import SchoolAdminEditSubjectScreen from './screens/schoolAdmin/SchoolAdminEditSubjectScreen';
-import SchoolAdminTeacherInviteScreen from './screens/schoolAdmin/SchoolAdminTeacherInviteScreen';
 import SchoolAdminCreatePlanScreen from './screens/schoolAdmin/SchoolAdminCreatePlanScreen';
 import SchoolAdminPlansScreen from './screens/schoolAdmin/SchoolAdminPlansScreen';
 import SchoolAdminUpdatePlanScreen from './screens/schoolAdmin/SchoolAdminUpdatePlanScreen';
@@ -225,6 +225,7 @@ const router = createBrowserRouter(
             <Route path="/teachers/courses/:id/preview" element={<TeacherPreviewCourseScreen />} />
             <Route path="/teachers/bookchapters/:subjectId" element={<TeacherBookChaptersScreen />} />
             <Route path="/teachers/generatelessons/:subjectId" element={<TeacherGenerateLessonsScreen />} />
+            <Route path="/teachers/viewbook/:subjectId" element={<TeacherViewBookScreen />} />
             <Route
                 path="/teachers/lessonpage/:subjectId/:lessonId"
                 element={<StudentLessonPageScreen />}
@@ -244,10 +245,6 @@ const router = createBrowserRouter(
             />
             <Route  path="/schooladmins/courses/:id" element={<SchoolAdminCoursesScreen />} />
             <Route  path="/schooladmins/editsubject/:id" element={<SchoolAdminEditSubjectScreen />} />
-            <Route
-                path="/schooladmins/teacherinvite/:id"
-                element={<SchoolAdminTeacherInviteScreen />}
-            />
             <Route  path="/schooladmins/createplan" element={<SchoolAdminCreatePlanScreen />} />
             <Route  path="/schooladmins/plans" element={<SchoolAdminPlansScreen />} />
             <Route  path="/schooladmins/updateplan/:id" element={<SchoolAdminUpdatePlanScreen />} />

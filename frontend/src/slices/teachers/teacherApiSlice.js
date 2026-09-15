@@ -104,6 +104,52 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
                 { type: 'Subject', id: `STUDENTS_${subjectId}` },
             ],
         }),
+        uploadSubjectDocumentByTeacher: builder.mutation({
+            query: ({ id, document, label }) => {
+                const fd = new FormData()
+                fd.append('document', document)
+                if (label != null && String(label).trim() !== '') {
+                    fd.append('label', String(label).trim())
+                }
+                return {
+                    url: `${SUBJECTS_URL}/${id}/teacher/documents`,
+                    method: 'POST',
+                    body: fd,
+                }
+            },
+            invalidatesTags: (result, error, { id, teacherId }) => {
+                const tags = []
+                if (id) {
+                    tags.push({ type: 'Subject', id })
+                }
+                if (teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${teacherId}`,
+                    })
+                }
+                return tags
+            },
+        }),
+        deleteSubjectDocumentByTeacher: builder.mutation({
+            query: ({ id, documentId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/documents/${documentId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, { id, teacherId }) => {
+                const tags = []
+                if (id) {
+                    tags.push({ type: 'Subject', id })
+                }
+                if (teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${teacherId}`,
+                    })
+                }
+                return tags
+            },
+        }),
         updateSubjectByTeacher: builder.mutation({
             query: ({ id, teacherId, book, ...body }) => {
                 if (book instanceof File) {
@@ -419,6 +465,8 @@ export const {
     useUpdateTeacherProfileMutation,
     useGetSubjectsByTeacherIdQuery,
     useUpdateSubjectByTeacherMutation,
+    useUploadSubjectDocumentByTeacherMutation,
+    useDeleteSubjectDocumentByTeacherMutation,
     useAddStudentEmailToSubjectMutation,
     useGetSubjectStudentsForTeacherQuery,
     useGetCoursesBySubjectForTeacherQuery,

@@ -10,6 +10,7 @@ import {
 	useGetSubjectsByTeacherIdQuery,
 } from '../../slices/teachers/teacherApiSlice'
 import { SUBJECTS_URL } from '../../constants'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
@@ -22,6 +23,58 @@ function bookDisplayName (bookId) {
 	const parts = trimmed.split('/')
 	const last = parts[parts.length - 1]
 	return last && last.length > 0 ? last : trimmed
+}
+
+function documentDisplayName (doc) {
+	if (doc?.fileName) {
+		return String(doc.fileName)
+	}
+	if (doc?.label) {
+		return String(doc.label)
+	}
+	if (doc?.fileId) {
+		return bookDisplayName(String(doc.fileId))
+	}
+	return 'Documento'
+}
+
+function getDocumentKey (doc) {
+	if (doc?._id) {
+		return String(doc._id)
+	}
+	if (doc?.fileId) {
+		return String(doc.fileId)
+	}
+	return ''
+}
+
+function chapterBelongsToDocument (
+	chapter,
+	documentKey,
+	requiresSourceDocument,
+) {
+	if (!requiresSourceDocument) {
+		return true
+	}
+	if (!documentKey) {
+		return false
+	}
+	return String(chapter.sourceDocumentId || '') === String(documentKey)
+}
+
+function getSubjectDocuments (subject) {
+	if (Array.isArray(subject?.documents) && subject.documents.length > 0) {
+		return subject.documents
+	}
+	if (subject?.bookId && String(subject.bookId).trim() !== '') {
+		return [{
+			_id: null,
+			fileId: String(subject.bookId).trim(),
+			fileName: bookDisplayName(String(subject.bookId)),
+			fileUrl: subject.bookUrl,
+		}]
+	}
+	return []
 }
 
 const BookGlyph = () => (
@@ -86,6 +139,48 @@ const BookGlyph = () => (
 	</svg>
 )
 
+const DocumentPdfGlyph = () => (
+	<svg
+		width='32'
+		height='32'
+		viewBox='0 0 24 24'
+		fill='none'
+		xmlns='http://www.w3.org/2000/svg'
+		aria-hidden
+	>
+		<path
+			d='M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z'
+			fill='url(#teacher-generate-lessons-doc-pdf-fill)'
+		/>
+		<path
+			d='M14 2v6h6'
+			stroke='#0284c7'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+			strokeLinejoin='round'
+		/>
+		<path
+			d='M8 13h8M8 17h5'
+			stroke='#0369a1'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+		/>
+		<defs>
+			<linearGradient
+				id='teacher-generate-lessons-doc-pdf-fill'
+				x1='4'
+				y1='2'
+				x2='20'
+				y2='22'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#e0f2fe' />
+				<stop offset='1' stopColor='#7dd3fc' />
+			</linearGradient>
+		</defs>
+	</svg>
+)
+
 const SparkGlyph = () => (
 	<svg
 		width='22'
@@ -116,22 +211,22 @@ function chapterTitle (chapter, index) {
 	if (title) {
 		return title
 	}
-	return `Chapter ${chapter?.ChapterNumber ?? index + 1}`
+	return `Capítulo ${chapter?.ChapterNumber ?? index + 1}`
 }
 
 function chapterPageLabel (chapter) {
 	const start = chapter?.ChapterBeginPage
 	const end = chapter?.ChapterEndPage
 	if (start != null && end != null) {
-		return `Pages ${start}–${end}`
+		return `Páginas ${start}–${end}`
 	}
 	if (start != null) {
-		return `From page ${start}`
+		return `Desde la página ${start}`
 	}
 	if (end != null) {
-		return `Through page ${end}`
+		return `Hasta la página ${end}`
 	}
-	return 'Page range not set'
+	return 'Rango de páginas no definido'
 }
 
 function TeacherGenerateLessonsScreen () {
@@ -145,6 +240,7 @@ function TeacherGenerateLessonsScreen () {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
 	)
+	const [selectedDocumentId, setSelectedDocumentId] = useState('')
 	const [generatingChapterId, setGeneratingChapterId] = useState(null)
 	const [chapterErrors, setChapterErrors] = useState({})
 
@@ -198,21 +294,80 @@ function TeacherGenerateLessonsScreen () {
 		return currentSubject.bookChapters
 	}, [currentSubject])
 
-	const hasStoredBook = Boolean(
-		currentSubject
-		&& currentSubject.bookId
-		&& String(currentSubject.bookId).trim() !== '',
+	const subjectDocuments = useMemo(
+		() => getSubjectDocuments(currentSubject),
+		[currentSubject],
 	)
-	const storedBookLabel = hasStoredBook
-		? bookDisplayName(String(currentSubject.bookId))
-		: ''
-	const openBookHref = hasStoredBook && currentSubject?.bookUrl
-		? String(currentSubject.bookUrl)
-		: (hasStoredBook && subjectId
-			? `${SUBJECTS_URL}/${subjectId}/teacher/book`
-			: '')
+	const hasDocuments = subjectDocuments.length > 0
+	const requiresSourceDocument = subjectDocuments.length > 1
 
-	const chaptersWithPdf = bookChapters.filter(
+	const selectedDocument = useMemo(() => {
+		if (!selectedDocumentId) {
+			return undefined
+		}
+		return subjectDocuments.find(
+			(doc) => getDocumentKey(doc) === selectedDocumentId,
+		)
+	}, [subjectDocuments, selectedDocumentId])
+
+	const filteredChapters = useMemo(() => {
+		if (!hasDocuments) {
+			return []
+		}
+		if (!selectedDocumentId && requiresSourceDocument) {
+			return []
+		}
+		return bookChapters.filter((chapter) => chapterBelongsToDocument(
+			chapter,
+			selectedDocumentId,
+			requiresSourceDocument,
+		))
+	}, [
+		bookChapters,
+		hasDocuments,
+		requiresSourceDocument,
+		selectedDocumentId,
+	])
+
+	const getDocumentChapters = (documentKey) => bookChapters.filter(
+		(chapter) => chapterBelongsToDocument(
+			chapter,
+			documentKey,
+			requiresSourceDocument,
+		),
+	)
+
+	const getDocumentOpenHref = (doc) => {
+		if (doc?.fileUrl) {
+			return String(doc.fileUrl)
+		}
+		if (doc?._id && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/teacher/documents/${doc._id}`
+		}
+		if (hasDocuments && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/teacher/book`
+		}
+		return ''
+	}
+
+	const getDocumentChapterCount = (documentKey) =>
+		getDocumentChapters(documentKey).length
+
+	const getDocumentChaptersWithPdf = (documentKey) =>
+		getDocumentChapters(documentKey).filter(
+			(chapter) => chapter.ChapterFileId || chapter.chapterFileUrl,
+		).length
+
+	const getDocumentGeneratedLessonsCount = (documentKey) =>
+		getDocumentChapters(documentKey).filter((chapter) => {
+			if (!chapter._id) {
+				return false
+			}
+			const lesson = lessonsByChapterId.get(String(chapter._id))
+			return Boolean(lesson?.hasContent)
+		}).length
+
+	const filteredChaptersWithPdf = filteredChapters.filter(
 		(chapter) => chapter.ChapterFileId || chapter.chapterFileUrl,
 	).length
 
@@ -224,6 +379,10 @@ function TeacherGenerateLessonsScreen () {
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
+	}
+
+	const handleSelectDocument = (documentKey) => {
+		setSelectedDocumentId(String(documentKey))
 	}
 
 	const handleGenerateLessons = async (chapterId) => {
@@ -245,9 +404,10 @@ function TeacherGenerateLessonsScreen () {
 			}).unwrap()
 			await refetchLessons()
 		} catch (err) {
-			const message = err?.data?.message
-				|| err?.message
-				|| 'Could not generate lessons. Please try again.'
+			const message = localizeApiError(
+				err,
+				'No se pudieron generar las lecciones. Intenta de nuevo.',
+			)
 			setChapterErrors((prev) => ({
 				...prev,
 				[String(chapterId)]: message,
@@ -262,6 +422,24 @@ function TeacherGenerateLessonsScreen () {
 			navigate('/teachers/login', { replace: true })
 		}
 	}, [teacherInfo, navigate])
+
+	useEffect(() => {
+		if (subjectDocuments.length === 0) {
+			setSelectedDocumentId('')
+			return
+		}
+		setSelectedDocumentId((prev) => {
+			if (
+				prev
+				&& subjectDocuments.some(
+					(doc) => getDocumentKey(doc) === prev,
+				)
+			) {
+				return prev
+			}
+			return getDocumentKey(subjectDocuments[0])
+		})
+	}, [subjectDocuments])
 
 	if (!teacherInfo) {
 		return null
@@ -281,27 +459,27 @@ function TeacherGenerateLessonsScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
-											Invalid subject
+											Materia no válida
 										</h1>
 										<p className={
 											'login-card__subtitle ' +
 											'login-card__subtitle--wide'
 										}
 										>
-											This link does not point to a valid
-											subject.
+											Este enlace no apunta a una materia
+											válida.
 										</p>
 										<p className='login-card__back'>
 											<Link
 												to='/teachers/subjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a mis materias
 											</Link>
 										</p>
 									</div>
@@ -328,27 +506,27 @@ function TeacherGenerateLessonsScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
-											Subject not found
+											Materia no encontrada
 										</h1>
 										<p className={
 											'login-card__subtitle ' +
 											'login-card__subtitle--wide'
 										}
 										>
-											There is no subject with this id in
-											your assigned subjects.
+											Esta materia no está asignada a tu
+											cuenta.
 										</p>
 										<p className='login-card__back'>
 											<Link
 												to='/teachers/subjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a mis materias
 											</Link>
 										</p>
 									</div>
@@ -363,7 +541,7 @@ function TeacherGenerateLessonsScreen () {
 
 	const subjectTitle = currentSubject?.title
 		? String(currentSubject.title)
-		: 'Subject'
+		: 'Materia'
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
@@ -382,7 +560,7 @@ function TeacherGenerateLessonsScreen () {
 						'content-area--login-scroll'
 					}
 					>
-						<div className='center-content2 login-screen login-screen--wide'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className='login-card book-chapters generate-lessons'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
@@ -391,45 +569,43 @@ function TeacherGenerateLessonsScreen () {
 											to={`/teachers/subjects/${subjectId}/edit`}
 											className='login-card__link'
 										>
-											← Back to edit subject
+											← Volver a editar materia
 										</Link>
 									</p>
 									<h1 className='login-card__title'>
-										Generate lessons
+										Generar lecciones
 									</h1>
 									<p className={
 										'login-card__subtitle ' +
 										'login-card__subtitle--wide'
 									}
 									>
-										Use the full course book and chapter PDFs
-										for{' '}
-										<strong>{subjectTitle}</strong> to build
-										lessons chapter by chapter.
+										Elige un PDF fuente y genera lecciones
+										interactivas capítulo por capítulo para{' '}
+										<strong>{subjectTitle}</strong>.
 									</p>
-									{generatedLessonsCount > 0 ? (
-										<p className='generate-lessons__index-link-wrap'>
-											<span className='generate-lessons__index-link'>
-												{generatedLessonsCount} web lesson
-												{generatedLessonsCount === 1 ? '' : 's'}{' '}
-												ready for students
-											</span>
-										</p>
-									) : null}
+									<p className='generate-lessons__index-link-wrap'>
+										<Link
+											to={`/teachers/viewbook/${subjectId}`}
+											className='generate-lessons__index-link'
+										>
+											Abrir índice del libro web →
+										</Link>
+									</p>
 								</div>
 
 								{isSubjectsError ? (
 									<div className='book-chapters__alert'>
 										<p className='book-chapters__alert-text'>
-											We could not load this subject.
-											Please try again.
+											No pudimos cargar esta materia.
+											Intenta de nuevo.
 										</p>
 										<button
 											type='button'
 											className='login-submit'
 											onClick={() => void refetchSubjects()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								) : null}
@@ -438,84 +614,110 @@ function TeacherGenerateLessonsScreen () {
 									className='book-chapters__book-section'
 									aria-labelledby='generate-lessons-book-heading'
 								>
-									<h2
-										id='generate-lessons-book-heading'
-										className='book-chapters__section-title'
-									>
-										Full course book
-									</h2>
+									<div className='book-chapters__section-intro'>
+										<h2
+											id='generate-lessons-book-heading'
+											className='book-chapters__section-title'
+										>
+											1. Elegir documento fuente
+										</h2>
+										<p className='book-chapters__section-desc'>
+											Selecciona el PDF cuyos capítulos quieres
+											convertir en lecciones. Cada documento
+											tiene su propia lista de capítulos abajo.
+										</p>
+									</div>
 
 									{isLoadingSubjects && !currentSubject ? (
 										<p className='book-chapters__loading'>
-											Loading book…
+											Cargando documentos…
 										</p>
-									) : hasStoredBook ? (
-										<div className='book-chapters__book-card'>
-											<div className='book-chapters__book-visual'>
-												<BookGlyph />
-											</div>
-											<div
-												className={
-													'teacher-book-upload__status ' +
-													'book-chapters__book-status'
-												}
-												role='status'
-											>
-												<span
-													className='teacher-book-upload__status-icon'
-													aria-hidden
-												>
-													<svg
-														width='20'
-														height='20'
-														viewBox='0 0 24 24'
-														fill='none'
-														stroke='currentColor'
-														strokeWidth='2'
+									) : hasDocuments ? (
+										<div
+											className='book-chapters__doc-picker'
+											role='listbox'
+											aria-label='Documentos fuente'
+										>
+											{subjectDocuments.map((doc) => {
+												const docKey = getDocumentKey(doc)
+												const openHref = getDocumentOpenHref(doc)
+												const isSelected =
+													selectedDocumentId === docKey
+												const chapterCount =
+													getDocumentChapterCount(docKey)
+												const readyCount =
+													getDocumentChaptersWithPdf(docKey)
+												const lessonsCount =
+													getDocumentGeneratedLessonsCount(
+														docKey,
+													)
+
+												return (
+													<button
+														key={docKey}
+														type='button'
+														role='option'
+														aria-selected={isSelected}
+														className={
+															'book-chapters__doc-card' +
+															(isSelected
+																? ' book-chapters__doc-card--selected'
+																: '')
+														}
+														onClick={() =>
+															handleSelectDocument(docKey)}
 													>
-														<path
-															d='M20 6L9 17l-5-5'
-															strokeLinecap='round'
-															strokeLinejoin='round'
-														/>
-													</svg>
-												</span>
-												<div className='teacher-book-upload__status-body'>
-													<p className='teacher-book-upload__status-title'>
-														PDF saved for this subject
-													</p>
-													{storedBookLabel ? (
-														<p className='teacher-book-upload__status-file'>
-															{storedBookLabel}
-														</p>
-													) : null}
-													{openBookHref ? (
-														<p className='teacher-book-upload__status-actions'>
-															<a
-																href={openBookHref}
-																className='teacher-book-upload__open-link'
-																target='_blank'
-																rel='noopener noreferrer'
+														{isSelected ? (
+															<span
+																className='book-chapters__doc-card-check'
+																aria-hidden
 															>
-																Open PDF in new tab
-																<span
-																	className={
-																		'teacher-book-upload__open-link-icon'
-																	}
-																	aria-hidden
-																>
-																	↗
+																✓
+															</span>
+														) : null}
+														<span className='book-chapters__doc-card-icon'>
+															<DocumentPdfGlyph />
+														</span>
+														<span className='book-chapters__doc-card-body'>
+															<span className='book-chapters__doc-card-name'>
+																{documentDisplayName(doc)}
+															</span>
+															<span className='book-chapters__doc-card-meta'>
+																<span className='book-chapters__doc-card-count'>
+																	{readyCount}/{chapterCount}{' '}
+																	listos
 																</span>
-															</a>
-														</p>
-													) : null}
-													<p className='teacher-book-upload__status-hint'>
-														Chapter PDFs below were
-														extracted from this full
-														book.
-													</p>
-												</div>
-											</div>
+																{lessonsCount > 0 ? (
+																	<span className='generate-lessons__doc-card-lessons'>
+																		{lessonsCount}{' '}
+																		{lessonsCount === 1
+																			? 'lección'
+																			: 'lecciones'}
+																	</span>
+																) : null}
+																{openHref ? (
+																	<a
+																		href={openHref}
+																		className='book-chapters__doc-card-link'
+																		target='_blank'
+																		rel='noopener noreferrer'
+																		onClick={(e) =>
+																			e.stopPropagation()}
+																	>
+																		Abrir PDF
+																		<span
+																			className='teacher-book-upload__open-link-icon'
+																			aria-hidden
+																		>
+																			↗
+																		</span>
+																	</a>
+																) : null}
+															</span>
+														</span>
+													</button>
+												)
+											})}
 										</div>
 									) : (
 										<div
@@ -526,25 +728,29 @@ function TeacherGenerateLessonsScreen () {
 												<BookGlyph />
 											</div>
 											<p className='book-chapters__empty-book-title'>
-												No course book uploaded yet
+												Aún no hay PDFs fuente subidos
 											</p>
 											<p className='book-chapters__empty-book-text'>
-												Upload the full PDF on the edit
-												subject page before generating
-												lessons.
+												Sube PDFs en la página de editar
+												materia antes de generar lecciones.
 											</p>
 											<Link
 												to={`/teachers/subjects/${subjectId}/edit`}
 												className='book-chapters__empty-book-link'
 											>
-												Go to edit subject
+												Ir a editar materia
 											</Link>
 										</div>
 									)}
 								</section>
 
 								<section
-									className='book-chapters__list-section'
+									className={
+										'book-chapters__list-section' +
+										(!hasDocuments
+											? ' book-chapters__list-section--hidden'
+											: '')
+									}
 									aria-labelledby='generate-lessons-chapters-heading'
 								>
 									<div className='book-chapters__list-header'>
@@ -553,46 +759,69 @@ function TeacherGenerateLessonsScreen () {
 												id='generate-lessons-chapters-heading'
 												className='book-chapters__section-title'
 											>
-												Book chapters
+												2. Generar lecciones
 											</h2>
 											<p className='book-chapters__section-desc'>
-												Each chapter needs a generated PDF
-												before you can create lessons from
-												it.
+												{selectedDocument
+													? (
+														<>
+															Creando lecciones de{' '}
+															<strong>
+																{documentDisplayName(
+																	selectedDocument,
+																)}
+															</strong>
+															. Cada capítulo necesita un
+															PDF generado antes de poder
+															crear lecciones a partir de él.
+														</>
+													)
+													: 'Selecciona un documento fuente arriba para generar lecciones.'}
 											</p>
 										</div>
-										{bookChapters.length > 0 ? (
+										{filteredChapters.length > 0 ? (
 											<span className='book-chapters__count'>
-												{chaptersWithPdf}/{bookChapters.length}{' '}
-												ready
+												{filteredChaptersWithPdf}/
+												{filteredChapters.length}{' '}
+												listos
 											</span>
 										) : null}
 									</div>
 
-									{isLoadingSubjects || isLoadingLessons ? (
+									{!hasDocuments ? null : isLoadingSubjects || isLoadingLessons ? (
 										<p className='book-chapters__loading'>
-											Loading chapters…
+											Cargando capítulos…
 										</p>
-									) : bookChapters.length === 0 ? (
+									) : !selectedDocumentId && requiresSourceDocument ? (
+										<div className='book-chapters__select-doc-prompt'>
+											<p className='book-chapters__select-doc-prompt-title'>
+												Elige un documento para continuar
+											</p>
+											<p className='book-chapters__select-doc-prompt-text'>
+												Selecciona uno de tus PDFs fuente arriba
+												para generar lecciones de sus capítulos.
+											</p>
+										</div>
+									) : filteredChapters.length === 0 ? (
 										<div className='book-chapters__empty-chapters'>
 											<p className='book-chapters__empty-chapters-title'>
-												No chapters yet
+												Aún no hay capítulos para este documento
 											</p>
 											<p className='book-chapters__empty-chapters-text'>
-												Define chapter page ranges and
-												generate PDFs on the book chapters
-												page first.
+												Define rangos de páginas por capítulo y
+												genera PDFs en la página de capítulos
+												del libro primero.
 											</p>
 											<Link
 												to={`/teachers/bookchapters/${subjectId}`}
 												className='book-chapters__empty-chapters-link'
 											>
-												Go to book chapters
+												Ir a capítulos del libro
 											</Link>
 										</div>
 									) : (
 										<ol className='generate-lessons__chapter-list'>
-											{bookChapters.map((chapter, index) => {
+											{filteredChapters.map((chapter, index) => {
 												const chapterKey = chapter._id
 													? String(chapter._id)
 													: `chapter-${index}`
@@ -669,7 +898,7 @@ function TeacherGenerateLessonsScreen () {
 																	</span>
 																	<div className='book-chapters__upload-status-body'>
 																		<p className='book-chapters__upload-status-title'>
-																			Chapter PDF generated
+																			PDF del capítulo generado
 																		</p>
 																		{chapterFileLabel ? (
 																			<p className='book-chapters__upload-status-file'>
@@ -683,7 +912,7 @@ function TeacherGenerateLessonsScreen () {
 																				target='_blank'
 																				rel='noopener noreferrer'
 																			>
-																				Open chapter PDF
+																				Abrir PDF del capítulo
 																				<span
 																					className='teacher-book-upload__open-link-icon'
 																					aria-hidden
@@ -707,18 +936,18 @@ function TeacherGenerateLessonsScreen () {
 																	</span>
 																	<div className='generate-lessons__chapter-missing-body'>
 																		<p className='generate-lessons__chapter-missing-title'>
-																			Chapter PDF not ready
+																			PDF del capítulo no listo
 																		</p>
 																		<p className='generate-lessons__chapter-missing-text'>
-																			Generate this chapter PDF
-																			on the book chapters page
-																			before creating lessons.
+																			Genera el PDF de este capítulo
+																			en la página de capítulos del
+																			libro antes de crear lecciones.
 																		</p>
 																		<Link
 																			to={`/teachers/bookchapters/${subjectId}`}
 																			className='teacher-book-upload__open-link'
 																		>
-																			Go to book chapters
+																			Ir a capítulos del libro
 																			<span
 																				className='teacher-book-upload__open-link-icon'
 																				aria-hidden
@@ -739,12 +968,12 @@ function TeacherGenerateLessonsScreen () {
 																>
 																	<Loader size='sm' />
 																	<p className='generate-lessons__generating-title'>
-																		Generating lesson…
+																		Generando lección…
 																	</p>
 																	<p className='generate-lessons__generating-hint'>
-																		Reading text, tables and charts
-																		from the PDF with AI. This can
-																		take a minute.
+																		Leyendo texto, tablas y gráficos
+																		del PDF con IA. Esto puede
+																		tomar un minuto.
 																	</p>
 																</div>
 															) : hasGeneratedLesson ? (
@@ -753,11 +982,11 @@ function TeacherGenerateLessonsScreen () {
 																	role='status'
 																>
 																	<p className='generate-lessons__lesson-ready-title'>
-																		Lessons generated
+																		Lecciones generadas
 																	</p>
 																	<p className='generate-lessons__lesson-ready-meta'>
 																		{lesson.content?.length ?? 0}{' '}
-																		elements extracted from PDF
+																		elementos extraídos del PDF
 																	</p>
 																	<Link
 																		to={`/teachers/lessonpage/${subjectId}/${lesson._id}`}
@@ -765,7 +994,7 @@ function TeacherGenerateLessonsScreen () {
 																		target='_blank'
 																		rel='noopener noreferrer'
 																	>
-																		Preview student lesson
+																		Vista previa de la lección
 																		<span
 																			className='teacher-book-upload__open-link-icon'
 																			aria-hidden
@@ -810,11 +1039,11 @@ function TeacherGenerateLessonsScreen () {
 																	<>
 																		<Loader size='sm' />
 																		<span className='generate-lessons__action-btn-title'>
-																			Generating…
+																			Generando…
 																		</span>
 																		<span className='generate-lessons__action-btn-hint'>
-																			Please wait while the lesson is
-																			being built
+																			Espera mientras se crea la
+																			lección
 																		</span>
 																	</>
 																) : (
@@ -824,15 +1053,15 @@ function TeacherGenerateLessonsScreen () {
 																		</span>
 																		<span className='generate-lessons__action-btn-title'>
 																			{hasGeneratedLesson
-																				? 'Regenerate lessons'
-																				: 'Generate lessons'}
+																				? 'Regenerar lecciones'
+																				: 'Generar lecciones'}
 																		</span>
 																		<span className='generate-lessons__action-btn-hint'>
 																			{!hasChapterFile
-																				? 'Chapter PDF required first'
+																				? 'Se requiere el PDF del capítulo primero'
 																				: (hasGeneratedLesson
-																					? 'Rebuild lesson (text, tables & charts)'
-																					: 'AI reads text, tables & charts from the PDF')}
+																					? 'Reconstruir lección (texto, tablas y gráficos)'
+																					: 'La IA lee texto, tablas y gráficos del PDF')}
 																		</span>
 																	</>
 																)}
@@ -852,15 +1081,15 @@ function TeacherGenerateLessonsScreen () {
 								>
 									<div className='subject-book-tools__header'>
 										<span className='subject-book-tools__eyebrow'>
-											Next step
+											Siguiente paso
 										</span>
 										<h3 className='subject-book-tools__title'>
-											AI tutor creation
+											Creación de tutor con IA
 										</h3>
 										<p className='subject-book-tools__desc'>
 											{hasGeneratedLessons
-												? `Turn your ${generatedLessonsCount} generated lesson${generatedLessonsCount === 1 ? '' : 's'} into AI tutors with video, captions, and tutor scripts.`
-												: 'Generate at least one web lesson from a chapter PDF to unlock AI tutor creation.'}
+												? `Convierte ${generatedLessonsCount === 1 ? 'tu lección generada' : `tus ${generatedLessonsCount} lecciones generadas`} en tutores con IA con video, subtítulos y guiones.`
+												: 'Genera al menos una lección web a partir de un PDF de capítulo para desbloquear la creación de tutores con IA.'}
 										</p>
 									</div>
 									{hasGeneratedLessons ? (
@@ -912,10 +1141,10 @@ function TeacherGenerateLessonsScreen () {
 											</span>
 											<span className='subject-book-tools__body'>
 												<span className='subject-book-tools__label'>
-													Create AI tutors
+													Crear tutores con IA
 												</span>
 												<span className='subject-book-tools__hint'>
-													Upload tutor video & captions per chapter
+													Sube video del tutor y subtítulos por capítulo
 												</span>
 											</span>
 											<span
@@ -975,10 +1204,10 @@ function TeacherGenerateLessonsScreen () {
 											</span>
 											<span className='subject-book-tools__body'>
 												<span className='subject-book-tools__label'>
-													Create AI tutors
+													Crear tutores con IA
 												</span>
 												<span className='subject-book-tools__hint'>
-													Requires at least one generated web lesson
+													Requiere al menos una lección web generada
 												</span>
 											</span>
 										</span>

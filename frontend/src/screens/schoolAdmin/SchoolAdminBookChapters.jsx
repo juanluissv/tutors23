@@ -25,6 +25,58 @@ function bookDisplayName (bookId) {
 	return last && last.length > 0 ? last : trimmed
 }
 
+function documentDisplayName (doc) {
+	if (doc?.fileName) {
+		return String(doc.fileName)
+	}
+	if (doc?.label) {
+		return String(doc.label)
+	}
+	if (doc?.fileId) {
+		return bookDisplayName(String(doc.fileId))
+	}
+	return 'Documento'
+}
+
+function getDocumentKey (doc) {
+	if (doc?._id) {
+		return String(doc._id)
+	}
+	if (doc?.fileId) {
+		return String(doc.fileId)
+	}
+	return ''
+}
+
+function chapterBelongsToDocument (
+	chapter,
+	documentKey,
+	requiresSourceDocument,
+) {
+	if (!requiresSourceDocument) {
+		return true
+	}
+	if (!documentKey) {
+		return false
+	}
+	return String(chapter.sourceDocumentId || '') === String(documentKey)
+}
+
+function getSubjectDocuments (subject) {
+	if (Array.isArray(subject?.documents) && subject.documents.length > 0) {
+		return subject.documents
+	}
+	if (subject?.bookId && String(subject.bookId).trim() !== '') {
+		return [{
+			_id: null,
+			fileId: String(subject.bookId).trim(),
+			fileName: bookDisplayName(String(subject.bookId)),
+			fileUrl: subject.bookUrl,
+		}]
+	}
+	return []
+}
+
 function resolveSchoolId (school) {
 	if (!school) {
 		return null
@@ -45,6 +97,9 @@ function isPersistedChapterId (chapterId) {
 function chapterDraftFromApi (chapter, index) {
 	return {
 		_id: chapter._id ? String(chapter._id) : `draft-${index}-${Date.now()}`,
+		sourceDocumentId: chapter.sourceDocumentId
+			? String(chapter.sourceDocumentId)
+			: '',
 		ChapterNumber: chapter.ChapterNumber ?? index + 1,
 		ChapterTitle: chapter.ChapterTitle ? String(chapter.ChapterTitle) : '',
 		ChapterBeginPage: chapter.ChapterBeginPage ?? '',
@@ -64,6 +119,9 @@ function chaptersToDrafts (bookChapters) {
 function draftsToPayload (drafts) {
 	return drafts.map((draft, index) => ({
 		...(isPersistedChapterId(draft._id) ? { _id: draft._id } : {}),
+		...(draft.sourceDocumentId
+			? { sourceDocumentId: draft.sourceDocumentId }
+			: {}),
 		ChapterNumber: draft.ChapterNumber || index + 1,
 		ChapterTitle: String(draft.ChapterTitle || '').trim(),
 		ChapterBeginPage: draft.ChapterBeginPage === ''
@@ -137,6 +195,48 @@ const BookGlyph = () => (
 	</svg>
 )
 
+const DocumentPdfGlyph = () => (
+	<svg
+		width='32'
+		height='32'
+		viewBox='0 0 24 24'
+		fill='none'
+		xmlns='http://www.w3.org/2000/svg'
+		aria-hidden
+	>
+		<path
+			d='M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z'
+			fill='url(#doc-pdf-fill)'
+		/>
+		<path
+			d='M14 2v6h6'
+			stroke='#0284c7'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+			strokeLinejoin='round'
+		/>
+		<path
+			d='M8 13h8M8 17h5'
+			stroke='#0369a1'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+		/>
+		<defs>
+			<linearGradient
+				id='doc-pdf-fill'
+				x1='4'
+				y1='2'
+				x2='20'
+				y2='22'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#e0f2fe' />
+				<stop offset='1' stopColor='#7dd3fc' />
+			</linearGradient>
+		</defs>
+	</svg>
+)
+
 const ChapterGenerateGlyph = () => (
 	<svg
 		width='28'
@@ -172,6 +272,7 @@ function SchoolAdminBookChapters () {
 		window.innerWidth > 768,
 	)
 	const [chapterDrafts, setChapterDrafts] = useState([])
+	const [selectedDocumentId, setSelectedDocumentId] = useState('')
 	const [generatingChapterId, setGeneratingChapterId] = useState(null)
 	const initializedSubjectRef = useRef(null)
 
@@ -209,19 +310,61 @@ function SchoolAdminBookChapters () {
 		return subjects.find((s) => String(s._id) === String(subjectId))
 	}, [subjects, subjectId, isValidSubjectParam])
 
-	const hasStoredBook = Boolean(
-		currentSubject
-		&& currentSubject.bookId
-		&& String(currentSubject.bookId).trim() !== '',
+	const subjectDocuments = useMemo(
+		() => getSubjectDocuments(currentSubject),
+		[currentSubject],
 	)
-	const storedBookLabel = hasStoredBook
-		? bookDisplayName(String(currentSubject.bookId))
-		: ''
-	const openBookHref = hasStoredBook && currentSubject?.bookUrl
-		? String(currentSubject.bookUrl)
-		: (hasStoredBook && subjectId
-			? `${SUBJECTS_URL}/${subjectId}/school-admin/book`
-			: '')
+	const hasDocuments = subjectDocuments.length > 0
+	const requiresSourceDocument = subjectDocuments.length > 1
+
+	const selectedDocument = useMemo(() => {
+		if (!selectedDocumentId) {
+			return undefined
+		}
+		return subjectDocuments.find(
+			(doc) => getDocumentKey(doc) === selectedDocumentId,
+		)
+	}, [subjectDocuments, selectedDocumentId])
+
+	const filteredChapterDrafts = useMemo(() => {
+		if (!hasDocuments) {
+			return []
+		}
+		if (!selectedDocumentId && requiresSourceDocument) {
+			return []
+		}
+		return chapterDrafts.filter((chapter) => chapterBelongsToDocument(
+			chapter,
+			selectedDocumentId,
+			requiresSourceDocument,
+		))
+	}, [
+		chapterDrafts,
+		hasDocuments,
+		requiresSourceDocument,
+		selectedDocumentId,
+	])
+
+	const getDocumentChapterCount = (documentKey) => chapterDrafts.filter(
+		(chapter) => chapterBelongsToDocument(
+			chapter,
+			documentKey,
+			requiresSourceDocument,
+		),
+	).length
+
+	const getDocumentOpenHref = (doc) => {
+		if (doc?.fileUrl) {
+			return String(doc.fileUrl)
+		}
+		if (doc?._id && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/school-admin/documents/${doc._id}`
+		}
+		if (hasDocuments && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/school-admin/book`
+		}
+		return ''
+	}
 
 	const hasChaptersWithPdf = chapterDrafts.some(
 		(chapter) => Boolean(
@@ -253,6 +396,24 @@ function SchoolAdminBookChapters () {
 		initializedSubjectRef.current = subjectKey
 	}, [currentSubject])
 
+	useEffect(() => {
+		if (subjectDocuments.length === 0) {
+			setSelectedDocumentId('')
+			return
+		}
+		setSelectedDocumentId((prev) => {
+			if (
+				prev
+				&& subjectDocuments.some(
+					(doc) => getDocumentKey(doc) === prev,
+				)
+			) {
+				return prev
+			}
+			return getDocumentKey(subjectDocuments[0])
+		})
+	}, [subjectDocuments])
+
 	const handleChapterFieldChange = (chapterKey, field, value) => {
 		if (field === 'ChapterBeginPage' || field === 'ChapterEndPage') {
 			setChapterDrafts((prev) => prev.map((chapter) => {
@@ -279,18 +440,43 @@ function SchoolAdminBookChapters () {
 	}
 
 	const handleAddChapter = () => {
-		setChapterDrafts((prev) => [
-			...prev,
-			{
-				_id: `draft-${Date.now()}`,
-				ChapterNumber: prev.length + 1,
-				ChapterTitle: '',
-				ChapterBeginPage: '',
-				ChapterEndPage: '',
-				ChapterFileId: '',
-				chapterFileUrl: '',
-			},
-		])
+		const sourceDocumentId = selectedDocumentId
+			|| (subjectDocuments.length === 1
+				? getDocumentKey(subjectDocuments[0])
+				: '')
+
+		if (requiresSourceDocument && !sourceDocumentId) {
+			toast.error('Selecciona un documento fuente primero')
+			return
+		}
+
+		setChapterDrafts((prev) => {
+			const docChapterCount = prev.filter((chapter) =>
+				chapterBelongsToDocument(
+					chapter,
+					sourceDocumentId,
+					requiresSourceDocument,
+				),
+			).length
+
+			return [
+				...prev,
+				{
+					_id: `draft-${Date.now()}`,
+					sourceDocumentId,
+					ChapterNumber: docChapterCount + 1,
+					ChapterTitle: '',
+					ChapterBeginPage: '',
+					ChapterEndPage: '',
+					ChapterFileId: '',
+					chapterFileUrl: '',
+				},
+			]
+		})
+	}
+
+	const handleSelectDocument = (documentKey) => {
+		setSelectedDocumentId(String(documentKey))
 	}
 
 	const handleRemoveChapter = async (chapterKey) => {
@@ -318,10 +504,11 @@ function SchoolAdminBookChapters () {
 			}).unwrap()
 			setChapterDrafts(chaptersToDrafts(result.bookChapters))
 			initializedSubjectRef.current = String(subjectId)
-			toast.success('Chapter removed')
+			toast.success('Capítulo eliminado')
 			await refetchSubjects()
 		} catch (err) {
-			const message = err?.data?.message || 'Could not remove chapter'
+			const message = err?.data?.message
+				|| 'No se pudo eliminar el capítulo'
 			toast.error(message)
 		}
 	}
@@ -336,11 +523,12 @@ function SchoolAdminBookChapters () {
 				id: String(subjectId),
 				bookChapters: draftsToPayload(chapterDrafts),
 			}).unwrap()
-			toast.success('Chapters saved')
+			toast.success('Capítulos guardados')
 			initializedSubjectRef.current = null
 			await refetchSubjects()
 		} catch (err) {
-			const message = err?.data?.message || 'Could not save chapters'
+			const message = err?.data?.message
+				|| 'No se pudieron guardar los capítulos'
 			toast.error(message)
 		}
 	}
@@ -351,12 +539,14 @@ function SchoolAdminBookChapters () {
 		}
 
 		if (!isPersistedChapterId(chapterKey)) {
-			toast.error('Save this chapter before generating a PDF')
+			toast.error('Guarda este capítulo antes de generar un PDF')
 			return
 		}
 
-		if (!hasStoredBook) {
-			toast.error('Upload the full course book before generating chapters')
+		if (!hasDocuments) {
+			toast.error(
+				'Sube al menos un PDF fuente antes de generar capítulos',
+			)
 			return
 		}
 
@@ -364,8 +554,18 @@ function SchoolAdminBookChapters () {
 			(item) => String(item._id) === String(chapterKey),
 		)
 
+		if (
+			requiresSourceDocument
+			&& !chapter?.sourceDocumentId
+		) {
+			toast.error(
+				'Selecciona un documento fuente para este capítulo primero',
+			)
+			return
+		}
+
 		if (!chapter?.ChapterBeginPage || !chapter?.ChapterEndPage) {
-			toast.error('Enter start and end page numbers first')
+			toast.error('Ingresa las páginas de inicio y fin primero')
 			return
 		}
 
@@ -381,11 +581,12 @@ function SchoolAdminBookChapters () {
 				id: String(subjectId),
 				chapterId: String(chapterKey),
 			}).unwrap()
-			toast.success('Chapter PDF generated')
+			toast.success('PDF del capítulo generado')
 			initializedSubjectRef.current = null
 			await refetchSubjects()
 		} catch (err) {
-			const message = err?.data?.message || 'Could not generate chapter PDF'
+			const message = err?.data?.message
+				|| 'No se pudo generar el PDF del capítulo'
 			toast.error(message)
 		} finally {
 			setGeneratingChapterId(null)
@@ -410,27 +611,27 @@ function SchoolAdminBookChapters () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
-											Invalid subject
+											Materia no válida
 										</h1>
 										<p className={
 											'login-card__subtitle ' +
 											'login-card__subtitle--wide'
 										}
 										>
-											This link does not point to a valid
-											subject.
+											Este enlace no apunta a una materia
+											válida.
 										</p>
 										<p className='login-card__back'>
 											<Link
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</p>
 									</div>
@@ -457,27 +658,27 @@ function SchoolAdminBookChapters () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
-											Subject not found
+											Materia no encontrada
 										</h1>
 										<p className={
 											'login-card__subtitle ' +
 											'login-card__subtitle--wide'
 										}
 										>
-											There is no subject with this id in
-											your school.
+											No hay una materia con este id en tu
+											escuela.
 										</p>
 										<p className='login-card__back'>
 											<Link
 												to='/schooladmins/mysubjects'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</p>
 									</div>
@@ -492,7 +693,7 @@ function SchoolAdminBookChapters () {
 
 	const subjectTitle = currentSubject?.title
 		? String(currentSubject.title)
-		: 'Subject'
+		: 'Materia'
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
@@ -511,7 +712,7 @@ function SchoolAdminBookChapters () {
 						'content-area--login-scroll'
 					}
 					>
-						<div className='center-content2 login-screen login-screen--wide'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className='login-card book-chapters'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
@@ -520,36 +721,36 @@ function SchoolAdminBookChapters () {
 											to={`/schooladmins/editsubject/${subjectId}`}
 											className='login-card__link'
 										>
-											← Back to edit subject
+											← Volver a editar materia
 										</Link>
 									</p>
 									<h1 className='login-card__title'>
-										Book chapters
+										Capítulos del libro
 									</h1>
 									<p className={
 										'login-card__subtitle ' +
 										'login-card__subtitle--wide'
 									}
 									>
-										Define chapter page ranges for{' '}
-										<strong>{subjectTitle}</strong> and
-										generate each chapter PDF from the full
-										course book.
+										Elige un PDF fuente, define los rangos de
+										páginas por capítulo y genera cada archivo
+										para{' '}
+										<strong>{subjectTitle}</strong>.
 									</p>
 								</div>
 
 								{isSubjectsError ? (
 									<div className='book-chapters__alert'>
 										<p className='book-chapters__alert-text'>
-											We could not load this subject.
-											Please try again.
+											No pudimos cargar esta materia.
+											Intenta de nuevo.
 										</p>
 										<button
 											type='button'
 											className='login-submit'
 											onClick={() => void refetchSubjects()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								) : null}
@@ -558,79 +759,98 @@ function SchoolAdminBookChapters () {
 									className='book-chapters__book-section'
 									aria-labelledby='book-chapters-book-heading'
 								>
-									<h2
-										id='book-chapters-book-heading'
-										className='book-chapters__section-title'
-									>
-										Full course book
-									</h2>
+									<div className='book-chapters__section-intro'>
+										<h2
+											id='book-chapters-book-heading'
+											className='book-chapters__section-title'
+										>
+											1. Elegir documento fuente
+										</h2>
+										<p className='book-chapters__section-desc'>
+											Selecciona el PDF del que quieres mapear
+											capítulos. Cada documento tiene su propia
+											lista de capítulos abajo.
+										</p>
+									</div>
 
 									{isLoadingSubjects && !currentSubject ? (
 										<p className='book-chapters__loading'>
-											Loading book…
+											Cargando documentos…
 										</p>
-									) : hasStoredBook ? (
-										<div className='book-chapters__book-card'>
-											<div className='book-chapters__book-visual'>
-												<BookGlyph />
-											</div>
-											<div
-												className='teacher-book-upload__status book-chapters__book-status'
-												role='status'
-											>
-												<span
-													className='teacher-book-upload__status-icon'
-													aria-hidden
-												>
-													<svg
-														width='20'
-														height='20'
-														viewBox='0 0 24 24'
-														fill='none'
-														stroke='currentColor'
-														strokeWidth='2'
+									) : hasDocuments ? (
+										<div
+											className='book-chapters__doc-picker'
+											role='listbox'
+											aria-label='Documentos fuente'
+										>
+											{subjectDocuments.map((doc) => {
+												const docKey = getDocumentKey(doc)
+												const openHref = getDocumentOpenHref(doc)
+												const isSelected =
+													selectedDocumentId === docKey
+												const chapterCount =
+													getDocumentChapterCount(docKey)
+
+												return (
+													<button
+														key={docKey}
+														type='button'
+														role='option'
+														aria-selected={isSelected}
+														className={
+															'book-chapters__doc-card' +
+															(isSelected
+																? ' book-chapters__doc-card--selected'
+																: '')
+														}
+														onClick={() =>
+															handleSelectDocument(docKey)}
 													>
-														<path
-															d='M20 6L9 17l-5-5'
-															strokeLinecap='round'
-															strokeLinejoin='round'
-														/>
-													</svg>
-												</span>
-												<div className='teacher-book-upload__status-body'>
-													<p className='teacher-book-upload__status-title'>
-														PDF saved for this subject
-													</p>
-													{storedBookLabel ? (
-														<p className='teacher-book-upload__status-file'>
-															{storedBookLabel}
-														</p>
-													) : null}
-													{openBookHref ? (
-														<p className='teacher-book-upload__status-actions'>
-															<a
-																href={openBookHref}
-																className='teacher-book-upload__open-link'
-																target='_blank'
-																rel='noopener noreferrer'
+														{isSelected ? (
+															<span
+																className='book-chapters__doc-card-check'
+																aria-hidden
 															>
-																Open PDF in new tab
-																<span
-																	className='teacher-book-upload__open-link-icon'
-																	aria-hidden
-																>
-																	↗
+																✓
+															</span>
+														) : null}
+														<span className='book-chapters__doc-card-icon'>
+															<DocumentPdfGlyph />
+														</span>
+														<span className='book-chapters__doc-card-body'>
+															<span className='book-chapters__doc-card-name'>
+																{documentDisplayName(doc)}
+															</span>
+															<span className='book-chapters__doc-card-meta'>
+																<span className='book-chapters__doc-card-count'>
+																	{chapterCount}{' '}
+																	{chapterCount === 1
+																		? 'capítulo'
+																		: 'capítulos'}
 																</span>
-															</a>
-														</p>
-													) : null}
-													<p className='teacher-book-upload__status-hint'>
-														Use the PDF page numbers
-														when setting chapter ranges
-														below.
-													</p>
-												</div>
-											</div>
+																{openHref ? (
+																	<a
+																		href={openHref}
+																		className='book-chapters__doc-card-link'
+																		target='_blank'
+																		rel='noopener noreferrer'
+																		onClick={(e) =>
+																			e.stopPropagation()}
+																	>
+																		Abrir PDF
+																		<span
+																			className='teacher-book-upload__open-link-icon'
+																			aria-hidden
+																		>
+																			↗
+																		</span>
+																	</a>
+																) : null}
+															</span>
+														</span>
+													</button>
+												)
+											})}
 										</div>
 									) : (
 										<div
@@ -641,25 +861,29 @@ function SchoolAdminBookChapters () {
 												<BookGlyph />
 											</div>
 											<p className='book-chapters__empty-book-title'>
-												No course book uploaded yet
+												Aún no hay PDFs fuente subidos
 											</p>
 											<p className='book-chapters__empty-book-text'>
-												Upload the full PDF on the edit
-												subject page before mapping
-												chapters.
+												Sube PDFs en la página de editar
+												materia antes de mapear capítulos.
 											</p>
 											<Link
 												to={`/schooladmins/editsubject/${subjectId}`}
 												className='book-chapters__empty-book-link'
 											>
-												Go to edit subject
+												Ir a editar materia
 											</Link>
 										</div>
 									)}
 								</section>
 
 								<section
-									className='book-chapters__list-section'
+									className={
+										'book-chapters__list-section' +
+										(!hasDocuments
+											? ' book-chapters__list-section--hidden'
+											: '')
+									}
 									aria-labelledby='book-chapters-list-heading'
 								>
 									<div className='book-chapters__list-header'>
@@ -668,37 +892,63 @@ function SchoolAdminBookChapters () {
 												id='book-chapters-list-heading'
 												className='book-chapters__section-title'
 											>
-												Chapter page ranges
+												2. Rangos de páginas por capítulo
 											</h2>
 											<p className='book-chapters__section-desc'>
-												For each chapter, complete step 1
-												(details and page range), then step
-												2 (generate the chapter PDF).
+												{selectedDocument
+													? (
+														<>
+															Mapeando capítulos de{' '}
+															<strong>
+																{documentDisplayName(
+																	selectedDocument,
+																)}
+															</strong>
+															. Completa el paso 1 (detalles
+															y rango de páginas), luego el
+															paso 2 (generar el PDF del
+															capítulo).
+														</>
+													)
+													: 'Selecciona un documento fuente arriba para gestionar sus capítulos.'}
 											</p>
 										</div>
-										{chapterDrafts.length > 0 ? (
+										{filteredChapterDrafts.length > 0 ? (
 											<span className='book-chapters__count'>
-												{chapterDrafts.length}{' '}
-												{chapterDrafts.length === 1
-													? 'chapter'
-													: 'chapters'}
+												{filteredChapterDrafts.length}{' '}
+												{filteredChapterDrafts.length === 1
+													? 'capítulo'
+													: 'capítulos'}
 											</span>
 										) : null}
 									</div>
 
-									{isLoadingSubjects ? (
+									{!hasDocuments ? null : isLoadingSubjects ? (
 										<p className='book-chapters__loading'>
-											Loading chapters…
+											Cargando capítulos…
 										</p>
-									) : chapterDrafts.length === 0 ? (
+									) : !selectedDocumentId && requiresSourceDocument ? (
+										<div className='book-chapters__select-doc-prompt'>
+											<p className='book-chapters__select-doc-prompt-title'>
+												Elige un documento para continuar
+											</p>
+											<p className='book-chapters__select-doc-prompt-text'>
+												Selecciona uno de tus PDFs fuente
+												arriba para agregar o editar rangos
+												de páginas.
+											</p>
+										</div>
+									) : filteredChapterDrafts.length === 0 ? (
 										<div className='book-chapters__empty-chapters'>
 											<p className='book-chapters__empty-chapters-title'>
-												No chapters yet
+												Aún no hay capítulos para este
+												documento
 											</p>
 											<p className='book-chapters__empty-chapters-text'>
-												Add chapters manually now, or run
-												your detection script later to
-												populate them automatically.
+												Agrega capítulos manualmente ahora, o
+												ejecuta tu script de detección más
+												tarde para completarlos
+												automáticamente.
 											</p>
 											<button
 												type='button'
@@ -706,13 +956,13 @@ function SchoolAdminBookChapters () {
 												disabled={isBusy}
 												onClick={handleAddChapter}
 											>
-												Add first chapter
+												Agregar primer capítulo
 											</button>
 										</div>
 									) : (
 										<>
 											<ol className='book-chapters__list'>
-												{chapterDrafts.map((chapter, index) => {
+												{filteredChapterDrafts.map((chapter, index) => {
 													const chapterKey = String(chapter._id)
 													const isPersisted = isPersistedChapterId(
 														chapterKey,
@@ -732,10 +982,15 @@ function SchoolAdminBookChapters () {
 														chapter.ChapterBeginPage
 														&& chapter.ChapterEndPage,
 													)
+													const hasSourceDocument = Boolean(
+														chapter.sourceDocumentId
+														|| !requiresSourceDocument,
+													)
 													const generateDisabled = isBusy
 														|| !isPersisted
-														|| !hasStoredBook
+														|| !hasDocuments
 														|| !hasPageRange
+														|| !hasSourceDocument
 														|| isGeneratingThis
 
 													return (
@@ -757,7 +1012,7 @@ function SchoolAdminBookChapters () {
 																		onClick={() =>
 																			void handleRemoveChapter(chapterKey)}
 																	>
-																		Remove
+																		Eliminar
 																	</button>
 																</div>
 
@@ -769,12 +1024,12 @@ function SchoolAdminBookChapters () {
 																			</span>
 																			<div className='book-chapters__step-copy'>
 																				<p className='book-chapters__step-title'>
-																					Save chapter details
+																					Guardar detalles del capítulo
 																				</p>
 																				<p className='book-chapters__step-desc'>
-																					First, enter the chapter
-																					title, beginning page, and end
-																					page — then save below.
+																					Ingresa el título del
+																					capítulo, la página inicial y
+																					la final — luego guarda abajo.
 																				</p>
 																			</div>
 																		</div>
@@ -785,13 +1040,13 @@ function SchoolAdminBookChapters () {
 																					className='book-chapters__title-label'
 																					htmlFor={`chapter-title-${chapterKey}`}
 																				>
-																					Chapter title
+																					Título del capítulo
 																				</label>
 																				<input
 																					id={`chapter-title-${chapterKey}`}
 																					type='text'
 																					className='book-chapters__title-input'
-																					placeholder={`Chapter ${index + 1}`}
+																					placeholder={`Capítulo ${index + 1}`}
 																					autoComplete='off'
 																					disabled={isBusy}
 																					value={chapter.ChapterTitle}
@@ -810,7 +1065,7 @@ function SchoolAdminBookChapters () {
 																						className='book-chapters__page-label'
 																						htmlFor={`chapter-start-${chapterKey}`}
 																					>
-																						Start page
+																						Página inicial
 																					</label>
 																					<div className='book-chapters__page-input-wrap'>
 																						<span
@@ -851,7 +1106,7 @@ function SchoolAdminBookChapters () {
 																						className='book-chapters__page-label'
 																						htmlFor={`chapter-end-${chapterKey}`}
 																					>
-																						End page
+																						Página final
 																					</label>
 																					<div className='book-chapters__page-input-wrap'>
 																						<span
@@ -888,8 +1143,8 @@ function SchoolAdminBookChapters () {
 																				onClick={() => void handleSaveChapters()}
 																			>
 																				{isSavingChapters
-																					? 'Saving…'
-																					: 'Save chapters'}
+																					? 'Guardando…'
+																					: 'Guardar capítulos'}
 																			</button>
 																		</div>
 																	</div>
@@ -907,12 +1162,17 @@ function SchoolAdminBookChapters () {
 																			</span>
 																			<div className='book-chapters__step-copy'>
 																				<p className='book-chapters__step-title'>
-																					Generate chapter PDF
+																					Generar PDF del capítulo
 																				</p>
 																				<p className='book-chapters__step-desc'>
-																					Extract pages from the full
-																					course book using the saved
-																					title and page range.
+																					Extrae páginas de{' '}
+																					{selectedDocument
+																						? documentDisplayName(
+																							selectedDocument,
+																						)
+																						: 'el PDF seleccionado'}{' '}
+																					usando el título guardado y
+																					el rango de páginas.
 																				</p>
 																			</div>
 																		</div>
@@ -931,7 +1191,7 @@ function SchoolAdminBookChapters () {
 																					</span>
 																					<div className='book-chapters__upload-status-body'>
 																						<p className='book-chapters__upload-status-title'>
-																							Chapter PDF generated
+																							PDF del capítulo generado
 																						</p>
 																						{chapterFileLabel ? (
 																							<p className='book-chapters__upload-status-file'>
@@ -945,7 +1205,7 @@ function SchoolAdminBookChapters () {
 																								target='_blank'
 																								rel='noopener noreferrer'
 																							>
-																								Open chapter PDF
+																								Abrir PDF del capítulo
 																								<span
 																									className='teacher-book-upload__open-link-icon'
 																									aria-hidden
@@ -977,19 +1237,21 @@ function SchoolAdminBookChapters () {
 																				</span>
 																				<span className='book-chapters__generate-btn-title'>
 																					{isGeneratingThis
-																						? 'Generating PDF…'
+																						? 'Generando PDF…'
 																						: hasChapterFile
-																							? 'Regenerate chapter PDF'
-																							: 'Generate chapter PDF'}
+																							? 'Regenerar PDF del capítulo'
+																							: 'Generar PDF del capítulo'}
 																				</span>
 																				<span className='book-chapters__generate-btn-hint'>
 																					{!isPersisted
-																						? 'Complete step 1 first'
-																						: !hasStoredBook
-																							? 'Upload the full course book first'
-																							: !hasPageRange
-																								? 'Enter start and end pages'
-																								: `Pages ${chapter.ChapterBeginPage}–${chapter.ChapterEndPage} from full book`}
+																						? 'Completa el paso 1 primero'
+																						: !hasDocuments
+																							? 'Sube un PDF fuente primero'
+																							: !hasSourceDocument
+																								? 'Selecciona un documento fuente'
+																								: !hasPageRange
+																									? 'Ingresa páginas de inicio y fin'
+																									: `Páginas ${chapter.ChapterBeginPage}–${chapter.ChapterEndPage} del PDF fuente`}
 																				</span>
 																			</button>
 																		</div>
@@ -1008,7 +1270,7 @@ function SchoolAdminBookChapters () {
 													disabled={isBusy}
 													onClick={handleAddChapter}
 												>
-													+ Add chapter
+													+ Agregar capítulo
 												</button>
 											</div>
 
@@ -1019,15 +1281,15 @@ function SchoolAdminBookChapters () {
 											>
 												<div className='subject-book-tools__header'>
 													<span className='subject-book-tools__eyebrow'>
-														Next step
+														Siguiente paso
 													</span>
 													<h3 className='subject-book-tools__title'>
-														Lesson generation
+														Generación de lecciones
 													</h3>
 													<p className='subject-book-tools__desc'>
 														{hasChaptersWithPdf
-															? 'Turn your chapter PDFs into interactive student lesson pages.'
-															: 'Save chapters and generate at least one chapter PDF to unlock lesson generation.'}
+															? 'Convierte tus PDFs de capítulos en lecciones interactivas para estudiantes.'
+															: 'Guarda capítulos y genera al menos un PDF de capítulo para desbloquear la generación de lecciones.'}
 													</p>
 												</div>
 												{hasChaptersWithPdf ? (
@@ -1062,10 +1324,11 @@ function SchoolAdminBookChapters () {
 														</span>
 														<span className='subject-book-tools__body'>
 															<span className='subject-book-tools__label'>
-																Generate lessons
+																Generar lecciones
 															</span>
 															<span className='subject-book-tools__hint'>
-																Build student-ready lesson pages
+																Crea lecciones listas para
+																estudiantes
 															</span>
 														</span>
 														<span
@@ -1108,10 +1371,11 @@ function SchoolAdminBookChapters () {
 														</span>
 														<span className='subject-book-tools__body'>
 															<span className='subject-book-tools__label'>
-																Generate lessons
+																Generar lecciones
 															</span>
 															<span className='subject-book-tools__hint'>
-																Requires a generated chapter PDF
+																Requiere al menos un PDF de
+																capítulo
 															</span>
 														</span>
 													</span>

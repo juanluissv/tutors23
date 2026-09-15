@@ -31,7 +31,7 @@ const StatusDot = ({ isActive }) => (
 			}`
 		}
 	>
-		{isActive ? 'Active' : 'Inactive'}
+		{isActive ? 'Activa' : 'Inactiva'}
 	</span>
 )
 
@@ -103,7 +103,9 @@ function SchoolAdminSubjectStudentsScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area'>
-							<p className='ts-page__subtitle'>Invalid subject link.</p>
+							<p className='ts-page__subtitle'>
+								Enlace de materia no válido.
+							</p>
 						</div>
 					</div>
 				</div>
@@ -115,7 +117,7 @@ function SchoolAdminSubjectStudentsScreen () {
 		isError && error?.data?.message
 			? String(error.data.message)
 			: isError
-				? 'Could not load students.'
+				? 'No se pudieron cargar los estudiantes.'
 				: ''
 
 	return (
@@ -133,7 +135,7 @@ function SchoolAdminSubjectStudentsScreen () {
 					<div className='content-area'>
 						<div className='ts-page'>
 							<h1 className='ts-page__title heading-gradient'>
-								School Students
+								Estudiantes de la materia
 							</h1>
 							<p className='ts-page__subtitle'>
 								{subjectTitle && (
@@ -142,12 +144,15 @@ function SchoolAdminSubjectStudentsScreen () {
 										{' · '}
 									</>
 								)}
-								{studentsList.length} students enrolled &middot;{' '}
-								{activeCount} with active subscription
+								{studentsList.length} estudiantes inscritos
+								{' '}&middot;{' '}
+								{activeCount} con suscripción activa
 							</p>
 
 							{isLoading && (
-								<p className='ts-page__subtitle'>Loading…</p>
+								<p className='ts-page__subtitle'>
+									Cargando…
+								</p>
 							)}
 
 							{isError && (
@@ -158,7 +163,7 @@ function SchoolAdminSubjectStudentsScreen () {
 										className='teacher-subject-card__btn'
 										onClick={() => refetch()}
 									>
-										Retry
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -183,7 +188,7 @@ function SchoolAdminSubjectStudentsScreen () {
 										<input
 											type='text'
 											className='ts-search-bar__input'
-											placeholder='Search by name, email…'
+											placeholder='Buscar por nombre, correo…'
 											value={searchTerm}
 											onChange={(e) => setSearchTerm(e.target.value)}
 										/>
@@ -193,11 +198,11 @@ function SchoolAdminSubjectStudentsScreen () {
 										<table className='ts-table'>
 											<thead>
 												<tr>
-													<th>Student</th>
-													<th>Subject</th>
-													<th>Questions this month</th>
-													<th>Subscription</th>
-													<th>Joined</th>
+													<th>Estudiante</th>
+													<th>Materia</th>
+													<th>Preguntas este mes</th>
+													<th>Suscripción</th>
+													<th>Ingreso</th>
 												</tr>
 											</thead>
 											<tbody>
@@ -240,8 +245,8 @@ function SchoolAdminSubjectStudentsScreen () {
 													<tr>
 														<td colSpan='5' className='ts-empty'>
 															{studentsList.length === 0
-																? 'No students enrolled yet.'
-																: 'No students match your search'}
+																? 'Aún no hay estudiantes inscritos.'
+																: 'Ningún estudiante coincide con tu búsqueda'}
 														</td>
 													</tr>
 												)}

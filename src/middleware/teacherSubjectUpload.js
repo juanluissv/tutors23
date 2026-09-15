@@ -23,6 +23,7 @@ const bookUpload = multer({
 
 const uploadBookSingle = bookUpload.single('book');
 const uploadChapterFileSingle = bookUpload.single('chapterFile');
+const uploadDocumentSingle = bookUpload.single('document');
 
 /**
  * Only parse multipart for PUT /:id/teacher; JSON + express.json for other
@@ -86,8 +87,38 @@ function parseChapterFileMultipart (req, res, next) {
     next();
 }
 
+function parseSubjectDocumentMultipart (req, res, next) {
+    const ct = (req.headers['content-type'] || '');
+    if (ct.includes('multipart/form-data')) {
+        return uploadDocumentSingle(req, res, (err) => {
+            if (!err) {
+                return next();
+            }
+            if (err instanceof multer.MulterError) {
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    res.status(400);
+                    return res.json({
+                        message: 'File too large. Maximum size is 200 MB.',
+                    });
+                }
+                res.status(400);
+                return res.json({
+                    message: 'Invalid file upload. Use a single PDF file.',
+                });
+            }
+            if (err instanceof Error) {
+                res.status(400);
+                return res.json({ message: err.message });
+            }
+            return next(err);
+        });
+    }
+    next();
+}
+
 export {
     parseTeacherSubjectMultipart,
     parseChapterFileMultipart,
+    parseSubjectDocumentMultipart,
     MAX_BYTES,
 };

@@ -27,13 +27,13 @@ const GradCapIcon = () => (
 )
 
 const DEFAULT_COPY = {
-	loading: 'Loading courses…',
+	loading: 'Cargando cursos…',
 	error:
-		'We couldn\'t load courses for this subject. You may '
-		+ 'not have access, or there was a network issue.',
-	retry: 'Try again',
-	published: 'Published',
-	draft: 'Draft',
+		'No pudimos cargar los cursos de esta materia. Puede '
+		+ 'que no tengas acceso, o que haya un problema de red.',
+	retry: 'Intentar de nuevo',
+	published: 'Publicado',
+	draft: 'Borrador',
 }
 
 /**

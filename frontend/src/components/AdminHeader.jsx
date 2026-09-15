@@ -74,11 +74,11 @@ function AdminHeader({
 				<button
 					type="button"
 					className="header-logo"
-					onClick={() => navigate('/')}
-					aria-label="Ask to Learn — go to home"
+					onClick={() => navigate('/schooladmins/mysubjects')}
+					aria-label="Ask to Learn — ir al inicio"
 				>
 					<img
-						src="https://app.asktolearn.co/assets/img/log4.png"
+						src="/assets/img/log4.png"
 						alt=""
 						className="logo-image"
 						style={{ width: '37px', height: '37px' }}
@@ -101,9 +101,9 @@ function AdminHeader({
 					aria-label={
 						schoolAdminInfo
 							? isDropdownOpen
-								? 'Close account menu'
-								: 'Open account menu'
-							: 'Sign in'
+								? 'Cerrar menú de cuenta'
+								: 'Abrir menú de cuenta'
+							: 'Iniciar sesión'
 					}
 				>
 					<img src={userIconSrc} alt="" width="48" height="48" />
@@ -113,7 +113,8 @@ function AdminHeader({
 					<div className="user-dropdown" role="menu">
 						<div className="user-dropdown__header">
 							<span className="user-dropdown__name">
-								{schoolAdminInfo?.name || 'School Admin'}
+								{schoolAdminInfo?.name
+									|| 'Administrador de escuela'}
 							</span>
 							<span className="user-dropdown__email">
 								{schoolAdminInfo?.email}
@@ -127,7 +128,7 @@ function AdminHeader({
 							role="menuitem"
 						>
 							<LogoutIcon />
-							<span>Log out</span>
+							<span>Cerrar sesión</span>
 						</button>
 					</div>
 				)}

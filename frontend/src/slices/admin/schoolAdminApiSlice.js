@@ -173,6 +173,52 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
                 return tags
             },
         }),
+        uploadSubjectDocument: builder.mutation({
+            query: ({ id, document, label }) => {
+                const fd = new FormData()
+                fd.append('document', document)
+                if (label != null && String(label).trim() !== '') {
+                    fd.append('label', String(label).trim())
+                }
+                return {
+                    url: `${SUBJECTS_URL}/${id}/documents`,
+                    method: 'POST',
+                    body: fd,
+                }
+            },
+            invalidatesTags: (result) => {
+                const tags = ['Subject']
+                if (result?.school) {
+                    const sid = String(
+                        result.school._id ?? result.school,
+                    )
+                    tags.push(
+                        { type: 'School', id: sid },
+                        { type: 'Subject', id: `SCHOOL_LIST_${sid}` },
+                    )
+                }
+                return tags
+            },
+        }),
+        deleteSubjectDocument: builder.mutation({
+            query: ({ id, documentId }) => ({
+                url: `${SUBJECTS_URL}/${id}/documents/${documentId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result) => {
+                const tags = ['Subject']
+                if (result?.school) {
+                    const sid = String(
+                        result.school._id ?? result.school,
+                    )
+                    tags.push(
+                        { type: 'School', id: sid },
+                        { type: 'Subject', id: `SCHOOL_LIST_${sid}` },
+                    )
+                }
+                return tags
+            },
+        }),
         updateSubjectBookChapters: builder.mutation({
             query: ({ id, bookChapters }) => ({
                 url: `${SUBJECTS_URL}/${id}/book-chapters`,
@@ -298,6 +344,27 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
                 fd.append('video', video)
                 return {
                     url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}/tutor-video`,
+                    method: 'PUT',
+                    body: fd,
+                }
+            },
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
+        uploadSuggestedQuestionVideo: builder.mutation({
+            query: ({
+                id,
+                chapterId,
+                questionIndex,
+                videoKind,
+                video,
+            }) => {
+                const fd = new FormData()
+                fd.append('video', video)
+                return {
+                    url: `${SUBJECTS_URL}/${id}/book-chapters/${chapterId}`
+                        + `/suggested-questions/${questionIndex}/${videoKind}`,
                     method: 'PUT',
                     body: fd,
                 }
@@ -547,6 +614,8 @@ export const {
     useGetSubjectsBySchoolQuery,
     useCreateSubjectMutation,
     useUpdateSubjectMutation,
+    useUploadSubjectDocumentMutation,
+    useDeleteSubjectDocumentMutation,
     useUpdateSubjectBookChaptersMutation,
     useGenerateSubjectBookChapterPdfMutation,
     useGenerateBookLessonsFromChapterMutation,
@@ -558,6 +627,7 @@ export const {
     useGenerateAnimatedVideoFromLessonMutation,
     useCheckAnimatedVideoStatusFromLessonMutation,
     useUploadChapterTutorVideoMutation,
+    useUploadSuggestedQuestionVideoMutation,
     useUploadChapterTutorTranscribeMutation,
     useGetBookLessonsBySubjectQuery,
     useGetBookLessonByIdForSchoolAdminQuery,

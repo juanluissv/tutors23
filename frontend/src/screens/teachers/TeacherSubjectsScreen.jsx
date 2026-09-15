@@ -58,12 +58,15 @@ function TeacherSubjectsScreen () {
 					/>
 					<div className='content-area'>
 						<TeacherSubjectsGrid
-							pageTitle='My Subjects'
-							pageSubtitle='Manage your courses, lessons, and past student questions.'
+							pageTitle='Mis materias'
+							pageSubtitle={
+								'Administra tus cursos, lecciones y las '
+								+ 'preguntas anteriores de tus estudiantes.'
+							}
 							emptyMessage={
-								'You don\'t have any subjects yet. When ' +
-								'a school admin invites you by email, your ' +
-								'subjects will show up here.'
+								'Aún no tienes materias. Cuando un '
+								+ 'administrador escolar te invite por '
+								+ 'correo, tus materias aparecerán aquí.'
 							}
 							subjects={subjects}
 							isLoading={isLoading}

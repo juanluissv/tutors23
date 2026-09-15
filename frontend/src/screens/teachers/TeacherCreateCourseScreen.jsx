@@ -8,6 +8,7 @@ import {
 	useCreateCourseMutation,
 	useGetSubjectsByTeacherIdQuery,
 } from '../../slices/teachers/teacherApiSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 function TeacherCreateCourseScreen () {
@@ -43,11 +44,11 @@ function TeacherCreateCourseScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (title.trim() === '') {
-			toast.error('Please enter the course title')
+			toast.error('Ingresa el título del curso')
 			return
 		}
 		if (!subjectId) {
-			toast.error('Please select a subject')
+			toast.error('Selecciona una materia')
 			return
 		}
 		if (!teacherId) {
@@ -65,13 +66,11 @@ function TeacherCreateCourseScreen () {
 
 		try {
 			await createCourse(body).unwrap()
-			toast.success('Course created')
+			toast.success('Curso creado')
 			navigate('/teachers/subjects', { replace: true })
 		} catch (err) {
 			toast.error(
-				err?.data?.message
-					|| err?.error?.message
-					|| 'Could not create course',
+				localizeApiError(err, 'No se pudo crear el curso'),
 			)
 		}
 	}
@@ -93,37 +92,39 @@ function TeacherCreateCourseScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login'>
-						<div className='center-content2 login-screen login-screen--wide'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>
 										<br />
-										Create a course
+										Crear un curso
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Link a new course to one of your subjects and
-										add an optional description. New courses stay
-										unpublished until you change that later;
-										you can add sections and lessons afterward.
+										Vincula un curso nuevo a una de tus materias
+										y agrega una descripción opcional. Los cursos
+										nuevos permanecen sin publicar hasta que lo
+										cambies más adelante; puedes agregar
+										secciones y lecciones después.
 									</p>
 								</div>
 								{isSubjectsError ? (
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Could not load your subjects. Please try
-										again.
+										No pudimos cargar tus materias. Intenta de
+										nuevo.
 									</p>
 								) : null}
 								{!isLoadingSubjects && !hasSubjects ? (
 									<div className='login-card__header'>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											You need at least one subject before
-											creating a course. Subjects appear here when
-											a school admin adds you by email.
+											Necesitas al menos una materia antes de
+											crear un curso. Las materias aparecen aquí
+											cuando un administrador escolar te agrega
+											por correo.
 										</p>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
 											<Link to='/teachers/subjects'>
-												Back to my subjects
+												Volver a mis materias
 											</Link>
 										</p>
 									</div>
@@ -140,14 +141,14 @@ function TeacherCreateCourseScreen () {
 												className='login-label'
 												htmlFor='teacher-create-course-title'
 											>
-												Course title
+												Título del curso
 											</label>
 											<input
 												type='text'
 												id='teacher-create-course-title'
 												name='title'
 												className='login-input'
-												placeholder='e.g. Unit 1 — Getting started'
+												placeholder='p. ej. Unidad 1 — Primeros pasos'
 												autoComplete='off'
 												value={title}
 												disabled={isFormDisabled}
@@ -160,7 +161,7 @@ function TeacherCreateCourseScreen () {
 												className='login-label'
 												htmlFor='teacher-create-course-subject'
 											>
-												Subject
+												Materia
 											</label>
 											<select
 												id='teacher-create-course-subject'
@@ -174,8 +175,8 @@ function TeacherCreateCourseScreen () {
 											>
 												<option value=''>
 													{isLoadingSubjects
-														? 'Loading subjects…'
-														: 'Select a subject'}
+														? 'Cargando materias…'
+														: 'Selecciona una materia'}
 												</option>
 												{subjects.map((s) => (
 													<option
@@ -192,13 +193,13 @@ function TeacherCreateCourseScreen () {
 												className='login-label'
 												htmlFor='teacher-create-course-description'
 											>
-												Description (optional)
+												Descripción (opcional)
 											</label>
 											<textarea
 												id='teacher-create-course-description'
 												name='description'
 												className='login-input login-textarea'
-												placeholder='What this course covers…'
+												placeholder='De qué trata este curso…'
 												rows={4}
 												value={description}
 												disabled={isFormDisabled}
@@ -216,8 +217,8 @@ function TeacherCreateCourseScreen () {
 											}
 										>
 											{isSubmitting
-												? 'Creating…'
-												: 'Create course'}
+												? 'Creando…'
+												: 'Crear curso'}
 										</button>
 									</form>
 								) : null}

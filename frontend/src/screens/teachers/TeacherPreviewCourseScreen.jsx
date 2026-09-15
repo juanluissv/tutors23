@@ -13,6 +13,7 @@ import {
 	useUpdateCoursePublishMutation,
 } from '../../slices/teachers/teacherApiSlice'
 import { buildSectionGroups, lessonKey } from '../../utils/courseOutline'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import './TeacherPreviewCourseScreen.css'
 import '../../App.css'
 
@@ -101,7 +102,12 @@ function TeacherPreviewCourseScreen () {
 	const [selectedLessonKey, setSelectedLessonKey] = useState(null)
 
 	const sectionGroups = useMemo(
-		() => (course ? buildSectionGroups(course) : []),
+		() => (course
+			? buildSectionGroups(course, {
+				section: 'Sección',
+				otherLessons: 'Otras lecciones',
+			})
+			: []),
 		[course],
 	)
 
@@ -115,6 +121,10 @@ function TeacherPreviewCourseScreen () {
 	}, [sectionGroups])
 
 	const firstLessonKey = firstLesson ? lessonKey(firstLesson) : null
+	const lessonCount = sectionGroups.reduce(
+		(n, g) => n + g.lessons.length,
+		0,
+	)
 
 	useEffect(() => {
 		if (!teacherInfo) {
@@ -184,14 +194,16 @@ function TeacherPreviewCourseScreen () {
 			}).unwrap()
 			toast.success(
 				nextPublish
-					? 'Course is now published for students.'
-					: 'Course is back in draft. Students can no longer open it.',
+					? 'El curso ya está publicado para los estudiantes.'
+					: 'El curso volvió a borrador. Los estudiantes '
+						+ 'ya no pueden abrirlo.',
 			)
 		}
 		catch (err) {
-			const msg = err?.data?.message
-				|| err?.error
-				|| 'Could not update publish status.'
+			const msg = localizeApiError(
+				err,
+				'No se pudo actualizar el estado de publicación.',
+			)
 			toast.error(msg)
 		}
 	}
@@ -212,27 +224,28 @@ function TeacherPreviewCourseScreen () {
 						<div className='center-content2 course-preview'>
 							{!courseIdOk && (
 								<p className='course-preview__alert'>
-									Invalid course link.
+									Enlace de curso no válido.
 								</p>
 							)}
 							{courseIdOk && isLoading && (
 								<p className='course-preview__muted'>
-									Loading preview…
+									Cargando vista previa…
 								</p>
 							)}
 							{courseIdOk && isError && (
 								<div className='course-preview__alert-block'>
 									<p>
-										{error?.data?.message
-											|| error?.error
-											|| 'Could not load this course.'}
+										{localizeApiError(
+											error,
+											'No pudimos cargar este curso.',
+										)}
 									</p>
 									<button
 										type='button'
 										className='course-preview__btn course-preview__btn--ghost'
 										onClick={() => refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							)}
@@ -242,7 +255,7 @@ function TeacherPreviewCourseScreen () {
 										<div>
 											<div className='course-preview__title-row'>
 												<p className='course-preview__eyebrow'>
-													Course preview
+													Vista previa del curso
 												</p>
 												<span
 													className={
@@ -253,8 +266,8 @@ function TeacherPreviewCourseScreen () {
 													}
 												>
 													{isCoursePublished
-														? 'Published'
-														: 'Draft'}
+														? 'Publicado'
+														: 'Borrador'}
 												</span>
 											</div>
 											<h1 className='course-preview__course-title'>
@@ -273,7 +286,7 @@ function TeacherPreviewCourseScreen () {
 												}
 												className='course-preview__btn course-preview__btn--primary'
 											>
-												Add lessons
+												Agregar lecciones
 											</Link>
 											{isCoursePublished ? (
 												<button
@@ -284,8 +297,8 @@ function TeacherPreviewCourseScreen () {
 														void handleSetPublish(false)}
 												>
 													{isUpdatingPublish
-														? 'Updating…'
-														: 'Unpublish course'}
+														? 'Actualizando…'
+														: 'Despublicar curso'}
 												</button>
 											) : (
 												<button
@@ -296,8 +309,8 @@ function TeacherPreviewCourseScreen () {
 														void handleSetPublish(true)}
 												>
 													{isUpdatingPublish
-														? 'Updating…'
-														: 'Publish course'}
+														? 'Actualizando…'
+														: 'Publicar curso'}
 												</button>
 											)}
 										</div>
@@ -316,25 +329,27 @@ function TeacherPreviewCourseScreen () {
 															preload='metadata'
 															src={selectedLesson.videoUrl}
 														>
-															Your browser does not support
-															video playback.
+															Tu navegador no admite la
+															reproducción de video.
 														</video>
 													) : (
 														<div className='course-preview__video-placeholder'>
 															{selectedLesson
 																? (
 																	<p>
-																		Video URL is not
-																		available. Check S3
-																		configuration or
-																		public base URL.
+																		El enlace del video no
+																		está disponible.
+																		Revisa la
+																		configuración de
+																		almacenamiento o la
+																		dirección pública.
 																	</p>
 																)
 																: (
 																	<p>
-																		Select a lesson
-																		from the outline
-																		to preview it.
+																		Selecciona una
+																		lección del temario
+																		para verla.
 																	</p>
 																)}
 														</div>
@@ -343,7 +358,7 @@ function TeacherPreviewCourseScreen () {
 												<div className='course-preview__lesson-meta'>
 													<h2 className='course-preview__lesson-title'>
 														{selectedLesson?.title
-															|| 'No lesson selected'}
+															|| 'Ninguna lección seleccionada'}
 													</h2>
 													{selectedLesson?.description && (
 														<p className='course-preview__lesson-body'>
@@ -356,22 +371,22 @@ function TeacherPreviewCourseScreen () {
 
 										<aside
 											className='course-preview__sidebar'
-											aria-label='Course outline'
+											aria-label='Temario del curso'
 										>
 											<div className='course-preview__sidebar-head'>
-												<h2>Outline</h2>
+												<h2>Temario</h2>
 												<p>
-													{sectionGroups.reduce(
-														(n, g) => n + g.lessons.length,
-														0,
-													)}{' '}
-													lessons
+													{lessonCount}{' '}
+													{lessonCount === 1
+														? 'lección'
+														: 'lecciones'}
 												</p>
 											</div>
 											{sectionGroups.length === 0 && (
 												<p className='course-preview__muted'>
-													No sections yet. Add sections and
-													lessons to build your course.
+													Aún no hay secciones. Agrega
+													secciones y lecciones para armar
+													tu curso.
 												</p>
 											)}
 											<ul className='course-preview__accordion'>
@@ -407,8 +422,8 @@ function TeacherPreviewCourseScreen () {
 																	{group.lessons.length
 																		=== 0 && (
 																		<li className='course-preview__empty-section'>
-																			No lessons in
-																			this section
+																			No hay lecciones
+																			en esta sección
 																		</li>
 																	)}
 																	{group.lessons.map(
@@ -437,7 +452,7 @@ function TeacherPreviewCourseScreen () {
 																						<PlayGlyph />
 																						<span className='course-preview__lesson-name'>
 																							{lesson.title
-																								|| 'Untitled lesson'}
+																								|| 'Lección sin título'}
 																						</span>
 																					</button>
 																				</li>

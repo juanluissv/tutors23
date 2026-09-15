@@ -88,6 +88,14 @@ const bookLessonsSchema = mongoose.Schema({
 				type: String,
 				required: false,
 			},
+			questionVideoUrl: {
+				type: String,
+				required: false,
+			},
+			answerVideoUrl: {
+				type: String,
+				required: false,
+			},
 		},
 	],
 	videoScript: {

@@ -82,11 +82,11 @@ function TeacherCoursesScreen () {
 						<div className='content-area'>
 							<div className='teacher-subjects-page'>
 								<p className='teacher-subjects-page__subtitle'>
-									Invalid subject link.
+									Enlace de materia no válido.
 								</p>
 								<p className='teacher-subjects-page__subtitle'>
 									<Link to='/teachers/subjects'>
-										Back to my subjects
+										Volver a mis materias
 									</Link>
 								</p>
 							</div>
@@ -98,8 +98,8 @@ function TeacherCoursesScreen () {
 	}
 
 	const pageTitle = subjectTitle
-		? `Courses · ${subjectTitle}`
-		: 'Courses'
+		? `Cursos · ${subjectTitle}`
+		: 'Cursos'
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
@@ -117,17 +117,18 @@ function TeacherCoursesScreen () {
 						<TeacherCoursesGrid
 							pageTitle={pageTitle}
 							pageSubtitle={
-								'Your courses for this subject. Add sections ' +
-								'and lessons from the course editor when ' +
-								'you are ready.'
+								'Tus cursos de esta materia. Agrega secciones '
+								+ 'y lecciones desde el editor del curso '
+								+ 'cuando estés listo.'
 							}
 							backLink={{
 								to: '/teachers/subjects',
-								label: '← Back to my subjects',
+								label: '← Volver a mis materias',
 							}}
 							emptyMessage={
-								'No courses yet for this subject. Use Create ' +
-								'course in the sidebar to add one.'
+								'Aún no hay cursos para esta materia. Usa '
+								+ 'Crear curso en el menú lateral para '
+								+ 'agregar uno.'
 							}
 							courses={courses}
 							isLoading={isLoading}
@@ -141,7 +142,7 @@ function TeacherCoursesScreen () {
 										}
 										className='teacher-subject-card__btn'
 									>
-										Preview
+										Vista previa
 									</Link>
 									<Link
 										to={
@@ -150,7 +151,7 @@ function TeacherCoursesScreen () {
 										}
 										className='teacher-subject-card__btn'
 									>
-										Add lessons & sections
+										Agregar lecciones y secciones
 									</Link>
 								</div>
 							)}

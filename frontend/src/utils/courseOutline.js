@@ -10,8 +10,8 @@ export function lessonKey (lesson) {
 }
 
 export function buildSectionGroups (course, labels = {}) {
-	const sectionPrefix = labels.section ?? 'Section'
-	const otherLessons = labels.otherLessons ?? 'Other lessons'
+	const sectionPrefix = labels.section ?? 'Sección'
+	const otherLessons = labels.otherLessons ?? 'Otras lecciones'
 	const sections = Array.isArray(course?.sections)
 		? [...course.sections]
 		: []

@@ -443,73 +443,104 @@ function TeacherSidebar ({ isOpen, toggleSidebar }) {
 		}`
 
 	return (
-		<aside
-			className={`sidebar sidebar--teacher ${
-				isOpen ? 'sidebar-open' : 'sidebar-closed'
-			}`}
-			aria-label="Main navigation"
-		>
-			<div className="sidebar-header">
-				<button
-					type="button"
-					className="menu-button"
-					onClick={toggleSidebar}
-					aria-expanded={isOpen}
-					aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-				>
-					<img src={imgIcon} alt="" className="icon" />
-				</button>
-			</div>
+		<div className="teacher-sidebar-shell">
+			<aside
+				className={`sidebar sidebar--teacher ${
+					isOpen ? 'sidebar-open' : 'sidebar-closed'
+				}`}
+				aria-label="Navegación principal"
+			>
+				<div className="sidebar-header">
+					<button
+						type="button"
+						className="menu-button"
+						onClick={toggleSidebar}
+						aria-expanded={isOpen}
+						aria-label={isOpen ? 'Contraer menú' : 'Expandir menú'}
+					>
+						<img src={imgIcon} alt="" className="icon" />
+					</button>
+				</div>
 
-			<div className="sidebar-content">
-				<nav className="navigation" aria-label="Primary">
-					<NavLink to="/teachers/newquestions" className={newQuestionsNavClass}>
-						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
-							<IconNewTutor />
-						</span>
-						<span className="sidebar-nav-link__label-wrap">
-							<span className="sidebar-nav-link__label">
-								New Questions
+				<div className="sidebar-content">
+					<nav className="navigation" aria-label="Principal">
+						<NavLink
+							to="/teachers/newquestions"
+							className={newQuestionsNavClass}
+						>
+							<span
+								className="sidebar-nav-link__icon-well"
+								aria-hidden="true"
+							>
+								<IconNewTutor />
 							</span>
-							{newQuestionsCount > 0 ? (
-								<span
-									className="sidebar-new-answers-badge"
-									aria-hidden="true"
-								>
-									{newQuestionsCount > 99
-										? '99+'
-										: String(newQuestionsCount)}
+							<span className="sidebar-nav-link__label-wrap">
+								<span className="sidebar-nav-link__label">
+									Nuevas preguntas
 								</span>
-							) : null}
-						</span>
-					</NavLink>
-					<NavLink to="/teachers/subjects" className={mySubjectsNavClass}>
-						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
-							<IconAskTeacher />
-						</span>
-						<span className="sidebar-nav-link__label">My  Subjects</span>
-					</NavLink>
-					<NavLink to="/teachers/createcourse" className={navClass}>
-						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
-							<IconCreateCourse />
-						</span>
-						<span className="sidebar-nav-link__label">Create course</span>
-					</NavLink>
-					<NavLink to="/teachers/students" className={navClass}>
-						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
-							<IconMyStudents />
-						</span>
-						<span className="sidebar-nav-link__label">My  Students</span>
-					</NavLink>
-					<NavLink to="/teachers/profile" className={navClass}>
-						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
-							<IconSubjects />
-						</span>
-						<span className="sidebar-nav-link__label">My  Profile</span>
-					</NavLink>
-				</nav>
-			</div>
-		</aside>
+								{newQuestionsCount > 0 ? (
+									<span
+										className="sidebar-new-answers-badge"
+										aria-hidden="true"
+									>
+										{newQuestionsCount > 99
+											? '99+'
+											: String(newQuestionsCount)}
+									</span>
+								) : null}
+							</span>
+						</NavLink>
+						<NavLink
+							to="/teachers/subjects"
+							className={mySubjectsNavClass}
+						>
+							<span
+								className="sidebar-nav-link__icon-well"
+								aria-hidden="true"
+							>
+								<IconAskTeacher />
+							</span>
+							<span className="sidebar-nav-link__label">
+								Mis materias
+							</span>
+						</NavLink>
+						<NavLink to="/teachers/createcourse" className={navClass}>
+							<span
+								className="sidebar-nav-link__icon-well"
+								aria-hidden="true"
+							>
+								<IconCreateCourse />
+							</span>
+							<span className="sidebar-nav-link__label">
+								Crear curso
+							</span>
+						</NavLink>
+						<NavLink to="/teachers/students" className={navClass}>
+							<span
+								className="sidebar-nav-link__icon-well"
+								aria-hidden="true"
+							>
+								<IconMyStudents />
+							</span>
+							<span className="sidebar-nav-link__label">
+								Mis estudiantes
+							</span>
+						</NavLink>
+						<NavLink to="/teachers/profile" className={navClass}>
+							<span
+								className="sidebar-nav-link__icon-well"
+								aria-hidden="true"
+							>
+								<IconSubjects />
+							</span>
+							<span className="sidebar-nav-link__label">
+								Mi perfil
+							</span>
+						</NavLink>
+					</nav>
+				</div>
+			</aside>
+		</div>
 	)
 }
 

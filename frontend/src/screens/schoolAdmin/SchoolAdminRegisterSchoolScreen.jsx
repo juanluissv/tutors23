@@ -9,10 +9,10 @@ import AdminHeader from '../../components/AdminHeader'
 import '../../App.css'
 
 const SCHOOL_TYPE_OPTIONS = [
-	{ value: 'primary', label: 'Primary' },
-	{ value: 'secondary', label: 'Secondary' },
-	{ value: 'high_school', label: 'High school' },
-	{ value: 'university', label: 'University' },
+	{ value: 'primary', label: 'Primaria' },
+	{ value: 'secondary', label: 'Secundaria' },
+	{ value: 'high_school', label: 'Bachillerato' },
+	{ value: 'university', label: 'Universidad' },
 ]
 
 function SchoolAdminRegisterSchoolScreen () {
@@ -44,19 +44,19 @@ function SchoolAdminRegisterSchoolScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (name.trim() === '') {
-			toast.error('Please enter the school name')
+			toast.error('Por favor ingresa el nombre de la escuela')
 			return
 		}
 		if (country.trim() === '') {
-			toast.error('Please enter the country')
+			toast.error('Por favor ingresa el país')
 			return
 		}
 		if (city.trim() === '') {
-			toast.error('Please enter the city')
+			toast.error('Por favor ingresa la ciudad')
 			return
 		}
 		if (schoolType.trim() === '') {
-			toast.error('Please select a school type')
+			toast.error('Por favor selecciona el tipo de escuela')
 			return
 		}
 
@@ -76,11 +76,13 @@ function SchoolAdminRegisterSchoolScreen () {
 					school: res._id,
 				}),
 			)
-			toast.success('School created')
+			toast.success('Escuela creada')
 			navigate('/schooladmins/myschools', { replace: true })
 		} catch (err) {
 			toast.error(
-				err?.data?.message || err?.error?.message || 'Could not create school',
+				err?.data?.message
+					|| err?.error?.message
+					|| 'No se pudo crear la escuela',
 			)
 		}
 	}
@@ -106,17 +108,18 @@ function SchoolAdminRegisterSchoolScreen () {
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br /><br /><br /><br />
-											School already registered
+											Escuela ya registrada
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Your account is already linked to a school.
-											Update your profile or contact support if
-											you need to make changes.
+											Tu cuenta ya está vinculada a una
+											escuela. Actualiza tu perfil o
+											contacta a soporte si necesitas
+											hacer cambios.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/profile'>
-											Go to your profile
+											Ir a tu perfil
 										</Link>
 									</p>
 								</div>
@@ -144,11 +147,12 @@ function SchoolAdminRegisterSchoolScreen () {
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>
 										<br /><br /><br /><br />
-										Register your school
+										Registra tu escuela
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Add your institution so you can manage teachers,
-										students, and subjects from your dashboard.
+										Agrega tu institución para administrar
+										profesores, estudiantes y materias
+										desde tu panel.
 									</p>
 								</div>
 								<form
@@ -162,14 +166,14 @@ function SchoolAdminRegisterSchoolScreen () {
 											className='login-label'
 											htmlFor='schooladmin-register-school-name'
 										>
-											School name
+											Nombre de la escuela
 										</label>
 										<input
 											type='text'
 											id='schooladmin-register-school-name'
 											name='name'
 											className='login-input'
-											placeholder='e.g. Lincoln High School'
+											placeholder='p. ej. Instituto Nacional'
 											autoComplete='organization'
 											value={name}
 											required
@@ -182,7 +186,7 @@ function SchoolAdminRegisterSchoolScreen () {
 											className='login-label'
 											htmlFor='schooladmin-register-school-type'
 										>
-											School type
+											Tipo de escuela
 										</label>
 										<select
 											id='schooladmin-register-school-type'
@@ -195,7 +199,7 @@ function SchoolAdminRegisterSchoolScreen () {
 												setSchoolType(e.target.value)}
 										>
 											<option value=''>
-												Select school type
+												Selecciona el tipo de escuela
 											</option>
 											{SCHOOL_TYPE_OPTIONS.map((opt) => (
 												<option
@@ -213,14 +217,14 @@ function SchoolAdminRegisterSchoolScreen () {
 												className='login-label'
 												htmlFor='schooladmin-register-school-country'
 											>
-												Country
+												País
 											</label>
 											<input
 												type='text'
 												id='schooladmin-register-school-country'
 												name='country'
 												className='login-input'
-												placeholder='Country'
+												placeholder='País'
 												autoComplete='country-name'
 												value={country}
 												required
@@ -234,14 +238,14 @@ function SchoolAdminRegisterSchoolScreen () {
 												className='login-label'
 												htmlFor='schooladmin-register-school-city'
 											>
-												City
+												Ciudad
 											</label>
 											<input
 												type='text'
 												id='schooladmin-register-school-city'
 												name='city'
 												className='login-input'
-												placeholder='City'
+												placeholder='Ciudad'
 												autoComplete='address-level2'
 												value={city}
 												required
@@ -256,14 +260,14 @@ function SchoolAdminRegisterSchoolScreen () {
 											className='login-label'
 											htmlFor='schooladmin-register-school-address'
 										>
-											Address
+											Dirección
 										</label>
 										<input
 											type='text'
 											id='schooladmin-register-school-address'
 											name='address'
 											className='login-input'
-											placeholder='Street, number, district…'
+											placeholder='Calle, número, colonia…'
 											autoComplete='street-address'
 											value={address}
 											disabled={isLoading}
@@ -277,7 +281,9 @@ function SchoolAdminRegisterSchoolScreen () {
 										className='login-submit'
 										disabled={isLoading}
 									>
-										{isLoading ? 'Creating…' : 'Create school'}
+										{isLoading
+											? 'Creando…'
+											: 'Crear escuela'}
 									</button>
 								</form>
 							</div>

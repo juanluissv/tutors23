@@ -100,19 +100,21 @@ function SchoolAdminAddTeacherScreen () {
 			return
 		}
 		if (firstname.trim() === '') {
-			toast.error('Please enter the teacher first name')
+			toast.error('Ingresa el nombre del profesor')
 			return
 		}
 		if (lastname.trim() === '') {
-			toast.error('Please enter the teacher last name')
+			toast.error('Ingresa el apellido del profesor')
 			return
 		}
 		if (email.trim() === '') {
-			toast.error('Please enter the teacher email')
+			toast.error('Ingresa el correo del profesor')
 			return
 		}
 		if (schoolType.trim() === '') {
-			toast.error('Could not determine your school type. Try again.')
+			toast.error(
+				'No pudimos determinar el tipo de escuela. Intenta de nuevo.',
+			)
 			return
 		}
 
@@ -124,7 +126,7 @@ function SchoolAdminAddTeacherScreen () {
 				email: email.trim(),
 				schoolType,
 			}).unwrap()
-			toast.success('Teacher added to your school')
+			toast.success('Profesor agregado a tu escuela')
 			setFirstname('')
 			setLastname('')
 			setEmail('')
@@ -132,7 +134,7 @@ function SchoolAdminAddTeacherScreen () {
 			toast.error(
 				err?.data?.message
 					|| err?.error?.message
-					|| 'Could not add teacher',
+					|| 'No se pudo agregar el profesor',
 			)
 		}
 	}
@@ -152,22 +154,22 @@ function SchoolAdminAddTeacherScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											add teachers.
+											Registra tu escuela primero; después
+											podrás agregar profesores.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registra tu escuela
 										</Link>
 									</p>
 								</div>
@@ -189,33 +191,33 @@ function SchoolAdminAddTeacherScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login content-area--login-scroll'>
-					<div className='center-content2 login-screen login-screen--wide'>
+					<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>
 										<br />
-										Add a teacher
+										Agregar un profesor
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Enter the teacher&apos;s name and email to
-										add them to your school. They can sign up or
-										log in later with this email.
+										Ingresa el nombre y correo del profesor para
+										agregarlo a tu escuela. Podrá registrarse o
+										iniciar sesión más tarde con este correo.
 									</p>
 								</div>
 
 								<section
 									className='school-teachers-roster'
-									aria-label='Teachers already in your school'
+									aria-label='Profesores ya en tu escuela'
 								>
 									<div className='school-teachers-roster__header'>
 										<h2 className='school-teachers-roster__title'>
-											Teachers in your school
+											Profesores en tu escuela
 										</h2>
 										{!isLoadingTeachers && !isTeachersError && (
 											<span
 												className='school-teachers-roster__count'
-												aria-label={`${teachersList.length} teachers`}
+												aria-label={`${teachersList.length} profesores`}
 											>
 												{teachersList.length}
 											</span>
@@ -224,14 +226,14 @@ function SchoolAdminAddTeacherScreen () {
 
 									{isLoadingTeachers && (
 										<p className='school-teachers-roster__status'>
-											Loading teachers…
+											Cargando profesores…
 										</p>
 									)}
 
 									{isTeachersError && !isLoadingTeachers && (
 										<div className='school-teachers-roster__empty'>
 											<p className='school-teachers-roster__status'>
-												Could not load your teachers.
+												No pudimos cargar tus profesores.
 											</p>
 											<button
 												type='button'
@@ -239,7 +241,7 @@ function SchoolAdminAddTeacherScreen () {
 												style={{ marginTop: '0.75rem' }}
 												onClick={() => void refetchTeachers()}
 											>
-												Try again
+												Intentar de nuevo
 											</button>
 										</div>
 									)}
@@ -248,8 +250,9 @@ function SchoolAdminAddTeacherScreen () {
 										&& !isTeachersError
 										&& teachersList.length === 0 && (
 										<p className='school-teachers-roster__empty'>
-											No teachers added yet. Use the form below
-											to add your first teacher.
+											Aún no hay profesores agregados. Usa el
+											formulario de abajo para agregar tu
+											primer profesor.
 										</p>
 									)}
 
@@ -306,14 +309,14 @@ function SchoolAdminAddTeacherScreen () {
 											className='login-label'
 											htmlFor='schooladmin-add-teacher-firstname'
 										>
-											First name
+											Nombre
 										</label>
 										<input
 											type='text'
 											id='schooladmin-add-teacher-firstname'
 											name='firstname'
 											className='login-input'
-											placeholder='e.g. Maria'
+											placeholder='p. ej. María'
 											autoComplete='given-name'
 											value={firstname}
 											required
@@ -327,14 +330,14 @@ function SchoolAdminAddTeacherScreen () {
 											className='login-label'
 											htmlFor='schooladmin-add-teacher-lastname'
 										>
-											Last name
+											Apellido
 										</label>
 										<input
 											type='text'
 											id='schooladmin-add-teacher-lastname'
 											name='lastname'
 											className='login-input'
-											placeholder='e.g. Garcia'
+											placeholder='p. ej. García'
 											autoComplete='family-name'
 											value={lastname}
 											required
@@ -348,14 +351,14 @@ function SchoolAdminAddTeacherScreen () {
 											className='login-label'
 											htmlFor='schooladmin-add-teacher-email'
 										>
-											Email
+											Correo electrónico
 										</label>
 										<input
 											type='email'
 											id='schooladmin-add-teacher-email'
 											name='email'
 											className='login-input'
-											placeholder='teacher@school.edu'
+											placeholder='profesor@escuela.edu'
 											autoComplete='email'
 											value={email}
 											required
@@ -369,7 +372,7 @@ function SchoolAdminAddTeacherScreen () {
 										className='login-submit'
 										disabled={isBusy}
 									>
-										{isSaving ? 'Adding…' : 'Add teacher'}
+										{isSaving ? 'Agregando…' : 'Agregar profesor'}
 									</button>
 								</form>
 							</div>

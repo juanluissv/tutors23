@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetTeacherPreviousQuestionsQuery } from '../../slices/teachers/teacherPreviousQuestionsSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 const PAGE_SIZE = 1
@@ -104,18 +105,18 @@ const AnswerBadge = () => (
 
 function studentDisplayName (student) {
 	if (!student || typeof student !== 'object') {
-		return 'Student'
+		return 'Estudiante'
 	}
 	const parts = [student.firstname, student.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Student'
+	return parts.length > 0 ? parts.join(' ') : 'Estudiante'
 }
 
 function teacherDisplayName (teacher) {
 	if (!teacher || typeof teacher !== 'object') {
-		return 'Teacher'
+		return 'Profesor'
 	}
 	const parts = [teacher.firstname, teacher.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Teacher'
+	return parts.length > 0 ? parts.join(' ') : 'Profesor'
 }
 
 function formatQaDate (value) {
@@ -126,7 +127,7 @@ function formatQaDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return ''
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
@@ -179,7 +180,7 @@ function QaTimelineVideoThumb ({
 			<Link
 				to={watchTo}
 				className='qa-timeline__video'
-				aria-label={ariaLabel ?? 'Watch video'}
+				aria-label={ariaLabel ?? 'Ver video'}
 			>
 				{inner}
 			</Link>
@@ -253,9 +254,10 @@ function TeacherPreviousQuestionsScreen () {
 		return null
 	}
 
-	const errorMessage =
-		error?.data?.message || error?.error
-			|| 'Could not load previous questions.'
+	const errorMessage = localizeApiError(
+		error,
+		'No se pudieron cargar las preguntas anteriores.',
+	)
 
 	const subjectTitle =
 		convo?.subject && typeof convo.subject === 'object'
@@ -298,22 +300,23 @@ function TeacherPreviousQuestionsScreen () {
 						<div className='center-content3'>
 							<div className='qa-timeline-page'>
 								<h1 className='qa-timeline-page__title heading-gradient'>
-									Questions &amp; answers
+									Preguntas y respuestas
 								</h1>
 								<p className='qa-timeline-page__subtitle'>
 									{subjectTitle != null ? (
 										<>
-											Past student questions you have answered
-											for <strong>{subjectTitle}</strong> —
-											open the videos or read the text below.
+											Preguntas anteriores de tus estudiantes
+											que ya respondiste en{' '}
+											<strong>{subjectTitle}</strong> —
+											abre los videos o lee el texto abajo.
 										</>
 									) : subjectQuery != null ? (
-										'Past student questions you have answered '
-										+ 'for this subject — open the videos or '
-										+ 'read the text below.'
+										'Preguntas anteriores de tus estudiantes '
+										+ 'que ya respondiste en esta materia — '
+										+ 'abre los videos o lee el texto abajo.'
 									) : (
-										'A valid subject is required to view '
-										+ 'questions and answers.'
+										'Se necesita una materia válida para ver '
+										+ 'las preguntas y respuestas.'
 									)}
 								</p>
 
@@ -324,10 +327,10 @@ function TeacherPreviousQuestionsScreen () {
 										width: '100%',
 									}}
 									>
-										Invalid subject link. Open this page from
-										your{' '}
+										Enlace de materia no válido. Abre esta
+										página desde tu{' '}
 										<Link to='/teachers/subjects'>
-											subjects list
+											lista de materias
 										</Link>
 										.
 									</p>
@@ -340,7 +343,7 @@ function TeacherPreviousQuestionsScreen () {
 										width: '100%',
 									}}
 									>
-										Loading…
+										Cargando…
 									</p>
 								)}
 
@@ -360,7 +363,7 @@ function TeacherPreviousQuestionsScreen () {
 											style={{ marginTop: '0.75rem' }}
 											onClick={() => refetch()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								)}
@@ -373,8 +376,9 @@ function TeacherPreviousQuestionsScreen () {
 										width: '100%',
 									}}
 									>
-										No answered conversations yet. When you reply
-										to a student question, it will appear here.
+										Aún no hay conversaciones respondidas.
+										Cuando respondas una pregunta de un
+										estudiante, aparecerá aquí.
 									</p>
 								)}
 
@@ -392,14 +396,14 @@ function TeacherPreviousQuestionsScreen () {
 													+ 'qa-timeline__tag--question'
 												}
 												>
-													{subjectTitle ?? 'Subject'}
+													{subjectTitle ?? 'Materia'}
 												</span>
 												<h3 className='qa-timeline__card-title'>
 													{convo.title}
 												</h3>
 												<QaTimelineVideoThumb
 													watchTo={questionWatchTo}
-													ariaLabel='Watch student question'
+													ariaLabel='Ver video de la pregunta'
 												/>
 												{convo.description != null
 													&& String(convo.description)
@@ -433,7 +437,7 @@ function TeacherPreviousQuestionsScreen () {
 																+ 'qa-timeline__watch--question'
 															}
 														>
-															Watch question
+															Mira la pregunta
 															<PlayIconSmall />
 														</Link>
 													) : (
@@ -448,9 +452,9 @@ function TeacherPreviousQuestionsScreen () {
 																opacity: 0.55,
 																cursor: 'not-allowed',
 															}}
-															title='No question video'
+															title='Sin video de la pregunta'
 														>
-															No question video
+															Sin video de la pregunta
 														</button>
 													)}
 											</div>
@@ -487,11 +491,11 @@ function TeacherPreviousQuestionsScreen () {
 													+ 'qa-timeline__tag--answer'
 												}
 												>
-													Your answer
+													Tu respuesta
 												</span>
 												<QaTimelineVideoThumb
 													watchTo={answerWatchTo}
-													ariaLabel='Watch your answer'
+													ariaLabel='Ver video de tu respuesta'
 												/>
 												{answerDoc != null ? (
 													<>
@@ -529,7 +533,7 @@ function TeacherPreviousQuestionsScreen () {
 																	+ 'qa-timeline__watch--answer'
 																}
 															>
-																Watch answer
+																Mira la respuesta
 																<PlayIconSmall />
 															</Link>
 														)}
@@ -539,8 +543,9 @@ function TeacherPreviousQuestionsScreen () {
 														'qa-timeline__card-text'
 													}
 													>
-														Answer details are not
-														available.
+														Los detalles de la
+														respuesta no están
+														disponibles.
 													</p>
 												)}
 											</div>

@@ -9,6 +9,7 @@ import {
 	useAddCourseSectionMutation,
 	useGetCourseByIdForTeacherQuery,
 } from '../../slices/teachers/teacherApiSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import './TeacherAddLessonsScreen.css'
 import '../../App.css'
 
@@ -139,7 +140,7 @@ function TeacherAddLessonsScreen () {
 		e.preventDefault()
 		const trimmed = sectionName.trim()
 		if (!trimmed) {
-			toast.error('Enter a section name')
+			toast.error('Ingresa un nombre de sección')
 			return
 		}
 
@@ -149,15 +150,13 @@ function TeacherAddLessonsScreen () {
 				sectionTitle: trimmed,
 				subjectId: subjectIdCache,
 			}).unwrap()
-			toast.success('Section added')
+			toast.success('Sección agregada')
 			setSectionName('')
 			void refetch()
 		}
 		catch (err) {
 			toast.error(
-				err?.data?.message
-					|| err?.error?.message
-					|| 'Could not add section',
+				localizeApiError(err, 'No se pudo agregar la sección'),
 			)
 		}
 	}
@@ -165,20 +164,20 @@ function TeacherAddLessonsScreen () {
 	const handleAddLesson = async (e) => {
 		e.preventDefault()
 		if (sections.length === 0) {
-			toast.error('Add at least one section first')
+			toast.error('Primero agrega al menos una sección')
 			return
 		}
 		const t = lessonTitle.trim()
 		if (!t) {
-			toast.error('Enter a lesson title')
+			toast.error('Ingresa el título de la lección')
 			return
 		}
 		if (!lessonSectionNum) {
-			toast.error('Choose a section')
+			toast.error('Elige una sección')
 			return
 		}
 		if (!videoFile) {
-			toast.error('Choose a video file')
+			toast.error('Elige un archivo de video')
 			return
 		}
 
@@ -191,7 +190,7 @@ function TeacherAddLessonsScreen () {
 				video: videoFile,
 				subjectId: subjectIdCache,
 			}).unwrap()
-			toast.success('Lesson added')
+			toast.success('Lección agregada')
 			setLessonTitle('')
 			setLessonDescription('')
 			setVideoFile(null)
@@ -203,9 +202,7 @@ function TeacherAddLessonsScreen () {
 		}
 		catch (err) {
 			toast.error(
-				err?.data?.message
-					|| err?.error?.message
-					|| 'Could not add lesson',
+				localizeApiError(err, 'No se pudo agregar la lección'),
 			)
 		}
 	}
@@ -229,8 +226,8 @@ function TeacherAddLessonsScreen () {
 						/>
 						<div className='content-area'>
 							<p className='course-builder__loading'>
-								Invalid course link.{' '}
-								<Link to='/teachers/subjects'>My subjects</Link>
+								Enlace de curso no válido.{' '}
+								<Link to='/teachers/subjects'>Mis materias</Link>
 							</p>
 						</div>
 					</div>
@@ -257,27 +254,27 @@ function TeacherAddLessonsScreen () {
 					<div className='content-area'>
 						{isLoading ? (
 							<p className='course-builder__loading'>
-								Loading course…
+								Cargando curso…
 							</p>
 						) : isError || !course ? (
 							<div className='course-builder__loading'>
-								<p>Could not load this course.</p>
+								<p>No pudimos cargar este curso.</p>
 								<button
 									type='button'
 									className='login-submit'
 									style={{ maxWidth: 220, marginTop: 12 }}
 									onClick={() => void refetch()}
 								>
-									Try again
+									Intentar de nuevo
 								</button>
 							</div>
 						) : (
 							<>
 								<div className='course-builder'>
 									<div className='course-builder__hero'>
-										<p className='course-builder__eyebrow'>
-											Course builder
-										</p>
+										{/* <p className='course-builder__eyebrow'>
+											Editor del curso
+										</p> */}
 										<h1 className='course-builder__title'>
 											{course.title}
 										</h1>
@@ -287,10 +284,10 @@ function TeacherAddLessonsScreen () {
 											</p>
 										) : (
 											<p className='course-builder__sub'>
-												Add sections first, then attach
-												lessons with video to each
-												section. Everything saves to
-												your course as you go.
+												Primero agrega secciones y luego
+												adjunta lecciones con video a
+												cada una. Todo se guarda en tu
+												curso a medida que avanzas.
 											</p>
 										)}
 									</div>
@@ -321,12 +318,12 @@ function TeacherAddLessonsScreen () {
 													>
 														1
 													</span>
-													Add course section
+													Agregar sección del curso
 												</h2>
 												<p className='course-builder__help'>
-													Create the outline for your
-													course (units, chapters, or
-													modules).
+													Crea el temario de tu curso
+													(unidades, capítulos o
+													módulos).
 												</p>
 												<form
 													onSubmit={handleAddSection}
@@ -359,7 +356,7 @@ function TeacherAddLessonsScreen () {
 																	'cb-section-name'
 																}
 															>
-																Section name
+																Nombre de la sección
 															</label>
 															<input
 																id='cb-section-name'
@@ -367,7 +364,7 @@ function TeacherAddLessonsScreen () {
 																className={
 																	'course-builder__input'
 																}
-																placeholder='e.g. Welcome &amp; overview'
+																placeholder='Ej. Bienvenida y resumen'
 																value={
 																	sectionName
 																}
@@ -418,8 +415,8 @@ function TeacherAddLessonsScreen () {
 														}
 													>
 														{isSavingSection
-															? 'Saving…'
-															: 'Add section'}
+															? 'Guardando…'
+															: 'Agregar sección'}
 													</button>
 												</form>
 											</div>
@@ -450,13 +447,13 @@ function TeacherAddLessonsScreen () {
 													>
 														2
 													</span>
-													Add lesson
+													Agregar lección
 												</h2>
 												<p className='course-builder__help'>
-													After a section exists,
-													record or upload lesson
-													video (WebM, MP4, MOV). Max
-													about 200 MB.
+													Cuando ya exista una sección,
+													graba o sube el video de la
+													lección (WebM, MP4, MOV).
+													Máximo unos 200 MB.
 												</p>
 												<form
 													onSubmit={handleAddLesson}
@@ -489,7 +486,7 @@ function TeacherAddLessonsScreen () {
 																	'cb-lesson-title'
 																}
 															>
-																Lesson title
+																Título de la lección
 															</label>
 															<input
 																id='cb-lesson-title'
@@ -497,7 +494,7 @@ function TeacherAddLessonsScreen () {
 																className={
 																	'course-builder__input'
 																}
-																placeholder='Lesson title'
+																placeholder='Título de la lección'
 																value={
 																	lessonTitle
 																}
@@ -541,7 +538,7 @@ function TeacherAddLessonsScreen () {
 																	'cb-lesson-section'
 																}
 															>
-																Course sections
+																Secciones del curso
 															</label>
 															<select
 																id='cb-lesson-section'
@@ -560,8 +557,8 @@ function TeacherAddLessonsScreen () {
 																	)}
 															>
 																<option value=''>
-																	Choose a
-																	section
+																	Elige una
+																	sección
 																</option>
 																{sections.map(
 																	(s) => (
@@ -611,7 +608,7 @@ function TeacherAddLessonsScreen () {
 																	'course-builder__label'
 																}
 															>
-																Lesson video
+																Video de la lección
 															</label>
 															<div style={{ position: 'relative' }}>
 																<input
@@ -621,7 +618,7 @@ function TeacherAddLessonsScreen () {
 																	type='file'
 																	name='video'
 																	accept='video/*,.webm'
-																	aria-label='Upload lesson video file'
+																	aria-label='Subir archivo de video de la lección'
 																	style={{
 																		position: (
 																			'absolute'
@@ -672,7 +669,7 @@ function TeacherAddLessonsScreen () {
 																		handlePickVideo
 																	}
 																>
-																	Choose file
+																	Elegir archivo
 																</button>
 																<span className={
 																	'course-builder__file-meta'
@@ -680,7 +677,7 @@ function TeacherAddLessonsScreen () {
 																>
 																	{videoLabel
 																		|| (
-																			'No file chosen'
+																			'Ningún archivo elegido'
 																		)}
 																</span>
 															</div>
@@ -707,7 +704,7 @@ function TeacherAddLessonsScreen () {
 																	'cb-lesson-desc'
 																}
 															>
-																Description
+																Descripción
 																{' '}
 																<span
 																	style={{
@@ -720,7 +717,7 @@ function TeacherAddLessonsScreen () {
 																			'rgb(148 163 184)'),
 																	}}
 																>
-																	(optional)
+																	(opcional)
 																</span>
 															</label>
 															<textarea
@@ -729,7 +726,7 @@ function TeacherAddLessonsScreen () {
 																	'course-builder__input ' +
 																	'course-builder__textarea'
 																}
-																placeholder='Short notes for this lesson…'
+																placeholder='Notas breves para esta lección…'
 																rows={3}
 																value={
 																	lessonDescription
@@ -754,8 +751,8 @@ function TeacherAddLessonsScreen () {
 														disabled={lessonLocked}
 													>
 														{isSavingLesson
-															? 'Uploading…'
-															: 'Add lesson'}
+															? 'Subiendo…'
+															: 'Agregar lección'}
 													</button>
 												</form>
 											</div>
@@ -764,7 +761,7 @@ function TeacherAddLessonsScreen () {
 								</div>
 								<p className='course-builder__back'>
 									<Link to={backToSubjectCoursesHref}>
-										← Back to courses for this subject
+										← Volver a los cursos de esta materia
 									</Link>
 								</p>
 							</>

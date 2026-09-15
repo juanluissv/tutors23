@@ -193,7 +193,7 @@ function ForestScreen() {
                             <div className="valores-semana1-lang-row">
                                 <div className="valores-semana1-lang-pill">
                                     <Link
-                                        to="/9/valores/unidad1/semana1"
+                                        to="/students/lessonpage/6a3979882d6dcf3adc9b6ef4"
                                         className="valores-semana1-lang-link"
                                     >
                                         Spanish Version

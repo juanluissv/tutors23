@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
@@ -7,6 +7,8 @@ import TeacherHeader from '../../components/TeacherHeader'
 import {
 	useGetSubjectsByTeacherIdQuery,
 	useUpdateSubjectByTeacherMutation,
+	useUploadSubjectDocumentByTeacherMutation,
+	useDeleteSubjectDocumentByTeacherMutation,
 } from '../../slices/teachers/teacherApiSlice'
 import { SUBJECTS_URL } from '../../constants'
 import { getSubjectGradeLevelNames } from '../../utils/gradeLevel'
@@ -15,7 +17,10 @@ import {
 	normalizeSubjectPrograms,
 } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
+
+const MAX_BOOK_BYTES = 200 * 1024 * 1024
 
 const BookUploadGlyph = () => (
 	<svg
@@ -95,6 +100,34 @@ function bookDisplayName (bookId) {
 	return last && last.length > 0 ? last : trimmed
 }
 
+function documentDisplayName (doc) {
+	if (doc?.fileName) {
+		return String(doc.fileName)
+	}
+	if (doc?.label) {
+		return String(doc.label)
+	}
+	if (doc?.fileId) {
+		return bookDisplayName(String(doc.fileId))
+	}
+	return 'Documento'
+}
+
+function getSubjectDocuments (subject) {
+	if (Array.isArray(subject?.documents) && subject.documents.length > 0) {
+		return subject.documents
+	}
+	if (subject?.bookId && String(subject.bookId).trim() !== '') {
+		return [{
+			_id: null,
+			fileId: String(subject.bookId).trim(),
+			fileName: bookDisplayName(String(subject.bookId)),
+			fileUrl: subject.bookUrl,
+		}]
+	}
+	return []
+}
+
 function TeacherEditSubjectScreen () {
 	const { id: subjectId } = useParams()
 	const navigate = useNavigate()
@@ -120,6 +153,10 @@ function TeacherEditSubjectScreen () {
 
 	const [updateSubject, { isLoading: isSavingMutation }] =
 		useUpdateSubjectByTeacherMutation()
+	const [uploadSubjectDocument, { isLoading: isUploadingDocument }] =
+		useUploadSubjectDocumentByTeacherMutation()
+	const [deleteSubjectDocument, { isLoading: isDeletingDocument }] =
+		useDeleteSubjectDocumentByTeacherMutation()
 
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
@@ -127,6 +164,8 @@ function TeacherEditSubjectScreen () {
 	const [title, setTitle] = useState('')
 	const [description, setDescription] = useState('')
 	const [bookFile, setBookFile] = useState(null)
+	const [documentLabel, setDocumentLabel] = useState('')
+	const [deletingDocumentId, setDeletingDocumentId] = useState(null)
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -149,21 +188,20 @@ function TeacherEditSubjectScreen () {
 		setTitle(currentSubject.title ?? '')
 		setDescription(currentSubject.description ?? '')
 		setBookFile(null)
+		setDocumentLabel('')
 		if (bookInputRef.current) {
 			bookInputRef.current.value = ''
 		}
 	}, [currentSubject])
 
 	const isSaving = isSavingMutation
+	const isBusy = isSaving || isUploadingDocument || isDeletingDocument
 
-	const hasStoredBook = Boolean(
-		currentSubject
-		&& currentSubject.bookId
-		&& String(currentSubject.bookId).trim() !== '',
+	const subjectDocuments = useMemo(
+		() => getSubjectDocuments(currentSubject),
+		[currentSubject],
 	)
-	const storedBookLabel = hasStoredBook
-		? bookDisplayName(String(currentSubject.bookId))
-		: ''
+	const hasDocuments = subjectDocuments.length > 0
 
 	const isUniversity = isUniversitySchool(teacherInfo?.schoolType)
 		|| normalizeSubjectPrograms(currentSubject?.program).length > 0
@@ -181,16 +219,75 @@ function TeacherEditSubjectScreen () {
 		? String(currentSubject.semester)
 		: '—'
 
-	const openBookHref = hasStoredBook && currentSubject?.bookUrl
-		? String(currentSubject.bookUrl)
-		: (hasStoredBook && subjectId
-			? `${SUBJECTS_URL}/${subjectId}/teacher/book`
-			: '')
+	const getDocumentOpenHref = (doc) => {
+		if (doc?.fileUrl) {
+			return String(doc.fileUrl)
+		}
+		if (doc?._id && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/teacher/documents/${doc._id}`
+		}
+		if (hasDocuments && subjectId) {
+			return `${SUBJECTS_URL}/${subjectId}/teacher/book`
+		}
+		return ''
+	}
 
 	const handleClearBook = () => {
 		setBookFile(null)
+		setDocumentLabel('')
 		if (bookInputRef.current) {
 			bookInputRef.current.value = ''
+		}
+	}
+
+	const handleUploadDocument = async () => {
+		if (!(bookFile instanceof File)) {
+			toast.error('Elige un PDF para subir')
+			return
+		}
+		if (!isValidParam || !teacherId) {
+			return
+		}
+
+		try {
+			await uploadSubjectDocument({
+				id: String(subjectId),
+				teacherId,
+				document: bookFile,
+				label: documentLabel.trim() !== ''
+					? documentLabel.trim()
+					: undefined,
+			}).unwrap()
+			toast.success('PDF subido')
+			handleClearBook()
+			await refetch()
+		} catch (err) {
+			toast.error(
+				localizeApiError(err, 'No se pudo subir el PDF'),
+			)
+		}
+	}
+
+	const handleDeleteDocument = async (documentId) => {
+		if (!documentId || !isValidParam || !teacherId) {
+			return
+		}
+
+		setDeletingDocumentId(String(documentId))
+		try {
+			await deleteSubjectDocument({
+				id: String(subjectId),
+				teacherId,
+				documentId: String(documentId),
+			}).unwrap()
+			toast.success('PDF eliminado')
+			await refetch()
+		} catch (err) {
+			toast.error(
+				localizeApiError(err, 'No se pudo eliminar el PDF'),
+			)
+		} finally {
+			setDeletingDocumentId(null)
 		}
 	}
 
@@ -202,7 +299,15 @@ function TeacherEditSubjectScreen () {
 				if (bookInputRef.current) {
 					bookInputRef.current.value = ''
 				}
-				toast.error('Please choose a PDF file')
+				toast.error('Elige un archivo PDF')
+				return
+			}
+			if (file.size > MAX_BOOK_BYTES) {
+				setBookFile(null)
+				if (bookInputRef.current) {
+					bookInputRef.current.value = ''
+				}
+				toast.error('El PDF debe ser de 200 MB o menos')
 				return
 			}
 			setBookFile(file)
@@ -214,7 +319,7 @@ function TeacherEditSubjectScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (title.trim() === '') {
-			toast.error('Please enter a subject name')
+			toast.error('Ingresa el nombre de la materia')
 			return
 		}
 		if (!isValidParam || !teacherId || !subjectId) {
@@ -222,25 +327,20 @@ function TeacherEditSubjectScreen () {
 		}
 
 		try {
-			const payload = {
+			await updateSubject({
 				id: String(subjectId),
 				teacherId,
 				title: title.trim(),
 				description: description.trim(),
-			}
-			if (bookFile instanceof File) {
-				payload.book = bookFile
-			}
-			await updateSubject(payload).unwrap()
-			toast.success(
-				bookFile ? 'Subject and PDF saved.' : 'Subject saved.',
-			)
+			}).unwrap()
+			toast.success('Materia guardada.')
 			navigate('/teachers/subjects', { replace: true })
 		} catch (err) {
 			toast.error(
-				err?.data?.message
-					|| err?.error
-					|| 'Could not save subject. Try again.',
+				localizeApiError(
+					err,
+					'No se pudo guardar la materia. Intenta de nuevo.',
+				),
 			)
 		}
 	}
@@ -263,7 +363,7 @@ function TeacherEditSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
@@ -271,10 +371,10 @@ function TeacherEditSubjectScreen () {
 											to='/teachers/subjects'
 											className='login-card__link'
 										>
-											← Back to subjects
+											← Volver a mis materias
 										</Link>
 										<p className='login-card__subtitle'>
-											This subject link is not valid.
+											Este enlace de materia no es válido.
 										</p>
 									</div>
 								</div>
@@ -300,8 +400,8 @@ function TeacherEditSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
-								<p className='login-card__subtitle'>Loading…</p>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
+								<p className='login-card__subtitle'>Cargando…</p>
 							</div>
 						</div>
 					</div>
@@ -324,25 +424,25 @@ function TeacherEditSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<p className='login-card__subtitle'>
-										We couldn&apos;t load your subjects. Try
-										again in a moment.
+										No pudimos cargar tus materias.
+										Intenta de nuevo en un momento.
 									</p>
 									<button
 										type='button'
 										className='login-submit'
 										onClick={() => void refetch()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 									<Link
 										to='/teachers/subjects'
 										className='login-card__link'
 									>
-										← Back to subjects
+										← Volver a mis materias
 									</Link>
 								</div>
 							</div>
@@ -367,7 +467,7 @@ function TeacherEditSubjectScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
@@ -375,11 +475,11 @@ function TeacherEditSubjectScreen () {
 											to='/teachers/subjects'
 											className='login-card__link'
 										>
-											← Back to subjects
+											← Volver a mis materias
 										</Link>
 										<p className='login-card__subtitle'>
-											Subject not found, or you don&apos;t
-											have access to it.
+											No se encontró la materia, o no
+											tienes acceso a ella.
 										</p>
 									</div>
 								</div>
@@ -393,7 +493,6 @@ function TeacherEditSubjectScreen () {
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
-
 			<div className='main-container'>
 				<TeacherSidebar
 					isOpen={isSidebarOpen}
@@ -404,9 +503,13 @@ function TeacherEditSubjectScreen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area content-area--login'>  
-						<div className='center-content2 login-screen login-screen--wide'><br /><br /><br /><br /><br /><br />
-							<div className='login-card'><br /><br /><br />
+					<div className={
+						'content-area content-area--login '
+						+ 'content-area--login-scroll'
+					}
+					>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
+							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<div className='login-card__back'>
@@ -414,29 +517,29 @@ function TeacherEditSubjectScreen () {
 											to='/teachers/subjects'
 											className='login-card__link'
 										>
-											← Back to subjects
+											← Volver a mis materias
 										</Link>
 									</div>
 									<h1 className='login-card__title'>
-										Edit subject
+										Editar materia
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Update how this course appears to
-										students.
+										Actualiza cómo se muestra esta materia
+										a los estudiantes.
 										{isUniversity
 											? (
-												' Program and semester are set '
-												+ 'by your school and cannot '
-												+ 'be changed here.'
+												' El programa y el semestre '
+												+ 'los define tu escuela y no '
+												+ 'se pueden cambiar aquí.'
 											)
 											: (
-												' Grade level is set by your '
-												+ 'school and cannot be '
-												+ 'changed here.'
+												' El nivel de grado lo define '
+												+ 'tu escuela y no se puede '
+												+ 'cambiar aquí.'
 											)}
 										{' '}
-										Attach an optional course book — PDF,
-										up to 25 MB.
+										Adjunta documentos del curso opcionales —
+										PDF, hasta 200 MB cada uno.
 									</p>
 								</div>
 								<form
@@ -450,17 +553,17 @@ function TeacherEditSubjectScreen () {
 											className='login-label'
 											htmlFor='edit-subject-name'
 										>
-											Subject name
+											Nombre de la materia
 										</label>
 										<input
 											type='text'
 											id='edit-subject-name'
 											name='title'
 											className='login-input'
-											placeholder='e.g. Algebra I'
+											placeholder='Ej. Álgebra I'
 											autoComplete='off'
 											value={title}
-											disabled={isSaving}
+											disabled={isBusy}
 											onChange={(e) => setTitle(e.target.value)}
 										/>
 									</div>
@@ -471,7 +574,7 @@ function TeacherEditSubjectScreen () {
 													className='login-label'
 													htmlFor='edit-subject-program'
 												>
-													Program
+													Programa
 												</label>
 												<input
 													type='text'
@@ -488,7 +591,7 @@ function TeacherEditSubjectScreen () {
 													className='login-label'
 													htmlFor='edit-subject-semester'
 												>
-													Semester
+													Semestre
 												</label>
 												<input
 													type='text'
@@ -507,7 +610,7 @@ function TeacherEditSubjectScreen () {
 												className='login-label'
 												htmlFor='edit-subject-grade'
 											>
-												Grade level
+												Nivel de grado
 											</label>
 											<input
 												type='text'
@@ -525,18 +628,18 @@ function TeacherEditSubjectScreen () {
 											className='login-label'
 											htmlFor='edit-subject-description'
 										>
-											Description
+											Descripción
 										</label>
 										<textarea
 											id='edit-subject-description'
 											name='description'
 											className='login-input login-textarea'
 											placeholder={
-												'What will students learn? Who is it for?'
+												'¿Qué aprenderán los estudiantes? ¿Para quién es?'
 											}
 											rows={5}
 											value={description}
-											disabled={isSaving}
+											disabled={isBusy}
 											onChange={(e) => setDescription(
 												e.target.value,
 											)}
@@ -544,76 +647,91 @@ function TeacherEditSubjectScreen () {
 									</div>
 									<div className='login-field'>
 										<span className='login-label' id='book-label'>
-											Course book (optional)
+											Documentos del curso (opcional)
 										</span>
-										{hasStoredBook ? (
-											<div
-												className='teacher-book-upload__status'
-												role='status'
+										{hasDocuments ? (
+											<ul
+												className='subject-documents__list'
+												aria-label='PDFs subidos'
 											>
-												<span
-													className='teacher-book-upload__status-icon'
-													aria-hidden
-												>
-													<svg
-														width='20'
-														height='20'
-														viewBox='0 0 24 24'
-														fill='none'
-														stroke='currentColor'
-														strokeWidth='2'
-													>
-														<path
-															d='M20 6L9 17l-5-5'
-															strokeLinecap='round'
-															strokeLinejoin='round'
-														/>
-													</svg>
-												</span>
-												<div className='teacher-book-upload__status-body'>
-													<p className='teacher-book-upload__status-title'>
-														PDF already saved
-													</p>
-													{storedBookLabel ? (
-														<p className='teacher-book-upload__status-file'>
-															{storedBookLabel}
-														</p>
-													) : null}
-													{openBookHref ? (
-														<p className='teacher-book-upload__status-actions'>
-															<a
-																href={openBookHref}
-																className='teacher-book-upload__open-link'
-																target='_blank'
-																rel='noopener noreferrer'
-															>
-																Open PDF in new tab
-																<span
-																	className='teacher-book-upload__open-link-icon'
-																	aria-hidden
+												{subjectDocuments.map((doc) => {
+													const docKey = doc._id
+														? String(doc._id)
+														: String(doc.fileId)
+													const openHref = getDocumentOpenHref(doc)
+													const isDeletingThis =
+														deletingDocumentId === docKey
+
+													return (
+														<li
+															key={docKey}
+															className='subject-documents__item'
+														>
+															<div className='subject-documents__info'>
+																<p className='subject-documents__name'>
+																	{documentDisplayName(doc)}
+																</p>
+																{openHref ? (
+																	<a
+																		href={openHref}
+																		className='teacher-book-upload__open-link'
+																		target='_blank'
+																		rel='noopener noreferrer'
+																	>
+																		Abrir PDF
+																	</a>
+																) : null}
+															</div>
+															{doc._id ? (
+																<button
+																	type='button'
+																	className='subject-documents__delete'
+																	disabled={isBusy || isDeletingThis}
+																	onClick={() =>
+																		void handleDeleteDocument(doc._id)}
 																>
-																	↗
-																</span>
-															</a>
-														</p>
-													) : null}
-													<p className='teacher-book-upload__status-hint'>
-														{bookFile
-															? `This save will replace it with “${bookFile.name}”.`
-															: 'Upload a new PDF below to replace it.'}
-													</p>
-												</div>
-											</div>
-										) : null}
+																	{isDeletingThis
+																		? 'Eliminando…'
+																		: 'Eliminar'}
+																</button>
+															) : null}
+														</li>
+													)
+												})}
+											</ul>
+										) : (
+											<p className='teacher-book-upload__status-hint'>
+												Aún no hay PDFs. Agrega documentos
+												abajo — uno a la vez.
+											</p>
+										)}
+										<div className='login-field'>
+											<label
+												className='login-label'
+												htmlFor='edit-subject-document-label'
+											>
+												Etiqueta del documento (opcional)
+											</label>
+											<input
+												type='text'
+												id='edit-subject-document-label'
+												className='login-input'
+												placeholder='Ej. Libro unidad 1'
+												value={documentLabel}
+												disabled={isBusy}
+												onChange={(e) =>
+													setDocumentLabel(e.target.value)}
+											/>
+										</div>
 										<div className='teacher-book-upload'>
 											<input
 												ref={bookInputRef}
 												type='file'
 												id='edit-subject-book'
-												name='book'
+												name='document'
 												className='teacher-book-upload__input'
 												accept='application/pdf,.pdf'
-												disabled={isSaving}
+												disabled={isBusy}
 												onChange={handleBookChange}
 												aria-labelledby='book-label'
 											/>
@@ -630,39 +748,54 @@ function TeacherEditSubjectScreen () {
 												<span className='teacher-book-upload__title'>
 													{bookFile
 														? bookFile.name
-														: 'Drop a file or tap to browse'}
+														: 'Subir un archivo'}
 												</span>
 												<span className='teacher-book-upload__hint'>
-													PDF only · up to 25 MB
+													Solo PDF · hasta 200 MB · se agrega
+													sin reemplazar los existentes
 												</span>
 											</label>
 											{bookFile ? (
-												<button
-													type='button'
-													className='teacher-book-upload__clear'
-													onClick={handleClearBook}
-													disabled={isSaving}
-												>
-													Remove file
-												</button>
+												<div className='subject-documents__actions'>
+													<button
+														type='button'
+														className='login-submit'
+														disabled={isBusy}
+														onClick={() =>
+															void handleUploadDocument()}
+													>
+														{isUploadingDocument
+															? 'Subiendo…'
+															: 'Subir PDF'}
+													</button>
+													<button
+														type='button'
+														className='teacher-book-upload__clear'
+														onClick={handleClearBook}
+														disabled={isBusy}
+													>
+														Quitar selección
+													</button>
+												</div>
 											) : null}
 										</div>
 									</div>
 									<div className='subject-book-tools'>
 										<div className='subject-book-tools__header'>
 											<span className='subject-book-tools__eyebrow'>
-												Course book
+												Documentos del curso
 											</span>
 											<h3 className='subject-book-tools__title'>
-												Once you have a course book please generate book chapters
+												Cuando tengas PDFs del curso,
+												genera los capítulos
 											</h3>
 											<p className='subject-book-tools__desc'>
-												{hasStoredBook
-													? 'Split your PDF into chapters with page ranges for each section.'
-													: 'Save a course book above to unlock chapter splitting.'}
+												{hasDocuments
+													? 'Divide tus PDFs en capítulos con rangos de páginas para cada sección.'
+													: 'Sube al menos un PDF arriba para desbloquear la división en capítulos.'}
 											</p>
 										</div>
-										{hasStoredBook ? (
+										{hasDocuments ? (
 											<Link
 												to={`/teachers/bookchapters/${subjectId}`}
 												className={
@@ -698,10 +831,10 @@ function TeacherEditSubjectScreen () {
 												</span>
 												<span className='subject-book-tools__body'>
 													<span className='subject-book-tools__label'>
-														Generate Book chapters
+														Generar capítulos del libro
 													</span>
 													<span className='subject-book-tools__hint'>
-														Define page ranges per chapter
+														Define rangos de páginas por capítulo
 													</span>
 												</span>
 												<span
@@ -748,10 +881,10 @@ function TeacherEditSubjectScreen () {
 												</span>
 												<span className='subject-book-tools__body'>
 													<span className='subject-book-tools__label'>
-														Generate Book chapters
+														Generar capítulos del libro
 													</span>
 													<span className='subject-book-tools__hint'>
-														Requires a saved course book PDF
+														Requiere al menos un PDF del curso
 													</span>
 												</span>
 											</span>
@@ -760,9 +893,11 @@ function TeacherEditSubjectScreen () {
 									<button
 										type='submit'
 										className='login-submit'
-										disabled={isSaving}
+										disabled={isBusy}
 									>
-										{isSaving ? 'Saving…' : 'Save changes'}
+										{isSaving
+											? 'Guardando…'
+											: 'Guardar cambios'}
 									</button>
 								</form>
 							</div>

@@ -519,7 +519,20 @@ const getSchoolAdminPreviousQuestionsWithAnswers = asyncHandler(
 
         const filter = {
             subject: qSubject,
-            answer: { $exists: true, $ne: null },
+            $expr: {
+                $gt: [
+                    {
+                        $strLenCP: {
+                            $trim: {
+                                input: {
+                                    $ifNull: ['$mediaId', ''],
+                                },
+                            },
+                        },
+                    },
+                    0,
+                ],
+            },
         }
 
         const total = await Question.countDocuments(filter)

@@ -36,7 +36,7 @@ function formatCurrency (value) {
 		return String(value)
 	}
 	try {
-		return new Intl.NumberFormat(undefined, {
+		return new Intl.NumberFormat('es', {
 			style: 'currency',
 			currency: 'USD',
 			minimumFractionDigits: 0,
@@ -154,24 +154,24 @@ function SchoolAdminAddStudentsScreen () {
 			return
 		}
 		if (firstname.trim() === '') {
-			toast.error('Please enter the student first name')
+			toast.error('Ingresa el nombre del estudiante')
 			return
 		}
 		if (lastname.trim() === '') {
-			toast.error('Please enter the student last name')
+			toast.error('Ingresa el apellido del estudiante')
 			return
 		}
 		if (isUniversity) {
 			if (selectedProgram === '') {
-				toast.error('Please select a program')
+				toast.error('Selecciona un programa')
 				return
 			}
 		} else if (selectedGradesLevel === '') {
-			toast.error('Please select a grade level')
+			toast.error('Selecciona un grado')
 			return
 		}
 		if (selectedPlanId === '') {
-			toast.error('Please select a subscription plan')
+			toast.error('Selecciona un plan de suscripción')
 			return
 		}
 
@@ -193,7 +193,7 @@ function SchoolAdminAddStudentsScreen () {
 
 		try {
 			await addStudent(payload).unwrap()
-			toast.success('Student added to your school')
+			toast.success('Estudiante agregado a tu escuela')
 			setFirstname('')
 			setLastname('')
 			setEmail('')
@@ -202,7 +202,7 @@ function SchoolAdminAddStudentsScreen () {
 			toast.error(
 				err?.data?.message
 					|| err?.error?.message
-					|| 'Could not add student',
+					|| 'No se pudo agregar el estudiante',
 			)
 		}
 	}
@@ -222,22 +222,22 @@ function SchoolAdminAddStudentsScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											add students.
+											Registra tu escuela primero; después
+											podrás agregar estudiantes.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registra tu escuela
 										</Link>
 									</p>
 								</div>
@@ -259,19 +259,32 @@ function SchoolAdminAddStudentsScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login content-area--login-scroll'>
-						<div className='center-content2 login-screen login-screen--wide'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>
 										<br />
-										Add a student
+										Agregar un estudiante
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Enter the student&apos;s details, assign a
-										grade level and subscription plan. Email is
-										optional; each student gets a unique username
-										they can use to sign in later.
+										{isUniversity
+											? (
+												'Ingresa los datos del estudiante, '
+												+ 'asigna un programa y un plan de '
+												+ 'suscripción. El correo es opcional; '
+												+ 'cada estudiante recibe un nombre de '
+												+ 'usuario único para iniciar sesión '
+												+ 'más tarde.'
+											)
+											: (
+												'Ingresa los datos del estudiante, '
+												+ 'asigna un grado y un plan de '
+												+ 'suscripción. El correo es opcional; '
+												+ 'cada estudiante recibe un nombre de '
+												+ 'usuario único para iniciar sesión '
+												+ 'más tarde.'
+											)}
 									</p>
 								</div>
 
@@ -286,14 +299,14 @@ function SchoolAdminAddStudentsScreen () {
 											className='login-label'
 											htmlFor='schooladmin-add-student-firstname'
 										>
-											First name
+											Nombre
 										</label>
 										<input
 											type='text'
 											id='schooladmin-add-student-firstname'
 											name='firstname'
 											className='login-input'
-											placeholder='e.g. Alex'
+											placeholder='p. ej. Alex'
 											autoComplete='given-name'
 											value={firstname}
 											required
@@ -307,14 +320,14 @@ function SchoolAdminAddStudentsScreen () {
 											className='login-label'
 											htmlFor='schooladmin-add-student-lastname'
 										>
-											Last name
+											Apellido
 										</label>
 										<input
 											type='text'
 											id='schooladmin-add-student-lastname'
 											name='lastname'
 											className='login-input'
-											placeholder='e.g. Rivera'
+											placeholder='p. ej. Rivera'
 											autoComplete='family-name'
 											value={lastname}
 											required
@@ -328,14 +341,14 @@ function SchoolAdminAddStudentsScreen () {
 											className='login-label'
 											htmlFor='schooladmin-add-student-email'
 										>
-											Email (optional)
+											Correo electrónico (opcional)
 										</label>
 										<input
 											type='email'
 											id='schooladmin-add-student-email'
 											name='email'
 											className='login-input'
-											placeholder='student@school.edu (optional)'
+											placeholder='estudiante@escuela.edu (opcional)'
 											autoComplete='email'
 											value={email}
 											disabled={formBusy}
@@ -347,29 +360,29 @@ function SchoolAdminAddStudentsScreen () {
 											className='login-label'
 											htmlFor='schooladmin-add-student-cohort'
 										>
-											{isUniversity ? 'Program' : 'Grade level'}
+											{isUniversity ? 'Programa' : 'Grado'}
 										</label>
 										{isLoadingSchool ? (
 											<p className='school-grades-levels__hint'>
 												{isUniversity
-													? 'Loading programs…'
-													: 'Loading grade levels…'}
+													? 'Cargando programas…'
+													: 'Cargando grados…'}
 											</p>
 										) : isUniversity && programs.length === 0 ? (
 											<p className='school-grades-levels__hint'>
-												No programs on your institution yet.{' '}
+												Aún no hay programas en tu institución.{' '}
 												<Link to='/schooladmins/myschools'>
-													Add them in My school
+													Agrégalos en Mi escuela
 												</Link>{' '}
-												first.
+												primero.
 											</p>
 										) : !isUniversity && gradesLevels.length === 0 ? (
 											<p className='school-grades-levels__hint'>
-												No grade levels on your school yet.{' '}
+												Aún no hay grados en tu escuela.{' '}
 												<Link to='/schooladmins/myschools'>
-													Add them in My school
+													Agrégalos en Mi escuela
 												</Link>{' '}
-												first.
+												primero.
 											</p>
 										) : (
 											<select
@@ -391,8 +404,8 @@ function SchoolAdminAddStudentsScreen () {
 											>
 												<option value=''>
 													{isUniversity
-														? 'Select a program'
-														: 'Select a grade level'}
+														? 'Selecciona un programa'
+														: 'Selecciona un grado'}
 												</option>
 												{(isUniversity ? programs : gradesLevels)
 													.map((item) => (
@@ -414,27 +427,28 @@ function SchoolAdminAddStudentsScreen () {
 											className='login-label'
 											htmlFor='schooladmin-add-student-plan'
 										>
-											Subscription plan
+											Plan de suscripción
 										</label>
 										{isLoadingPlans && (
 											<p className='school-grades-levels__hint'>
-												Loading plans…
+												Cargando planes…
 											</p>
 										)}
 										{isPlansError && !isLoadingPlans && (
 											<p className='school-grades-levels__hint'>
-												Could not load plans. Try again later.
+												No se pudieron cargar los planes.
+												Intenta de nuevo más tarde.
 											</p>
 										)}
 										{!isLoadingPlans
 											&& !isPlansError
 											&& activePlans.length === 0 && (
 											<p className='school-grades-levels__hint'>
-												No active plans yet.{' '}
+												Aún no hay planes activos.{' '}
 												<Link to='/schooladmins/createplan'>
-													Create a plan
+													Crea un plan
 												</Link>{' '}
-												first.
+												primero.
 											</p>
 										)}
 										{!isLoadingPlans
@@ -444,10 +458,10 @@ function SchoolAdminAddStudentsScreen () {
 												? selectedProgram
 												: selectedGradesLevel) === '' && (
 											<p className='school-grades-levels__hint'>
-												Select {isUniversity
-													? 'a program'
-													: 'a grade level'} above to see
-												matching plans.
+												Selecciona {isUniversity
+													? 'un programa'
+													: 'un grado'} arriba para ver
+												los planes correspondientes.
 											</p>
 										)}
 										{!isLoadingPlans
@@ -457,15 +471,16 @@ function SchoolAdminAddStudentsScreen () {
 												: selectedGradesLevel) !== ''
 											&& filteredPlans.length === 0 && (
 											<p className='school-grades-levels__hint'>
-												No active plans for this {isUniversity
-													? 'program'
-													: 'grade'}.{' '}
+												Aún no hay planes activos para este
+												{isUniversity
+													? ' programa'
+													: ' grado'}.{' '}
 												<Link to='/schooladmins/createplan'>
-													Create a plan
+													Crea un plan
 												</Link>{' '}
-												for this {isUniversity
-													? 'program'
-													: 'grade level'}.
+												para este {isUniversity
+													? 'programa'
+													: 'grado'}.
 											</p>
 										)}
 										{!isLoadingPlans
@@ -482,7 +497,7 @@ function SchoolAdminAddStudentsScreen () {
 													setSelectedPlanId(e.target.value)}
 											>
 												<option value=''>
-													Select a plan
+													Selecciona un plan
 												</option>
 												{filteredPlans.map((plan) => {
 													const id = String(plan._id)
@@ -495,11 +510,11 @@ function SchoolAdminAddStudentsScreen () {
 															{formatCurrency(plan.price)}
 															{' · '}
 															{plan.totalQuestions}{' '}
-															questions ·{' '}
+															preguntas ·{' '}
 															{subjectCount}{' '}
 															{subjectCount === 1
-																? 'subject'
-																: 'subjects'}
+																? 'materia'
+																: 'materias'}
 														</option>
 													)
 												})}
@@ -518,7 +533,7 @@ function SchoolAdminAddStudentsScreen () {
 											|| activePlans.length === 0
 										}
 									>
-										{isSaving ? 'Adding…' : 'Add student'}
+										{isSaving ? 'Agregando…' : 'Agregar estudiante'}
 									</button>
 								</form>
 							</div>

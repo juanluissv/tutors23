@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Sidebar from '../../components/Sidebar'
@@ -13,6 +14,7 @@ import SuggestedQuestionsPanel, {
 import { useGetBookLessonByIdQuery } from '../../slices/student/studentApiSlice'
 import { useGetBookLessonByIdForSchoolAdminQuery } from '../../slices/admin/schoolAdminApiSlice'
 import { useGetBookLessonByIdForTeacherQuery } from '../../slices/teachers/teacherApiSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 import './StudentLessonPageScreen.css'
 
@@ -53,6 +55,106 @@ const LeafIcon = ({ size = 22 }) => (
 	>
 		<path d='M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z' />
 		<path d='M2 21c0-3 1.85-5.36 5.08-6' />
+	</svg>
+)
+
+const PracticeQuestionIcon = ({ size = 16 }) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<circle cx='12' cy='12' r='10' />
+		<path d='M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3' />
+		<line x1='12' y1='17' x2='12.01' y2='17' />
+	</svg>
+)
+
+const PracticeRevealIcon = ({ size = 16 }) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<path d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z' />
+		<circle cx='12' cy='12' r='3' />
+	</svg>
+)
+
+const PracticeCheckIcon = ({ size = 16 }) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2.4'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<polyline points='20 6 9 17 4 12' />
+	</svg>
+)
+
+const PracticeChevronLeftIcon = ({ size = 16 }) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2.4'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<polyline points='15 18 9 12 15 6' />
+	</svg>
+)
+
+const PracticeChevronRightIcon = ({ size = 16 }) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2.4'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<polyline points='9 18 15 12 9 6' />
+	</svg>
+)
+
+const PracticeReturnIcon = ({ size = 16 }) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2.2'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<polyline points='9 14 4 9 9 4' />
+		<path d='M20 20v-7a4 4 0 0 0-4-4H4' />
 	</svg>
 )
 
@@ -692,6 +794,7 @@ const LESSON_TEXT_SELECTOR = [
 	'.lesson-doc__figure-text',
 	'.lesson-doc__diagram-box-text',
 	'.lesson-doc__table-caption',
+	'.lesson-doc__objectives-text',
 ].join(', ')
 
 // Very common Spanish words that add noise when matching a transcript cue to a
@@ -738,6 +841,7 @@ const MATCH_MARGIN = 0.75
 const POSITION_BONUS_MAX = 0.4
 const POSITION_BONUS_SPAN = 6
 const LAPTOP_SIDEBAR_EXPAND_BREAKPOINT = 1450
+const FOREST_LESSON_ID = '6a3979882d6dcf3adc9b6ef4'
 
 function getInitialSidebarOpen () {
 	return window.innerWidth >= LAPTOP_SIDEBAR_EXPAND_BREAKPOINT
@@ -758,10 +862,13 @@ function StudentLessonPageScreen () {
 	)
 	const [allCues, setAllCues] = useState([])
 	const [videoLoading, setVideoLoading] = useState(true)
+	const [featureVideoLoading, setFeatureVideoLoading] = useState(true)
 	const [isClassVideoPlaying, setIsClassVideoPlaying] = useState(false)
 	const [questionText, setQuestionText] = useState('')
 	const [isSuggestedPanelOpen, setIsSuggestedPanelOpen] = useState(false)
 	const [expandedQuestionIndex, setExpandedQuestionIndex] = useState(null)
+	const [practiceStep, setPracticeStep] = useState('idle')
+	const [practiceIndex, setPracticeIndex] = useState(0)
 
 	const contentRef = useRef(null)
 	const classVideoRef = useRef(null)
@@ -784,6 +891,11 @@ function StudentLessonPageScreen () {
 			navigate('/teachers/login', { replace: true })
 		}
 	}, [isSchoolAdminView, isTeacherView, schoolAdminInfo, teacherInfo, navigate])
+
+	useEffect(() => {
+		setPracticeStep('idle')
+		setPracticeIndex(0)
+	}, [lessonId])
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -864,11 +976,41 @@ function StudentLessonPageScreen () {
 			.map((item) => ({
 				question: String(item?.question ?? '').trim(),
 				answer: String(item?.answer ?? '').trim(),
+				questionVideoUrl: String(
+					item?.questionVideoUrl ?? '',
+				).trim(),
+				answerVideoUrl: String(
+					item?.answerVideoUrl ?? '',
+				).trim(),
 			}))
 			.filter((item) => item.question)
 	}, [lesson])
 
 	const hasSuggestedQuestions = suggestedQuestions.length > 0
+	const currentPracticeQuestion = hasSuggestedQuestions
+		? suggestedQuestions[
+			Math.min(practiceIndex, suggestedQuestions.length - 1)
+		]
+		: null
+	const practiceQuestionText = currentPracticeQuestion?.question || ''
+	const practiceAnswerText = currentPracticeQuestion?.answer || ''
+	const isPracticeMode = practiceStep !== 'idle'
+	const practiceVideoUrl = practiceStep === 'question'
+		? (currentPracticeQuestion?.questionVideoUrl || '')
+		: (practiceStep === 'answer'
+			? (currentPracticeQuestion?.answerVideoUrl || '')
+			: '')
+	const hasPracticeClip = practiceVideoUrl !== ''
+	const activeVideoUrl = hasPracticeClip
+		? practiceVideoUrl
+		: chapterVideoUrl
+	const canControlLessonVideo = !isPracticeMode || hasPracticeClip
+	const practiceTotal = suggestedQuestions.length
+	const safePracticeIndex = currentPracticeQuestion
+		? Math.min(practiceIndex, practiceTotal - 1)
+		: 0
+	const canGoToPreviousQuestion = safePracticeIndex > 0
+	const canGoToNextQuestion = safePracticeIndex < practiceTotal - 1
 
 	const chatIndexId = lesson?.chatIndexId
 		? String(lesson.chatIndexId).trim()
@@ -1116,7 +1258,7 @@ function StudentLessonPageScreen () {
 	}
 
 	const handleTimeUpdate = (currentTime) => {
-		if (allCues.length === 0) {
+		if (practiceStep !== 'idle' || allCues.length === 0) {
 			return
 		}
 
@@ -1161,7 +1303,7 @@ function StudentLessonPageScreen () {
 	}
 
 	const handleClassVideoToggle = () => {
-		if (!classVideoRef.current) {
+		if (!classVideoRef.current || !canControlLessonVideo) {
 			return
 		}
 
@@ -1239,6 +1381,113 @@ function StudentLessonPageScreen () {
 
 		setExpandedQuestionIndex(null)
 		setIsSuggestedPanelOpen(true)
+	}
+
+	const pauseActiveVideo = () => {
+		const video = classVideoRef.current
+		if (video) {
+			video.pause()
+		}
+		setIsClassVideoPlaying(false)
+	}
+
+	const playActiveVideo = () => {
+		const video = classVideoRef.current
+		if (!video) {
+			return
+		}
+
+		const source = String(video.getAttribute('src') || '').trim()
+		if (!source) {
+			pauseActiveVideo()
+			return
+		}
+
+		const tryPlay = () => {
+			if (classVideoRef.current !== video) {
+				return
+			}
+
+			const playPromise = video.play()
+			if (playPromise && typeof playPromise.then === 'function') {
+				playPromise
+					.then(() => {
+						if (classVideoRef.current !== video) {
+							return
+						}
+						setIsClassVideoPlaying(true)
+					})
+					.catch((err) => {
+						console.error(err)
+					})
+			}
+		}
+
+		if (video.readyState >= 3) {
+			tryPlay()
+			return
+		}
+
+		video.addEventListener('canplay', tryPlay, { once: true })
+	}
+
+	const syncPracticePlayback = (clipUrl) => {
+		if (String(clipUrl || '').trim()) {
+			playActiveVideo()
+			return
+		}
+		pauseActiveVideo()
+	}
+
+	const handleStartPracticeQuestion = () => {
+		if (!hasSuggestedQuestions) {
+			return
+		}
+		const firstQuestion = suggestedQuestions[0]
+		flushSync(() => {
+			setPracticeIndex(0)
+			setPracticeStep('question')
+		})
+		syncPracticePlayback(firstQuestion?.questionVideoUrl)
+	}
+
+	const handleShowPracticeAnswer = () => {
+		if (practiceStep !== 'question') {
+			return
+		}
+		const answerUrl = currentPracticeQuestion?.answerVideoUrl || ''
+		flushSync(() => {
+			setPracticeStep('answer')
+		})
+		syncPracticePlayback(answerUrl)
+	}
+
+	const handleGoToPracticeQuestion = (nextIndex) => {
+		if (nextIndex < 0 || nextIndex >= practiceTotal) {
+			return
+		}
+		const nextQuestion = suggestedQuestions[nextIndex]
+		flushSync(() => {
+			setPracticeIndex(nextIndex)
+			setPracticeStep('question')
+		})
+		syncPracticePlayback(nextQuestion?.questionVideoUrl)
+	}
+
+	const handlePreviousPracticeQuestion = () => {
+		handleGoToPracticeQuestion(safePracticeIndex - 1)
+	}
+
+	const handleNextPracticeQuestion = () => {
+		handleGoToPracticeQuestion(safePracticeIndex + 1)
+	}
+
+	const handleReturnToLesson = () => {
+		flushSync(() => {
+			setPracticeStep('idle')
+			setPracticeIndex(0)
+		})
+		playActiveVideo()
 	}
 
 	const handleToggleSuggestedQuestion = (index) => {
@@ -1340,7 +1589,16 @@ function StudentLessonPageScreen () {
 						className='content-area content-area--book-lesson'
 						ref={contentRef}
 					>
-						<div className='lesson-doc'>{children}</div>
+						<div
+							className={
+								'lesson-doc' +
+								(isPracticeMode
+									? ' lesson-doc--practice'
+									: '')
+							}
+						>
+							{children}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -1371,9 +1629,10 @@ function StudentLessonPageScreen () {
 	}
 
 	if (isError || !lesson) {
-		const errorMessage = error?.data?.message
-			|| error?.message
-			|| 'No pudimos cargar esta lección.'
+		const errorMessage = localizeApiError(
+			error,
+			'No pudimos cargar esta lección.',
+		)
 
 		return renderShell(
 			<div className='lesson-doc__state'>
@@ -1390,7 +1649,7 @@ function StudentLessonPageScreen () {
 						navigate(-1)
 					}}
 				>
-					{backPath ? 'Volver al índice del libro' : 'Volver'}
+					{backPath ? 'Volver al índice del documento' : 'Volver'}
 				</button>
 			</div>,
 		)
@@ -1415,6 +1674,26 @@ function StudentLessonPageScreen () {
 
 	return renderShell(
 		<>
+			{lessonId === FOREST_LESSON_ID ? (
+				<div className='valores-semana1-lang-row'>
+					<div className='valores-semana1-lang-pill'>
+						<Link
+							to='/forest'
+							className='valores-semana1-lang-link'
+						>
+							English Version
+						</Link>
+					</div>
+					<div className='valores-semana1-lang-pill'>
+						<Link
+							to='/french'
+							className='valores-semana1-lang-link'
+						>
+							French Version
+						</Link>
+					</div>
+				</div>
+			) : null}
 			<div className='lesson-doc__toolbar'>
 				<div className='lesson-doc__brand'>
 					<span className='lesson-doc__brand-leaf'>
@@ -1466,14 +1745,14 @@ function StudentLessonPageScreen () {
 						</p>
 					) : null}
 					{objectivesText ? (
-						<div
-							className='lesson-doc__objectives'
-							data-block-id='h3'
-						>
+						<div className='lesson-doc__objectives'>
 							<p className='lesson-doc__objectives-label'>
 								En esta unidad aprenderemos a:
 							</p>
-							<p className='lesson-doc__objectives-text'>
+							<p
+								className='lesson-doc__objectives-text'
+								data-block-id='h3'
+							>
 								{objectivesText}
 							</p>
 						</div>
@@ -1514,12 +1793,43 @@ function StudentLessonPageScreen () {
 				))}
 			</div>
 
+			{lessonId === FOREST_LESSON_ID ? (
+				<div className='valores-semana1-feature-wrap'>
+					<video
+						className='valores-semana1-feature-video unidad-video'
+						src='https://res.cloudinary.com/dutglmj02/video/upload/v1775596686/bosques1_ne7opd.mp4'
+						controls
+						onLoadedData={() => setFeatureVideoLoading(false)}
+						onLoadStart={() => setFeatureVideoLoading(true)}
+						onError={() => setFeatureVideoLoading(false)}
+						style={{
+							width: '100%',
+							height: 'auto',
+							display: featureVideoLoading
+								? 'none'
+								: 'block',
+						}}
+					/>
+				</div>
+			) : null}
+
 			<p className='lesson-doc__footer'>
 				Reproducción web del material de estudio · {folioLabel}
 			</p>
 
 			{hasTutorVideo ? (
-				<div className='fixed-video-bottom-right lesson-doc-tutor-video'>
+				<div
+					className={
+						'fixed-video-bottom-right lesson-doc-tutor-video' +
+						(practiceStep !== 'idle'
+							? ' lesson-doc-tutor-video--practice'
+							: '') +
+						(practiceStep === 'answer'
+							? ' lesson-doc-tutor-video--answer'
+							: '')
+					}
+				>
+					{canControlLessonVideo ? (
 					<div className='fixed-video-controls'>
 						<button
 							type='button'
@@ -1561,6 +1871,7 @@ function StudentLessonPageScreen () {
 							)}
 						</button>
 					</div>
+					) : null}
 					<div className='lesson-doc-tutor-circle-shell'>
 						<div className='fixed-video-wrapper'>
 							{videoLoading ? (
@@ -1588,8 +1899,10 @@ function StudentLessonPageScreen () {
 								</div>
 							) : null}
 							<video
+								key={`${practiceStep}-${activeVideoUrl}`}
 								ref={classVideoRef}
-								src={chapterVideoUrl}
+								src={activeVideoUrl}
+								playsInline
 								controls={false}
 								onLoadedData={() => setVideoLoading(false)}
 								onLoadStart={() => setVideoLoading(true)}
@@ -1602,7 +1915,8 @@ function StudentLessonPageScreen () {
 							/>
 						</div>
 					</div>
-					<div className='fixed-video-question-wrap lesson-doc-tutor-question-wrap'>
+
+					{/* <div className='fixed-video-question-wrap lesson-doc-tutor-question-wrap'>
 						<textarea
 							ref={questionTextareaRef}
 							rows={2}
@@ -1631,70 +1945,182 @@ function StudentLessonPageScreen () {
 								<polygon points='22 2 15 22 11 13 2 9 22 2' />
 							</svg>
 						</button>
-					</div>
-					{hasSuggestedQuestions && !isStaffView ? (
-						<>
-							{/*
-							<button
-								type='button'
-								className='lesson-doc-suggested-link'
-								onClick={handleOpenSuggestedQuestions}
+					</div> */}
+					{(practiceStep !== 'idle'
+						|| (!isStaffView && hasSuggestedQuestions)
+					) ? (
+						<div className='lesson-doc-practice-stack'>
+						{practiceStep !== 'idle' ? (
+							<div
+								key={`${safePracticeIndex}-${practiceStep}`}
+								className={
+									'lesson-doc-practice-card ' +
+									`lesson-doc-practice-card--${practiceStep}`
+								}
+								aria-live='polite'
 							>
-								<span
-									className='lesson-doc-suggested-link__icon'
-									aria-hidden
-								>
-									<svg
-										width='18'
-										height='18'
-										viewBox='0 0 24 24'
-										fill='none'
-										stroke='currentColor'
-										strokeWidth='2'
-										strokeLinecap='round'
-										strokeLinejoin='round'
+								<div className='lesson-doc-practice-card__kicker'>
+									<span
+										className='lesson-doc-practice-card__badge'
+										aria-hidden
 									>
-										<circle cx='12' cy='12' r='10' />
-										<path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3' />
-										<line x1='12' y1='17' x2='12.01' y2='17' />
-									</svg>
-								</span>
-								<span className='lesson-doc-suggested-link__text'>
-									Examen de práctica
-								</span>
-								<span
-									className='lesson-doc-suggested-link__arrow'
-									aria-hidden
-								>
-									→
-								</span>
-							</button>
-							*/}
+										{practiceStep === 'answer' ? (
+											<PracticeCheckIcon size={13} />
+										) : (
+											<PracticeQuestionIcon size={13} />
+										)}
+									</span>
+									<span>
+										{practiceStep === 'answer'
+											? 'Respuesta'
+											: 'Pregunta'}
+										{practiceTotal > 1
+											? ` ${safePracticeIndex + 1} de ${practiceTotal}`
+											: ''}
+									</span>
+								</div>
+								<p className='lesson-doc-practice-card__text'>
+									{practiceStep === 'answer'
+										? practiceAnswerText
+										: practiceQuestionText}
+								</p>
+								{practiceTotal > 1 ? (
+									<div
+										className='lesson-doc-practice-card__dots'
+										aria-hidden
+									>
+										{suggestedQuestions.map((_, index) => (
+											<span
+												key={`dot-${index}`}
+												className={
+													'lesson-doc-practice-card__dot' +
+													(index === safePracticeIndex
+														? ' lesson-doc-practice-card__dot--active'
+														: '')
+												}
+											/>
+										))}
+									</div>
+								) : null}
+							</div>
+						) : null}
+						{!isStaffView && hasSuggestedQuestions
+							&& practiceStep !== 'answer' ? (
 							<button
 								type='button'
-								className='lesson-doc-suggested-link'
-								onClick={handleOpenSuggestedPanel}
-								aria-haspopup='dialog'
+								className={
+									'lesson-doc-practice-btn' +
+									(practiceStep === 'question'
+										? ' lesson-doc-practice-btn--reveal'
+										: '')
+								}
+								onClick={
+									practiceStep === 'question'
+										? handleShowPracticeAnswer
+										: handleStartPracticeQuestion
+								}
+								aria-label={
+									practiceStep === 'question'
+										? 'Mostrar respuesta'
+										: 'Examen de práctica'
+								}
 							>
 								<span
-									className='lesson-doc-suggested-link__icon'
+									className='lesson-doc-practice-btn__icon'
 									aria-hidden
 								>
-									<SparklesIcon size={16} />
+									{practiceStep === 'question' ? (
+										<PracticeRevealIcon size={16} />
+									) : (
+										<SparklesIcon size={16} />
+									)}
 								</span>
-								<span className='lesson-doc-suggested-link__text'>
-									Examen de práctica
-									
+								<span className='lesson-doc-practice-btn__text'>
+									{practiceStep === 'question'
+										? 'Mostrar respuesta'
+										: 'Examen de práctica'}
 								</span>
 								<span
-									className='lesson-doc-suggested-link__arrow'
+									className='lesson-doc-practice-btn__arrow'
 									aria-hidden
 								>
 									→
 								</span>
 							</button>
-						</>
+						) : null}
+						{practiceStep !== 'idle' && practiceTotal > 1 ? (
+							<div className='lesson-doc-practice-nav'>
+								<button
+									type='button'
+									className='lesson-doc-practice-nav__btn'
+									onClick={handlePreviousPracticeQuestion}
+									disabled={!canGoToPreviousQuestion}
+									aria-label='Pregunta anterior'
+								>
+									<PracticeChevronLeftIcon size={16} />
+									<span>Anterior</span>
+								</button>
+								<span
+									className='lesson-doc-practice-nav__count'
+									aria-live='polite'
+								>
+									{safePracticeIndex + 1} / {practiceTotal}
+								</span>
+								<button
+									type='button'
+									className='lesson-doc-practice-nav__btn'
+									onClick={handleNextPracticeQuestion}
+									disabled={!canGoToNextQuestion}
+									aria-label='Pregunta siguiente'
+								>
+									<span>Siguiente</span>
+									<PracticeChevronRightIcon size={16} />
+								</button>
+							</div>
+						) : null}
+						{practiceStep !== 'idle' ? (
+							<button
+								type='button'
+								className='lesson-doc-practice-return'
+								onClick={handleReturnToLesson}
+								aria-label='Regresar a la lección'
+							>
+								<span
+									className='lesson-doc-practice-return__icon'
+									aria-hidden
+								>
+									<PracticeReturnIcon size={15} />
+								</span>
+								<span className='lesson-doc-practice-return__text'>
+									Regresar a la lección
+								</span>
+							</button>
+						) : null}
+					</div>
 					) : null}
+					{/* <button
+						type='button'
+						className='lesson-doc-suggested-link'
+						onClick={handleOpenSuggestedPanel}
+						aria-haspopup='dialog'
+					>
+						<span
+							className='lesson-doc-suggested-link__icon'
+							aria-hidden
+						>
+							<SparklesIcon size={16} />
+						</span>
+						<span className='lesson-doc-suggested-link__text'>
+							Examen de práctica
+							
+						</span>
+						<span
+							className='lesson-doc-suggested-link__arrow'
+							aria-hidden
+						>
+							→
+						</span>
+					</button> */}
 				</div>
 			) : null}
 

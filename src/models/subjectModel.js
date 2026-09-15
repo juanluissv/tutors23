@@ -24,9 +24,38 @@ const subjectSchema = mongoose.Schema({
     bookId: {
         type: String,
         required: false,
-    },        
+    },
+    documents: [
+        {
+            fileId: {
+                type: String,
+                required: true,
+            },
+            fileName: {
+                type: String,
+                required: false,
+            },
+            label: {
+                type: String,
+                required: false,
+            },
+            uploadedAt: {
+                type: Date,
+                default: Date.now,
+            },
+            uploadedBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                required: false,
+                ref: 'SchoolAdmin',
+            },
+        },
+    ],
     bookChapters: [
         {
+            sourceDocumentId: {
+                type: mongoose.Schema.Types.ObjectId,
+                required: false,
+            },
             ChapterNumber: {
                 type: Number,
                 required: false

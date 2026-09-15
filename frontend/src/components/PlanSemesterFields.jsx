@@ -19,7 +19,7 @@ function PlanSemesterFields ({
 				className='login-label'
 				htmlFor={`${idPrefix}-count`}
 			>
-				Number of semesters
+				Número de semestres
 			</label>
 			<input
 				type='number'
@@ -34,8 +34,9 @@ function PlanSemesterFields ({
 				onChange={(e) => onCountChange(e.target.value)}
 			/>
 			<p className='school-grades-levels__hint'>
-				Monthly charges run until the current semester ends.
-				Students pick new subjects when the next semester starts.
+				Los cobros mensuales continúan hasta que termine el semestre
+				actual. Los estudiantes eligen nuevas materias cuando comienza
+				el siguiente semestre.
 			</p>
 			{rows.map((row, index) => {
 				const n = index + 1
@@ -45,7 +46,7 @@ function PlanSemesterFields ({
 						className='plan-semester-block'
 					>
 						<span className='login-label'>
-							Semester {n}
+							Semestre {n}
 						</span>
 						<div className='plan-semester-row'>
 							<div className='login-field'>
@@ -53,7 +54,7 @@ function PlanSemesterFields ({
 									className='login-label'
 									htmlFor={`${idPrefix}-${index}-start`}
 								>
-									Start date
+									Fecha de inicio
 								</label>
 								<input
 									type='date'
@@ -75,7 +76,7 @@ function PlanSemesterFields ({
 									className='login-label'
 									htmlFor={`${idPrefix}-${index}-end`}
 								>
-									End date
+									Fecha de fin
 								</label>
 								<input
 									type='date'

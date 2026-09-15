@@ -19,6 +19,39 @@ import {
 } from '../../utils/planSemester'
 import '../../App.css'
 
+function translateSemesterFormError (message) {
+	if (message == null || message === '') {
+		return message
+	}
+	const text = String(message)
+	const semesterMatch = text.match(/^Semester (\d+)/)
+	const semesterLabel = semesterMatch
+		? `Semestre ${semesterMatch[1]}`
+		: null
+
+	if (text.includes('Plans can have between')) {
+		return 'Los planes pueden tener entre 1 y 4 semestres'
+	}
+	if (semesterLabel && text.includes('start date is required')) {
+		return `La fecha de inicio de ${semesterLabel} es obligatoria`
+	}
+	if (semesterLabel && text.includes('end date is required')) {
+		return `La fecha de fin de ${semesterLabel} es obligatoria`
+	}
+	if (semesterLabel && text.includes('has an invalid date')) {
+		return `${semesterLabel} tiene una fecha no válida`
+	}
+	if (semesterLabel && text.includes('end date must be after its start date')) {
+		return `La fecha de fin de ${semesterLabel} debe ser posterior a su fecha de inicio`
+	}
+	if (semesterLabel && text.includes('must start after semester')) {
+		const prevMatch = text.match(/semester (\d+) ends/)
+		const prevNum = prevMatch ? prevMatch[1] : ''
+		return `${semesterLabel} debe comenzar después de que termine el semestre ${prevNum}`
+	}
+	return text
+}
+
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
 
 function resolveSchoolId (school) {
@@ -89,9 +122,9 @@ function SchoolAdminUpdatePlanScreen () {
 
 	const planCohortLabel = useMemo(() => {
 		if (isUniversityPlan) {
-			return getSubjectProgramsLabel(plan?.program, 'Not set')
+			return getSubjectProgramsLabel(plan?.program, 'Sin definir')
 		}
-		return getGradeLevelLabel(plan?.gradesLevel, 'Not set')
+		return getGradeLevelLabel(plan?.gradesLevel, 'Sin definir')
 	}, [plan, isUniversityPlan])
 
 	const toggleSidebar = () => {
@@ -151,7 +184,7 @@ function SchoolAdminUpdatePlanScreen () {
 
 		const priceNum = Number(price)
 		if (Number.isNaN(priceNum) || priceNum < 0) {
-			toast.error('Please enter a valid price (0 or greater)')
+			toast.error('Ingresa un precio válido (0 o mayor)')
 			return
 		}
 
@@ -162,19 +195,19 @@ function SchoolAdminUpdatePlanScreen () {
 			|| Math.floor(totalNum) !== totalNum
 		) {
 			toast.error(
-				'Total questions must be a whole number of at least 1',
+				'Las preguntas totales deben ser un número entero de al menos 1',
 			)
 			return
 		}
 
 		if (!isUniversityPlan && selectedSubjectIds.length === 0) {
-			toast.error('Select at least one subject included in this plan')
+			toast.error('Selecciona al menos una materia incluida en este plan')
 			return
 		}
 
 		const semesterError = validateSemesterForm(semesters)
 		if (semesterError) {
-			toast.error(semesterError)
+			toast.error(translateSemesterFormError(semesterError))
 			return
 		}
 
@@ -187,13 +220,13 @@ function SchoolAdminUpdatePlanScreen () {
 				active: isPlanActive,
 				semesters,
 			}).unwrap()
-			toast.success('Plan updated')
+			toast.success('Plan actualizado')
 			navigate('/schooladmins/plans', { replace: true })
 		} catch (err) {
 			toast.error(
 				err?.data?.message
 					|| err?.error?.message
-					|| 'Could not update plan',
+					|| 'No se pudo actualizar el plan',
 			)
 		}
 	}
@@ -213,22 +246,22 @@ function SchoolAdminUpdatePlanScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											edit subscription plans.
+											Registra tu escuela primero; después
+											podrás editar planes de suscripción.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registrar tu escuela
 										</Link>
 									</p>
 								</div>
@@ -251,21 +284,21 @@ function SchoolAdminUpdatePlanScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											Invalid plan
+											Plan no válido
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											This plan link is not valid.
+											Este enlace de plan no es válido.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/plans'>
-											Back to plans
+											Volver a planes
 										</Link>
 									</p>
 								</div>
@@ -287,41 +320,41 @@ function SchoolAdminUpdatePlanScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login content-area--login-scroll'>
-						<div className='center-content2 login-screen login-screen--wide'>
+						<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
-									<h1 className='login-card__title'>										
-										Edit plan
+									<h1 className='login-card__title'>
+										Editar plan
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										{isUniversityPlan
-											? 'View and update this subscription plan. Change price, question quota, or whether the plan is active. Students choose their subjects after subscribing.'
-											: 'View and update this subscription plan. Change price, question quota, included subjects, or whether the plan is active.'}
+											? 'Consulta y actualiza este plan de suscripción. Cambia el precio, la cuota de preguntas o si el plan está activo. Los estudiantes eligen sus materias después de suscribirse.'
+											: 'Consulta y actualiza este plan de suscripción. Cambia el precio, la cuota de preguntas, las materias incluidas o si el plan está activo.'}
 										{' '}
 										<Link to='/schooladmins/plans'>
-											Back to plans
+											Volver a planes
 										</Link>
 									</p>
 								</div>
 
 								{planLoading && (
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Loading plan…
+										Cargando plan…
 									</p>
 								)}
 
 								{planError && !planLoading && (
 									<div className='login-field'>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											We couldn&apos;t load this plan.
+											No pudimos cargar este plan.
 										</p>
 										<button
 											type='button'
 											className='login-submit'
 											onClick={() => void refetchPlan()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								)}
@@ -337,9 +370,9 @@ function SchoolAdminUpdatePlanScreen () {
 											<p className='login-card__subtitle login-card__subtitle--wide'>
 												{plan.studentCount}{' '}
 												{plan.studentCount === 1
-													? 'student'
-													: 'students'}{' '}
-												on this plan
+													? 'estudiante'
+													: 'estudiantes'}{' '}
+												en este plan
 											</p>
 										)}
 										<div className='login-field'>
@@ -347,14 +380,14 @@ function SchoolAdminUpdatePlanScreen () {
 												className='login-label'
 												htmlFor='schooladmin-update-plan-price'
 											>
-												Price
+												Precio
 											</label>
 											<input
 												type='number'
 												id='schooladmin-update-plan-price'
 												name='price'
 												className='login-input'
-												placeholder='e.g. 29.99'
+												placeholder='p. ej. 29.99'
 												min={0}
 												step='any'
 												autoComplete='off'
@@ -369,14 +402,14 @@ function SchoolAdminUpdatePlanScreen () {
 												className='login-label'
 												htmlFor='schooladmin-update-plan-questions'
 											>
-												Total questions
+												Preguntas totales
 											</label>
 											<input
 												type='number'
 												id='schooladmin-update-plan-questions'
 												name='totalQuestions'
 												className='login-input'
-												placeholder='e.g. 50'
+												placeholder='p. ej. 50'
 												min={1}
 												step={1}
 												autoComplete='off'
@@ -398,7 +431,7 @@ function SchoolAdminUpdatePlanScreen () {
 												className='login-label'
 												id='schooladmin-update-plan-cohort-label'
 											>
-												{isUniversityPlan ? 'Program' : 'Grade level'}
+												{isUniversityPlan ? 'Programa' : 'Grado'}
 											</span>
 											<div
 												className='plan-grade-level'
@@ -407,7 +440,11 @@ function SchoolAdminUpdatePlanScreen () {
 											>
 												<span
 													className='plan-grade-level__badge'
-													aria-label={`Plan ${isUniversityPlan ? 'program' : 'grade level'}: ${planCohortLabel}`}
+													aria-label={`${
+														isUniversityPlan
+															? 'Programa'
+															: 'Grado'
+													} del plan: ${planCohortLabel}`}
 												>
 													<span
 														className='plan-grade-level__icon'
@@ -432,35 +469,35 @@ function SchoolAdminUpdatePlanScreen () {
 													</span>
 												</span>
 												<p className='plan-grade-level__hint'>
-													Set when this plan was created and
-													cannot be changed here.
+													Se define al crear el plan y no
+													se puede cambiar aquí.
 												</p>
 											</div>
 										</div>
 										{isUniversityPlan ? (
 											<div className='login-field'>
 												<p className='school-grades-levels__hint'>
-													Students subscribed to this plan will
-													choose up to {plan.maxSubjects ?? 5}{' '}
-													subjects from this program after
-													payment, and again when a new
-													semester starts.
+													Los estudiantes suscritos a este plan
+													elegirán hasta {plan.maxSubjects ?? 5}{' '}
+													materias de este programa después del
+													pago, y de nuevo cuando comience un
+													nuevo semestre.
 												</p>
 											</div>
 										) : (
 											<div className='login-field'>
 												<span className='login-label'>
-													Subjects in this plan
+													Materias en este plan
 												</span>
 												{subjectsBusy && (
 													<p className='login-card__subtitle login-card__subtitle--wide'>
-														Loading subjects…
+														Cargando materias…
 													</p>
 												)}
 												{subjectsError && !subjectsBusy && (
 													<div className='login-field'>
 														<p className='login-card__subtitle login-card__subtitle--wide'>
-															Could not load subjects.
+															No se pudieron cargar las materias.
 														</p>
 														<button
 															type='button'
@@ -469,17 +506,17 @@ function SchoolAdminUpdatePlanScreen () {
 															disabled={isBusy}
 															onClick={() => refetchSubjects()}
 														>
-															Retry loading subjects
+															Intentar de nuevo
 														</button>
 													</div>
 												)}
 												{!subjectsBusy && subjectsList.length === 0 && (
 													<p className='login-card__subtitle login-card__subtitle--wide'>
-														No subjects yet.{' '}
+														Aún no hay materias.{' '}
 														<Link to='/schooladmins/createsubject'>
-															Create a subject
+															Crea una materia
 														</Link>{' '}
-														first.
+														primero.
 													</p>
 												)}
 												{!subjectsBusy && subjectsList.length > 0 && (
@@ -496,7 +533,7 @@ function SchoolAdminUpdatePlanScreen () {
 																'1px solid rgba(148,163,184,0.35)',
 														}}
 														role='group'
-														aria-label='Subjects included in plan'
+														aria-label='Materias incluidas en el plan'
 													>
 														{subjectsList.map((sub) => {
 															const sid = String(sub._id)
@@ -505,7 +542,7 @@ function SchoolAdminUpdatePlanScreen () {
 																	sub.gradesLevel,
 																)
 																return names !== ''
-																	? ` · Grade ${names}`
+																	? ` · Grado ${names}`
 																	: ''
 															})()
 															return (
@@ -559,7 +596,7 @@ function SchoolAdminUpdatePlanScreen () {
 														)}
 												/>
 												<span className='login-remember__text'>
-													Plan is active
+													El plan está activo
 												</span>
 											</label>
 										</div>
@@ -574,7 +611,7 @@ function SchoolAdminUpdatePlanScreen () {
 														|| subjectsList.length === 0))
 											}
 										>
-											{isSaving ? 'Saving…' : 'Save changes'}
+											{isSaving ? 'Guardando…' : 'Guardar cambios'}
 										</button>
 									</form>
 								)}

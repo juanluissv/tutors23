@@ -22,10 +22,10 @@ import { isUniversitySchool } from '../../utils/schoolType'
 import '../../App.css'
 
 const SCHOOL_TYPE_OPTIONS = [
-	{ value: 'primary', label: 'Primary' },
-	{ value: 'secondary', label: 'Secondary' },
-	{ value: 'high_school', label: 'High school' },
-	{ value: 'university', label: 'University' },
+	{ value: 'primary', label: 'Primaria' },
+	{ value: 'secondary', label: 'Secundaria' },
+	{ value: 'high_school', label: 'Bachillerato' },
+	{ value: 'university', label: 'Universidad' },
 ]
 
 function normalizeSchoolType (schoolType) {
@@ -115,7 +115,7 @@ function SchoolAdminMySchoolsScreen () {
 			return
 		}
 		if (gradesLevels.some((level) => level.name === trimmed)) {
-			toast.error('That grade level is already in the list')
+			toast.error('Ese grado ya está en la lista')
 			return
 		}
 		setGradesLevels([...gradesLevels, { name: trimmed }])
@@ -135,7 +135,7 @@ function SchoolAdminMySchoolsScreen () {
 			return
 		}
 		if (programs.some((item) => item.name === trimmed)) {
-			toast.error('That program is already in the list')
+			toast.error('Ese programa ya está en la lista')
 			return
 		}
 		const department = newProgramDepartment.trim()
@@ -163,28 +163,28 @@ function SchoolAdminMySchoolsScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (name.trim() === '') {
-			toast.error('Please enter the school name')
+			toast.error('Ingresa el nombre de la escuela')
 			return
 		}
 		if (schoolType.trim() === '') {
-			toast.error('Please select a school type')
+			toast.error('Selecciona el tipo de escuela')
 			return
 		}
 		if (isUniversity) {
 			if (programs.length === 0) {
-				toast.error('Please add at least one program')
+				toast.error('Agrega al menos un programa')
 				return
 			}
 		} else if (gradesLevels.length === 0) {
-			toast.error('Please add at least one grade level')
+			toast.error('Agrega al menos un grado')
 			return
 		}
 		if (country.trim() === '') {
-			toast.error('Please enter the country')
+			toast.error('Ingresa el país')
 			return
 		}
 		if (city.trim() === '') {
-			toast.error('Please enter the city')
+			toast.error('Ingresa la ciudad')
 			return
 		}
 		if (
@@ -192,8 +192,8 @@ function SchoolAdminMySchoolsScreen () {
 			&& canChangeSchoolType === false
 		) {
 			toast.error(
-				'Cannot change school type because this institution '
-				+ 'already has subjects, plans, or students',
+				'No se puede cambiar el tipo de escuela porque esta '
+				+ 'institución ya tiene materias, planes o estudiantes',
 			)
 			return
 		}
@@ -215,10 +215,12 @@ function SchoolAdminMySchoolsScreen () {
 				city: city.trim(),
 				address: address.trim(),
 			}).unwrap()
-			toast.success('School updated')
+			toast.success('Escuela actualizada')
 		} catch (err) {
 			toast.error(
-				err?.data?.message || err?.error?.message || 'Could not update school',
+				err?.data?.message
+					|| err?.error?.message
+					|| 'No se pudo actualizar la escuela',
 			)
 		}
 	}
@@ -238,22 +240,22 @@ function SchoolAdminMySchoolsScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br /><br /><br /><br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											view and edit its details here.
+											Registra tu escuela primero; después
+											podrás ver y editar sus detalles aquí.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registrar tu escuela
 										</Link>
 									</p>
 								</div>
@@ -266,7 +268,7 @@ function SchoolAdminMySchoolsScreen () {
 	}
 
 	const signInLabel = schoolData?.signInDate
-		? new Date(schoolData.signInDate).toLocaleString(undefined, {
+		? new Date(schoolData.signInDate).toLocaleString('es', {
 			dateStyle: 'medium',
 			timeStyle: 'short',
 		})
@@ -282,36 +284,39 @@ function SchoolAdminMySchoolsScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area content-area--login content-area--login-scroll'>
-					<div className='center-content2 login-screen login-screen--wide'>
+					<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 					<div className='login-card'>
 					<div className='login-card__accent' aria-hidden />
 					<div className='login-card__header'>
 					<h1 className='login-card__title'>
 										<br />
-										My school
+										{savedIsUniversity
+											? 'Mi Universidad'
+											: 'Mi escuela'}
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										View and update your school&apos;s public
-										details. Changes apply to this institution
-										only.
+										Consulta y actualiza los datos públicos de
+										tu escuela. Los cambios aplican solo a esta
+										institución.
 									</p>
 								</div>
 								{isLoadingSchool && !schoolData ? (
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Loading school…
+										Cargando escuela…
 									</p>
 								) : isSchoolQueryError && !schoolData ? (
 									<div className='login-form'>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											We couldn&apos;t load your school. Check
-											that you are signed in, then try again.
+											No pudimos cargar tu escuela. Verifica
+											que hayas iniciado sesión e intenta de
+											nuevo.
 										</p>
 										<button
 											type='button'
 											className='login-submit'
 											onClick={() => void refetchSchool()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								) : (
@@ -328,15 +333,15 @@ function SchoolAdminMySchoolsScreen () {
 														className='login-label'
 														htmlFor='schooladmin-myschool-program-new'
 													>
-														First step: add your university programs
+														Primer paso: agrega los programas de tu universidad
 													</label>
 													<p className='school-grades-levels__hint'>
-														Enter each degree program your institution
-														offers, then click Add. You need at least
-														one program before you can save (e.g.
-														Computer Science, Business Administration).
-														Remove a program only if no subjects,
-														plans, or students still use it.
+														Ingresa cada programa de grado que ofrece
+														tu institución y haz clic en Agregar. Necesitas
+														al menos un programa antes de guardar (p. ej.
+														Ciencias de la Computación, Administración de
+														Empresas). Elimina un programa solo si ninguna
+														materia, plan o estudiante lo usa aún.
 													</p>
 													<div className='school-grades-levels__add-row'>
 														<div className='login-field'>
@@ -345,7 +350,7 @@ function SchoolAdminMySchoolsScreen () {
 																id='schooladmin-myschool-program-new'
 																name='newProgram'
 																className='login-input'
-																placeholder='e.g. Computer Science'
+																placeholder='p. ej. Ciencias de la Computación'
 																autoComplete='off'
 																value={newProgram}
 																disabled={isBusy}
@@ -365,7 +370,7 @@ function SchoolAdminMySchoolsScreen () {
 																id='schooladmin-myschool-program-dept'
 																name='newProgramDepartment'
 																className='login-input'
-																placeholder='Department '
+																placeholder='Departamento'
 																autoComplete='off'
 																value={newProgramDepartment}
 																disabled={isBusy}
@@ -386,7 +391,7 @@ function SchoolAdminMySchoolsScreen () {
 																	setNewProgramType(e.target.value)}
 															>
 																<option value=''>
-																	Program type 
+																	Tipo de programa
 																</option>
 																{UNIVERSITY_PROGRAM_TYPES.map(
 																	(type) => (
@@ -406,13 +411,13 @@ function SchoolAdminMySchoolsScreen () {
 															disabled={isBusy}
 															onClick={handleAddProgram}
 														>
-															Add
+															Agregar
 														</button>
 													</div>
 													{programs.length > 0 ? (
 														<ul
 															className='school-grades-levels__chips'
-															aria-label='Current programs'
+															aria-label='Programas actuales'
 														>
 															{programs.map((program) => (
 																<li
@@ -433,7 +438,7 @@ function SchoolAdminMySchoolsScreen () {
 																	<button
 																		type='button'
 																		className='school-grades-levels__chip-remove'
-																		aria-label={`Remove ${program.name}`}
+																		aria-label={`Eliminar ${program.name}`}
 																		disabled={isBusy}
 																		onClick={() =>
 																			handleRemoveProgram(program)}
@@ -445,8 +450,9 @@ function SchoolAdminMySchoolsScreen () {
 														</ul>
 													) : (
 														<p className='school-grades-levels__empty'>
-															No programs added yet — enter your first
-															program above, then click Add.
+															Aún no hay programas — ingresa tu
+															primer programa arriba y haz clic en
+															Agregar.
 														</p>
 													)}
 												</>
@@ -456,15 +462,15 @@ function SchoolAdminMySchoolsScreen () {
 														className='login-label'
 														htmlFor='schooladmin-myschool-grade-new'
 													>
-														First step: add your school grade levels
+														Primer paso: agrega los grados de tu escuela
 													</label>
 													<p className='school-grades-levels__hint'>
-														Start here by entering each grade or year
-														your school offers, then click Add. You
-														need at least one grade level before you
-														can save (e.g. 9, 10, 11, 12 or Year 1).
-														Remove a grade only if no subjects, plans,
-														or students still use it.
+														Empieza aquí ingresando cada grado o año
+														que ofrece tu escuela y haz clic en Agregar.
+														Necesitas al menos un grado antes de guardar
+														(p. ej. 9, 10, 11, 12 o Año 1). Elimina un
+														grado solo si ninguna materia, plan o
+														estudiante lo usa aún.
 													</p>
 													<div className='school-grades-levels__add-row'>
 														<div className='login-field'>
@@ -473,7 +479,7 @@ function SchoolAdminMySchoolsScreen () {
 																id='schooladmin-myschool-grade-new'
 																name='newGradeLevel'
 																className='login-input'
-																placeholder='e.g. 10 or Year 2'
+																placeholder='p. ej. 10 o Año 2'
 																autoComplete='off'
 																value={newGradeLevel}
 																disabled={isBusy}
@@ -493,13 +499,13 @@ function SchoolAdminMySchoolsScreen () {
 															disabled={isBusy}
 															onClick={handleAddGradeLevel}
 														>
-															Add
+															Agregar
 														</button>
 													</div>
 													{gradesLevels.length > 0 ? (
 														<ul
 															className='school-grades-levels__chips'
-															aria-label='Current grade levels'
+															aria-label='Grados actuales'
 														>
 															{gradesLevels.map((level) => (
 																<li
@@ -512,7 +518,7 @@ function SchoolAdminMySchoolsScreen () {
 																	<button
 																		type='button'
 																		className='school-grades-levels__chip-remove'
-																		aria-label={`Remove ${level.name}`}
+																		aria-label={`Eliminar ${level.name}`}
 																		disabled={isBusy}
 																		onClick={() =>
 																			handleRemoveGradeLevel(level)}
@@ -524,8 +530,8 @@ function SchoolAdminMySchoolsScreen () {
 														</ul>
 													) : (
 														<p className='school-grades-levels__empty'>
-															No grade levels added yet — enter your
-															first grade level above, then click Add.
+															Aún no hay grados — ingresa tu primer
+															grado arriba y haz clic en Agregar.
 														</p>
 													)}
 												</>
@@ -536,7 +542,7 @@ function SchoolAdminMySchoolsScreen () {
 												className='login-label'
 												htmlFor='schooladmin-myschool-signin'
 											>
-												Registered on
+												Registrada el
 											</label>
 											<input
 												type='text'
@@ -553,14 +559,14 @@ function SchoolAdminMySchoolsScreen () {
 												className='login-label'
 												htmlFor='schooladmin-myschool-name'
 											>
-												School name
+												Nombre de la escuela
 											</label>
 											<input
 												type='text'
 												id='schooladmin-myschool-name'
 												name='name'
 												className='login-input'
-												placeholder='School name'
+												placeholder='Nombre de la escuela'
 												autoComplete='organization'
 												value={name}
 												required
@@ -573,7 +579,7 @@ function SchoolAdminMySchoolsScreen () {
 												className='login-label'
 												htmlFor='schooladmin-myschool-type'
 											>
-												School type
+												Tipo de escuela
 											</label>
 											<select
 												id='schooladmin-myschool-type'
@@ -586,7 +592,7 @@ function SchoolAdminMySchoolsScreen () {
 													setSchoolType(e.target.value)}
 											>
 												<option value=''>
-													Select school type
+													Selecciona el tipo de escuela
 												</option>
 												{SCHOOL_TYPE_OPTIONS.map((opt) => (
 													<option
@@ -600,14 +606,14 @@ function SchoolAdminMySchoolsScreen () {
 											<p className='school-grades-levels__hint'>
 												{canChangeSchoolType
 													? (
-														'You can switch between university '
-														+ 'and school types only before '
-														+ 'adding subjects, plans, or students.'
+														'Solo puedes cambiar entre universidad '
+														+ 'y escuela antes de agregar materias, '
+														+ 'planes o estudiantes.'
 													)
 													: (
-														'School type is locked because this '
-														+ 'institution already has subjects, '
-														+ 'plans, or students.'
+														'El tipo de escuela está bloqueado '
+														+ 'porque esta institución ya tiene '
+														+ 'materias, planes o estudiantes.'
 													)}
 											</p>
 										</div>
@@ -617,14 +623,14 @@ function SchoolAdminMySchoolsScreen () {
 													className='login-label'
 													htmlFor='schooladmin-myschool-country'
 												>
-													Country
+													País
 												</label>
 												<input
 													type='text'
 													id='schooladmin-myschool-country'
 													name='country'
 													className='login-input'
-													placeholder='Country'
+													placeholder='País'
 													autoComplete='country-name'
 													value={country}
 													required
@@ -638,14 +644,14 @@ function SchoolAdminMySchoolsScreen () {
 													className='login-label'
 													htmlFor='schooladmin-myschool-city'
 												>
-													City
+													Ciudad
 												</label>
 												<input
 													type='text'
 													id='schooladmin-myschool-city'
 													name='city'
 													className='login-input'
-													placeholder='City'
+													placeholder='Ciudad'
 													autoComplete='address-level2'
 													value={city}
 													required
@@ -660,14 +666,14 @@ function SchoolAdminMySchoolsScreen () {
 												className='login-label'
 												htmlFor='schooladmin-myschool-address'
 											>
-												Address
+												Dirección
 											</label>
 											<input
 												type='text'
 												id='schooladmin-myschool-address'
 												name='address'
 												className='login-input'
-												placeholder='Street, number, district…'
+												placeholder='Calle, número, colonia…'
 												autoComplete='street-address'
 												value={address}
 												disabled={isBusy}
@@ -682,10 +688,10 @@ function SchoolAdminMySchoolsScreen () {
 											disabled={isBusy}
 										>
 											{isUpdating
-												? 'Updating…'
+												? 'Actualizando…'
 												: isLoadingSchool
-													? 'Loading…'
-													: 'Update school'}
+													? 'Cargando…'
+													: 'Actualizar escuela'}
 										</button>
 									</form>
 								)}

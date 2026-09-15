@@ -114,18 +114,18 @@ function isLikelyMongoId (value) {
 
 function studentDisplayName (student) {
 	if (!student || typeof student !== 'object') {
-		return 'Student'
+		return 'Estudiante'
 	}
 	const parts = [student.firstname, student.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Student'
+	return parts.length > 0 ? parts.join(' ') : 'Estudiante'
 }
 
 function teacherDisplayName (teacher) {
 	if (!teacher || typeof teacher !== 'object') {
-		return 'Teacher'
+		return 'Profesor'
 	}
 	const parts = [teacher.firstname, teacher.lastname].filter(Boolean)
-	return parts.length > 0 ? parts.join(' ') : 'Teacher'
+	return parts.length > 0 ? parts.join(' ') : 'Profesor'
 }
 
 function formatQaDate (value) {
@@ -136,7 +136,7 @@ function formatQaDate (value) {
 	if (Number.isNaN(d.getTime())) {
 		return ''
 	}
-	return d.toLocaleDateString(undefined, {
+	return d.toLocaleDateString('es', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
@@ -182,7 +182,7 @@ function QaTimelineVideoThumb ({ watchTo, ariaLabel }) {
 			<Link
 				to={watchTo}
 				className='qa-timeline__video'
-				aria-label={ariaLabel ?? 'Watch video'}
+				aria-label={ariaLabel ?? 'Ver video'}
 			>
 				{inner}
 			</Link>
@@ -231,7 +231,10 @@ function SchoolAdminPreviousQuestionsScreen () {
 		convo?.answer != null && typeof convo.answer === 'object'
 			? convo.answer
 			: null
-	const showTimeline = convo != null && answerDoc != null
+	const showTimeline =
+		convo != null && questionHasVideo(convo)
+	const hasAnswerVideo =
+		answerDoc != null && answerHasVideo(answerDoc)
 
 	useEffect(() => {
 		if (!schoolAdminInfo) {
@@ -259,20 +262,12 @@ function SchoolAdminPreviousQuestionsScreen () {
 
 	const errorMessage =
 		error?.data?.message || error?.error
-			|| 'Could not load previous questions.'
+			|| 'No se pudieron cargar las preguntas anteriores.'
 
 	const subjectTitle =
 		convo?.subject && typeof convo.subject === 'object'
 			? convo.subject.title
 			: null
-
-	const hasQuestionVideo = convo != null && questionHasVideo(convo)
-	const hasAnswerVideo = answerDoc != null && answerHasVideo(answerDoc)
-	const subjectIdForLinks =
-		convo?.subject != null && typeof convo.subject === 'object'
-			&& convo.subject._id != null
-			? String(convo.subject._id)
-			: subjectQuery
 
 	return (
 		<div className='chat-app chat-app--teacher-login ask-screen'>
@@ -287,20 +282,23 @@ function SchoolAdminPreviousQuestionsScreen () {
 						<div className='center-content3'>
 							<div className='qa-timeline-page qa-timeline-page--student'>
 								<h1 className='qa-timeline-page__title heading-gradient'>
-									Questions &amp; answers
+									Preguntas y respuestas
 								</h1>
 								<p className='qa-timeline-page__subtitle'>
 									{subjectTitle != null ? (
 										<>
-											Past questions and teacher replies for{' '}
-											<strong>{subjectTitle}</strong>.
+											Preguntas anteriores de{' '}
+											<strong>{subjectTitle}</strong>,
+											incluyendo las que aún esperan
+											una respuesta.
 										</>
 									) : subjectQuery != null ? (
-										'Past questions and teacher replies for '
-										+ 'this subject.'
+										'Preguntas anteriores de esta materia, '
+										+ 'incluyendo las que aún esperan '
+										+ 'una respuesta.'
 									) : (
-										'A valid subject is required to view '
-										+ 'questions and answers.'
+										'Se necesita una materia válida para ver '
+										+ 'las preguntas y respuestas.'
 									)}
 								</p>
 
@@ -311,10 +309,10 @@ function SchoolAdminPreviousQuestionsScreen () {
 										width: '100%',
 									}}
 									>
-										Invalid subject link. Open this page from
-										your{' '}
+										Enlace de materia no válido. Abre esta
+										página desde tu{' '}
 										<Link to='/schooladmins/mysubjects'>
-											subjects list
+											lista de materias
 										</Link>
 										.
 									</p>
@@ -327,7 +325,7 @@ function SchoolAdminPreviousQuestionsScreen () {
 										width: '100%',
 									}}
 									>
-										Loading…
+										Cargando…
 									</p>
 								)}
 
@@ -347,7 +345,7 @@ function SchoolAdminPreviousQuestionsScreen () {
 											style={{ marginTop: '0.75rem' }}
 											onClick={() => refetch()}
 										>
-											Try again
+											Intentar de nuevo
 										</button>
 									</div>
 								)}
@@ -362,9 +360,9 @@ function SchoolAdminPreviousQuestionsScreen () {
 										width: '100%',
 									}}
 									>
-										No answered questions yet for this subject.
-										When a teacher replies, conversations will
-										show up here.
+										Aún no hay preguntas grabadas para esta
+										materia. Cuando un estudiante haga una
+										pregunta con video, aparecerá aquí.
 									</p>
 								)}
 
@@ -384,21 +382,19 @@ function SchoolAdminPreviousQuestionsScreen () {
 													+ 'qa-timeline__tag--question'
 												}
 												>
-													{subjectTitle ?? 'Subject'}
+													{subjectTitle ?? 'Materia'}
 												</span>
 												<h3 className='qa-timeline__card-title'>
 													{convo.title}
 												</h3>
-												{hasQuestionVideo ? (
-													<QaTimelineVideoThumb
-														watchTo={
-															`/schooladmins/watchquestion/${
-																String(convo._id)
-															}`
-														}
-														ariaLabel='Watch question video'
-													/>
-												) : null}
+												<QaTimelineVideoThumb
+													watchTo={
+														`/schooladmins/watchquestion/${
+															String(convo._id)
+														}`
+													}
+													ariaLabel='Ver video de la pregunta'
+												/>
 												{convo.description != null
 													&& String(convo.description)
 														.trim() !== '' && (
@@ -418,38 +414,20 @@ function SchoolAdminPreviousQuestionsScreen () {
 														convo.dateCreated,
 													)}
 												</span>
-												{hasQuestionVideo ? (
-													<Link
-														to={
-															`/schooladmins/watchquestion/${
-																String(convo._id)
-															}`
-														}
-														className={
-															'qa-timeline__watch '
-															+ 'qa-timeline__watch--question'
-														}
-													>
-														Watch question
-														<PlayIconSmall />
-													</Link>
-												) : (
-													<button
-														type='button'
-														disabled
-														className={
-															'qa-timeline__watch '
-															+ 'qa-timeline__watch--question'
-														}
-														style={{
-															opacity: 0.55,
-															cursor: 'not-allowed',
-														}}
-														title='No question video'
-													>
-														No question video
-													</button>
-												)}
+												<Link
+													to={
+														`/schooladmins/watchquestion/${
+															String(convo._id)
+														}`
+													}
+													className={
+														'qa-timeline__watch '
+														+ 'qa-timeline__watch--question'
+													}
+												>
+													Mira la pregunta
+													<PlayIconSmall />
+												</Link>
 											</div>
 
 											<div className={
@@ -484,24 +462,23 @@ function SchoolAdminPreviousQuestionsScreen () {
 													+ 'qa-timeline__tag--answer'
 												}
 												>
-													Teacher answer
+													{hasAnswerVideo
+														? 'Respuesta del profesor'
+														: 'Esperando respuesta'}
 												</span>
 												{hasAnswerVideo ? (
 													<QaTimelineVideoThumb
 														watchTo={
-															answerDoc != null
-																&& answerDoc._id != null
-																? `/schooladmins/watchanswer/${
-																	String(
-																		answerDoc._id,
-																	)
-																}`
-																: null
+															`/schooladmins/watchanswer/${
+																String(
+																	answerDoc._id,
+																)
+															}`
 														}
-														ariaLabel='Watch answer video'
+														ariaLabel='Ver video de la respuesta'
 													/>
 												) : null}
-												{answerDoc != null ? (
+												{hasAnswerVideo ? (
 													<>
 														{answerDoc.description
 															!= null
@@ -529,40 +506,33 @@ function SchoolAdminPreviousQuestionsScreen () {
 																answerDoc.dateCreated,
 															)}
 														</span>
-														{hasAnswerVideo
-															&& answerDoc._id != null ? (
-															<Link
-																to={
-																	'/schooladmins/watchanswer/'
-																	+ String(
-																		answerDoc._id,
-																	)
-																}
-																className={
-																	'qa-timeline__watch '
-																	+ 'qa-timeline__watch--answer'
-																}
-															>
-																Watch answer
-																<PlayIconSmall />
-															</Link>
-														) : answerDoc._id != null ? (
-															<span className={
+														<Link
+															to={
+																'/schooladmins/watchanswer/'
+																+ String(
+																	answerDoc._id,
+																)
+															}
+															className={
 																'qa-timeline__watch '
 																+ 'qa-timeline__watch--answer'
 															}
-															>
-																Text answer
-															</span>
-														) : null}
+														>
+															Mira la respuesta
+															<PlayIconSmall />
+														</Link>
 													</>
 												) : (
 													<p className={
-														'qa-timeline__card-text'
+														'qa-timeline__card-text '
+														+ 'qa-timeline__card-text--pending'
 													}
 													>
-														Answer details are not
-														available.
+														El profesor aún no ha
+														publicado una respuesta
+														en video. Vuelve a
+														consultar aquí cuando
+														lo haga.
 													</p>
 												)}
 											</div>

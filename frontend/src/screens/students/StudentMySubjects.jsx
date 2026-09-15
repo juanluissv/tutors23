@@ -69,7 +69,7 @@ function StudentSubjectCardActions ({
 					to={`/students/viewbook/${subjectId}`}
 					className='teacher-subject-card__btn'
 				>
-					Abrir libro
+					Ver documentos
 				</Link>
 				{/* <Link
 					to={`/students/asknewquestion?subject=${subjectId}`}

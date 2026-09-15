@@ -8,6 +8,7 @@ import {
 	useAddStudentEmailToSubjectMutation,
 	useGetSubjectsByTeacherIdQuery,
 } from '../../slices/teachers/teacherApiSlice'
+import { localizeApiError } from '../../utils/localizeApiMessage'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
@@ -62,7 +63,7 @@ function TeacherAddStudentToSubjectScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (email.trim() === '') {
-			toast.error('Please enter the student email')
+			toast.error('Por favor ingresa el correo del estudiante')
 			return
 		}
 		if (!isValidSubjectParam || !teacherIdStr) {
@@ -75,13 +76,14 @@ function TeacherAddStudentToSubjectScreen () {
 				teacherId: teacherIdStr,
 				email: email.trim(),
 			}).unwrap()
-			toast.success('Student email added')
+			toast.success('Correo del estudiante agregado')
 			navigate(`/teachers/students/`, { replace: true })
 		} catch (err) {
 			toast.error(
-				err?.data?.message
-					|| err?.error?.message
-					|| 'Could not add student email',
+				localizeApiError(
+					err,
+					'No se pudo agregar el correo del estudiante',
+				),
 			)
 		}
 	}
@@ -110,12 +112,12 @@ function TeacherAddStudentToSubjectScreen () {
 												to='/teachers/students'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
-										<h1 className='login-card__title'>Invalid link</h1>
+										<h1 className='login-card__title'>Enlace no válido</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											This subject link is not valid.
+											Este enlace de materia no es válido.
 										</p>
 									</div>
 								</div>
@@ -147,11 +149,11 @@ function TeacherAddStudentToSubjectScreen () {
 												to='/teachers/students'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											We couldn&apos;t load subjects.
+											No pudimos cargar las materias.
 										</p>
 									</div>
 									<button
@@ -159,7 +161,7 @@ function TeacherAddStudentToSubjectScreen () {
 										className='login-submit'
 										onClick={() => void refetchSubjects()}
 									>
-										Try again
+										Intentar de nuevo
 									</button>
 								</div>
 							</div>
@@ -190,13 +192,15 @@ function TeacherAddStudentToSubjectScreen () {
 												to='/teachers/students'
 												className='login-card__link'
 											>
-												← Back to subjects
+												← Volver a las materias
 											</Link>
 										</div>
-										<h1 className='login-card__title'>Subject not found</h1>
+										<h1 className='login-card__title'>
+											Materia no encontrada
+										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											There is no subject with this id in your
-											assignments, or it may have been removed.
+											No hay una materia con este id en tus
+											asignaciones, o pudo haber sido eliminada.
 										</p>
 									</div>
 								</div>
@@ -227,23 +231,23 @@ function TeacherAddStudentToSubjectScreen () {
 											to={`/teachers/students/${subjectId}`}
 											className='login-card__link'
 										>
-											← Back to students
+											← Volver a estudiantes
 										</Link>
 									</div>
 									<h1 className='login-card__title'>
-										Add student by email
+										Agregar estudiante por correo
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Add the email for a student taking{' '}
+										Agrega el correo de un estudiante inscrito en{' '}
 										<strong>
-											{currentSubject?.title || 'this subject'}
+											{currentSubject?.title || 'esta materia'}
 										</strong>
-										. Duplicate emails are ignored.
+										. Los correos duplicados se ignoran.
 									</p>
 								</div>
 								{isLoadingList && !currentSubject ? (
 									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Loading…
+										Cargando…
 									</p>
 								) : (
 									<form
@@ -257,14 +261,14 @@ function TeacherAddStudentToSubjectScreen () {
 												className='login-label'
 												htmlFor='teacher-add-student-email'
 											>
-												Student email
+												Correo del estudiante
 											</label>
 											<input
 												type='email'
 												id='teacher-add-student-email'
 												name='email'
 												className='login-input'
-												placeholder='student@school.edu'
+												placeholder='estudiante@escuela.edu'
 												autoComplete='email'
 												value={email}
 												disabled={isBusy}
@@ -277,7 +281,9 @@ function TeacherAddStudentToSubjectScreen () {
 											className='login-submit'
 											disabled={isBusy}
 										>
-											{isSaving ? 'Adding…' : 'Add student'}
+											{isSaving
+												? 'Agregando…'
+												: 'Agregar estudiante'}
 										</button>
 									</form>
 								)}

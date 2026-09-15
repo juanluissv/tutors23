@@ -27,27 +27,27 @@ function SchoolAdminRegisterScreen () {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		if (firstname === '') {
-			toast.error('Please enter your first name')
+			toast.error('Por favor ingresa tu nombre')
 			return
 		}
 		if (lastname === '') {
-			toast.error('Please enter your last name')
+			toast.error('Por favor ingresa tu apellido')
 			return
 		}
 		if (email === '') {
-			toast.error('Please enter email')
+			toast.error('Por favor ingresa tu correo electrónico')
 			return
 		}
 		if (password === '') {
-			toast.error('Please enter password')
+			toast.error('Por favor ingresa tu contraseña')
 			return
 		}
 		if (confirmPassword === '') {
-			toast.error('Please enter confirm password')
+			toast.error('Por favor confirma tu contraseña')
 			return
 		}
 		if (password !== confirmPassword) {
-			toast.error('Passwords do not match')
+			toast.error('Las contraseñas no coinciden')
 			return
 		}
 		try {
@@ -58,7 +58,7 @@ function SchoolAdminRegisterScreen () {
 				password,
 			}).unwrap()
 			dispatch(setSchoolAdminCredentials({ ...res }))
-			toast.success('Registration successful')
+			toast.success('Cuenta creada')
 			navigate('/schooladmins/profile')
 		} catch (err) {
 			toast.error(err?.data?.message || err?.error?.message)
@@ -78,13 +78,17 @@ function SchoolAdminRegisterScreen () {
 						toggleSidebar={handleToggleSidebar}
 					/>
 					<div className='content-area content-area--login'>
-						<div className='center-content2 login-screen'>
+						<div className='center-content2 login-screen login-screen--register login-screen--offset-20'>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
-									<h1 className='login-card__title'>Create a school admin account</h1>
+									<h1 className='login-card__title'>
+										Crea una cuenta de administrador
+										escolar
+									</h1>
 									<p className='login-card__subtitle'>
-										Sign up to manage your school on Ask to Learn
+										Regístrate para administrar tu escuela
+										en Ask to Learn
 									</p>
 								</div>
 								<form
@@ -98,14 +102,14 @@ function SchoolAdminRegisterScreen () {
 											className='login-label'
 											htmlFor='schooladmin-register-firstname'
 										>
-											First name
+											Nombre
 										</label>
 										<input
 											type='text'
 											id='schooladmin-register-firstname'
 											name='firstname'
 											className='login-input'
-											placeholder='Jane'
+											placeholder='Nombre'
 											autoComplete='given-name'
 											onChange={(e) => setFirstname(e.target.value)}
 											value={firstname}
@@ -117,14 +121,14 @@ function SchoolAdminRegisterScreen () {
 											className='login-label'
 											htmlFor='schooladmin-register-lastname'
 										>
-											Last name
+											Apellido
 										</label>
 										<input
 											type='text'
 											id='schooladmin-register-lastname'
 											name='lastname'
 											className='login-input'
-											placeholder='Doe'
+											placeholder='Apellido'
 											autoComplete='family-name'
 											onChange={(e) => setLastname(e.target.value)}
 											value={lastname}
@@ -136,14 +140,14 @@ function SchoolAdminRegisterScreen () {
 											className='login-label'
 											htmlFor='schooladmin-register-email'
 										>
-											Email
+											Correo electrónico
 										</label>
 										<input
 											type='email'
 											id='schooladmin-register-email'
 											name='email'
 											className='login-input'
-											placeholder='you@example.com'
+											placeholder='tucorreo@ejemplo.com'
 											autoComplete='email'
 											onChange={(e) => setEmail(e.target.value)}
 											value={email}
@@ -155,7 +159,7 @@ function SchoolAdminRegisterScreen () {
 											className='login-label'
 											htmlFor='schooladmin-register-password'
 										>
-											Password
+											Contraseña
 										</label>
 										<input
 											type='password'
@@ -174,7 +178,7 @@ function SchoolAdminRegisterScreen () {
 											className='login-label'
 											htmlFor='schooladmin-register-confirm-password'
 										>
-											Confirm password
+											Confirmar contraseña
 										</label>
 										<input
 											type='password'
@@ -195,16 +199,18 @@ function SchoolAdminRegisterScreen () {
 										className='login-submit'
 										disabled={isLoading}
 									>
-										{isLoading ? 'Creating account…' : 'Sign up'}
+										{isLoading
+											? 'Creando cuenta…'
+											: 'Registrarse'}
 									</button>
 								</form>
 								<p className='login-card__footer'>
-									Already have an account?{' '}
+									¿Ya tienes una cuenta?{' '}
 									<Link
 										to='/schooladmins/login'
 										className='login-card__link'
 									>
-										Sign in
+										Iniciar sesión
 									</Link>
 								</p>
 							</div>

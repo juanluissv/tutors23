@@ -654,6 +654,9 @@ function answerHasVideo (answer) {
   return answer?.mediaId != null && String(answer.mediaId).trim() !== ''
 }
 
+const VALORES_SEMANA1_PATH =
+  '/students/lessonpage/6a3979882d6dcf3adc9b6ef4'
+
 const MATEMATICAS_SEMANA1_PATH =
   '/students/lessonpage/6a8f4c617a61127e0b6ead7f'
 
@@ -743,8 +746,14 @@ function Sidebar ({ isOpen, toggleSidebar }) {
     setIsCienciasAccordionOpen((prev) => !prev)
   }
 
-  const navClass = ({ isActive }) =>
-    `sidebar-nav-link${isActive ? ' sidebar-nav-link--active' : ''}`
+  const isStudentProfileSection =
+    location.pathname === '/students/profile'
+    || location.pathname.startsWith('/students/profile/')
+
+  const aiTutorNavClass = ({ isActive }) =>
+    `sidebar-nav-link${
+      isActive || isStudentProfileSection ? ' sidebar-nav-link--active' : ''
+    }`
 
   const isAskTeacherRecording =
     location.pathname === '/studentscreen' ||
@@ -781,6 +790,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
   const isStudentSubjectsSection =
     location.pathname.startsWith('/students/courses/')
     || location.pathname.startsWith('/students/watchcourse/')
+    || location.pathname.startsWith('/students/viewbook/')
 
   const subjectsNavClass = ({ isActive }) =>
     `sidebar-nav-link${
@@ -817,7 +827,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
 
       <div className="sidebar-content">
         <nav className="navigation" aria-label="Primary">
-          <NavLink to="/" end className={navClass}>
+          <NavLink to="/" end className={aiTutorNavClass}>
             <span className="sidebar-nav-link__icon-well" aria-hidden="true">
               <IconNewTutor />
             </span>
@@ -863,7 +873,7 @@ function Sidebar ({ isOpen, toggleSidebar }) {
         <div className="sidebar-valores-hub-block">
           <div className="sidebar-valores-hub-row">
             <NavLink
-              to="/9/valores/unidad1/semana1"
+              to={VALORES_SEMANA1_PATH}
               className={({ isActive }) =>
                 `sidebar-nav-link sidebar-nav-link--valores-hub${isActive
                   ? ' sidebar-nav-link--active sidebar-nav-link--subject'
@@ -933,9 +943,9 @@ function Sidebar ({ isOpen, toggleSidebar }) {
               <ul className="sidebar-valores-weeks sidebar-valores-weeks--solo">
                 <li>
                   <Link
-                    to="/9/valores/unidad1/semana1"
+                    to={VALORES_SEMANA1_PATH}
                     className={`sidebar-valores-week-link${
-                      location.pathname === '/9/valores/unidad1/semana1'
+                      location.pathname === VALORES_SEMANA1_PATH
                         ? ' sidebar-valores-link-active'
                         : ''
                     }`}

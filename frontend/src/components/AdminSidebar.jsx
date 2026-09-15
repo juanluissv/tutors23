@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useGetSchoolByIdQuery } from '../slices/admin/schoolAdminApiSlice'
+import { isUniversitySchool } from '../utils/schoolType'
 
 const imgIcon = `${process.env.PUBLIC_URL}/burg.svg`
 
@@ -573,17 +575,18 @@ const IconEarnings = () => (
 	</svg>
 )
 
-function hasLinkedSchool (school) {
+function resolveSchoolId (school) {
 	if (school == null || school === '') {
-		return false
+		return null
 	}
 	if (typeof school === 'string') {
-		return school.trim() !== ''
+		const trimmed = school.trim()
+		return trimmed !== '' ? trimmed : null
 	}
 	if (typeof school === 'object' && school._id != null) {
-		return true
+		return String(school._id)
 	}
-	return Boolean(school)
+	return null
 }
 
 const LAPTOP_SIDEBAR_HOVER_MIN = 769
@@ -597,7 +600,12 @@ function canExpandSidebarOnHover () {
 function AdminSidebar ({ isOpen, toggleSidebar }) {
 	const location = useLocation()
 	const { schoolAdminInfo } = useSelector((state) => state.authSchoolAdmin)
-	const showMySchool = hasLinkedSchool(schoolAdminInfo?.school)
+	const schoolId = resolveSchoolId(schoolAdminInfo?.school)
+	const showMySchool = Boolean(schoolId)
+	const { data: schoolData } = useGetSchoolByIdQuery(schoolId, {
+		skip: !schoolId,
+	})
+	const isUniversity = isUniversitySchool(schoolData?.schoolType)
 	const [isHoverExpanded, setIsHoverExpanded] = useState(false)
 
 	useEffect(() => {
@@ -634,10 +642,13 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 		location.pathname.startsWith('/schooladmins/createsubject')
 		|| location.pathname.startsWith('/schooladmins/editsubject')
 		|| location.pathname.startsWith('/schooladmins/courses')
-		|| location.pathname.startsWith('/schooladmins/teacherinvite')
 		|| location.pathname.startsWith('/schooladmins/previousquestions')
 		|| location.pathname.startsWith('/schooladmins/watchquestion')
 		|| location.pathname.startsWith('/schooladmins/watchanswer')
+		|| location.pathname.startsWith('/schooladmins/bookchapters')
+		|| location.pathname.startsWith('/schooladmins/generatelessons')
+		|| location.pathname.startsWith('/schooladmins/createtutor')
+		|| location.pathname.startsWith('/schooladmins/viewbook')
 
 	const mySubjectsNavClass = ({ isActive }) =>
 		`sidebar-nav-link${
@@ -673,7 +684,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 				className={`sidebar sidebar--teacher ${
 					isOpen ? 'sidebar-open' : 'sidebar-closed'
 				}${isHoverExpanded ? ' sidebar-hover-expanded' : ''}`}
-				aria-label="Main navigation"
+				aria-label="Navegación principal"
 				onMouseEnter={handleSidebarMouseEnter}
 				onMouseLeave={handleSidebarMouseLeave}
 			>
@@ -683,14 +694,14 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 					className="menu-button"
 					onClick={toggleSidebar}
 					aria-expanded={isOpen}
-					aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+					aria-label={isOpen ? 'Contraer menú' : 'Expandir menú'}
 				>
 					<img src={imgIcon} alt="" className="icon" />
 				</button>
 			</div>
 
 			<div className="sidebar-content">
-				<nav className="navigation" aria-label="Primary">
+				<nav className="navigation" aria-label="Principal">
 					{/* <NavLink to="/teachers/newquestions"  className={navClass}>
 						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
 							<IconNewTutor />
@@ -701,7 +712,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
 							<IconAskTeacher />
 						</span>
-						<span className="sidebar-nav-link__label">My  Subjects</span>
+						<span className="sidebar-nav-link__label">Mis materias</span>
 					</NavLink>
 					{showMySchool && (
 						<NavLink to="/schooladmins/plans" className={plansNavClass}>
@@ -712,7 +723,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 								<IconPlans />
 							</span>
 							<span className="sidebar-nav-link__label">
-								School Plans
+								Planes
 							</span>
 						</NavLink>
 					)}
@@ -725,7 +736,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 								<IconTeacherAnswers />
 							</span>
 							<span className="sidebar-nav-link__label">
-								Create New School
+								Crear escuela
 							</span>
 						</NavLink>
 					)}
@@ -737,7 +748,11 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 							>
 								<IconTeacherAnswers />
 							</span>
-							<span className="sidebar-nav-link__label">My School</span>
+							<span className="sidebar-nav-link__label">
+								{isUniversity
+									? 'Mi universidad'
+									: 'Mi escuela'}
+							</span>
 						</NavLink>
 					)}
 					{showMySchool && (
@@ -749,7 +764,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 								<IconEarnings />
 							</span>
 							<span className="sidebar-nav-link__label">
-								Earnings
+								Ingresos
 							</span>
 						</NavLink>
 					)}
@@ -762,7 +777,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 								<IconAddTeacher />
 							</span>
 							<span className="sidebar-nav-link__label">
-								Add Teachers
+								Agregar profesores
 							</span>
 						</NavLink>
 					)}
@@ -775,7 +790,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 								<IconAddStudent />
 							</span>
 							<span className="sidebar-nav-link__label">
-								 Students
+								Estudiantes
 							</span>
 						</NavLink>
 					)}
@@ -783,7 +798,7 @@ function AdminSidebar ({ isOpen, toggleSidebar }) {
 						<span className="sidebar-nav-link__icon-well" aria-hidden="true">
 							<IconSubjects />
 						</span>
-						<span className="sidebar-nav-link__label">My Profile</span>
+						<span className="sidebar-nav-link__label">Mi perfil</span>
 					</NavLink>
 				</nav>
 			</div>

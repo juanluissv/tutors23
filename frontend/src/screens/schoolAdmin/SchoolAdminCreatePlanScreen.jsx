@@ -26,6 +26,39 @@ import {
 } from '../../utils/planSemester'
 import '../../App.css'
 
+function translateSemesterFormError (message) {
+	if (message == null || message === '') {
+		return message
+	}
+	const text = String(message)
+	const semesterMatch = text.match(/^Semester (\d+)/)
+	const semesterLabel = semesterMatch
+		? `Semestre ${semesterMatch[1]}`
+		: null
+
+	if (text.includes('Plans can have between')) {
+		return 'Los planes pueden tener entre 1 y 4 semestres'
+	}
+	if (semesterLabel && text.includes('start date is required')) {
+		return `La fecha de inicio de ${semesterLabel} es obligatoria`
+	}
+	if (semesterLabel && text.includes('end date is required')) {
+		return `La fecha de fin de ${semesterLabel} es obligatoria`
+	}
+	if (semesterLabel && text.includes('has an invalid date')) {
+		return `${semesterLabel} tiene una fecha no válida`
+	}
+	if (semesterLabel && text.includes('end date must be after its start date')) {
+		return `La fecha de fin de ${semesterLabel} debe ser posterior a su fecha de inicio`
+	}
+	if (semesterLabel && text.includes('must start after semester')) {
+		const prevMatch = text.match(/semester (\d+) ends/)
+		const prevNum = prevMatch ? prevMatch[1] : ''
+		return `${semesterLabel} debe comenzar después de que termine el semestre ${prevNum}`
+	}
+	return text
+}
+
 function resolveSchoolId (school) {
 	if (!school) {
 		return null
@@ -160,7 +193,7 @@ function SchoolAdminCreatePlanScreen () {
 
 		const priceNum = Number(price)
 		if (Number.isNaN(priceNum) || priceNum < 0) {
-			toast.error('Please enter a valid price (0 or greater)')
+			toast.error('Ingresa un precio válido (0 o mayor)')
 			return
 		}
 
@@ -171,29 +204,29 @@ function SchoolAdminCreatePlanScreen () {
 			|| Math.floor(totalNum) !== totalNum
 		) {
 			toast.error(
-				'Total questions must be a whole number of at least 1',
+				'Las preguntas totales deben ser un número entero de al menos 1',
 			)
 			return
 		}
 
 		if (!isUniversity && selectedSubjectIds.length === 0) {
-			toast.error('Select at least one subject included in this plan')
+			toast.error('Selecciona al menos una materia incluida en este plan')
 			return
 		}
 
 		if (isUniversity) {
 			if (selectedProgram === '') {
-				toast.error('Select a program for this plan')
+				toast.error('Selecciona un programa para este plan')
 				return
 			}
 		} else if (selectedGradesLevel === '') {
-			toast.error('Select a grade level for this plan')
+			toast.error('Selecciona un grado para este plan')
 			return
 		}
 
 		const semesterError = validateSemesterForm(semesters)
 		if (semesterError) {
-			toast.error(semesterError)
+			toast.error(translateSemesterFormError(semesterError))
 			return
 		}
 
@@ -212,13 +245,13 @@ function SchoolAdminCreatePlanScreen () {
 				planPayload.gradesLevel = selectedGradesLevel
 			}
 			await createPlan(planPayload).unwrap()
-			toast.success('Plan created')
+			toast.success('Plan creado')
 			navigate('/schooladmins/plans', { replace: true })
 		} catch (err) {
 			toast.error(
 				err?.data?.message
 					|| err?.error?.message
-					|| 'Could not create plan',
+					|| 'No se pudo crear el plan',
 			)
 		}
 	}
@@ -238,22 +271,22 @@ function SchoolAdminCreatePlanScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No school yet
+											Aún no hay escuela
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Register your school first, then you can
-											create subscription plans.
+											Registra tu escuela primero; después
+											podrás crear planes de suscripción.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/registerschool'>
-											Register your school
+											Registrar tu escuela
 										</Link>
 									</p>
 								</div>
@@ -284,26 +317,26 @@ function SchoolAdminCreatePlanScreen () {
 							toggleSidebar={toggleSidebar}
 						/>
 						<div className='content-area content-area--login'>
-							<div className='center-content2 login-screen login-screen--wide'>
+							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
 								<div className='login-card'>
 									<div className='login-card__accent' aria-hidden />
 									<div className='login-card__header'>
 										<h1 className='login-card__title'>
 											<br />
-											No subjects yet
+											Aún no hay materias
 										</h1>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
-											Add at least one subject before you can
-											create a subscription plan.
+											Agrega al menos una materia antes de
+											poder crear un plan de suscripción.
 										</p>
 									</div>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										<Link to='/schooladmins/createsubject'>
-											Create a subject
+											Crear una materia
 										</Link>
 										{' · '}
 										<Link to='/schooladmins/plans'>
-											Back to plans
+											Volver a planes
 										</Link>
 									</p>
 								</div>
@@ -324,19 +357,21 @@ function SchoolAdminCreatePlanScreen () {
 						isSidebarOpen={isSidebarOpen}
 						toggleSidebar={toggleSidebar}
 					/>
-					<div className='content-area content-area--login'>
-						<div className='center-content2 login-screen login-screen--wide'>
+					<div className='content-area content-area--login content-area--login-scroll'>
+						<div
+							className='center-content2 login-screen login-screen--wide login-screen--subject-form'
+							style={{ marginTop: 'calc(1.5rem - 40px)' }}
+						>
 							<div className='login-card'>
 								<div className='login-card__accent' aria-hidden />
 								<div className='login-card__header'>
 									<h1 className='login-card__title'>
-										<br />
-										Create a plan
+										Crear un plan
 									</h1>
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										{isUniversity
-											? 'Set the price, how many questions it includes, which program this plan covers, and the semester dates. Students will choose their subjects after subscribing and again when a new semester starts.'
-											: 'Set the price, how many questions it includes, which subjects belong to this plan, and the semester dates. Pick a grade level to see subjects for that grade.'}
+											? 'Define el precio, cuántas preguntas incluye, qué programa cubre este plan y las fechas del semestre. Los estudiantes elegirán sus materias después de suscribirse y de nuevo cuando comience un nuevo semestre.'
+											: 'Define el precio, cuántas preguntas incluye, qué materias pertenecen a este plan y las fechas del semestre. Elige un grado para ver las materias de ese grado.'}
 									</p>
 								</div>
 								<form
@@ -350,14 +385,14 @@ function SchoolAdminCreatePlanScreen () {
 											className='login-label'
 											htmlFor='schooladmin-create-plan-price'
 										>
-											Price
+											Precio
 										</label>
 										<input
 											type='number'
 											id='schooladmin-create-plan-price'
 											name='price'
 											className='login-input'
-											placeholder='e.g. 29.99'
+											placeholder='p. ej. 29.99'
 											min={0}
 											step='any'
 											autoComplete='off'
@@ -371,14 +406,14 @@ function SchoolAdminCreatePlanScreen () {
 											className='login-label'
 											htmlFor='schooladmin-create-plan-questions'
 										>
-											Total questions
+											Preguntas totales
 										</label>
 										<input
 											type='number'
 											id='schooladmin-create-plan-questions'
 											name='totalQuestions'
 											className='login-input'
-											placeholder='e.g. 50'
+											placeholder='p. ej. 50'
 											min={1}
 											step={1}
 											autoComplete='off'
@@ -400,29 +435,29 @@ function SchoolAdminCreatePlanScreen () {
 											className='login-label'
 											htmlFor='schooladmin-create-plan-cohort'
 										>
-											{isUniversity ? 'Program' : 'Grade level'}
+											{isUniversity ? 'Programa' : 'Grado'}
 										</label>
 										{isLoadingSchool ? (
 											<p className='school-grades-levels__hint'>
 												{isUniversity
-													? 'Loading programs…'
-													: 'Loading grade levels…'}
+													? 'Cargando programas…'
+													: 'Cargando grados…'}
 											</p>
 										) : isUniversity && programs.length === 0 ? (
 											<p className='school-grades-levels__hint'>
-												No programs on your institution yet.{' '}
+												Aún no hay programas en tu institución.{' '}
 												<Link to='/schooladmins/myschools'>
-													Add them in My school
+													Agrégalos en Mi escuela
 												</Link>{' '}
-												first.
+												primero.
 											</p>
 										) : !isUniversity && gradesLevels.length === 0 ? (
 											<p className='school-grades-levels__hint'>
-												No grade levels on your school yet.{' '}
+												Aún no hay grados en tu escuela.{' '}
 												<Link to='/schooladmins/myschools'>
-													Add them in My school
+													Agrégalos en Mi escuela
 												</Link>{' '}
-												first.
+												primero.
 											</p>
 										) : (
 											<select
@@ -443,8 +478,8 @@ function SchoolAdminCreatePlanScreen () {
 											>
 												<option value=''>
 													{isUniversity
-														? 'Select a program'
-														: 'Select a grade level'}
+														? 'Selecciona un programa'
+														: 'Selecciona un grado'}
 												</option>
 												{(isUniversity ? programs : gradesLevels)
 													.map((item) => (
@@ -464,26 +499,26 @@ function SchoolAdminCreatePlanScreen () {
 									{isUniversity ? (
 										<div className='login-field'>
 											<p className='school-grades-levels__hint'>
-												Students subscribed to this plan will
-												choose up to 5 subjects from this
-												program after payment, and again
-												when a new semester starts.
+												Los estudiantes suscritos a este plan
+												elegirán hasta 5 materias de este
+												programa después del pago, y de nuevo
+												cuando comience un nuevo semestre.
 											</p>
 										</div>
 									) : (
 									<div className='login-field'>
 										<span className='login-label'>
-											Subjects in this plan
+											Materias en este plan
 										</span>
 										{subjectsBusy && (
 											<p className='login-card__subtitle login-card__subtitle--wide'>
-												Loading subjects…
+												Cargando materias…
 											</p>
 										)}
 										{subjectsError && !subjectsBusy && (
 											<div className='login-field'>
 												<p className='login-card__subtitle login-card__subtitle--wide'>
-													Could not load subjects.
+													No se pudieron cargar las materias.
 												</p>
 												<button
 													type='button'
@@ -492,7 +527,7 @@ function SchoolAdminCreatePlanScreen () {
 													disabled={formBusy}
 													onClick={() => refetchSubjects()}
 												>
-													Retry loading subjects
+													Intentar de nuevo
 												</button>
 											</div>
 										)}
@@ -500,11 +535,11 @@ function SchoolAdminCreatePlanScreen () {
 											&& !subjectsError
 											&& subjectsList.length === 0 && (
 											<p className='login-card__subtitle login-card__subtitle--wide'>
-												No subjects yet.{' '}
+												Aún no hay materias.{' '}
 												<Link to='/schooladmins/createsubject'>
-													Create a subject
+													Crea una materia
 												</Link>{' '}
-												first.
+												primero.
 											</p>
 										)}
 										{!subjectsBusy
@@ -512,10 +547,10 @@ function SchoolAdminCreatePlanScreen () {
 											&& subjectsList.length > 0
 											&& selectedCohortLabel === '' && (
 											<p className='school-grades-levels__hint'>
-												Select {isUniversity
-													? 'a program'
-													: 'a grade level'} above to choose
-												subjects for this plan.
+												Selecciona {isUniversity
+													? 'un programa'
+													: 'un grado'} arriba para elegir
+												las materias de este plan.
 											</p>
 										)}
 										{!subjectsBusy
@@ -523,15 +558,15 @@ function SchoolAdminCreatePlanScreen () {
 											&& selectedCohortLabel !== ''
 											&& filteredSubjects.length === 0 && (
 											<p className='login-card__subtitle login-card__subtitle--wide'>
-												No subjects for{' '}
+												No hay materias para{' '}
 												<strong>{selectedCohortLabel}</strong>
 												.{' '}
 												<Link to='/schooladmins/createsubject'>
-													Create a subject
+													Crea una materia
 												</Link>{' '}
-												with this {isUniversity
-													? 'program'
-													: 'grade level'}.
+												con este {isUniversity
+													? 'programa'
+													: 'grado'}.
 											</p>
 										)}
 										{!subjectsBusy
@@ -549,7 +584,9 @@ function SchoolAdminCreatePlanScreen () {
 														'1px solid rgba(148,163,184,0.35)',
 												}}
 												role='group'
-												aria-label={`Subjects for ${selectedCohortLabel || 'cohort'}`}
+												aria-label={`Materias de ${
+													selectedCohortLabel || 'grupo'
+												}`}
 											>
 												{filteredSubjects.map((sub) => {
 													const id = String(sub._id)
@@ -585,10 +622,11 @@ function SchoolAdminCreatePlanScreen () {
 										)}
 										{selectedSubjectIds.length > 0 && (
 											<p className='school-grades-levels__hint'>
-												{selectedSubjectIds.length} subject
+												{selectedSubjectIds.length}{' '}
 												{selectedSubjectIds.length === 1
-													? ''
-													: 's'} selected (across all grades).
+													? 'materia seleccionada'
+													: 'materias seleccionadas'}{' '}
+												(en todos los grados).
 											</p>
 										)}
 									</div>
@@ -609,7 +647,7 @@ function SchoolAdminCreatePlanScreen () {
 													setIsPlanActive(e.target.checked)}
 											/>
 											<span className='login-remember__text'>
-												Plan is active
+												El plan está activo
 											</span>
 										</label>
 									</div>
@@ -625,7 +663,7 @@ function SchoolAdminCreatePlanScreen () {
 													|| subjectsList.length === 0)
 										}
 									>
-										{isSaving ? 'Creating…' : 'Create plan'}
+										{isSaving ? 'Creando…' : 'Crear plan'}
 									</button>
 								</form>
 							</div>
