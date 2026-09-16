@@ -12768,6 +12768,36 @@ a.upload-card {
   padding: 16px 16px 8px;
 }
 
+.chat-messages__back-btn {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 4px;
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #7c3aed;
+  background: rgba(248, 250, 252, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.chat-messages__back-btn:hover {
+  color: #6d28d9;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.chat-messages__back-btn:active {
+  transform: scale(0.98);
+}
+
 .chat-app--home .message-question .message-content {
   background: linear-gradient(145deg, #f5f3ff 0%, #faf5ff 100%);
   border: none;

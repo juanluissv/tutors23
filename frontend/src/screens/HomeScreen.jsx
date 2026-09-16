@@ -382,27 +382,45 @@ function HomeScreen() {
     return getSubjectDocuments(fullSubject)
   }, [selectedSubject, mySubjectsById])
 
+  const hasSingleSubjectDocument = selectedSubjectDocuments.length === 1
+
+  const effectiveDocumentId = useMemo(() => {
+    if (selectedDocumentId) {
+      return selectedDocumentId
+    }
+
+    if (!hasSingleSubjectDocument) {
+      return null
+    }
+
+    return getDocumentKey(selectedSubjectDocuments[0]) || null
+  }, [
+    selectedDocumentId,
+    selectedSubjectDocuments,
+    hasSingleSubjectDocument,
+  ])
+
   const selectedDocument = useMemo(() => {
-    if (!selectedDocumentId) {
+    if (!effectiveDocumentId) {
       return null
     }
 
     return selectedSubjectDocuments.find(
-      (doc) => getDocumentKey(doc) === String(selectedDocumentId),
+      (doc) => getDocumentKey(doc) === String(effectiveDocumentId),
     ) || null
-  }, [selectedDocumentId, selectedSubjectDocuments])
+  }, [effectiveDocumentId, selectedSubjectDocuments])
 
   const selectedDocumentChapters = useMemo(() => {
-    if (!selectedSubject || !selectedDocumentId) {
+    if (!selectedSubject || !effectiveDocumentId) {
       return []
     }
 
     return getDocumentChapters(
       selectedSubject,
-      selectedDocumentId,
+      effectiveDocumentId,
       mySubjectsById,
     )
-  }, [selectedSubject, selectedDocumentId, mySubjectsById])
+  }, [selectedSubject, effectiveDocumentId, mySubjectsById])
 
   const activePineconeIndexId = useMemo(() => {
     const routeIndexId = String(id ?? '').trim()
@@ -479,6 +497,7 @@ function HomeScreen() {
     const abortControllerRef = useRef(null);
     const audioUrlRef = useRef(null);
     const audioEventHandlersRef = useRef({ onended: null, onerror: null });
+    const chatGenerationRef = useRef(0);
     const [predefinedQuestion, setPredefinedQuestion] = useState('');
     const [learningMaterial, setLearningMaterial] = useState(
       '¿Qué vas a aprender hoy?',
@@ -601,10 +620,15 @@ function HomeScreen() {
             setQuestion(trimmedQuery);
 
             const sendFromUrl = async () => {
+                const generation = chatGenerationRef.current + 1
+                chatGenerationRef.current = generation
                 const userMessage = { type: 'question', content: trimmedQuery };
                 setMessages(prev => [...prev, userMessage]);
                 try {
                     const res = await sendChatQuestion(trimmedQuery)
+                    if (chatGenerationRef.current !== generation) {
+                      return
+                    }
                     if (!res) {
                       setMessages((prev) => prev.slice(0, -1))
                       return
@@ -613,6 +637,9 @@ function HomeScreen() {
                     const aiMessage = { type: 'answer', content: res.data.message };
                     setMessages(prev => [...prev, aiMessage]);
                 } catch (error) {
+                    if (chatGenerationRef.current !== generation) {
+                      return
+                    }
                     console.error(error);
                     const errorMessage = {
                       type: 'answer',
@@ -620,7 +647,9 @@ function HomeScreen() {
                     };
                     setMessages(prev => [...prev, errorMessage]);
                 } finally {
-                    setQuestion("");
+                    if (chatGenerationRef.current === generation) {
+                      setQuestion("");
+                    }
                     setHasSentQueryFromUrl(true);
                 }
             };
@@ -758,6 +787,7 @@ function HomeScreen() {
       }
 
       cleanupAudio();
+      chatGenerationRef.current += 1
       setMessages([]);
       setShowSubheading(false);
       setShowQuestions(false);
@@ -780,6 +810,8 @@ function HomeScreen() {
           return;
         }
 
+        const generation = chatGenerationRef.current + 1
+        chatGenerationRef.current = generation
         const userMessage = { type: 'question', content: question };
         setMessages(prev => [...prev, userMessage]);
         
@@ -787,6 +819,9 @@ function HomeScreen() {
         setQuestion("");
         try {
           const res = await sendChatQuestion(currentQuestion)
+          if (chatGenerationRef.current !== generation) {
+            return
+          }
           if (!res) {
             setMessages((prev) => prev.slice(0, -1))
             return
@@ -795,6 +830,9 @@ function HomeScreen() {
           const aiMessage = { type: 'answer', content: res.data.message };
           setMessages(prev => [...prev, aiMessage]);
         } catch (error) {
+            if (chatGenerationRef.current !== generation) {
+              return
+            }
             console.error(error);
             const errorMessage = {
               type: 'answer',
@@ -811,8 +849,14 @@ function HomeScreen() {
       }
 
       const subjectId = String(subject._id)
+      const fullSubject = mySubjectsById.get(subjectId) || subject
+      const documents = getSubjectDocuments(fullSubject)
+      const onlyDocumentId = documents.length === 1
+        ? getDocumentKey(documents[0])
+        : null
+
       setSelectedChapter(null)
-      setSelectedDocumentId(null)
+      setSelectedDocumentId(onlyDocumentId || null)
       setSelectedSubjectId(subjectId)
     }
 
@@ -823,12 +867,24 @@ function HomeScreen() {
     }
 
     const handleBackToDocuments = () => {
+      if (selectedSubjectDocuments.length <= 1) {
+        handleBackToSubjects()
+        return
+      }
+
       setSelectedDocumentId(null)
       setSelectedChapter(null)
     }
 
     const handleBackToChapters = () => {
       setSelectedChapter(null)
+    }
+
+    const handleBackFromChat = () => {
+      chatGenerationRef.current += 1
+      cleanupAudio()
+      setMessages([])
+      setQuestion('')
     }
 
     const handleDocumentBubbleClick = (doc) => {
@@ -863,12 +919,16 @@ function HomeScreen() {
           return;
         }
 
-        // Add the question to messages immediately
+        const generation = chatGenerationRef.current + 1
+        chatGenerationRef.current = generation
         const userMessage = { type: 'question', content: selectedQuestion };
         setMessages(prev => [...prev, userMessage]);
 
         try {
           const res = await sendChatQuestion(selectedQuestion)
+          if (chatGenerationRef.current !== generation) {
+            return
+          }
           if (!res) {
             setMessages((prev) => prev.slice(0, -1))
             return
@@ -877,6 +937,9 @@ function HomeScreen() {
           const aiMessage = { type: 'answer', content: res.data.message };
           setMessages(prev => [...prev, aiMessage]);
         } catch (error) {
+            if (chatGenerationRef.current !== generation) {
+              return
+            }
             console.error(error);
             const errorMessage = {
               type: 'answer',
@@ -1030,14 +1093,16 @@ function HomeScreen() {
                                 onClick={
                                   selectedChapter
                                     ? handleBackToChapters
-                                    : selectedDocumentId
+                                    : effectiveDocumentId
+                                      && !hasSingleSubjectDocument
                                       ? handleBackToDocuments
                                       : handleBackToSubjects
                                 }
                               >
                                 {selectedChapter
                                   ? '← Volver a capítulos'
-                                  : selectedDocumentId
+                                  : effectiveDocumentId
+                                    && !hasSingleSubjectDocument
                                     ? '← Volver a documentos'
                                     : '← Volver a materias'}
                               </button>
@@ -1126,7 +1191,7 @@ function HomeScreen() {
                                     </p>
                                   )}
                                 </div>
-                              ) : selectedDocumentId ? (
+                              ) : effectiveDocumentId ? (
                                 selectedDocumentChapters.length > 0 ? (
                                   <div
                                     className={
@@ -1136,20 +1201,26 @@ function HomeScreen() {
                                   >
                                     <p className="home-hub__chapters-label">
                                       Capítulos de{' '}
-                                      {selectedDocument
-                                        ? documentDisplayName(selectedDocument)
-                                        : selectedSubject.title}
+                                      {hasSingleSubjectDocument
+                                        ? selectedSubject.title
+                                        : selectedDocument
+                                          ? documentDisplayName(
+                                            selectedDocument,
+                                          )
+                                          : selectedSubject.title}
                                     </p>
                                     <div
                                       className="home-hub__chapters-list"
                                       role="list"
                                       aria-label={
                                         `Capítulos de ${
-                                          selectedDocument
-                                            ? documentDisplayName(
-                                              selectedDocument,
-                                            )
-                                            : selectedSubject.title
+                                          hasSingleSubjectDocument
+                                            ? selectedSubject.title
+                                            : selectedDocument
+                                              ? documentDisplayName(
+                                                selectedDocument,
+                                              )
+                                              : selectedSubject.title
                                         }`
                                       }
                                     >
@@ -1353,6 +1424,14 @@ function HomeScreen() {
               </div>
             ) : (
               <div className="chat-messages chat-messages--home">
+                <button
+                  type="button"
+                  className="chat-messages__back-btn"
+                  onClick={handleBackFromChat}
+                  aria-label="Volver a preguntas sugeridas"
+                >
+                  ← Volver
+                </button>
                 {messages.map((message, index) => (
                   <div 
                     key={index} 
@@ -1457,6 +1536,7 @@ function HomeScreen() {
                     : effectivePineconeIndexId
                       ? 'Pregunta lo que quieras…'
                       : selectedDocumentId
+                        || hasSingleSubjectDocument
                         ? 'Selecciona un capítulo para preguntar'
                         : selectedSubjectId
                           ? 'Selecciona un documento para continuar'
