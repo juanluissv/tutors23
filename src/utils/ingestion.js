@@ -54,13 +54,14 @@ async function ingestTextToPinecone ({
 		vectorStore,
 	})
 
-	const chunks = splitText(trimmed, 1000, 0)
+	const chunks = splitText(trimmed, 1000, 200)
 	const documents = chunks.map((chunk, i) => new Document({
 		text: chunk,
 		id_: `${resolvedIndexName}-chunk-${i}-${crypto.randomBytes(4).toString('hex')}`,
 		metadata: {
 			...metadata,
 			chunkIndex: i,
+			chunkText: chunk,
 			source: metadata.source ?? resolvedIndexName,
 		},
 	}))

@@ -1,4 +1,7 @@
+import mongoose from 'mongoose'
 import asyncHandler from '../middleware/asyncHandler.js'
+import BookLessons from '../models/bookLessonsModel.js'
+import Subject from '../models/subjectModel.js'
 import {
 	getStudentActiveSubscription,
 	universitySubscriptionNeedsSubjects,
@@ -8,9 +11,30 @@ import { queryChapterTutor } from '../utils/queryChapterTutor.js'
 
 dotenv.config()
 
+async function resolveAccessibleLessonId (studentId, lessonId) {
+	if (!lessonId || !mongoose.Types.ObjectId.isValid(lessonId)) {
+		return undefined
+	}
+
+	const lesson = await BookLessons.findById(lessonId).select('subject')
+	if (!lesson?.subject) {
+		return undefined
+	}
+
+	const subject = await Subject.findById(lesson.subject).select('students')
+	const isEnrolled = (subject?.students || []).some(
+		(id) => String(id) === String(studentId),
+	)
+	if (!isEnrolled) {
+		return null
+	}
+
+	return String(lesson._id)
+}
+
 // POST /api/chat
 const getChat = asyncHandler(async (req, res) => {
-	const { question, id } = req.body
+	const { question, id, lessonId } = req.body
 
 	const questionTrim = String(question ?? '').trim()
 	if (!questionTrim) {
@@ -38,10 +62,20 @@ const getChat = asyncHandler(async (req, res) => {
 		throw new Error('Pinecone index id is required')
 	}
 
+	const resolvedLessonId = await resolveAccessibleLessonId(
+		req.student._id,
+		String(lessonId ?? '').trim(),
+	)
+	if (resolvedLessonId === null) {
+		res.status(403)
+		throw new Error('Not authorized to use this chapter tutor')
+	}
+
 	try {
 		const { message } = await queryChapterTutor({
 			indexName,
 			question: questionTrim,
+			lessonId: resolvedLessonId,
 		})
 		res.json({ message })
 	} catch (err) {

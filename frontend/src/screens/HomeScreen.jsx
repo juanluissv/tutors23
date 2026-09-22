@@ -522,9 +522,12 @@ function HomeScreen() {
         return null
       }
 
+      const lessonId = String(selectedChapterLesson?._id ?? '').trim()
+
       return getChat({
         question: trimmedQuestion,
         id: pineconeIndexId,
+        lessonId: lessonId || undefined,
       })
     }
 
