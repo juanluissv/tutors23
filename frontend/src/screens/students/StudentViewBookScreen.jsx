@@ -362,7 +362,7 @@ function StudentViewBookScreen () {
 
 	if (!isValidSubjectParam) {
 		return (
-			<div className='chat-app'>
+			<div className='chat-app ask-screen'>
 				<div className='main-container'>
 					<Sidebar
 						isOpen={isSidebarOpen}
@@ -401,7 +401,7 @@ function StudentViewBookScreen () {
 
 	if (!isLoadingSubjects && !currentSubject) {
 		return (
-			<div className='chat-app'>
+			<div className='chat-app ask-screen'>
 				<div className='main-container'>
 					<Sidebar
 						isOpen={isSidebarOpen}
@@ -443,7 +443,7 @@ function StudentViewBookScreen () {
 		: 'Materia'
 
 	return (
-		<div className='chat-app'>
+		<div className='chat-app ask-screen'>
 			<div className='main-container'>
 				<Sidebar
 					isOpen={isSidebarOpen}

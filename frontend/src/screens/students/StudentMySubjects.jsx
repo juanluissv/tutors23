@@ -156,7 +156,7 @@ function StudentMySubjects () {
 		!isLoadingProfile && !canViewCourses
 
 	return (
-		<div className='chat-app ask-screen'>
+		<div className='chat-app ask-screen chat-app--student-subject-cards'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 				<div className='main-content'>

@@ -290,7 +290,7 @@ function StudentPreviousQuestionsScreen () {
 			: null
 
 	return (
-		<div className='chat-app ask-screen'>
+		<div className='chat-app ask-screen chat-app--student-previous-questions'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 				<div className='main-content'>

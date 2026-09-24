@@ -486,7 +486,7 @@ function StudentWatchAnswerScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area'>
-						<div className='watch-new watch-new--medium-player'>
+						<div className='watch-new watch-new--medium-player watch-new--student-answer'>
 							{/* <Link
 								to='/students/newanswers'
 								className='watch-new__back'

@@ -1045,10 +1045,13 @@ function HomeScreen() {
       <div className="main-container">
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         
-        {/* Overlay for mobile - click to close sidebar */}
-        {isSidebarOpen && window.innerWidth <= 768 && (
-          <div className="sidebar-overlay" onClick={closeSidebarOnMobile}></div>
-        )}
+        {isSidebarOpen ? (
+          <div
+            className="sidebar-overlay"
+            onClick={closeSidebarOnMobile}
+            aria-hidden="true"
+          />
+        ) : null}
 
         {/* Main Content */}
         <div className="main-content">

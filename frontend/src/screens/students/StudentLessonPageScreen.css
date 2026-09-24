@@ -1258,7 +1258,7 @@
 	align-self: center;
 	margin-bottom: 4px;
 	position: relative;
-	left: 10%;
+	left: 0;
 }
 
 .chat-app--lesson-doc .lesson-doc-tutor-circle-shell {
@@ -1269,7 +1269,7 @@
 	align-self: center;
 	flex-shrink: 0;
 	position: relative;
-	left: 10%;
+	left: 0;
 	border-radius: 50%;
 	overflow: hidden;
 	border: 5px solid #fff;
@@ -1428,7 +1428,7 @@
 	width: min(94%, 280px);
 	margin: 16px auto 0;
 	position: relative;
-	left: 10%;
+	left: 0;
 }
 
 .lesson-doc-practice-card {
@@ -2185,6 +2185,14 @@
 	background-color: #4f46e5;
 }
 
+@media (min-width: 769px) {
+	.chat-app--lesson-doc .lesson-doc-tutor-video .fixed-video-controls,
+	.chat-app--lesson-doc .lesson-doc-tutor-circle-shell,
+	.chat-app--lesson-doc .lesson-doc-practice-stack {
+		left: 10%;
+	}
+}
+
 @media (min-width: 1443px) {
 	.chat-app--lesson-doc .lesson-doc__toolbar,
 	.chat-app--lesson-doc .lesson-doc__pages,
@@ -2226,5 +2234,207 @@
 		transform: none !important;
 		font-size: 1.02rem !important;
 		padding: 8px 12px !important;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-tutor-video.fixed-video-bottom-right,
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video.fixed-video-bottom-right.lesson-doc-tutor-video--practice,
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video.fixed-video-bottom-right.lesson-doc-tutor-video--answer {
+		top: auto;
+		bottom: max(16px, env(safe-area-inset-bottom));
+		left: 50%;
+		right: auto !important;
+		transform: translateX(-50%);
+		width: min(calc(100vw - 24px), 280px);
+		max-width: min(calc(100vw - 24px), 280px);
+		margin-left: 0;
+		margin-right: 0;
+		align-items: center;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-tutor-video .fixed-video-controls,
+	.chat-app--lesson-doc .lesson-doc-tutor-video .lesson-doc-tutor-circle-shell,
+	.chat-app--lesson-doc .lesson-doc-tutor-video .lesson-doc-practice-stack {
+		left: 0;
+		right: auto;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-tutor-video .fixed-video-controls {
+		width: 100%;
+		justify-content: center;
+		align-self: center;
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-tutor-video .fixed-video-button {
+		width: 52px;
+		height: 52px;
+		min-width: 52px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		box-shadow:
+			0 4px 16px rgba(15, 23, 42, 0.16),
+			0 0 0 1px rgba(99, 102, 241, 0.12);
+	}
+
+	/* During the lesson: audio only — hide the tutor circle on phones */
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video:not(.lesson-doc-tutor-video--practice)
+		.lesson-doc-tutor-circle-shell {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
+		left: auto;
+		opacity: 0;
+		pointer-events: none;
+		box-shadow: none;
+	}
+
+	/* During practice exam: show the tutor circle again on phones */
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video--practice
+		.lesson-doc-tutor-circle-shell,
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video--answer
+		.lesson-doc-tutor-circle-shell {
+		position: relative;
+		left: 0;
+		width: 132px;
+		height: 132px;
+		max-width: 38vw;
+		max-height: 38vw;
+		margin: 0 auto 10px;
+		padding: 0;
+		overflow: hidden;
+		clip: auto;
+		clip-path: none;
+		white-space: normal;
+		opacity: 1;
+		pointer-events: auto;
+		align-self: center;
+		flex-shrink: 0;
+		border-radius: 50%;
+		border: 4px solid #fff;
+		box-shadow:
+			0 10px 28px rgba(15, 23, 42, 0.18),
+			0 4px 14px rgba(99, 102, 241, 0.12);
+		background: #fff;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-practice-stack {
+		width: 100%;
+		max-width: 280px;
+		margin-top: 10px;
+		margin-left: auto;
+		margin-right: auto;
+		align-items: center;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-practice-btn {
+		width: 100%;
+		max-width: 100%;
+		align-self: center;
+	}
+
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video--practice
+		.lesson-doc-practice-stack,
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video--answer
+		.lesson-doc-practice-stack {
+		left: 0;
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video--practice.fixed-video-bottom-right,
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video--answer.fixed-video-bottom-right {
+		width: min(calc(100vw - 20px), 360px);
+		max-width: min(calc(100vw - 20px), 360px);
+		align-items: center;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-practice-card {
+		width: 100%;
+		box-sizing: border-box;
+		padding: 18px 20px 16px;
+		border-radius: 24px;
+		text-align: center;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-practice-card::before {
+		display: none;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-practice-card__kicker {
+		justify-content: center;
+		font-size: 0.75rem;
+		margin-bottom: 10px;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-practice-card__badge {
+		width: 24px;
+		height: 24px;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-practice-card__text {
+		font-size: 0.96875rem;
+		line-height: 1.52;
+		text-align: center;
+	}
+
+	.chat-app--lesson-doc .lesson-doc-practice-nav,
+	.chat-app--lesson-doc .lesson-doc-practice-return {
+		width: 100%;
+		max-width: 100%;
+		align-self: center;
+	}
+
+	.chat-app--lesson-doc .lesson-doc--practice::before {
+		content: '';
+		position: fixed;
+		inset: 0;
+		z-index: 1500;
+		background: rgba(248, 250, 252, 0.42);
+		backdrop-filter: blur(7px);
+		-webkit-backdrop-filter: blur(7px);
+		pointer-events: none;
+		animation: lesson-doc-practice-backdrop-in 0.3s ease;
+	}
+
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video--practice.fixed-video-bottom-right,
+	.chat-app--lesson-doc
+		.lesson-doc-tutor-video--answer.fixed-video-bottom-right {
+		z-index: 2001;
+		filter: none;
+	}
+
+	.chat-app--lesson-doc .lesson-doc {
+		padding-bottom: 96px;
+	}
+}
+
+@keyframes lesson-doc-practice-backdrop-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
 	}
 }

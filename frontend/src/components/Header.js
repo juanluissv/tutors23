@@ -5,6 +5,7 @@ import { logoutStudent } from '../slices/student/authStudentSlice'
 import { useLogoutMutation } from '../slices/student/studentApiSlice'
 
 const userIconSrc = `${process.env.PUBLIC_URL}/user.svg`
+const menuIconSrc = `${process.env.PUBLIC_URL}/burg.svg`
 
 const LogoutIcon = () => (
 	<svg
@@ -25,8 +26,8 @@ const LogoutIcon = () => (
 )
 
 function Header({
-	isSidebarOpen: _isSidebarOpen,
-	toggleSidebar: _toggleSidebar,
+	isSidebarOpen = false,
+	toggleSidebar,
 }) {
 	const navigate = useNavigate()
 	const dispatch = useDispatch()
@@ -83,6 +84,21 @@ function Header({
 
 	return (
 		<header className="header header-centered">
+			{toggleSidebar ? (
+				<button
+					type="button"
+					className="toggle-sidebar-button header-button"
+					onClick={toggleSidebar}
+					aria-expanded={isSidebarOpen ? 'true' : 'false'}
+					aria-label={
+						isSidebarOpen
+							? 'Close navigation menu'
+							: 'Open navigation menu'
+					}
+				>
+					<img src={menuIconSrc} alt="" width="20" height="20" />
+				</button>
+			) : null}
 			<div className="header-left">
 				<button
 					type="button"

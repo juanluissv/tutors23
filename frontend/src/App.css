@@ -877,12 +877,17 @@
 }
 
 .toggle-sidebar-button {
+  display: none;
   padding: 8px !important;
 }
 
 .toggle-sidebar-button img {
   width: 20px;
   height: 20px;
+}
+
+.chat-app--login .toggle-sidebar-button {
+  display: none !important;
 }
 
 .header-left button:hover {
@@ -4261,6 +4266,56 @@
     margin: 22px -2px -2px;
     padding: 18px 14px 20px;
   }
+
+  .chat-app--student-login .login-card {
+    padding: 24px 18px 20px;
+    border-radius: 22px;
+  }
+
+  .chat-app--student-login .login-card__header {
+    margin-bottom: 20px;
+  }
+
+  .chat-app--student-login .login-card__subtitle {
+    max-width: 260px;
+  }
+
+  .chat-app--student-login .login-screen--register .login-card__subtitle {
+    max-width: 100%;
+  }
+
+  .chat-app--student-login .login-form {
+    gap: 16px;
+  }
+
+  .chat-app--student-login .login-submit {
+    padding: 14px 18px;
+  }
+
+  .chat-app--student-login .login-card__teacher-gateway {
+    margin: 18px 0 0;
+    padding: 16px 12px 16px;
+  }
+
+  .chat-app--student-login .login-card__teacher-gateway-lead {
+    margin-bottom: 12px;
+  }
+
+  .chat-app--student-login .login-card__teacher-gateway-btn {
+    gap: 8px;
+    padding: 12px 14px;
+    font-size: 0.875rem;
+  }
+
+  .chat-app--student-login .login-card__teacher-gateway-btn-label {
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .chat-app--student-login .content-area--login {
+    padding-top: 12px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
 }
 
 /* Login: sidebar shows icons but nav is inert (no routing / accordion) */
@@ -5118,6 +5173,25 @@
     min-height: 210px;
   }
 
+  .chat-app--student-subject-cards .teacher-subjects-grid {
+    width: calc(100% - 28px);
+    max-width: 430px;
+    margin-inline: auto;
+  }
+
+  .chat-app--student-subject-cards .teacher-subject-card {
+    min-height: 300px;
+    padding-bottom: 24px;
+  }
+
+  .chat-app--student-subject-cards .teacher-subject-card__top {
+    padding-bottom: 18px;
+  }
+
+  .chat-app--student-subject-cards .teacher-subject-card__actions {
+    gap: 12px;
+  }
+
   .teacher-subject-card__row {
     grid-template-columns: 1fr;
   }
@@ -5471,6 +5545,24 @@ a.qa-timeline__video {
 
   .qa-timeline__video {
     border-radius: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-app--student-previous-questions .qa-timeline-page__title,
+  .chat-app--student-previous-questions .qa-timeline-page__subtitle,
+  .chat-app--student-previous-questions .qa-timeline__card,
+  .chat-app--student-previous-questions .answers-heading {
+    text-align: center;
+  }
+
+  .chat-app--student-previous-questions .qa-timeline-page__subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .chat-app--student-previous-questions .pagination--answers {
+    justify-content: center;
   }
 }
 
@@ -6049,6 +6141,10 @@ a.qa-timeline__video {
     font-size: 1.5rem;
   }
 
+  .new-answers-page__subtitle {
+    margin-bottom: 28px;
+  }
+
   .new-answers__grid {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -6057,6 +6153,58 @@ a.qa-timeline__video {
   .new-answers__pair {
     grid-template-columns: 1fr;
     gap: 0;
+    justify-items: center;
+  }
+
+  .new-answers__pair--single {
+    grid-template-columns: minmax(0, 360px);
+  }
+
+  .new-answers__pair .new-answers__card {
+    width: 100%;
+    max-width: 360px;
+    padding: 18px 16px 20px;
+    border-radius: 18px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .new-answers__pair .new-answers__card-head {
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .new-answers__pair .new-answers__card-title {
+    font-size: 0.975rem;
+    margin-bottom: 10px;
+  }
+
+  .new-answers__video {
+    aspect-ratio: 16 / 10;
+    margin-bottom: 10px;
+    border-radius: 12px;
+  }
+
+  .new-answers__play-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .new-answers__pair .new-answers__card-text {
+    font-size: 0.8125rem;
+    margin-bottom: 6px;
+  }
+
+  .new-answers__pair .new-answers__meta {
+    margin-bottom: 12px;
+    font-size: 0.6875rem;
+  }
+
+  .new-answers__pair .new-answers__watch {
+    align-self: center;
+    padding: 8px 16px;
+    font-size: 0.75rem;
   }
 
   .new-answers__connector {
@@ -6085,13 +6233,45 @@ a.qa-timeline__video {
 }
 
 @media (max-width: 480px) {
-  .new-answers__card {
-    padding: 18px 16px 22px;
+  .new-answers__pair--single {
+    grid-template-columns: minmax(0, 320px);
+  }
+
+  .new-answers__pair .new-answers__card {
+    max-width: 320px;
+    padding: 16px 14px 18px;
     border-radius: 16px;
   }
 
+  .new-answers__card-title {
+    font-size: 0.925rem;
+    margin-bottom: 8px;
+  }
+
+  .new-answers__tag,
+  .new-answers__pill {
+    font-size: 0.625rem;
+    padding: 3px 8px;
+  }
+
   .new-answers__video {
-    border-radius: 12px;
+    aspect-ratio: 16 / 9;
+    max-height: 148px;
+    border-radius: 10px;
+  }
+
+  .new-answers__play-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .new-answers__watch {
+    padding: 7px 14px;
+    font-size: 0.6875rem;
+  }
+
+  .new-answers__connector {
+    height: 48px;
   }
 }
 
@@ -8502,12 +8682,11 @@ a.qa-timeline__video {
     margin-left: 0;
   }
 
-  /* Login: keep collapsed rail visible; toggle is a no-op in LoginScreen */
-  .chat-app--login .sidebar.sidebar-closed {
-    transform: translateX(0);
-    width: 72px;
-    min-width: 72px;
-    max-width: 72px;
+  /* Student login: no sidebar rail on phones — the card needs the full width */
+  .chat-app--student-login .sidebar,
+  .chat-app--student-login .sidebar.sidebar-closed,
+  .chat-app--student-login .sidebar-slot {
+    display: none !important;
   }
 
   /* Main content takes full width */
@@ -8520,6 +8699,55 @@ a.qa-timeline__video {
     margin-left: 72px !important;
     width: calc(100% - 72px) !important;
     max-width: none;
+  }
+
+  .chat-app--student-login .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100%;
+  }
+
+  .chat-app--student-login .content-area--login {
+    justify-content: safe center;
+    align-items: center;
+    padding:
+      16px
+      max(16px, env(safe-area-inset-right))
+      max(24px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .chat-app--student-login .content-area--login.content-area--login-scroll {
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .chat-app--student-login .center-content2.login-screen {
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 4px 0 12px;
+  }
+
+  .chat-app--student-login .center-content2.login-screen--register {
+    max-width: 100%;
+  }
+
+  .chat-app--student-login
+    .content-area--login-scroll
+    .center-content2.login-screen--offset-up-10 {
+    margin-top: 0;
+  }
+
+  .chat-app--student-login .login-input {
+    font-size: 16px;
+  }
+
+  .chat-app--student-login .header {
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
   }
 
   /* Header adjustments */
@@ -8543,6 +8771,14 @@ a.qa-timeline__video {
 
   .toggle-sidebar-button {
     display: flex !important;
+  }
+
+  .header-centered .toggle-sidebar-button {
+    position: absolute;
+    left: max(12px, env(safe-area-inset-left));
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 42;
   }
 
   /* Main heading */
@@ -9987,6 +10223,15 @@ a.upload-card {
 
   .watch-new__player {
     border-radius: 18px;
+  }
+
+  .watch-new.watch-new--student-answer .watch-new__player {
+    width: 92%;
+  }
+
+  .watch-new.watch-new--student-answer {
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .watch-new__volume {

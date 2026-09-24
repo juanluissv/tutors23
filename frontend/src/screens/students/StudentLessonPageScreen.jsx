@@ -1574,7 +1574,7 @@ function StudentLessonPageScreen () {
 				: null))
 
 	const renderShell = (children) => (
-		<div className='chat-app chat-app--lesson-doc'>
+		<div className='chat-app chat-app--lesson-doc ask-screen'>
 			<div className='main-container'>
 				<LayoutSidebar
 					isOpen={isSidebarOpen}

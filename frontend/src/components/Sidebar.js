@@ -710,6 +710,14 @@ function Sidebar ({ isOpen, toggleSidebar }) {
   }, [isOpen])
 
   useEffect(() => {
+    if (window.innerWidth <= 768 && isOpen) {
+      toggleSidebar()
+    }
+    // Close the drawer after navigating on phones.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname])
+
+  useEffect(() => {
     const handleResize = () => {
       if (!canExpandSidebarOnHover()) {
         setIsHoverExpanded(false)

@@ -79,7 +79,7 @@ function RegisterScreen () {
 	}
 
 	return (
-		<div className='chat-app chat-app--login ask-screen'>
+		<div className='chat-app chat-app--login chat-app--student-login ask-screen'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={handleToggleSidebar} />
 				<div className='main-content'>

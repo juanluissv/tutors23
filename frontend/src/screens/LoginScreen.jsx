@@ -51,7 +51,7 @@ function LoginScreen () {
 
 
 	return (
-		<div className='chat-app chat-app--login ask-screen'>
+		<div className='chat-app chat-app--login chat-app--student-login ask-screen'>
 			<div className='main-container'>
 				<Sidebar isOpen={isSidebarOpen} toggleSidebar={handleToggleSidebar} />
 				<div className='main-content'>
@@ -141,7 +141,7 @@ function LoginScreen () {
 									role='navigation'
 									aria-label='Inicio de sesión de profesores'
 								>
-									<div className='login-card__teacher-gateway-accent' aria-hidden /> <br />
+									<div className='login-card__teacher-gateway-accent' aria-hidden />
 									{/* <p className='login-card__teacher-gateway-kicker'>
 										Educators
 									</p> */}
