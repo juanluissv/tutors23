@@ -86,6 +86,7 @@ function LoginScreen () {
 											className='login-input'
 											placeholder='ej. alex.rivera.4821'
 											autoComplete='username'
+											disabled={isLoading}
 											onChange={(e) => setUsername(e.target.value)}
 											value={username}
 										/>
@@ -101,6 +102,7 @@ function LoginScreen () {
 											className='login-input'
 											placeholder='••••••••'
 											autoComplete='current-password'
+											disabled={isLoading}
 											onChange={(e) => setPassword(e.target.value)}
 											value={password}
 										/>
@@ -126,8 +128,17 @@ function LoginScreen () {
 										id='login-button'
 										name='login-button'
 										className='login-submit'
+										disabled={isLoading}
+										aria-busy={isLoading}
 									>
-										Iniciar sesión
+										{isLoading ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Iniciando sesión…</span>
+											</span>
+										) : (
+											'Iniciar sesión'
+										)}
 									</button>
 								</form>
 								<p className='login-card__footer'>

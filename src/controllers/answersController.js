@@ -13,6 +13,7 @@ import {
     getPublicBookUrlFromKey,
 } from '../config/s3Client.js'
 import { getStudentActiveSubscription } from './subscriptionController.js'
+import { denyIfSchoolAdminCannotAccessSchool } from '../utils/schoolAdminAuth.js'
 
 // POST /api/answers/teacher/question/:questionId — text answer (description only)
 const createTeacherAnswerForQuestion = asyncHandler(async (req, res) => {
@@ -377,14 +378,6 @@ async function verifySchoolAdminSubjectAccess (req, res, subjectId) {
         throw new Error('School admin not found')
     }
 
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== String(subject.school)
-    ) {
-        res.status(403)
-        throw new Error('Not authorized to view content for this subject')
-    }
-
     const school = await School.findById(subject.school)
         .select('admin')
         .lean()
@@ -394,13 +387,12 @@ async function verifySchoolAdminSubjectAccess (req, res, subjectId) {
         throw new Error('School not found')
     }
 
-    if (
-        !school.admin
-        || String(school.admin) !== String(req.schoolAdmin._id)
-    ) {
-        res.status(403)
-        throw new Error('Not authorized to view content for this subject')
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to view content for this subject',
+    )
 }
 
 // GET /api/answers/schooladmin/:answerId

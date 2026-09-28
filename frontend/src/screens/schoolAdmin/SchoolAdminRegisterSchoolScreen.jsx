@@ -38,6 +38,10 @@ function SchoolAdminRegisterSchoolScreen () {
 	useEffect(() => {
 		if (!schoolAdminInfo) {
 			navigate('/schooladmins/login', { replace: true })
+			return
+		}
+		if (schoolAdminInfo.role === 'superadmin') {
+			navigate('/schooladmins/mysubjects', { replace: true })
 		}
 	}, [schoolAdminInfo, navigate])
 

@@ -658,6 +658,7 @@ function SchoolAdminCreateTutor () {
 	const schoolId = schoolAdminInfo
 		? resolveSchoolId(schoolAdminInfo.school)
 		: null
+	const isSuperAdmin = schoolAdminInfo?.role === 'superadmin'
 
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
@@ -1887,9 +1888,10 @@ function SchoolAdminCreateTutor () {
 																)}
 															</strong>
 															. Genera el texto del
-															tutor, videos de práctica,
-															guiones y archivos por
-															capítulo.
+															tutor
+															{isSuperAdmin
+																? ', videos de práctica, guiones y archivos por capítulo.'
+																: ' y preguntas sugeridas por capítulo.'}
 														</>
 													)
 													: 'Selecciona un documento fuente arriba para empezar el flujo del tutor.'}
@@ -1917,7 +1919,9 @@ function SchoolAdminCreateTutor () {
 											<p className='view-book__summary-hint'>
 												{readyCount === 0
 													? 'Primero genera lecciones web para este documento y luego crea tutores con IA a partir de ellas.'
-													: `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas · ${filteredPracticeVideosReadyCount} tienen todos los videos de práctica de HeyGen · ${filteredVideoScriptReadyCount} tienen guion de video · ${filteredVideoAudioReadyCount} tienen audio de narración · ${filteredSceneIllustrationsReadyCount} tienen ilustraciones de escena · ${filteredTutorVideoReadyCount} tienen video del tutor · ${filteredTutorTranscribeReadyCount} tienen subtítulos.`}
+													: isSuperAdmin
+														? `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas · ${filteredPracticeVideosReadyCount} tienen todos los videos de práctica de HeyGen · ${filteredVideoScriptReadyCount} tienen guion de video · ${filteredVideoAudioReadyCount} tienen audio de narración · ${filteredSceneIllustrationsReadyCount} tienen ilustraciones de escena · ${filteredTutorVideoReadyCount} tienen video del tutor · ${filteredTutorTranscribeReadyCount} tienen subtítulos.`
+														: `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas.`}
 											</p>
 										</div>
 										<Link
@@ -2211,7 +2215,8 @@ function SchoolAdminCreateTutor () {
 																			</a>
 																		</p>
 																	) : null}
-																	{hasTutorVideo && videoMeta?.chapterVideoFileUrl ? (
+																	{isSuperAdmin && hasTutorVideo
+																		&& videoMeta?.chapterVideoFileUrl ? (
 																		<p className='create-tutor__video-status'>
 																			<a
 																				href={videoMeta.chapterVideoFileUrl}
@@ -2229,7 +2234,7 @@ function SchoolAdminCreateTutor () {
 																			</a>
 																		</p>
 																	) : null}
-																	{hasTutorTranscribe
+																	{isSuperAdmin && hasTutorTranscribe
 																		&& transcribeMeta?.chapterTranscribeFileUrl ? (
 																		<p className='create-tutor__transcribe-status'>
 																			<a
@@ -2264,17 +2269,17 @@ function SchoolAdminCreateTutor () {
 																		<p className='create-tutor__questions-status'>
 																			{questionsMeta.count}{' '}
 																			preguntas sugeridas listas
-																			{questionsMeta.clipTotal > 0
+																			{isSuperAdmin && questionsMeta.clipTotal > 0
 																				? ` · ${questionsMeta.clipCount}/${questionsMeta.clipTotal} clips de HeyGen subidos`
 																				: ''}
 																		</p>
 																	) : null}
-																	{videoScriptError ? (
+																	{isSuperAdmin && videoScriptError ? (
 																		<p className='create-tutor__error'>
 																			{videoScriptError}
 																		</p>
 																	) : null}
-																	{hasVideoScript ? (
+																	{isSuperAdmin && hasVideoScript ? (
 																		<p className='create-tutor__video-script-status'>
 																			Guion de video listo
 																			{' '}
@@ -2290,12 +2295,12 @@ function SchoolAdminCreateTutor () {
 																			)
 																		</p>
 																	) : null}
-																	{videoAudioError ? (
+																	{isSuperAdmin && videoAudioError ? (
 																		<p className='create-tutor__error'>
 																			{videoAudioError}
 																		</p>
 																	) : null}
-																	{hasVideoAudio ? (
+																	{isSuperAdmin && hasVideoAudio ? (
 																		<p className='create-tutor__video-audio-status'>
 																			Audio de narración listo
 																			{videoAudioMeta?.videoScriptAudioFileUrl ? (
@@ -2317,12 +2322,12 @@ function SchoolAdminCreateTutor () {
 																			) : null}
 																		</p>
 																	) : null}
-																	{illustrationError ? (
+																	{isSuperAdmin && illustrationError ? (
 																		<p className='create-tutor__error'>
 																			{illustrationError}
 																		</p>
 																	) : null}
-																	{hasAnySceneIllustrations ? (
+																	{isSuperAdmin && hasAnySceneIllustrations ? (
 																		<p className='create-tutor__illustrations-status'>
 																			Ilustraciones de escena listas
 																			{' '}
@@ -2340,7 +2345,7 @@ function SchoolAdminCreateTutor () {
 																			)
 																		</p>
 																	) : null}
-																	{hasCreatomatePending ? (
+																	{isSuperAdmin && hasCreatomatePending ? (
 																		<p className='create-tutor__creatomate-pending-status'>
 																			Render de Creatomate en curso
 																			{creatomatePendingMeta?.creatomateRenderStatus
@@ -2350,7 +2355,7 @@ function SchoolAdminCreateTutor () {
 																			— usa Revisar estado del video.
 																		</p>
 																	) : null}
-																	{animatedVideoStatusMessage ? (
+																	{isSuperAdmin && animatedVideoStatusMessage ? (
 																		<p className={
 																			isVideoAddedToLessonMessage(
 																				animatedVideoStatusMessage,
@@ -2382,17 +2387,17 @@ function SchoolAdminCreateTutor () {
 																				) : null}
 																		</p>
 																	) : null}
-																	{animatedVideoError ? (
+																	{isSuperAdmin && animatedVideoError ? (
 																		<p className='create-tutor__error'>
 																			{animatedVideoError}
 																		</p>
 																	) : null}
-																	{videoError ? (
+																	{isSuperAdmin && videoError ? (
 																		<p className='create-tutor__error'>
 																			{videoError}
 																		</p>
 																	) : null}
-																	{transcribeError ? (
+																	{isSuperAdmin && transcribeError ? (
 																		<p className='create-tutor__error'>
 																			{transcribeError}
 																		</p>
@@ -2455,272 +2460,289 @@ function SchoolAdminCreateTutor () {
 																				: 'Generar 10 preguntas sugeridas'}
 																	</span>
 																</button>
-																<button
-																	type='button'
-																	className={
-																		'create-tutor__generate-btn ' +
-																		'create-tutor__generate-btn--practice' +
-																		(!hasSuggestedQuestions
-																			? ' create-tutor__generate-btn--disabled'
-																			: '')
-																	}
-																	disabled={!hasSuggestedQuestions}
-																	title={
-																		!hasSuggestedQuestions
-																			? 'Primero genera las 10 preguntas'
-																			: undefined
-																	}
-																	onClick={() => {
-																		handleTogglePracticePanel(
-																			chapterKey,
-																		)
-																	}}
-																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorVideoUploadGlyph />
-																	</span>
-																	<span className='create-tutor__generate-btn-title'>
-																		{isPracticePanelOpen
-																			? 'Ocultar videos de práctica de HeyGen'
-																			: (arePracticeVideosComplete
-																				? 'Revisar videos de práctica de HeyGen'
-																				: 'Subir videos de práctica de HeyGen')}
-																	</span>
-																	{hasSuggestedQuestions ? (
-																		<span className='create-tutor__generate-btn-hint'>
-																			{questionsMeta.completeCount}/{questionsMeta.count} preguntas completas
+																{isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__generate-btn ' +
+																			'create-tutor__generate-btn--practice' +
+																			(!hasSuggestedQuestions
+																				? ' create-tutor__generate-btn--disabled'
+																				: '')
+																		}
+																		disabled={!hasSuggestedQuestions}
+																		title={
+																			!hasSuggestedQuestions
+																				? 'Primero genera las 10 preguntas'
+																				: undefined
+																		}
+																		onClick={() => {
+																			handleTogglePracticePanel(
+																				chapterKey,
+																			)
+																		}}
+																	>
+																		<span className='create-tutor__generate-btn-icon'>
+																			<TutorVideoUploadGlyph />
 																		</span>
-																	) : (
-																		<span className='create-tutor__generate-btn-hint'>
-																			1 video de pregunta + 1 video de respuesta
+																		<span className='create-tutor__generate-btn-title'>
+																			{isPracticePanelOpen
+																				? 'Ocultar videos de práctica de HeyGen'
+																				: (arePracticeVideosComplete
+																					? 'Revisar videos de práctica de HeyGen'
+																					: 'Subir videos de práctica de HeyGen')}
 																		</span>
-																	)}
-																</button>
-																<button
-																	type='button'
-																	className={
-																		'create-tutor__generate-btn ' +
-																		'create-tutor__generate-btn--video-script' +
-																		(actionDisabled
-																			? ' create-tutor__generate-btn--disabled'
-																			: '')
-																	}
-																	disabled={actionDisabled}
-																	onClick={() =>
-																		void handleGenerateVideoScript(
-																			chapterKey,
+																		{hasSuggestedQuestions ? (
+																			<span className='create-tutor__generate-btn-hint'>
+																				{questionsMeta.completeCount}/{questionsMeta.count} preguntas completas
+																			</span>
+																		) : (
+																			<span className='create-tutor__generate-btn-hint'>
+																				1 video de pregunta + 1 video de respuesta
+																			</span>
 																		)}
-																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
-																	<span className='create-tutor__generate-btn-title'>
-																		{isGeneratingVideoScriptThis
-																			? 'Generando guion de video…'
-																			: hasVideoScript
-																				? 'Regenerar guion de video'
-																				: 'Generar guion de video'}
-																	</span>
-																</button>
-																<button
-																	type='button'
-																	className={
-																		'create-tutor__generate-btn ' +
-																		'create-tutor__generate-btn--video-audio' +
-																		(videoAudioDisabled
-																			? ' create-tutor__generate-btn--disabled'
-																			: '')
-																	}
-																	disabled={videoAudioDisabled}
-																	title={
-																		!hasVideoScript
-																			? 'Primero genera el guion de video'
-																			: undefined
-																	}
-																	onClick={() =>
-																		void handleGenerateVideoAudio(
-																			chapterKey,
-																		)}
-																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
-																	<span className='create-tutor__generate-btn-title'>
-																		{isGeneratingVideoAudioThis
-																			? 'Generando audio del video…'
-																			: hasVideoAudio
-																				? 'Regenerar audio de narración'
-																				: 'Generar audio de narración'}
-																	</span>
-																</button>
-																<button
-																	type='button'
-																	className={
-																		'create-tutor__generate-btn ' +
-																		'create-tutor__generate-btn--illustrations' +
-																		(illustrationsDisabled
-																			? ' create-tutor__generate-btn--disabled'
-																			: '')
-																	}
-																	disabled={illustrationsDisabled}
-																	title={
-																		!hasVideoScript
-																			? 'Primero genera el guion de video'
-																			: 'Usa OpenAI gpt-image-1-mini (~$0.10–0.20 por capítulo)'
-																	}
-																	onClick={() =>
-																		void handleGenerateSceneIllustrations(
-																			chapterKey,
-																			hasSceneIllustrations,
-																		)}
-																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
-																	<span className='create-tutor__generate-btn-title'>
-																		{isGeneratingIllustrationsThis
-																			? 'Generando ilustraciones de escena…'
-																			: hasSceneIllustrations
-																				? 'Regenerar ilustraciones de escena'
-																				: hasAnySceneIllustrations
-																					? 'Terminar ilustraciones restantes'
-																					: 'Generar ilustraciones de escena'}
-																	</span>
-																	<span className='create-tutor__generate-btn-hint'>
-																		Imágenes de OpenAI · una ilustración por escena
-																	</span>
-																</button>
-																<button
-																	type='button'
-																	className={
-																		'create-tutor__generate-btn ' +
-																		'create-tutor__generate-btn--animated-video' +
-																		(animatedVideoDisabled
-																			? ' create-tutor__generate-btn--disabled'
-																			: '')
-																	}
-																	disabled={animatedVideoDisabled}
-																	title={
-																		!hasVideoAudio
-																			? 'Primero genera el audio de narración'
-																			: !hasSceneIllustrations
-																				? 'Consejo: genera primero las ilustraciones de escena para un visual más rico'
-																				: 'Se renderiza con Creatomate (puede tardar varios minutos)'
-																	}
-																	onClick={() =>
-																		void handleGenerateAnimatedVideo(
-																			chapterKey,
-																		)}
-																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
-																	<span className='create-tutor__generate-btn-title'>
-																		{isGeneratingAnimatedVideoThis
-																			? 'Iniciando render en Creatomate…'
-																			: hasCreatomatePending
-																				? 'Iniciar un render nuevo en Creatomate'
+																	</button>
+																) : null}
+																{isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__generate-btn ' +
+																			'create-tutor__generate-btn--video-script' +
+																			(actionDisabled
+																				? ' create-tutor__generate-btn--disabled'
+																				: '')
+																		}
+																		disabled={actionDisabled}
+																		onClick={() =>
+																			void handleGenerateVideoScript(
+																				chapterKey,
+																			)}
+																	>
+																		<span className='create-tutor__generate-btn-icon'>
+																			<TutorGenerateGlyph />
+																		</span>
+																		<span className='create-tutor__generate-btn-title'>
+																			{isGeneratingVideoScriptThis
+																				? 'Generando guion de video…'
+																				: hasVideoScript
+																					? 'Regenerar guion de video'
+																					: 'Generar guion de video'}
+																		</span>
+																	</button>
+																) : null}
+																{isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__generate-btn ' +
+																			'create-tutor__generate-btn--video-audio' +
+																			(videoAudioDisabled
+																				? ' create-tutor__generate-btn--disabled'
+																				: '')
+																		}
+																		disabled={videoAudioDisabled}
+																		title={
+																			!hasVideoScript
+																				? 'Primero genera el guion de video'
+																				: undefined
+																		}
+																		onClick={() =>
+																			void handleGenerateVideoAudio(
+																				chapterKey,
+																			)}
+																	>
+																		<span className='create-tutor__generate-btn-icon'>
+																			<TutorGenerateGlyph />
+																		</span>
+																		<span className='create-tutor__generate-btn-title'>
+																			{isGeneratingVideoAudioThis
+																				? 'Generando audio del video…'
+																				: hasVideoAudio
+																					? 'Regenerar audio de narración'
+																					: 'Generar audio de narración'}
+																		</span>
+																	</button>
+																) : null}
+																{isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__generate-btn ' +
+																			'create-tutor__generate-btn--illustrations' +
+																			(illustrationsDisabled
+																				? ' create-tutor__generate-btn--disabled'
+																				: '')
+																		}
+																		disabled={illustrationsDisabled}
+																		title={
+																			!hasVideoScript
+																				? 'Primero genera el guion de video'
+																				: 'Usa OpenAI gpt-image-1-mini (~$0.10–0.20 por capítulo)'
+																		}
+																		onClick={() =>
+																			void handleGenerateSceneIllustrations(
+																				chapterKey,
+																				hasSceneIllustrations,
+																			)}
+																	>
+																		<span className='create-tutor__generate-btn-icon'>
+																			<TutorGenerateGlyph />
+																		</span>
+																		<span className='create-tutor__generate-btn-title'>
+																			{isGeneratingIllustrationsThis
+																				? 'Generando ilustraciones de escena…'
+																				: hasSceneIllustrations
+																					? 'Regenerar ilustraciones de escena'
+																					: hasAnySceneIllustrations
+																						? 'Terminar ilustraciones restantes'
+																						: 'Generar ilustraciones de escena'}
+																		</span>
+																		<span className='create-tutor__generate-btn-hint'>
+																			Imágenes de OpenAI · una ilustración por escena
+																		</span>
+																	</button>
+																) : null}
+																{isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__generate-btn ' +
+																			'create-tutor__generate-btn--animated-video' +
+																			(animatedVideoDisabled
+																				? ' create-tutor__generate-btn--disabled'
+																				: '')
+																		}
+																		disabled={animatedVideoDisabled}
+																		title={
+																			!hasVideoAudio
+																				? 'Primero genera el audio de narración'
+																				: !hasSceneIllustrations
+																					? 'Consejo: genera primero las ilustraciones de escena para un visual más rico'
+																					: 'Se renderiza con Creatomate (puede tardar varios minutos)'
+																		}
+																		onClick={() =>
+																			void handleGenerateAnimatedVideo(
+																				chapterKey,
+																			)}
+																	>
+																		<span className='create-tutor__generate-btn-icon'>
+																			<TutorGenerateGlyph />
+																		</span>
+																		<span className='create-tutor__generate-btn-title'>
+																			{isGeneratingAnimatedVideoThis
+																				? 'Iniciando render en Creatomate…'
+																				: hasCreatomatePending
+																					? 'Iniciar un render nuevo en Creatomate'
+																					: hasTutorVideo
+																						? 'Regenerar video de Creatomate'
+																						: 'Generar video de Creatomate'}
+																		</span>
+																		<span className='create-tutor__generate-btn-hint'>
+																			Inicia el render en Creatomate · luego revisa el estado del video
+																		</span>
+																	</button>
+																) : null}
+																{isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__generate-btn ' +
+																			'create-tutor__generate-btn--check-video' +
+																			(checkVideoStatusDisabled
+																				? ' create-tutor__generate-btn--disabled'
+																				: '')
+																		}
+																		disabled={checkVideoStatusDisabled}
+																		title={
+																			!hasCreatomatePending
+																				? 'Primero inicia un render en Creatomate'
+																				: 'Revisa si Creatomate terminó y añade el video a la lección'
+																		}
+																		onClick={() =>
+																			void handleCheckVideoStatus(
+																				chapterKey,
+																			)}
+																	>
+																		<span className='create-tutor__generate-btn-icon'>
+																			<TutorGenerateGlyph />
+																		</span>
+																		<span className='create-tutor__generate-btn-title'>
+																			{isCheckingVideoStatusThis
+																				? 'Revisando estado del video…'
+																				: 'Revisar estado del video'}
+																		</span>
+																	</button>
+																) : null}
+																{isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__upload-video-btn' +
+																			(uploadDisabled
+																				? ' create-tutor__upload-video-btn--disabled'
+																				: '')
+																		}
+																		disabled={uploadDisabled}
+																		title={
+																			!hasTutorTxt
+																				? 'Primero genera el archivo de texto del tutor'
+																				: undefined
+																		}
+																		onClick={() =>
+																			handleUploadVideoClick(chapterKey)}
+																	>
+																		<span className='create-tutor__upload-video-btn-icon'>
+																			<TutorVideoUploadGlyph />
+																		</span>
+																		<span className='create-tutor__upload-video-btn-title'>
+																			{isUploadingThis
+																				? 'Subiendo video…'
 																				: hasTutorVideo
-																					? 'Regenerar video de Creatomate'
-																					: 'Generar video de Creatomate'}
-																	</span>
-																	<span className='create-tutor__generate-btn-hint'>
-																		Inicia el render en Creatomate · luego revisa el estado del video
-																	</span>
-																</button>
-																<button
-																	type='button'
-																	className={
-																		'create-tutor__generate-btn ' +
-																		'create-tutor__generate-btn--check-video' +
-																		(checkVideoStatusDisabled
-																			? ' create-tutor__generate-btn--disabled'
-																			: '')
-																	}
-																	disabled={checkVideoStatusDisabled}
-																	title={
-																		!hasCreatomatePending
-																			? 'Primero inicia un render en Creatomate'
-																			: 'Revisa si Creatomate terminó y añade el video a la lección'
-																	}
-																	onClick={() =>
-																		void handleCheckVideoStatus(
-																			chapterKey,
-																		)}
-																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
-																	<span className='create-tutor__generate-btn-title'>
-																		{isCheckingVideoStatusThis
-																			? 'Revisando estado del video…'
-																			: 'Revisar estado del video'}
-																	</span>
-																</button>
-																<button
-																	type='button'
-																	className={
-																		'create-tutor__upload-video-btn' +
-																		(uploadDisabled
-																			? ' create-tutor__upload-video-btn--disabled'
-																			: '')
-																	}
-																	disabled={uploadDisabled}
-																	title={
-																		!hasTutorTxt
-																			? 'Primero genera el archivo de texto del tutor'
-																			: undefined
-																	}
-																	onClick={() =>
-																		handleUploadVideoClick(chapterKey)}
-																>
-																	<span className='create-tutor__upload-video-btn-icon'>
-																		<TutorVideoUploadGlyph />
-																	</span>
-																	<span className='create-tutor__upload-video-btn-title'>
-																		{isUploadingThis
-																			? 'Subiendo video…'
-																			: hasTutorVideo
-																				? 'Reemplazar video del tutor'
-																				: 'Subir video de HeyGen'}
-																	</span>
-																	<span className='create-tutor__upload-video-btn-hint'>
-																		MP4, WebM o MOV · hasta 500 MB
-																	</span>
-																</button>
-																<button
-																	type='button'
-																	className={
-																		'create-tutor__upload-transcribe-btn' +
-																		(transcribeUploadDisabled
-																			? ' create-tutor__upload-transcribe-btn--disabled'
-																			: '')
-																	}
-																	disabled={transcribeUploadDisabled}
-																	title={
-																		!hasTutorVideo
-																			? 'Primero sube el video del tutor'
-																			: undefined
-																	}
-																	onClick={() =>
-																		handleUploadTranscribeClick(chapterKey)}
-																>
-																	<span className='create-tutor__upload-transcribe-btn-icon'>
-																		<TutorTranscribeUploadGlyph />
-																	</span>
-																	<span className='create-tutor__upload-transcribe-btn-title'>
-																		{isUploadingTranscribeThis
-																			? 'Subiendo subtítulos…'
-																			: hasTutorTranscribe
-																				? 'Reemplazar subtítulos'
-																				: 'Subir subtítulos del video'}
-																	</span>
-																	<span className='create-tutor__upload-transcribe-btn-hint'>
-																		SRT de HeyGen · se convierte a VTT
-																	</span>
-																</button>
+																					? 'Reemplazar video del tutor'
+																					: 'Subir video de HeyGen'}
+																		</span>
+																		<span className='create-tutor__upload-video-btn-hint'>
+																			MP4, WebM o MOV · hasta 500 MB
+																		</span>
+																	</button>
+																) : null}
+																{isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__upload-transcribe-btn' +
+																			(transcribeUploadDisabled
+																				? ' create-tutor__upload-transcribe-btn--disabled'
+																				: '')
+																		}
+																		disabled={transcribeUploadDisabled}
+																		title={
+																			!hasTutorVideo
+																				? 'Primero sube el video del tutor'
+																				: undefined
+																		}
+																		onClick={() =>
+																			handleUploadTranscribeClick(chapterKey)}
+																	>
+																		<span className='create-tutor__upload-transcribe-btn-icon'>
+																			<TutorTranscribeUploadGlyph />
+																		</span>
+																		<span className='create-tutor__upload-transcribe-btn-title'>
+																			{isUploadingTranscribeThis
+																				? 'Subiendo subtítulos…'
+																				: hasTutorTranscribe
+																					? 'Reemplazar subtítulos'
+																					: 'Subir subtítulos del video'}
+																		</span>
+																		<span className='create-tutor__upload-transcribe-btn-hint'>
+																			SRT de HeyGen · se convierte a VTT
+																		</span>
+																	</button>
+																) : null}
 															</div>
-															{isPracticePanelOpen
+															{isSuperAdmin
+																&& isPracticePanelOpen
 																&& hasSuggestedQuestions ? (
 																<PracticeVideosPanel
 																	chapterId={chapterKey}

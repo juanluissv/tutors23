@@ -19,18 +19,38 @@ import {
 } from '../../utils/planSemester'
 import '../../App.css'
 
-function translateSemesterFormError (message) {
+function getPlanPeriodLabels (isUniversity) {
+	if (isUniversity) {
+		return {
+			countLabel: 'Número de semestres',
+			blockLabel: (n) => `Semestre ${n}`,
+			hint:
+				'Los cobros mensuales continúan hasta que termine el semestre '
+				+ 'actual. Los estudiantes eligen nuevas materias cuando comienza '
+				+ 'el siguiente semestre.',
+		}
+	}
+	return {
+		blockLabel: (n) => `Año escolar ${n}`,
+	}
+}
+
+function translateSemesterFormError (message, isUniversity) {
 	if (message == null || message === '') {
 		return message
 	}
 	const text = String(message)
 	const semesterMatch = text.match(/^Semester (\d+)/)
 	const semesterLabel = semesterMatch
-		? `Semestre ${semesterMatch[1]}`
+		? isUniversity
+			? `Semestre ${semesterMatch[1]}`
+			: `Año escolar ${semesterMatch[1]}`
 		: null
 
 	if (text.includes('Plans can have between')) {
-		return 'Los planes pueden tener entre 1 y 4 semestres'
+		return isUniversity
+			? 'Los planes pueden tener entre 1 y 4 semestres'
+			: 'Los planes pueden tener entre 1 y 4 años escolares'
 	}
 	if (semesterLabel && text.includes('start date is required')) {
 		return `La fecha de inicio de ${semesterLabel} es obligatoria`
@@ -47,7 +67,9 @@ function translateSemesterFormError (message) {
 	if (semesterLabel && text.includes('must start after semester')) {
 		const prevMatch = text.match(/semester (\d+) ends/)
 		const prevNum = prevMatch ? prevMatch[1] : ''
-		return `${semesterLabel} debe comenzar después de que termine el semestre ${prevNum}`
+		return isUniversity
+			? `${semesterLabel} debe comenzar después de que termine el semestre ${prevNum}`
+			: `${semesterLabel} debe comenzar después de que termine el año escolar ${prevNum}`
 	}
 	return text
 }
@@ -120,6 +142,11 @@ function SchoolAdminUpdatePlanScreen () {
 		[plan],
 	)
 
+	const planPeriodLabels = useMemo(
+		() => getPlanPeriodLabels(isUniversityPlan),
+		[isUniversityPlan],
+	)
+
 	const planCohortLabel = useMemo(() => {
 		if (isUniversityPlan) {
 			return getSubjectProgramsLabel(plan?.program, 'Sin definir')
@@ -153,7 +180,12 @@ function SchoolAdminUpdatePlanScreen () {
 				)
 				: []
 		setSelectedSubjectIds(ids)
-		setSemesters(semestersFromPlan(plan))
+		const semesterRows = semestersFromPlan(plan)
+		setSemesters(
+			isUni
+				? semesterRows
+				: resizeSemesterRows(semesterRows, 1),
+		)
 		setFormReady(true)
 	}, [plan])
 
@@ -207,7 +239,9 @@ function SchoolAdminUpdatePlanScreen () {
 
 		const semesterError = validateSemesterForm(semesters)
 		if (semesterError) {
-			toast.error(translateSemesterFormError(semesterError))
+			toast.error(
+				translateSemesterFormError(semesterError, isUniversityPlan),
+			)
 			return
 		}
 
@@ -423,6 +457,8 @@ function SchoolAdminUpdatePlanScreen () {
 											semesters={semesters}
 											disabled={isBusy}
 											idPrefix='schooladmin-update-plan-semester'
+											periodLabels={planPeriodLabels}
+											showPeriodCount={isUniversityPlan}
 											onCountChange={handleSemesterCountChange}
 											onDateChange={handleSemesterDateChange}
 										/>

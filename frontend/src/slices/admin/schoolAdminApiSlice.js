@@ -18,11 +18,31 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['SchoolAdmins'], 
           }),
+        loginSuperAdmin: builder.mutation({
+            query: (data) => ({
+              url: `${SCHOOL_ADMINS_URL}/superlogin`,
+              method: 'POST',
+              body: data,
+            }),
+            invalidatesTags: ['SchoolAdmins'],
+        }),
         registerSchoolAdmin: builder.mutation({
             query: (data) => ({
               url: `${SCHOOL_ADMINS_URL}/register`,
               method: 'POST',
               body: data,
+            }),
+        }),
+        registerSuperAdmin: builder.mutation({
+            query: (data) => ({
+              url: `${SCHOOL_ADMINS_URL}/superregister`,
+              method: 'POST',
+              body: data,
+            }),
+        }),
+        getSchoolsForSuperAdminLogin: builder.query({
+            query: () => ({
+              url: `${SCHOOL_ADMINS_URL}/superadmin/schools`,
             }),
         }),
         logoutSchoolAdmin: builder.mutation({
@@ -204,6 +224,25 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
             query: ({ id, documentId }) => ({
                 url: `${SUBJECTS_URL}/${id}/documents/${documentId}`,
                 method: 'DELETE',
+            }),
+            invalidatesTags: (result) => {
+                const tags = ['Subject']
+                if (result?.school) {
+                    const sid = String(
+                        result.school._id ?? result.school,
+                    )
+                    tags.push(
+                        { type: 'School', id: sid },
+                        { type: 'Subject', id: `SCHOOL_LIST_${sid}` },
+                    )
+                }
+                return tags
+            },
+        }),
+        setMainSubjectDocument: builder.mutation({
+            query: ({ id, documentId }) => ({
+                url: `${SUBJECTS_URL}/${id}/documents/${documentId}/main`,
+                method: 'PUT',
             }),
             invalidatesTags: (result) => {
                 const tags = ['Subject']
@@ -605,7 +644,10 @@ export const schoolAdminApiSlice = apiSlice.injectEndpoints({
 
 export const {
     useLoginSchoolAdminMutation,
+    useLoginSuperAdminMutation,
     useRegisterSchoolAdminMutation,
+    useRegisterSuperAdminMutation,
+    useGetSchoolsForSuperAdminLoginQuery,
     useLogoutSchoolAdminMutation,
     useUpdateSchoolAdminProfileMutation,
     useCreateSchoolMutation,
@@ -616,6 +658,7 @@ export const {
     useUpdateSubjectMutation,
     useUploadSubjectDocumentMutation,
     useDeleteSubjectDocumentMutation,
+    useSetMainSubjectDocumentMutation,
     useUpdateSubjectBookChaptersMutation,
     useGenerateSubjectBookChapterPdfMutation,
     useGenerateBookLessonsFromChapterMutation,

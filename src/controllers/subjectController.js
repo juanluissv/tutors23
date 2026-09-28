@@ -24,6 +24,7 @@ import {
     requireSubjectPrograms,
 } from '../utils/universityProgramHelpers.js';
 import { isUniversitySchool } from '../utils/schoolTypeHelpers.js';
+import { denyIfSchoolAdminCannotAccessSchool } from '../utils/schoolAdminAuth.js';
 
 function parseSubjectSemester (semester, useUniversityPrograms) {
     if (!useUniversityPrograms) {
@@ -74,16 +75,110 @@ async function ensureDocumentsMigrated (subject) {
         uploadedAt: subject.dateCreated || subject.createdAt || new Date(),
     }];
     await subject.save();
+    await ensureMainDocument(subject);
+    await subject.save();
 }
 
 function getPersistedDocuments (subject) {
     return Array.isArray(subject.documents) ? subject.documents : [];
 }
 
-function documentToJson (doc) {
+function resolveMainDocumentId (subject) {
+    const docs = getPersistedDocuments(subject);
+    if (docs.length === 0) {
+        return undefined;
+    }
+
+    const storedMainId = subject.mainDocumentId
+        && String(subject.mainDocumentId).trim() !== ''
+        ? String(subject.mainDocumentId)
+        : null;
+    if (storedMainId) {
+        const matched = docs.find(
+            (doc) => doc._id && String(doc._id) === storedMainId,
+        );
+        if (matched) {
+            return storedMainId;
+        }
+    }
+
+    if (docs.length === 1 && docs[0]?._id) {
+        return String(docs[0]._id);
+    }
+
+    const bookId = subject.bookId && String(subject.bookId).trim() !== ''
+        ? String(subject.bookId).trim()
+        : null;
+    if (bookId) {
+        const matchedByFile = docs.find(
+            (doc) => doc.fileId && String(doc.fileId).trim() === bookId,
+        );
+        if (matchedByFile?._id) {
+            return String(matchedByFile._id);
+        }
+    }
+
+    return docs[0]?._id ? String(docs[0]._id) : undefined;
+}
+
+function resolveMainDocument (subject) {
+    const docs = getPersistedDocuments(subject);
+    if (docs.length === 0) {
+        return null;
+    }
+
+    const mainId = resolveMainDocumentId(subject);
+    if (mainId) {
+        const matched = docs.find(
+            (doc) => doc._id && String(doc._id) === mainId,
+        );
+        if (matched) {
+            return matched;
+        }
+    }
+
+    return docs[0] || null;
+}
+
+function syncBookIdFromMainDocument (subject) {
+    const mainDoc = resolveMainDocument(subject);
+    if (mainDoc?.fileId && String(mainDoc.fileId).trim() !== '') {
+        subject.bookId = String(mainDoc.fileId).trim();
+        return;
+    }
+
+    subject.set('bookId', undefined);
+}
+
+async function ensureMainDocument (subject) {
+    const docs = getPersistedDocuments(subject);
+    if (docs.length === 0) {
+        subject.set('mainDocumentId', undefined);
+        syncBookIdFromMainDocument(subject);
+        return;
+    }
+
+    const mainId = resolveMainDocumentId(subject);
+    const matched = mainId
+        ? docs.find((doc) => doc._id && String(doc._id) === mainId)
+        : null;
+
+    if (matched?._id) {
+        subject.mainDocumentId = matched._id;
+    } else if (docs[0]?._id) {
+        subject.mainDocumentId = docs[0]._id;
+    } else {
+        subject.set('mainDocumentId', undefined);
+    }
+
+    syncBookIdFromMainDocument(subject);
+}
+
+function documentToJson (doc, mainDocumentId) {
     const fileId = doc.fileId && String(doc.fileId).trim() !== ''
         ? String(doc.fileId).trim()
         : undefined;
+    const docId = doc._id ? String(doc._id) : undefined;
     return {
         _id: doc._id,
         fileId,
@@ -97,13 +192,19 @@ function documentToJson (doc) {
             ? getPublicBookUrlFromKey(fileId) || undefined
             : undefined,
         uploadedAt: doc.uploadedAt || undefined,
+        isMain: Boolean(
+            mainDocumentId
+            && docId
+            && String(mainDocumentId) === docId,
+        ),
     };
 }
 
 function getEffectiveDocuments (subject) {
+    const mainDocumentId = resolveMainDocumentId(subject);
     const docs = getPersistedDocuments(subject);
     if (docs.length > 0) {
-        return docs.map((doc) => documentToJson(doc));
+        return docs.map((doc) => documentToJson(doc, mainDocumentId));
     }
 
     const bookId = subject.bookId && String(subject.bookId).trim() !== ''
@@ -120,6 +221,7 @@ function getEffectiveDocuments (subject) {
         label: 'Course book',
         fileUrl: getPublicBookUrlFromKey(bookId) || undefined,
         uploadedAt: subject.dateCreated || subject.createdAt || undefined,
+        isMain: true,
     }];
 }
 
@@ -139,6 +241,13 @@ function resolveChapterSourceDocument (subject, chapter) {
 
     if (docs.length === 1 && docs[0]?.fileId) {
         return docs[0];
+    }
+
+    if (!chapter?.sourceDocumentId) {
+        const mainDoc = resolveMainDocument(subject);
+        if (mainDoc?.fileId && String(mainDoc.fileId).trim() !== '') {
+            return mainDoc;
+        }
     }
 
     if (docs.length === 0) {
@@ -246,10 +355,15 @@ async function appendSubjectDocument (subject, documentFields) {
         uploadedAt: new Date(),
     });
 
-    if (!subject.bookId || String(subject.bookId).trim() === '') {
-        subject.bookId = documentFields.fileId;
+    const newDoc = subject.documents[subject.documents.length - 1];
+    if (
+        !subject.mainDocumentId
+        && newDoc?._id
+    ) {
+        subject.mainDocumentId = newDoc._id;
     }
 
+    syncBookIdFromMainDocument(subject);
     await subject.save();
 }
 
@@ -440,21 +554,12 @@ async function loadSubjectForSchoolAdmin (req, res, subjectId) {
         throw new Error('School not found');
     }
 
-    if (
-        !school.admin
-        || school.admin.toString() !== req.schoolAdmin._id.toString()
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to update this subject');
-    }
-
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== String(subject.school)
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to update this subject');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to update this subject',
+    );
 
     return { subject, schoolAdmin, school };
 }
@@ -518,9 +623,10 @@ async function deleteChapterFileFromS3 (fileKey) {
 }
 
 const subjectToJson = (subject) => {
+    const mainDocumentId = resolveMainDocumentId(subject);
     const documents = getEffectiveDocuments(subject);
-    const firstDocument = documents[0];
-    const bookId = firstDocument?.fileId
+    const mainDocument = documents.find((doc) => doc.isMain) || documents[0];
+    const bookId = mainDocument?.fileId
         || (subject.bookId && String(subject.bookId).trim() !== ''
             ? String(subject.bookId).trim()
             : undefined);
@@ -541,6 +647,7 @@ const subjectToJson = (subject) => {
         teacherEmail: normalizeTeacherEmailsForJson(subject.teacherEmail),
         bookId,
         bookUrl,
+        mainDocumentId,
         documents,
         bookChapters: Array.isArray(subject.bookChapters)
             ? subject.bookChapters.map(bookChapterToJson)
@@ -671,14 +778,6 @@ const getSubjectsBySchool = asyncHandler(async (req, res) => {
         throw new Error('School admin not found');
     }
 
-    if (
-        schoolAdmin.school &&
-        String(schoolAdmin.school) !== String(schoolId)
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to view subjects for this school');
-    }
-
     const school = await School.findById(schoolId);
 
     if (!school) {
@@ -686,10 +785,12 @@ const getSubjectsBySchool = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== req.schoolAdmin._id.toString()) {
-        res.status(403);
-        throw new Error('Not authorized to view subjects for this school');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to view subjects for this school',
+    );
 
     const subjects = await findSubjectsWithGradeLevel({ school: schoolId });
 
@@ -781,18 +882,12 @@ const getSubjectBookForSchoolAdmin = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== req.schoolAdmin._id.toString()) {
-        res.status(403);
-        throw new Error('Not authorized to open this book');
-    }
-
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== String(subject.school)
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to open this book');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to open this book',
+    );
 
     await ensureDocumentsMigrated(subject);
     const sourceDoc = resolveChapterSourceDocument(subject, {});
@@ -985,14 +1080,6 @@ const getSubjectStudentsForSchoolAdmin = asyncHandler(async (req, res) => {
         throw new Error('Subject is not linked to a school');
     }
 
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== subjectSchoolId
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to view students for this subject');
-    }
-
     const school = await School.findById(subjectSchoolId);
 
     if (!school) {
@@ -1000,13 +1087,12 @@ const getSubjectStudentsForSchoolAdmin = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (
-        !school.admin
-        || school.admin.toString() !== req.schoolAdmin._id.toString()
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to view students for this subject');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to view students for this subject',
+    );
 
     res.status(200).json({
         subject: {
@@ -1056,14 +1142,6 @@ const createSubject = asyncHandler(async (req, res) => {
         throw new Error('Invalid school id');
     }
 
-    if (
-        schoolAdmin.school &&
-        String(schoolAdmin.school) !== schoolIdStr
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to create a subject for this school');
-    }
-
     const school = await School.findById(schoolIdStr);
 
     if (!school) {
@@ -1071,10 +1149,12 @@ const createSubject = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== req.schoolAdmin._id.toString()) {
-        res.status(403);
-        throw new Error('Not authorized to create a subject for this school');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to create a subject for this school',
+    );
 
     const useUniversityPrograms = isUniversitySchool(school.schoolType);
 
@@ -1182,18 +1262,12 @@ const updateSubjectById = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== req.schoolAdmin._id.toString()) {
-        res.status(403);
-        throw new Error('Not authorized to update this subject');
-    }
-
-    if (
-        schoolAdmin.school &&
-        String(schoolAdmin.school) !== String(subject.school)
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to update this subject');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to update this subject',
+    );
 
     if (req.body.title !== undefined) {
         if (!req.body.title || String(req.body.title).trim() === '') {
@@ -1472,18 +1546,12 @@ const setSubjectTeacherEmail = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== req.schoolAdmin._id.toString()) {
-        res.status(403);
-        throw new Error('Not authorized to update this subject');
-    }
-
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== String(subject.school)
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to update this subject');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to update this subject',
+    );
 
     const trimmed = String(email).trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(trimmed)) {
@@ -1932,20 +2000,47 @@ const deleteSubjectDocument = asyncHandler(async (req, res) => {
         ? String(doc.fileId).trim()
         : null;
 
+    const wasMain = subject.mainDocumentId
+        && String(subject.mainDocumentId) === String(documentId);
+
     subject.documents.pull(documentId);
 
-    const firstDoc = subject.documents[0];
-    if (firstDoc?.fileId && String(firstDoc.fileId).trim() !== '') {
-        subject.bookId = String(firstDoc.fileId).trim();
-    } else {
-        subject.set('bookId', undefined);
+    if (wasMain || !subject.mainDocumentId) {
+        const nextMain = subject.documents[0];
+        subject.mainDocumentId = nextMain?._id || undefined;
     }
 
+    syncBookIdFromMainDocument(subject);
     await subject.save();
 
     if (fileKey) {
         await deleteChapterFileFromS3(fileKey);
     }
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(200).json(subjectToJson(updated));
+});
+
+// PUT /api/subjects/:id/documents/:documentId/main — protectSchoolAdmin
+const setMainSubjectDocument = asyncHandler(async (req, res) => {
+    const { id, documentId } = req.params;
+    const { subject } = await loadSubjectForSchoolAdmin(req, res, id);
+    await ensureDocumentsMigrated(subject);
+
+    if (!mongoose.Types.ObjectId.isValid(documentId)) {
+        res.status(400);
+        throw new Error('Invalid document id');
+    }
+
+    const doc = subject.documents.id(documentId);
+    if (!doc) {
+        res.status(404);
+        throw new Error('Document not found');
+    }
+
+    subject.mainDocumentId = doc._id;
+    syncBookIdFromMainDocument(subject);
+    await subject.save();
 
     const updated = await findSubjectWithGradeLevel({ _id: id });
     res.status(200).json(subjectToJson(updated));
@@ -1983,20 +2078,47 @@ const deleteSubjectDocumentByTeacher = asyncHandler(async (req, res) => {
         ? String(doc.fileId).trim()
         : null;
 
+    const wasMain = subject.mainDocumentId
+        && String(subject.mainDocumentId) === String(documentId);
+
     subject.documents.pull(documentId);
 
-    const firstDoc = subject.documents[0];
-    if (firstDoc?.fileId && String(firstDoc.fileId).trim() !== '') {
-        subject.bookId = String(firstDoc.fileId).trim();
-    } else {
-        subject.set('bookId', undefined);
+    if (wasMain || !subject.mainDocumentId) {
+        const nextMain = subject.documents[0];
+        subject.mainDocumentId = nextMain?._id || undefined;
     }
 
+    syncBookIdFromMainDocument(subject);
     await subject.save();
 
     if (fileKey) {
         await deleteChapterFileFromS3(fileKey);
     }
+
+    const updated = await findSubjectWithGradeLevel({ _id: id });
+    res.status(200).json(subjectToJson(updated));
+});
+
+// PUT /api/subjects/:id/teacher/documents/:documentId/main — protectTeacher
+const setMainSubjectDocumentByTeacher = asyncHandler(async (req, res) => {
+    const { id, documentId } = req.params;
+    const { subject } = await loadSubjectForTeacher(req, res, id);
+    await ensureDocumentsMigrated(subject);
+
+    if (!mongoose.Types.ObjectId.isValid(documentId)) {
+        res.status(400);
+        throw new Error('Invalid document id');
+    }
+
+    const doc = subject.documents.id(documentId);
+    if (!doc) {
+        res.status(404);
+        throw new Error('Document not found');
+    }
+
+    subject.mainDocumentId = doc._id;
+    syncBookIdFromMainDocument(subject);
+    await subject.save();
 
     const updated = await findSubjectWithGradeLevel({ _id: id });
     res.status(200).json(subjectToJson(updated));
@@ -2018,6 +2140,8 @@ export {
     generateSubjectBookChapterPdf,
     uploadSubjectDocument,
     uploadSubjectDocumentByTeacher,
+    setMainSubjectDocument,
+    setMainSubjectDocumentByTeacher,
     deleteSubjectDocument,
     deleteSubjectDocumentByTeacher,
     uploadSubjectBookChapterFile,

@@ -3,41 +3,55 @@ import {
 	MIN_PLAN_SEMESTERS,
 } from '../utils/planSemester'
 
+const DEFAULT_PERIOD_LABELS = {
+	countLabel: 'Número de semestres',
+	blockLabel: (n) => `Semestre ${n}`,
+	hint:
+		'Los cobros mensuales continúan hasta que termine el semestre '
+		+ 'actual. Los estudiantes eligen nuevas materias cuando comienza '
+		+ 'el siguiente semestre.',
+}
+
 function PlanSemesterFields ({
 	semesters,
 	onCountChange,
 	onDateChange,
 	disabled = false,
 	idPrefix = 'plan-semester',
+	periodLabels = DEFAULT_PERIOD_LABELS,
+	showPeriodCount = true,
 }) {
 	const rows = Array.isArray(semesters) ? semesters : []
 	const count = rows.length || MIN_PLAN_SEMESTERS
+	const labels = { ...DEFAULT_PERIOD_LABELS, ...periodLabels }
 
 	return (
 		<div className='login-field'>
-			<label
-				className='login-label'
-				htmlFor={`${idPrefix}-count`}
-			>
-				Número de semestres
-			</label>
-			<input
-				type='number'
-				id={`${idPrefix}-count`}
-				name='numberOfSemesters'
-				className='login-input'
-				min={MIN_PLAN_SEMESTERS}
-				max={MAX_PLAN_SEMESTERS}
-				step={1}
-				value={count}
-				disabled={disabled}
-				onChange={(e) => onCountChange(e.target.value)}
-			/>
-			<p className='school-grades-levels__hint'>
-				Los cobros mensuales continúan hasta que termine el semestre
-				actual. Los estudiantes eligen nuevas materias cuando comienza
-				el siguiente semestre.
-			</p>
+			{showPeriodCount && (
+				<>
+					<label
+						className='login-label'
+						htmlFor={`${idPrefix}-count`}
+					>
+						{labels.countLabel}
+					</label>
+					<input
+						type='number'
+						id={`${idPrefix}-count`}
+						name='numberOfSemesters'
+						className='login-input'
+						min={MIN_PLAN_SEMESTERS}
+						max={MAX_PLAN_SEMESTERS}
+						step={1}
+						value={count}
+						disabled={disabled}
+						onChange={(e) => onCountChange(e.target.value)}
+					/>
+					<p className='school-grades-levels__hint'>
+						{labels.hint}
+					</p>
+				</>
+			)}
 			{rows.map((row, index) => {
 				const n = index + 1
 				return (
@@ -46,7 +60,7 @@ function PlanSemesterFields ({
 						className='plan-semester-block'
 					>
 						<span className='login-label'>
-							Semestre {n}
+							{labels.blockLabel(n)}
 						</span>
 						<div className='plan-semester-row'>
 							<div className='login-field'>

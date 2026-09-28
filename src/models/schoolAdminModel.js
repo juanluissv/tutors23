@@ -22,7 +22,8 @@ const schoolAdminSchema = mongoose.Schema({
     role: {
         type: String,
         required: true,
-        default: 'admin'
+        enum: ['admin', 'superadmin'],
+        default: 'admin',
     },    
     jobtitle: {
         type: String,

@@ -20,6 +20,10 @@ import {
 } from '../utils/universityProgramHelpers.js';
 import { isUniversitySchool } from '../utils/schoolTypeHelpers.js';
 import { generateUniqueStudentUsername } from '../utils/studentUsername.js';
+import {
+	denyIfSchoolAdminCannotAccessSchool,
+	isSuperAdmin,
+} from '../utils/schoolAdminAuth.js';
 
 const VALID_SCHOOL_TYPES = [
     'primary',
@@ -59,18 +63,11 @@ async function assertSchoolAdminOwnsSchool (res, schoolAdminId, schoolId) {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== String(schoolAdminId)) {
-        res.status(403);
-        throw new Error('Not authorized for this school');
-    }
-
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== String(schoolId)
-    ) {
-        res.status(403);
-        throw new Error('Not authorized for this school');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+    );
 
     return { schoolAdmin, school };
 }
@@ -163,6 +160,11 @@ const createSchool = asyncHandler(async (req, res) => {
         throw new Error('School admin not found');
     }
 
+    if (isSuperAdmin(schoolAdmin)) {
+        res.status(403);
+        throw new Error('Super admins cannot register schools');
+    }
+
     if (schoolAdmin.school) {
         res.status(400);
         throw new Error('School admin already has a school registered');
@@ -204,10 +206,14 @@ const getSchoolById = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== req.schoolAdmin._id.toString()) {
-        res.status(403);
-        throw new Error('Not authorized to view this school');
-    }
+    const schoolAdmin = await SchoolAdmin.findById(req.schoolAdmin._id);
+
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to view this school',
+    );
 
     res.status(200).json(schoolToResponseJson(school));
 });
@@ -228,10 +234,14 @@ const updateSchoolById = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== req.schoolAdmin._id.toString()) {
-        res.status(403);
-        throw new Error('Not authorized to update this school');
-    }
+    const schoolAdmin = await SchoolAdmin.findById(req.schoolAdmin._id);
+
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to update this school',
+    );
 
     const {
         name,

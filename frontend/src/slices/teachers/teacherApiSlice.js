@@ -150,6 +150,25 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
                 return tags
             },
         }),
+        setMainSubjectDocumentByTeacher: builder.mutation({
+            query: ({ id, documentId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/documents/${documentId}/main`,
+                method: 'PUT',
+            }),
+            invalidatesTags: (result, error, { id, teacherId }) => {
+                const tags = []
+                if (id) {
+                    tags.push({ type: 'Subject', id })
+                }
+                if (teacherId) {
+                    tags.push({
+                        type: 'Subject',
+                        id: `TEACHER_LIST_${teacherId}`,
+                    })
+                }
+                return tags
+            },
+        }),
         updateSubjectByTeacher: builder.mutation({
             query: ({ id, teacherId, book, ...body }) => {
                 if (book instanceof File) {
@@ -467,6 +486,7 @@ export const {
     useUpdateSubjectByTeacherMutation,
     useUploadSubjectDocumentByTeacherMutation,
     useDeleteSubjectDocumentByTeacherMutation,
+    useSetMainSubjectDocumentByTeacherMutation,
     useAddStudentEmailToSubjectMutation,
     useGetSubjectStudentsForTeacherQuery,
     useGetCoursesBySubjectForTeacherQuery,

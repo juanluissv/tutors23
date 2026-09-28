@@ -123,6 +123,8 @@ import SchoolAdminBookChapters from './screens/schoolAdmin/SchoolAdminBookChapte
 import SchoolAdminGenerateLessonsScreen from './screens/schoolAdmin/SchoolAdminGenerateLessonsScreen';
 import SchoolAdminViewBookScreen from './screens/schoolAdmin/SchoolAdminViewBookScreen';
 import SchoolAdminCreateTutor from './screens/schoolAdmin/SchoolAdminCreateTutor';
+import SchoolAdminSuperLoginScreen from './screens/schoolAdmin/SchoolAdminSuperLoginScreen';
+import SchoolAdminSuperRegisterScreen from './screens/schoolAdmin/SchoolAdminSuperRegisterScreen';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -268,6 +270,8 @@ const router = createBrowserRouter(
             />
             <Route  path="/schooladmins/viewbook/:subjectId" element={<SchoolAdminViewBookScreen />} />
             <Route  path="/schooladmins/createtutor/:subjectId" element={<SchoolAdminCreateTutor />} />
+            <Route  path="/schooladmins/superlogin" element={<SchoolAdminSuperLoginScreen />} />
+            {/* <Route  path="/schooladmins/superregister" element={<SchoolAdminSuperRegisterScreen />} /> */}
         </Route>
     )
 );

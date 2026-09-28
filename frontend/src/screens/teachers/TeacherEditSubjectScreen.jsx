@@ -9,6 +9,7 @@ import {
 	useUpdateSubjectByTeacherMutation,
 	useUploadSubjectDocumentByTeacherMutation,
 	useDeleteSubjectDocumentByTeacherMutation,
+	useSetMainSubjectDocumentByTeacherMutation,
 } from '../../slices/teachers/teacherApiSlice'
 import { SUBJECTS_URL } from '../../constants'
 import { getSubjectGradeLevelNames } from '../../utils/gradeLevel'
@@ -84,6 +85,127 @@ const BookUploadGlyph = () => (
 	</svg>
 )
 
+const DocumentPdfGlyph = () => (
+	<svg
+		width='32'
+		height='32'
+		viewBox='0 0 24 24'
+		fill='none'
+		xmlns='http://www.w3.org/2000/svg'
+		aria-hidden
+	>
+		<path
+			d='M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z'
+			fill='url(#teacher-edit-doc-pdf-fill)'
+		/>
+		<path
+			d='M14 2v6h6'
+			stroke='#0284c7'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+			strokeLinejoin='round'
+		/>
+		<path
+			d='M8 13h8M8 17h5'
+			stroke='#0369a1'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+		/>
+		<defs>
+			<linearGradient
+				id='teacher-edit-doc-pdf-fill'
+				x1='4'
+				y1='2'
+				x2='20'
+				y2='22'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#e0f2fe' />
+				<stop offset='1' stopColor='#7dd3fc' />
+			</linearGradient>
+		</defs>
+	</svg>
+)
+
+const BookGlyph = () => (
+	<svg
+		width='40'
+		height='40'
+		viewBox='0 0 24 24'
+		fill='none'
+		xmlns='http://www.w3.org/2000/svg'
+		className='book-chapters__book-glyph'
+		aria-hidden
+	>
+		<path
+			d='M4 6a2 2 0 012-2h5v16H6a2 2 0 01-2-2V6z'
+			fill='url(#teacher-edit-book-glyph-a)'
+		/>
+		<path
+			d='M13 4h5a2 2 0 012 2v10a2 2 0 01-2 2h-5V4z'
+			fill='url(#teacher-edit-book-glyph-b)'
+		/>
+		<path
+			d='M12 4v16'
+			stroke='url(#teacher-edit-book-glyph-stroke)'
+			strokeWidth='1.5'
+			strokeLinecap='round'
+		/>
+		<defs>
+			<linearGradient
+				id='teacher-edit-book-glyph-a'
+				x1='4'
+				y1='4'
+				x2='11'
+				y2='18'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#e0f2fe' />
+				<stop offset='1' stopColor='#bae6fd' />
+			</linearGradient>
+			<linearGradient
+				id='teacher-edit-book-glyph-b'
+				x1='13'
+				y1='4'
+				x2='20'
+				y2='18'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#f0f9ff' />
+				<stop offset='1' stopColor='#7dd3fc' />
+			</linearGradient>
+			<linearGradient
+				id='teacher-edit-book-glyph-stroke'
+				x1='12'
+				y1='4'
+				x2='12'
+				y2='20'
+				gradientUnits='userSpaceOnUse'
+			>
+				<stop stopColor='#0284c7' />
+				<stop offset='1' stopColor='#0ea5e9' />
+			</linearGradient>
+		</defs>
+	</svg>
+)
+
+const TrashGlyph = () => (
+	<svg
+		width='14'
+		height='14'
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden
+	>
+		<path d='M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z' />
+		<path d='M10 11v6M14 11v6' />
+	</svg>
+)
+
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i
 
 function isValidObjectId (value) {
@@ -113,6 +235,44 @@ function documentDisplayName (doc) {
 	return 'Documento'
 }
 
+function getDocumentKey (doc) {
+	if (doc?._id) {
+		return String(doc._id)
+	}
+	if (doc?.fileId) {
+		return String(doc.fileId)
+	}
+	return ''
+}
+
+function chapterBelongsToDocument (
+	chapter,
+	documentKey,
+	requiresSourceDocument,
+) {
+	if (!requiresSourceDocument) {
+		return true
+	}
+	if (!documentKey) {
+		return false
+	}
+	return String(chapter.sourceDocumentId || '') === String(documentKey)
+}
+
+function resolveMainDocumentKey (subject, documents) {
+	if (subject?.mainDocumentId) {
+		return String(subject.mainDocumentId)
+	}
+	const mainDoc = documents.find((doc) => doc.isMain === true)
+	if (mainDoc) {
+		return getDocumentKey(mainDoc)
+	}
+	if (documents.length === 1) {
+		return getDocumentKey(documents[0])
+	}
+	return ''
+}
+
 function getSubjectDocuments (subject) {
 	if (Array.isArray(subject?.documents) && subject.documents.length > 0) {
 		return subject.documents
@@ -123,6 +283,7 @@ function getSubjectDocuments (subject) {
 			fileId: String(subject.bookId).trim(),
 			fileName: bookDisplayName(String(subject.bookId)),
 			fileUrl: subject.bookUrl,
+			isMain: true,
 		}]
 	}
 	return []
@@ -157,6 +318,8 @@ function TeacherEditSubjectScreen () {
 		useUploadSubjectDocumentByTeacherMutation()
 	const [deleteSubjectDocument, { isLoading: isDeletingDocument }] =
 		useDeleteSubjectDocumentByTeacherMutation()
+	const [setMainSubjectDocument, { isLoading: isSettingMainDocument }] =
+		useSetMainSubjectDocumentByTeacherMutation()
 
 	const [isSidebarOpen, setIsSidebarOpen] = useState(
 		window.innerWidth > 768,
@@ -166,6 +329,7 @@ function TeacherEditSubjectScreen () {
 	const [bookFile, setBookFile] = useState(null)
 	const [documentLabel, setDocumentLabel] = useState('')
 	const [deletingDocumentId, setDeletingDocumentId] = useState(null)
+	const [settingMainDocumentId, setSettingMainDocumentId] = useState(null)
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -196,12 +360,43 @@ function TeacherEditSubjectScreen () {
 
 	const isSaving = isSavingMutation
 	const isBusy = isSaving || isUploadingDocument || isDeletingDocument
+		|| isSettingMainDocument
 
 	const subjectDocuments = useMemo(
 		() => getSubjectDocuments(currentSubject),
 		[currentSubject],
 	)
 	const hasDocuments = subjectDocuments.length > 0
+	const requiresSourceDocument = subjectDocuments.length > 1
+	const canSelectMainDocument = subjectDocuments.filter(
+		(doc) => Boolean(doc._id),
+	).length > 1
+	const mainDocumentKey = useMemo(
+		() => resolveMainDocumentKey(currentSubject, subjectDocuments),
+		[currentSubject, subjectDocuments],
+	)
+	const mainDocument = useMemo(
+		() => subjectDocuments.find(
+			(doc) => getDocumentKey(doc) === mainDocumentKey,
+		),
+		[subjectDocuments, mainDocumentKey],
+	)
+	const bookChapters = useMemo(
+		() => (
+			Array.isArray(currentSubject?.bookChapters)
+				? currentSubject.bookChapters
+				: []
+		),
+		[currentSubject],
+	)
+
+	const getDocumentChapterCount = (documentKey) => bookChapters.filter(
+		(chapter) => chapterBelongsToDocument(
+			chapter,
+			documentKey,
+			requiresSourceDocument,
+		),
+	).length
 
 	const isUniversity = isUniversitySchool(teacherInfo?.schoolType)
 		|| normalizeSubjectPrograms(currentSubject?.program).length > 0
@@ -265,6 +460,37 @@ function TeacherEditSubjectScreen () {
 			toast.error(
 				localizeApiError(err, 'No se pudo subir el PDF'),
 			)
+		}
+	}
+
+	const handleSetMainDocument = async (documentId) => {
+		if (!documentId || !isValidParam || !teacherId) {
+			return
+		}
+
+		const docKey = String(documentId)
+		if (docKey === mainDocumentKey) {
+			return
+		}
+
+		setSettingMainDocumentId(docKey)
+		try {
+			await setMainSubjectDocument({
+				id: String(subjectId),
+				teacherId,
+				documentId: docKey,
+			}).unwrap()
+			toast.success('Documento principal actualizado')
+			await refetch()
+		} catch (err) {
+			toast.error(
+				localizeApiError(
+					err,
+					'No se pudo establecer el documento principal',
+				),
+			)
+		} finally {
+			setSettingMainDocumentId(null)
 		}
 	}
 
@@ -645,141 +871,394 @@ function TeacherEditSubjectScreen () {
 											)}
 										/>
 									</div>
-									<div className='login-field'>
-										<span className='login-label' id='book-label'>
-											Documentos del curso (opcional)
-										</span>
-										{hasDocuments ? (
-											<ul
-												className='subject-documents__list'
-												aria-label='PDFs subidos'
-											>
-												{subjectDocuments.map((doc) => {
-													const docKey = doc._id
-														? String(doc._id)
-														: String(doc.fileId)
-													const openHref = getDocumentOpenHref(doc)
-													const isDeletingThis =
-														deletingDocumentId === docKey
+									<section
+										className='subject-documents'
+										aria-labelledby='teacher-subject-documents-heading'
+									>
+										<div className='subject-documents__panel'>
+											<div className='subject-documents__header'>
+												<div className='book-chapters__section-intro'>
+													<h2
+														id='teacher-subject-documents-heading'
+														className='book-chapters__section-title'
+													>
+														Documentos del curso
+													</h2>
+													<p className='book-chapters__section-desc'>
+														PDFs fuente de la materia. Elige
+														cuál es el documento principal de
+														la materia; los demás pueden
+														mapearse a capítulos por separado.
+													</p>
+												</div>
+												{hasDocuments ? (
+													<span className='subject-documents__count'>
+														{subjectDocuments.length}{' '}
+														{subjectDocuments.length === 1
+															? 'documento'
+															: 'documentos'}
+													</span>
+												) : null}
+											</div>
 
-													return (
-														<li
-															key={docKey}
-															className='subject-documents__item'
+											{hasDocuments && canSelectMainDocument ? (
+												<>
+													<div
+														className='subject-documents__main-hint'
+														role='note'
+													>
+														<span
+															className='subject-documents__main-hint-icon'
+															aria-hidden
 														>
-															<div className='subject-documents__info'>
-																<p className='subject-documents__name'>
-																	{documentDisplayName(doc)}
-																</p>
-																{openHref ? (
-																	<a
-																		href={openHref}
-																		className='teacher-book-upload__open-link'
-																		target='_blank'
-																		rel='noopener noreferrer'
+															★
+														</span>
+														<span className='subject-documents__main-hint-text'>
+															Haz clic en un documento para
+															marcarlo como principal.
+															{mainDocument
+																? (
+																	<>
+																		{' '}Actual:{' '}
+																		<strong>
+																			{documentDisplayName(
+																				mainDocument,
+																			)}
+																		</strong>
+																	</>
+																)
+																: null}
+														</span>
+													</div>
+													<div
+														className='subject-documents__main-hint'
+														role='note'
+													>
+														<span
+															className='subject-documents__main-hint-icon'
+															aria-hidden
+														>
+															ℹ
+														</span>
+														<span className='subject-documents__main-hint-text'>
+														Tu documento principal tendrá narración con 
+														video avatar y los demás documentos tendrán narración con audio
+														</span>
+													</div>
+												</>
+											) : null}
+
+											{hasDocuments ? (
+												<div
+													className={
+														'book-chapters__doc-picker '
+														+ 'subject-documents__picker'
+													}
+													role='listbox'
+													aria-label='Documentos del curso'
+												>
+													{subjectDocuments.map((doc) => {
+														const docKey = getDocumentKey(doc)
+														const openHref =
+															getDocumentOpenHref(doc)
+														const isDeletingThis =
+															deletingDocumentId === docKey
+														const isSettingMainThis =
+															settingMainDocumentId === docKey
+														const chapterCount =
+															getDocumentChapterCount(docKey)
+														const displayName =
+															documentDisplayName(doc)
+														const isMain =
+															docKey === mainDocumentKey
+														const isSelectable =
+															Boolean(doc._id)
+															&& canSelectMainDocument
+
+														const handleSelectMainKeyDown = (
+															e,
+														) => {
+															if (
+																!isSelectable
+																|| isBusy
+																|| isSettingMainThis
+															) {
+																return
+															}
+															if (
+																e.key === 'Enter'
+																|| e.key === ' '
+															) {
+																e.preventDefault()
+																void handleSetMainDocument(
+																	doc._id,
+																)
+															}
+														}
+
+														return (
+															<article
+																key={docKey}
+																role={
+																	isSelectable
+																		? 'option'
+																		: undefined
+																}
+																aria-selected={
+																	isSelectable
+																		? isMain
+																		: undefined
+																}
+																tabIndex={
+																	isSelectable
+																		? 0
+																		: undefined
+																}
+																aria-disabled={
+																	isSelectable
+																		? (
+																			isBusy
+																			|| isSettingMainThis
+																		)
+																		: undefined
+																}
+																className={
+																	'book-chapters__doc-card '
+																	+ 'subject-documents__card'
+																	+ (
+																		isMain
+																			? ' book-chapters__doc-card--selected'
+																			: ''
+																	)
+																	+ (
+																		isSelectable
+																			? ' subject-documents__card--selectable'
+																			: ''
+																	)
+																	+ (
+																		isSettingMainThis
+																			? ' subject-documents__card--busy'
+																			: ''
+																	)
+																}
+																onClick={
+																	isSelectable
+																		&& !isBusy
+																		&& !isSettingMainThis
+																		? () =>
+																			void handleSetMainDocument(
+																				doc._id,
+																			)
+																		: undefined
+																}
+																onKeyDown={
+																	handleSelectMainKeyDown
+																}
+															>
+																{isMain ? (
+																	<span
+																		className='book-chapters__doc-card-check'
+																		aria-hidden
 																	>
-																		Abrir PDF
-																	</a>
+																		✓
+																	</span>
 																) : null}
-															</div>
-															{doc._id ? (
+																{doc._id ? (
+																	<button
+																		type='button'
+																		className={
+																			'subject-documents__delete-btn'
+																			+ (
+																				isDeletingThis
+																					? ' subject-documents__delete-btn--busy'
+																					: ''
+																			)
+																		}
+																		disabled={
+																			isBusy
+																			|| isDeletingThis
+																		}
+																		aria-label={
+																			isDeletingThis
+																				? `Eliminando ${displayName}`
+																				: `Eliminar ${displayName}`
+																		}
+																		title={
+																			isDeletingThis
+																				? 'Eliminando…'
+																				: 'Eliminar PDF'
+																		}
+																		onClick={(e) => {
+																			e.stopPropagation()
+																			void handleDeleteDocument(
+																				doc._id,
+																			)
+																		}}
+																	>
+																		{isDeletingThis ? (
+																			<span
+																				className='subject-documents__delete-spinner'
+																				aria-hidden
+																			/>
+																		) : (
+																			<TrashGlyph />
+																		)}
+																	</button>
+																) : null}
+																<span className='book-chapters__doc-card-icon'>
+																	<DocumentPdfGlyph />
+																</span>
+																<span className='book-chapters__doc-card-body'>
+																	<span className='book-chapters__doc-card-name'>
+																		{displayName}
+																	</span>
+																	<span className='book-chapters__doc-card-meta'>
+																		{isMain ? (
+																			<span className='subject-documents__main-badge'>
+																				Principal
+																			</span>
+																		) : null}
+																		<span className='book-chapters__doc-card-count'>
+																			{chapterCount}{' '}
+																			{chapterCount === 1
+																				? 'capítulo'
+																				: 'capítulos'}
+																		</span>
+																		{openHref ? (
+																			<a
+																				href={openHref}
+																				className='book-chapters__doc-card-link'
+																				target='_blank'
+																				rel='noopener noreferrer'
+																				onClick={(e) =>
+																					e.stopPropagation()}
+																			>
+																				Abrir PDF
+																				<span
+																					className='teacher-book-upload__open-link-icon'
+																					aria-hidden
+																				>
+																					↗
+																				</span>
+																			</a>
+																		) : null}
+																	</span>
+																</span>
+															</article>
+														)
+													})}
+												</div>
+											) : (
+												<div
+													className='book-chapters__empty-book'
+													role='status'
+												>
+													<div className='book-chapters__empty-book-icon'>
+														<BookGlyph />
+													</div>
+													<p className='book-chapters__empty-book-title'>
+														Aún no hay PDFs del curso
+													</p>
+													<p className='book-chapters__empty-book-text'>
+														Sube el primer documento abajo.
+														Puedes agregar varios PDFs — uno
+														a la vez.
+													</p>
+												</div>
+											)}
+
+											<div className='subject-documents__upload'>
+												<div className='subject-documents__upload-intro'>
+													<h3
+														id='teacher-subject-documents-upload-heading'
+														className='subject-documents__upload-title'
+													>
+														Agregar documento
+													</h3>
+													<p className='subject-documents__upload-desc'>
+														Solo PDF · hasta 200 MB · se agrega
+														sin reemplazar los existentes
+													</p>
+												</div>
+												<div className='subject-documents__upload-fields'>
+													<div className='login-field subject-documents__label-field'>
+														<label
+															className='login-label'
+															htmlFor='edit-subject-document-label'
+														>
+															Etiqueta (opcional)
+														</label>
+														<input
+															type='text'
+															id='edit-subject-document-label'
+															className='login-input'
+															placeholder='Ej. Libro unidad 1'
+															value={documentLabel}
+															disabled={isBusy}
+															onChange={(e) =>
+																setDocumentLabel(e.target.value)}
+														/>
+													</div>
+													<div className='teacher-book-upload subject-documents__dropzone'>
+														<input
+															ref={bookInputRef}
+															type='file'
+															id='edit-subject-book'
+															name='document'
+															className='teacher-book-upload__input'
+															accept='application/pdf,.pdf'
+															disabled={isBusy}
+															onChange={handleBookChange}
+															aria-labelledby='teacher-subject-documents-upload-heading'
+														/>
+														<label
+															htmlFor='edit-subject-book'
+															className='teacher-book-upload__zone'
+														>
+															<span
+																className='teacher-book-upload__icon'
+																aria-hidden
+															>
+																<BookUploadGlyph />
+															</span>
+															<span className='teacher-book-upload__title'>
+																{bookFile
+																	? bookFile.name
+																	: 'Subir un archivo'}
+															</span>
+															<span className='teacher-book-upload__hint'>
+																Arrastra un PDF o haz clic
+																para elegir
+															</span>
+														</label>
+														{bookFile ? (
+															<div className='subject-documents__actions'>
 																<button
 																	type='button'
-																	className='subject-documents__delete'
-																	disabled={isBusy || isDeletingThis}
+																	className='login-submit'
+																	disabled={isBusy}
 																	onClick={() =>
-																		void handleDeleteDocument(doc._id)}
+																		void handleUploadDocument()}
 																>
-																	{isDeletingThis
-																		? 'Eliminando…'
-																		: 'Eliminar'}
+																	{isUploadingDocument
+																		? 'Subiendo…'
+																		: 'Subir PDF'}
 																</button>
-															) : null}
-														</li>
-													)
-												})}
-											</ul>
-										) : (
-											<p className='teacher-book-upload__status-hint'>
-												Aún no hay PDFs. Agrega documentos
-												abajo — uno a la vez.
-											</p>
-										)}
-										<div className='login-field'>
-											<label
-												className='login-label'
-												htmlFor='edit-subject-document-label'
-											>
-												Etiqueta del documento (opcional)
-											</label>
-											<input
-												type='text'
-												id='edit-subject-document-label'
-												className='login-input'
-												placeholder='Ej. Libro unidad 1'
-												value={documentLabel}
-												disabled={isBusy}
-												onChange={(e) =>
-													setDocumentLabel(e.target.value)}
-											/>
-										</div>
-										<div className='teacher-book-upload'>
-											<input
-												ref={bookInputRef}
-												type='file'
-												id='edit-subject-book'
-												name='document'
-												className='teacher-book-upload__input'
-												accept='application/pdf,.pdf'
-												disabled={isBusy}
-												onChange={handleBookChange}
-												aria-labelledby='book-label'
-											/>
-											<label
-												htmlFor='edit-subject-book'
-												className='teacher-book-upload__zone'
-											>
-												<span
-													className='teacher-book-upload__icon'
-													aria-hidden
-												>
-													<BookUploadGlyph />
-												</span>
-												<span className='teacher-book-upload__title'>
-													{bookFile
-														? bookFile.name
-														: 'Subir un archivo'}
-												</span>
-												<span className='teacher-book-upload__hint'>
-													Solo PDF · hasta 200 MB · se agrega
-													sin reemplazar los existentes
-												</span>
-											</label>
-											{bookFile ? (
-												<div className='subject-documents__actions'>
-													<button
-														type='button'
-														className='login-submit'
-														disabled={isBusy}
-														onClick={() =>
-															void handleUploadDocument()}
-													>
-														{isUploadingDocument
-															? 'Subiendo…'
-															: 'Subir PDF'}
-													</button>
-													<button
-														type='button'
-														className='teacher-book-upload__clear'
-														onClick={handleClearBook}
-														disabled={isBusy}
-													>
-														Quitar selección
-													</button>
+																<button
+																	type='button'
+																	className='teacher-book-upload__clear'
+																	onClick={handleClearBook}
+																	disabled={isBusy}
+																>
+																	Quitar selección
+																</button>
+															</div>
+														) : null}
+													</div>
 												</div>
-											) : null}
+											</div>
 										</div>
-									</div>
+									</section>
 									<div className='subject-book-tools'>
 										<div className='subject-book-tools__header'>
 											<span className='subject-book-tools__eyebrow'>

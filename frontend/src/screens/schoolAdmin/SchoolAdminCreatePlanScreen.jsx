@@ -26,18 +26,38 @@ import {
 } from '../../utils/planSemester'
 import '../../App.css'
 
-function translateSemesterFormError (message) {
+function getPlanPeriodLabels (isUniversity) {
+	if (isUniversity) {
+		return {
+			countLabel: 'Número de semestres',
+			blockLabel: (n) => `Semestre ${n}`,
+			hint:
+				'Los cobros mensuales continúan hasta que termine el semestre '
+				+ 'actual. Los estudiantes eligen nuevas materias cuando comienza '
+				+ 'el siguiente semestre.',
+		}
+	}
+	return {
+		blockLabel: (n) => `Año escolar ${n}`,
+	}
+}
+
+function translateSemesterFormError (message, isUniversity) {
 	if (message == null || message === '') {
 		return message
 	}
 	const text = String(message)
 	const semesterMatch = text.match(/^Semester (\d+)/)
 	const semesterLabel = semesterMatch
-		? `Semestre ${semesterMatch[1]}`
+		? isUniversity
+			? `Semestre ${semesterMatch[1]}`
+			: `Año escolar ${semesterMatch[1]}`
 		: null
 
 	if (text.includes('Plans can have between')) {
-		return 'Los planes pueden tener entre 1 y 4 semestres'
+		return isUniversity
+			? 'Los planes pueden tener entre 1 y 4 semestres'
+			: 'Los planes pueden tener entre 1 y 4 años escolares'
 	}
 	if (semesterLabel && text.includes('start date is required')) {
 		return `La fecha de inicio de ${semesterLabel} es obligatoria`
@@ -54,7 +74,9 @@ function translateSemesterFormError (message) {
 	if (semesterLabel && text.includes('must start after semester')) {
 		const prevMatch = text.match(/semester (\d+) ends/)
 		const prevNum = prevMatch ? prevMatch[1] : ''
-		return `${semesterLabel} debe comenzar después de que termine el semestre ${prevNum}`
+		return isUniversity
+			? `${semesterLabel} debe comenzar después de que termine el semestre ${prevNum}`
+			: `${semesterLabel} debe comenzar después de que termine el año escolar ${prevNum}`
 	}
 	return text
 }
@@ -119,6 +141,11 @@ function SchoolAdminCreatePlanScreen () {
 
 	const isUniversity = isUniversitySchool(schoolData?.schoolType)
 
+	const planPeriodLabels = useMemo(
+		() => getPlanPeriodLabels(isUniversity),
+		[isUniversity],
+	)
+
 	const selectedCohortLabel = useMemo(() => {
 		const cohortId = isUniversity ? selectedProgram : selectedGradesLevel
 		if (cohortId === '') {
@@ -165,6 +192,13 @@ function SchoolAdminCreatePlanScreen () {
 			navigate('/schooladmins/login', { replace: true })
 		}
 	}, [schoolAdminInfo, navigate])
+
+	useEffect(() => {
+		if (isLoadingSchool || isUniversity) {
+			return
+		}
+		setSemesters((prev) => resizeSemesterRows(prev, 1))
+	}, [isLoadingSchool, isUniversity])
 
 	const handleToggleSubject = (subjectId) => {
 		const id = String(subjectId)
@@ -226,7 +260,9 @@ function SchoolAdminCreatePlanScreen () {
 
 		const semesterError = validateSemesterForm(semesters)
 		if (semesterError) {
-			toast.error(translateSemesterFormError(semesterError))
+			toast.error(
+				translateSemesterFormError(semesterError, isUniversity),
+			)
 			return
 		}
 
@@ -371,7 +407,7 @@ function SchoolAdminCreatePlanScreen () {
 									<p className='login-card__subtitle login-card__subtitle--wide'>
 										{isUniversity
 											? 'Define el precio, cuántas preguntas incluye, qué programa cubre este plan y las fechas del semestre. Los estudiantes elegirán sus materias después de suscribirse y de nuevo cuando comience un nuevo semestre.'
-											: 'Define el precio, cuántas preguntas incluye, qué materias pertenecen a este plan y las fechas del semestre. Elige un grado para ver las materias de ese grado.'}
+											: 'Define el precio, cuántas preguntas incluye, qué materias pertenecen a este plan y las fechas del año escolar. Elige un grado para ver las materias de ese grado.'}
 									</p>
 								</div>
 								<form
@@ -427,6 +463,8 @@ function SchoolAdminCreatePlanScreen () {
 										semesters={semesters}
 										disabled={formBusy}
 										idPrefix='schooladmin-create-plan-semester'
+										periodLabels={planPeriodLabels}
+										showPeriodCount={isUniversity}
 										onCountChange={handleSemesterCountChange}
 										onDateChange={handleSemesterDateChange}
 									/>

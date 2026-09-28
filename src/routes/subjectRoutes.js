@@ -17,6 +17,8 @@ import {
     generateSubjectBookChapterPdf,
     uploadSubjectDocument,
     uploadSubjectDocumentByTeacher,
+    setMainSubjectDocument,
+    setMainSubjectDocumentByTeacher,
     deleteSubjectDocument,
     deleteSubjectDocumentByTeacher,
     uploadSubjectBookChapterFile,
@@ -89,6 +91,12 @@ router.delete(
     deleteSubjectDocument,
 );
 
+router.put(
+    '/:id/documents/:documentId/main',
+    protectSchoolAdmin,
+    setMainSubjectDocument,
+);
+
 router.get(
     '/:id/teacher/documents/:documentId',
     protectTeacher,
@@ -106,6 +114,12 @@ router.delete(
     '/:id/teacher/documents/:documentId',
     protectTeacher,
     deleteSubjectDocumentByTeacher,
+);
+
+router.put(
+    '/:id/teacher/documents/:documentId/main',
+    protectTeacher,
+    setMainSubjectDocumentByTeacher,
 );
 
 router.get(

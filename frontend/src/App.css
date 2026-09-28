@@ -1375,6 +1375,313 @@
   gap: 10px;
 }
 
+/* ── School admin: Subject documents panel ── */
+
+.subject-documents {
+  margin-top: 4px;
+}
+
+.subject-documents__panel {
+  padding: 20px 20px 18px;
+  border-radius: 18px;
+  background: linear-gradient(
+    165deg,
+    #ffffff 0%,
+    #f8fafc 42%,
+    #f0f9ff 100%
+  );
+  border: 1px solid rgba(14, 165, 233, 0.16);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 12px 32px -20px rgba(14, 165, 233, 0.28);
+}
+
+.subject-documents__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.subject-documents__header .book-chapters__section-intro {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.subject-documents__count {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0369a1;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(14, 165, 233, 0.22);
+  box-shadow: 0 2px 8px -4px rgba(14, 165, 233, 0.25);
+}
+
+.subject-documents__main-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(240, 249, 255, 0.88) 100%
+  );
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  box-shadow: 0 4px 14px -10px rgba(14, 165, 233, 0.28);
+}
+
+.subject-documents__main-hint-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  line-height: 1;
+  color: #0369a1;
+  background: rgba(14, 165, 233, 0.12);
+  border: 1px solid rgba(14, 165, 233, 0.22);
+}
+
+.subject-documents__main-hint-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.subject-documents__main-hint-text strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.subject-documents__picker {
+  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.subject-documents__card {
+  cursor: default;
+  padding-top: 18px;
+  padding-right: 44px;
+}
+
+.subject-documents__card--selectable {
+  cursor: pointer;
+}
+
+.subject-documents__card--selectable:hover {
+  border-color: rgba(14, 165, 233, 0.42);
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 14px 28px -14px rgba(14, 165, 233, 0.28);
+}
+
+.subject-documents__card--selectable:focus-visible {
+  outline: 2px solid rgba(14, 165, 233, 0.55);
+  outline-offset: 2px;
+}
+
+.subject-documents__card--selectable.book-chapters__doc-card--selected:hover {
+  border-color: rgba(2, 132, 199, 0.72);
+}
+
+.subject-documents__card--busy {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.subject-documents__main-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0369a1;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(14, 165, 233, 0.28);
+  box-shadow: 0 2px 8px -4px rgba(14, 165, 233, 0.22);
+}
+
+.subject-documents__card .book-chapters__doc-card-body {
+  padding-right: 0;
+}
+
+.subject-documents__delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 42px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 2px 8px -4px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.92);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    color 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.subject-documents__card:hover .subject-documents__delete-btn,
+.subject-documents__delete-btn:focus-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.subject-documents__delete-btn:hover:not(:disabled) {
+  color: #b91c1c;
+  background: rgba(254, 242, 242, 0.98);
+  border-color: rgba(239, 68, 68, 0.28);
+  box-shadow: 0 4px 12px -6px rgba(239, 68, 68, 0.35);
+}
+
+.subject-documents__delete-btn:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.subject-documents__delete-btn--busy {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.subject-documents__delete-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(148, 163, 184, 0.25);
+  border-top-color: #64748b;
+  border-radius: 50%;
+  animation: subject-documents-spin 0.65s linear infinite;
+}
+
+@keyframes subject-documents-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.subject-documents__panel .book-chapters__empty-book {
+  margin-bottom: 20px;
+}
+
+.subject-documents__upload {
+  padding-top: 18px;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.subject-documents__upload-intro {
+  margin-bottom: 14px;
+}
+
+.subject-documents__upload-title {
+  margin: 0 0 4px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.subject-documents__upload-desc {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.subject-documents__upload-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.subject-documents__label-field {
+  margin: 0;
+}
+
+.subject-documents__dropzone {
+  margin: 0;
+}
+
+.subject-documents__dropzone .teacher-book-upload__zone {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(14, 165, 233, 0.22);
+}
+
+.subject-documents__dropzone .teacher-book-upload__zone:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(14, 165, 233, 0.42);
+}
+
+.subject-documents__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+@media (hover: none) {
+  .subject-documents__delete-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .subject-documents__panel {
+    padding: 16px 14px 14px;
+  }
+
+  .subject-documents__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .subject-documents__count {
+    align-self: flex-start;
+  }
+
+  .subject-documents__picker {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Legacy list layout (teacher edit subject) */
 .subject-documents__list {
   display: flex;
   flex-direction: column;
@@ -1425,13 +1732,6 @@
 .subject-documents__delete:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-
-.subject-documents__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
 }
 
 .teacher-book-upload__input {
@@ -4094,6 +4394,27 @@
 
 .login-submit:active {
   transform: scale(0.98);
+}
+
+.login-submit:disabled {
+  filter: grayscale(0.15) brightness(0.96);
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+
+.login-submit__busy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.chat-app--student-login .login-submit .loader__spinner--sm {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
 }
 
 .login-card__footer {

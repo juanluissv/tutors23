@@ -6,6 +6,7 @@ import SchoolAdmin from '../models/schoolAdminModel.js';
 import Student from '../models/studentModel.js';
 import Subject from '../models/subjectModel.js';
 import Subscription from '../models/subscriptionModel.js';
+import { denyIfSchoolAdminCannotAccessSchool } from '../utils/schoolAdminAuth.js';
 import {
     gradeLevelToJson,
     gradeLevelsToJson,
@@ -103,14 +104,6 @@ async function assertSchoolAdminCanAccessSchool (
         throw new Error('School admin not found');
     }
 
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== String(schoolId)
-    ) {
-        res.status(403);
-        throw new Error('Not authorized for this school');
-    }
-
     const school = await School.findById(schoolId);
 
     if (!school) {
@@ -118,10 +111,7 @@ async function assertSchoolAdminCanAccessSchool (
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== String(schoolAdminId)) {
-        res.status(403);
-        throw new Error('Not authorized for this school');
-    }
+    denyIfSchoolAdminCannotAccessSchool(res, schoolAdmin, school);
 
     return { schoolAdmin, school };
 }
@@ -353,14 +343,6 @@ const createPlan = asyncHandler(async (req, res) => {
         throw new Error('Invalid school id');
     }
 
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== schoolIdStr
-    ) {
-        res.status(403);
-        throw new Error('Not authorized to create a plan for this school');
-    }
-
     const school = await School.findById(schoolIdStr);
 
     if (!school) {
@@ -368,10 +350,12 @@ const createPlan = asyncHandler(async (req, res) => {
         throw new Error('School not found');
     }
 
-    if (!school.admin || school.admin.toString() !== req.schoolAdmin._id.toString()) {
-        res.status(403);
-        throw new Error('Not authorized to create a plan for this school');
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to create a plan for this school',
+    );
 
     const priceNum = parsePrice(res, price);
     const totalQ = parseTotalQuestions(res, totalQuestions);

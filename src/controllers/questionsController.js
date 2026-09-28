@@ -16,6 +16,7 @@ import {
     getStudentActiveSubscription,
     universitySubscriptionNeedsSubjects,
 } from './subscriptionController.js'
+import { denyIfSchoolAdminCannotAccessSchool } from '../utils/schoolAdminAuth.js'
 
 // POST /api/questions/student — enrolled student asks a question
 const createStudentQuestion = asyncHandler(async (req, res) => {
@@ -492,14 +493,6 @@ const getSchoolAdminPreviousQuestionsWithAnswers = asyncHandler(
             throw new Error('School admin not found')
         }
 
-        if (
-            schoolAdmin.school
-            && String(schoolAdmin.school) !== String(subject.school)
-        ) {
-            res.status(403)
-            throw new Error('Not authorized to view questions for this subject')
-        }
-
         const school = await School.findById(subject.school)
             .select('admin')
             .lean()
@@ -509,13 +502,12 @@ const getSchoolAdminPreviousQuestionsWithAnswers = asyncHandler(
             throw new Error('School not found')
         }
 
-        if (
-            !school.admin
-            || String(school.admin) !== String(req.schoolAdmin._id)
-        ) {
-            res.status(403)
-            throw new Error('Not authorized to view questions for this subject')
-        }
+        denyIfSchoolAdminCannotAccessSchool(
+            res,
+            schoolAdmin,
+            school,
+            'Not authorized to view questions for this subject',
+        )
 
         const filter = {
             subject: qSubject,
@@ -586,14 +578,6 @@ async function verifySchoolAdminSubjectAccess (req, res, subjectId) {
         throw new Error('School admin not found')
     }
 
-    if (
-        schoolAdmin.school
-        && String(schoolAdmin.school) !== String(subject.school)
-    ) {
-        res.status(403)
-        throw new Error('Not authorized to view content for this subject')
-    }
-
     const school = await School.findById(subject.school)
         .select('admin')
         .lean()
@@ -603,13 +587,12 @@ async function verifySchoolAdminSubjectAccess (req, res, subjectId) {
         throw new Error('School not found')
     }
 
-    if (
-        !school.admin
-        || String(school.admin) !== String(req.schoolAdmin._id)
-    ) {
-        res.status(403)
-        throw new Error('Not authorized to view content for this subject')
-    }
+    denyIfSchoolAdminCannotAccessSchool(
+        res,
+        schoolAdmin,
+        school,
+        'Not authorized to view content for this subject',
+    )
 }
 
 // GET /api/questions/schooladmin/question/:questionId

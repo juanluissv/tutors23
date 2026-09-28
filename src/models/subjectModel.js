@@ -25,6 +25,10 @@ const subjectSchema = mongoose.Schema({
         type: String,
         required: false,
     },
+    mainDocumentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false,
+    },
     documents: [
         {
             fileId: {
