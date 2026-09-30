@@ -20,6 +20,7 @@ import {
 	TeacherSubjectsGrid,
 	SubjectCardActionsStudentsSchoolAdmin,
 } from '../teachers/TeacherSubjectsGrid'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const GradCapIcon = () => (
@@ -206,6 +207,28 @@ function SchooldAdminStudentsScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area'>
+						{isPageLoading ? (
+							<div className='teacher-subjects-page'>
+								<h1 className='teacher-subjects-page__title heading-gradient'>
+									Estudiantes por materia
+								</h1>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>
+										{isLoading && isLoadingSchool
+											? 'Cargando datos…'
+											: isLoading
+												? 'Cargando materias…'
+												: 'Cargando escuela…'}
+									</p>
+								</div>
+							</div>
+						) : (
 						<TeacherSubjectsGrid
 							pageTitle='Estudiantes por materia'
 							pageSubtitle={
@@ -339,7 +362,7 @@ function SchooldAdminStudentsScreen () {
 										+ 'los estudiantes inscritos aparecerán aquí.'
 							}
 							subjects={filteredSubjects}
-							isLoading={isPageLoading}
+							isLoading={false}
 							isError={isError}
 							refetch={refetch}
 							isUniversity={isUniversity}
@@ -349,6 +372,7 @@ function SchooldAdminStudentsScreen () {
 								/>
 							)}
 						/>
+						)}
 					</div>
 				</div>
 			</div>

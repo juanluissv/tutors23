@@ -10,6 +10,7 @@ import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useUploadTeacherAnswerVideoMutation } from '../../slices/teachers/teacherAnswersSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const recIconSrc = `${process.env.PUBLIC_URL}/assets/img/rec3.png`
@@ -322,11 +323,17 @@ function TeacherRecordScreen () {
 												disabled={
 													!recordedBlob || isUploading
 												}
+												aria-busy={isUploading}
 												onClick={() => void handleSaveVideo()}
 											>
-												{isUploading
-													? 'Guardando…'
-													: 'Guardar video'}
+												{isUploading ? (
+													<span className='login-submit__busy'>
+														<Loader size='sm' />
+														<span>Guardando…</span>
+													</span>
+												) : (
+													'Guardar video'
+												)}
 											</Button>
 										</div>
 									</div>

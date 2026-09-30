@@ -6,6 +6,7 @@ import { useUpdateSchoolAdminProfileMutation } from '../../slices/admin/schoolAd
 import { setSchoolAdminCredentials } from '../../slices/admin/authSchoolAdminSlice'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function SchoolAdminProfileScreen () {
@@ -23,9 +24,13 @@ function SchoolAdminProfileScreen () {
 	const [about, setAbout] = useState('')
 	const [newPassword, setNewPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
+	const [formReady, setFormReady] = useState(false)
 
-	const [updateSchoolAdminProfile, { isLoading }] =
+	const [updateSchoolAdminProfile, { isLoading: isSaving }] =
 		useUpdateSchoolAdminProfileMutation()
+
+	const isPageLoading = !formReady
+	const formBusy = isSaving
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -39,6 +44,7 @@ function SchoolAdminProfileScreen () {
 
 	useEffect(() => {
 		if (!schoolAdminInfo) {
+			setFormReady(false)
 			return
 		}
 		setFirstname(schoolAdminInfo.firstname ?? '')
@@ -48,6 +54,7 @@ function SchoolAdminProfileScreen () {
 		setAbout(schoolAdminInfo.about ?? '')
 		setNewPassword('')
 		setConfirmPassword('')
+		setFormReady(true)
 	}, [schoolAdminInfo])
 
 	const handleSubmit = async (e) => {
@@ -139,6 +146,17 @@ function SchoolAdminProfileScreen () {
 										mantener la actual.
 									</p>
 								</div>
+								{isPageLoading ? (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>Cargando perfil…</p>
+									</div>
+								) : (
 								<form
 									className='login-form'
 									id='schooladmin-profile-form'
@@ -161,7 +179,7 @@ function SchoolAdminProfileScreen () {
 												placeholder='Nombre'
 												autoComplete='given-name'
 												value={firstname}
-												disabled={isLoading}
+												disabled={formBusy}
 												onChange={(e) =>
 													setFirstname(e.target.value)}
 											/>
@@ -181,7 +199,7 @@ function SchoolAdminProfileScreen () {
 												placeholder='Apellido'
 												autoComplete='family-name'
 												value={lastname}
-												disabled={isLoading}
+												disabled={formBusy}
 												onChange={(e) =>
 													setLastname(e.target.value)}
 											/>
@@ -202,7 +220,7 @@ function SchoolAdminProfileScreen () {
 											placeholder='tu@escuela.edu'
 											autoComplete='email'
 											value={email}
-											disabled={isLoading}
+											disabled={formBusy}
 											onChange={(e) =>
 												setEmail(e.target.value)}
 										/>
@@ -222,7 +240,7 @@ function SchoolAdminProfileScreen () {
 											placeholder='p. ej. Director, Registrador'
 											autoComplete='organization-title'
 											value={jobtitle}
-											disabled={isLoading}
+											disabled={formBusy}
 											onChange={(e) =>
 												setJobtitle(e.target.value)}
 										/>
@@ -241,7 +259,7 @@ function SchoolAdminProfileScreen () {
 											placeholder='Una breve descripción de tu rol o escuela…'
 											rows={5}
 											value={about}
-											disabled={isLoading}
+											disabled={formBusy}
 											onChange={(e) =>
 												setAbout(e.target.value)}
 										/>
@@ -262,7 +280,7 @@ function SchoolAdminProfileScreen () {
 												placeholder='Déjalo en blanco para mantener la actual'
 												autoComplete='new-password'
 												value={newPassword}
-												disabled={isLoading}
+												disabled={formBusy}
 												onChange={(e) =>
 													setNewPassword(e.target.value)}
 											/>
@@ -282,7 +300,7 @@ function SchoolAdminProfileScreen () {
 												placeholder='Confirmar'
 												autoComplete='new-password'
 												value={confirmPassword}
-												disabled={isLoading}
+												disabled={formBusy}
 												onChange={(e) =>
 													setConfirmPassword(
 														e.target.value,
@@ -294,11 +312,20 @@ function SchoolAdminProfileScreen () {
 										type='submit'
 										id='schooladmin-profile-save'
 										className='login-submit'
-										disabled={isLoading}
+										disabled={formBusy}
+										aria-busy={isSaving}
 									>
-										{isLoading ? 'Guardando…' : 'Guardar cambios'}
+										{isSaving ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Guardando…</span>
+											</span>
+										) : (
+											'Guardar cambios'
+										)}
 									</button>
 								</form>
+								)}
 							</div>
 						</div>
 					</div>

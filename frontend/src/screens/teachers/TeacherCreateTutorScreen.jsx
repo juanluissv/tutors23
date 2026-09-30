@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
+import Loader from '../../components/Loader'
 import {
 	useGenerateChapterTutorTxtFromLessonByTeacherMutation,
 	useGenerateSuggestedQuestionsFromLessonByTeacherMutation,
@@ -201,6 +202,14 @@ const TutorTranscribeUploadGlyph = () => (
 		/>
 	</svg>
 )
+
+function CreateTutorBtnIcon ({ busy, className, Glyph }) {
+	return (
+		<span className={className}>
+			{busy ? <Loader size='sm' /> : <Glyph />}
+		</span>
+	)
+}
 
 const BookGlyph = () => (
 	<svg
@@ -1292,9 +1301,15 @@ function TeacherCreateTutorScreen () {
 									</div>
 
 									{isLoadingSubjects && !currentSubject ? (
-										<p className='book-chapters__loading'>
-											Cargando documentos…
-										</p>
+										<div
+											className='new-answers__status new-answers__status--loading'
+											role='status'
+											aria-live='polite'
+											aria-busy='true'
+										>
+											<Loader size='md' />
+											<p>Cargando documentos…</p>
+										</div>
 									) : hasDocuments ? (
 										<div
 											className='book-chapters__doc-picker'
@@ -1477,9 +1492,15 @@ function TeacherCreateTutorScreen () {
 									</section>
 
 									{!hasDocuments ? null : isLoadingSubjects || isLoadingLessons ? (
-										<p className='book-chapters__loading'>
-											Cargando lecciones…
-										</p>
+										<div
+											className='new-answers__status new-answers__status--loading'
+											role='status'
+											aria-live='polite'
+											aria-busy='true'
+										>
+											<Loader size='md' />
+											<p>Cargando lecciones…</p>
+										</div>
 									) : !selectedDocumentId && requiresSourceDocument ? (
 										<div className='book-chapters__select-doc-prompt'>
 											<p className='book-chapters__select-doc-prompt-title'>
@@ -1927,17 +1948,23 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__generate-btn' +
 																		(actionDisabled
 																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(isGeneratingThis
+																			? ' create-tutor__generate-btn--loading'
 																			: '')
 																	}
 																	disabled={actionDisabled}
+																	aria-busy={isGeneratingThis}
 																	onClick={() =>
 																		void handleGenerateTutorTxt(
 																			chapterKey,
 																		)}
 																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isGeneratingThis}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingThis
 																			? 'Extrayendo texto de la lección…'
@@ -1953,17 +1980,23 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__generate-btn--questions' +
 																		(actionDisabled
 																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(isGeneratingQuestionsThis
+																			? ' create-tutor__generate-btn--loading'
 																			: '')
 																	}
 																	disabled={actionDisabled}
+																	aria-busy={isGeneratingQuestionsThis}
 																	onClick={() =>
 																		void handleGenerateSuggestedQuestions(
 																			chapterKey,
 																		)}
 																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isGeneratingQuestionsThis}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingQuestionsThis
 																			? 'Generando preguntas…'
@@ -1979,17 +2012,23 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__generate-btn--video-script' +
 																		(actionDisabled
 																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(isGeneratingVideoScriptThis
+																			? ' create-tutor__generate-btn--loading'
 																			: '')
 																	}
 																	disabled={actionDisabled}
+																	aria-busy={isGeneratingVideoScriptThis}
 																	onClick={() =>
 																		void handleGenerateVideoScript(
 																			chapterKey,
 																		)}
 																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isGeneratingVideoScriptThis}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingVideoScriptThis
 																			? 'Generando guion de video…'
@@ -2005,9 +2044,13 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__generate-btn--video-audio' +
 																		(videoAudioDisabled
 																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(isGeneratingVideoAudioThis
+																			? ' create-tutor__generate-btn--loading'
 																			: '')
 																	}
 																	disabled={videoAudioDisabled}
+																	aria-busy={isGeneratingVideoAudioThis}
 																	title={
 																		!hasVideoScript
 																			? 'Primero genera el guion de video'
@@ -2018,9 +2061,11 @@ function TeacherCreateTutorScreen () {
 																			chapterKey,
 																		)}
 																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isGeneratingVideoAudioThis}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingVideoAudioThis
 																			? 'Generando audio del video…'
@@ -2036,9 +2081,13 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__generate-btn--illustrations' +
 																		(illustrationsDisabled
 																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(isGeneratingIllustrationsThis
+																			? ' create-tutor__generate-btn--loading'
 																			: '')
 																	}
 																	disabled={illustrationsDisabled}
+																	aria-busy={isGeneratingIllustrationsThis}
 																	title={
 																		!hasVideoScript
 																			? 'Primero genera el guion de video'
@@ -2050,9 +2099,11 @@ function TeacherCreateTutorScreen () {
 																			hasSceneIllustrations,
 																		)}
 																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isGeneratingIllustrationsThis}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingIllustrationsThis
 																			? 'Generando ilustraciones de escena…'
@@ -2073,9 +2124,13 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__generate-btn--animated-video' +
 																		(animatedVideoDisabled
 																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(isGeneratingAnimatedVideoThis
+																			? ' create-tutor__generate-btn--loading'
 																			: '')
 																	}
 																	disabled={animatedVideoDisabled}
+																	aria-busy={isGeneratingAnimatedVideoThis}
 																	title={
 																		!hasVideoAudio
 																			? 'Primero genera el audio de narración'
@@ -2088,9 +2143,11 @@ function TeacherCreateTutorScreen () {
 																			chapterKey,
 																		)}
 																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isGeneratingAnimatedVideoThis}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isGeneratingAnimatedVideoThis
 																			? 'Iniciando generación en Creatomate…'
@@ -2111,9 +2168,13 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__generate-btn--check-video' +
 																		(checkVideoStatusDisabled
 																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(isCheckingVideoStatusThis
+																			? ' create-tutor__generate-btn--loading'
 																			: '')
 																	}
 																	disabled={checkVideoStatusDisabled}
+																	aria-busy={isCheckingVideoStatusThis}
 																	title={
 																		!hasCreatomatePending
 																			? 'Primero inicia una generación en Creatomate'
@@ -2124,9 +2185,11 @@ function TeacherCreateTutorScreen () {
 																			chapterKey,
 																		)}
 																>
-																	<span className='create-tutor__generate-btn-icon'>
-																		<TutorGenerateGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isCheckingVideoStatusThis}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
 																	<span className='create-tutor__generate-btn-title'>
 																		{isCheckingVideoStatusThis
 																			? 'Revisando estado del video…'
@@ -2139,9 +2202,13 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__upload-video-btn' +
 																		(uploadDisabled
 																			? ' create-tutor__upload-video-btn--disabled'
+																			: '') +
+																		(isUploadingThis
+																			? ' create-tutor__upload-video-btn--loading'
 																			: '')
 																	}
 																	disabled={uploadDisabled}
+																	aria-busy={isUploadingThis}
 																	title={
 																		!hasTutorTxt
 																			? 'Primero genera el archivo de texto del tutor'
@@ -2150,9 +2217,11 @@ function TeacherCreateTutorScreen () {
 																	onClick={() =>
 																		handleUploadVideoClick(chapterKey)}
 																>
-																	<span className='create-tutor__upload-video-btn-icon'>
-																		<TutorVideoUploadGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isUploadingThis}
+																		className='create-tutor__upload-video-btn-icon'
+																		Glyph={TutorVideoUploadGlyph}
+																	/>
 																	<span className='create-tutor__upload-video-btn-title'>
 																		{isUploadingThis
 																			? 'Subiendo video…'
@@ -2170,9 +2239,13 @@ function TeacherCreateTutorScreen () {
 																		'create-tutor__upload-transcribe-btn' +
 																		(transcribeUploadDisabled
 																			? ' create-tutor__upload-transcribe-btn--disabled'
+																			: '') +
+																		(isUploadingTranscribeThis
+																			? ' create-tutor__upload-transcribe-btn--loading'
 																			: '')
 																	}
 																	disabled={transcribeUploadDisabled}
+																	aria-busy={isUploadingTranscribeThis}
 																	title={
 																		!hasTutorVideo
 																			? 'Primero sube el video del tutor'
@@ -2181,9 +2254,11 @@ function TeacherCreateTutorScreen () {
 																	onClick={() =>
 																		handleUploadTranscribeClick(chapterKey)}
 																>
-																	<span className='create-tutor__upload-transcribe-btn-icon'>
-																		<TutorTranscribeUploadGlyph />
-																	</span>
+																	<CreateTutorBtnIcon
+																		busy={isUploadingTranscribeThis}
+																		className='create-tutor__upload-transcribe-btn-icon'
+																		Glyph={TutorTranscribeUploadGlyph}
+																	/>
 																	<span className='create-tutor__upload-transcribe-btn-title'>
 																		{isUploadingTranscribeThis
 																			? 'Subiendo subtítulos…'

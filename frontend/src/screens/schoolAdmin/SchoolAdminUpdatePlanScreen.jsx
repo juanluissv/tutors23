@@ -17,6 +17,7 @@ import {
 	semestersFromPlan,
 	validateSemesterForm,
 } from '../../utils/planSemester'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function getPlanPeriodLabels (isUniversity) {
@@ -134,8 +135,11 @@ function SchoolAdminUpdatePlanScreen () {
 		[subjects],
 	)
 
-	const subjectsBusy = subjectsLoading || subjectsFetching
-	const isBusy = planLoading || isSaving
+	const isPageLoading =
+		planLoading
+		|| (plan != null && !formReady)
+		|| (plan != null && !Boolean(plan.program) && subjectsLoading)
+	const formBusy = isSaving || subjectsFetching
 
 	const isUniversityPlan = useMemo(
 		() => Boolean(plan?.program),
@@ -372,13 +376,7 @@ function SchoolAdminUpdatePlanScreen () {
 									</p>
 								</div>
 
-								{planLoading && (
-									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Cargando plan…
-									</p>
-								)}
-
-								{planError && !planLoading && (
+								{planError && !isPageLoading && (
 									<div className='login-field'>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
 											No pudimos cargar este plan.
@@ -393,7 +391,24 @@ function SchoolAdminUpdatePlanScreen () {
 									</div>
 								)}
 
-								{!planLoading && !planError && plan && formReady && (
+								{isPageLoading ? (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>
+											{planLoading && subjectsLoading
+												? 'Cargando datos del formulario…'
+												: planLoading
+													? 'Cargando plan…'
+													: 'Cargando materias…'}
+										</p>
+									</div>
+								) : (
+								!planError && plan && formReady && (
 									<form
 										className='login-form'
 										id='schooladmin-update-plan-form'
@@ -426,7 +441,7 @@ function SchoolAdminUpdatePlanScreen () {
 												step='any'
 												autoComplete='off'
 												value={price}
-												disabled={isBusy}
+												disabled={formBusy}
 												onChange={(e) =>
 													setPrice(e.target.value)}
 											/>
@@ -448,14 +463,14 @@ function SchoolAdminUpdatePlanScreen () {
 												step={1}
 												autoComplete='off'
 												value={totalQuestions}
-												disabled={isBusy}
+												disabled={formBusy}
 												onChange={(e) =>
 													setTotalQuestions(e.target.value)}
 											/>
 										</div>
 										<PlanSemesterFields
 											semesters={semesters}
-											disabled={isBusy}
+											disabled={formBusy}
 											idPrefix='schooladmin-update-plan-semester'
 											periodLabels={planPeriodLabels}
 											showPeriodCount={isUniversityPlan}
@@ -525,12 +540,7 @@ function SchoolAdminUpdatePlanScreen () {
 												<span className='login-label'>
 													Materias en este plan
 												</span>
-												{subjectsBusy && (
-													<p className='login-card__subtitle login-card__subtitle--wide'>
-														Cargando materias…
-													</p>
-												)}
-												{subjectsError && !subjectsBusy && (
+												{subjectsError && !subjectsFetching && (
 													<div className='login-field'>
 														<p className='login-card__subtitle login-card__subtitle--wide'>
 															No se pudieron cargar las materias.
@@ -539,14 +549,14 @@ function SchoolAdminUpdatePlanScreen () {
 															type='button'
 															className='login-submit'
 															style={{ marginTop: '0.5rem' }}
-															disabled={isBusy}
+															disabled={formBusy}
 															onClick={() => refetchSubjects()}
 														>
 															Intentar de nuevo
 														</button>
 													</div>
 												)}
-												{!subjectsBusy && subjectsList.length === 0 && (
+												{!subjectsFetching && subjectsList.length === 0 && (
 													<p className='login-card__subtitle login-card__subtitle--wide'>
 														Aún no hay materias.{' '}
 														<Link to='/schooladmins/createsubject'>
@@ -555,7 +565,7 @@ function SchoolAdminUpdatePlanScreen () {
 														primero.
 													</p>
 												)}
-												{!subjectsBusy && subjectsList.length > 0 && (
+												{!subjectsFetching && subjectsList.length > 0 && (
 													<div
 														className='login-field login-field--stack'
 														style={{
@@ -599,7 +609,7 @@ function SchoolAdminUpdatePlanScreen () {
 																		checked={selectedSubjectIds.includes(
 																			sid,
 																		)}
-																		disabled={isBusy}
+																		disabled={formBusy}
 																		onChange={() =>
 																			handleToggleSubject(sid)}
 																	/>
@@ -625,7 +635,7 @@ function SchoolAdminUpdatePlanScreen () {
 													name='active'
 													className='login-checkbox'
 													checked={isPlanActive}
-													disabled={isBusy}
+													disabled={formBusy}
 													onChange={(e) =>
 														setIsPlanActive(
 															e.target.checked,
@@ -641,15 +651,23 @@ function SchoolAdminUpdatePlanScreen () {
 											id='schooladmin-update-plan-submit'
 											className='login-submit'
 											disabled={
-												isBusy
+												formBusy
 												|| (!isUniversityPlan
-													&& (subjectsBusy
-														|| subjectsList.length === 0))
+													&& subjectsList.length === 0)
 											}
+											aria-busy={isSaving}
 										>
-											{isSaving ? 'Guardando…' : 'Guardar cambios'}
+											{isSaving ? (
+												<span className='login-submit__busy'>
+													<Loader size='sm' />
+													<span>Guardando…</span>
+												</span>
+											) : (
+												'Guardar cambios'
+											)}
 										</button>
 									</form>
+								)
 								)}
 							</div>
 						</div>

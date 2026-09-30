@@ -16,6 +16,7 @@ import {
 	getStudentSubjectsEmptyMessage,
 	getSubscriptionBlockReason,
 } from '../../utils/subscriptionAccess'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function AskTeacherSubjectCardActions ({
@@ -131,6 +132,8 @@ function StudentAskTeacherScreen () {
 	const showSubscriptionNotice =
 		!isLoadingProfile && !canView
 
+	const isFetchingData = isLoadingProfile || isLoading
+
 	return (
 		<div className='chat-app ask-screen chat-app--student-subject-cards'>
 			<div className='main-container'>
@@ -167,71 +170,92 @@ function StudentAskTeacherScreen () {
 								</p>
 							</div>
 						) : null}
-						<TeacherSubjectsGrid
-							pageTitle='Pregúntale a tu profesor'
-							pageSize={5}
-							pageSubtitle={
-								'Selecciona una materia para preguntarle a tu profesor'
-							}
-							copy={{
-								loading: 'Cargando materias…',
-								error:
-									'No pudimos cargar tus materias. '
-									+ 'Intenta de nuevo en un momento.',
-								retry: 'Intentar de nuevo',
-								students: 'estudiantes',
-								published: 'Publicado',
-								draft: 'Borrador',
-								paginationAria: 'Páginas de materias',
-								showing: 'Mostrando',
-								of: 'de',
-								subjects: 'materias',
-								prev: 'Anterior',
-								next: 'Siguiente',
-								pageAriaPrefix: 'Página',
-							}}
-							afterSubtitle={
-								!isLoadingProfile && currentSubscription ? (
-									<div className='ask-questions-left'>
-										<span className='ask-questions-left__label'>
-										 Preguntas disponibles 
-										</span>
-										<span
-											className={
-												'ask-questions-left__value' +
-												(questionsLeft > 0
-													? ' ask-questions-left__value--available'
-													: ' ask-questions-left__value--empty')
-											}
-										>
-											{questionsLeft}
-										</span>
-										{totalQuestions > 0 ? (
-											<span className='ask-questions-left__meta'>
-												{questionsAsked} usadas ·{' '}
-												{totalQuestions} en total
+						{isFetchingData ? (
+							<div className='teacher-subjects-page'>
+								<h1 className='teacher-subjects-page__title heading-gradient'>
+									Pregúntale a tu profesor
+								</h1>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>
+										{isLoadingProfile
+											? 'Cargando tu perfil…'
+											: 'Cargando materias…'}
+									</p>
+								</div>
+							</div>
+						) : (
+							<TeacherSubjectsGrid
+								pageTitle='Pregúntale a tu profesor'
+								pageSize={5}
+								pageSubtitle={
+									'Selecciona una materia para preguntarle a tu profesor'
+								}
+								copy={{
+									loading: 'Cargando materias…',
+									error:
+										'No pudimos cargar tus materias. '
+										+ 'Intenta de nuevo en un momento.',
+									retry: 'Intentar de nuevo',
+									students: 'estudiantes',
+									published: 'Publicado',
+									draft: 'Borrador',
+									paginationAria: 'Páginas de materias',
+									showing: 'Mostrando',
+									of: 'de',
+									subjects: 'materias',
+									prev: 'Anterior',
+									next: 'Siguiente',
+									pageAriaPrefix: 'Página',
+								}}
+								afterSubtitle={
+									currentSubscription ? (
+										<div className='ask-questions-left'>
+											<span className='ask-questions-left__label'>
+											 Preguntas disponibles 
 											</span>
-										) : null}
-									</div>
-								) : null
-							}
-							emptyMessage={getStudentSubjectsEmptyMessage(
-								currentSubscription,
-							)}
-							subjects={subjects}
-							isLoading={isLoading || isLoadingProfile}
-							isError={isError}
-							refetch={refetch}
-							renderCardActions={(subject) => (
-								<AskTeacherSubjectCardActions
-									subjectId={String(subject._id)}
-									canView={canView}
-									canAsk={canAsk}
-									viewBlockReason={viewBlockReason}
-									askBlockReason={askBlockReason}
-								/>
-							)}
-						/>
+											<span
+												className={
+													'ask-questions-left__value' +
+													(questionsLeft > 0
+														? ' ask-questions-left__value--available'
+														: ' ask-questions-left__value--empty')
+												}
+											>
+												{questionsLeft}
+											</span>
+											{totalQuestions > 0 ? (
+												<span className='ask-questions-left__meta'>
+													{questionsAsked} usadas ·{' '}
+													{totalQuestions} en total
+												</span>
+											) : null}
+										</div>
+									) : null
+								}
+								emptyMessage={getStudentSubjectsEmptyMessage(
+									currentSubscription,
+								)}
+								subjects={subjects}
+								isLoading={false}
+								isError={isError}
+								refetch={refetch}
+								renderCardActions={(subject) => (
+									<AskTeacherSubjectCardActions
+										subjectId={String(subject._id)}
+										canView={canView}
+										canAsk={canAsk}
+										viewBlockReason={viewBlockReason}
+										askBlockReason={askBlockReason}
+									/>
+								)}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

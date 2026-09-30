@@ -14,6 +14,7 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { useGetSchoolAdminQuestionByIdQuery } from '../../slices/admin/schoolAdminQuestionsSlice'
 import { QUESTIONS_URL } from '../../constants'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const SUBJECT_THEME_CYCLE = ['sky', 'teal', 'indigo']
@@ -492,12 +493,18 @@ function SchoolAdminWatchQuestionScreen () {
 							)}
 
 							{canFetch && isLoading && (
-								<p className='watch-new__description'>
-									Cargando pregunta…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando pregunta…</p>
+								</div>
 							)}
 
-							{canFetch && isError && (
+							{canFetch && isError && !isLoading && (
 								<div style={{ marginBottom: '1rem' }}>
 									<p className='watch-new__description'>
 										{errorMessage}
@@ -513,7 +520,7 @@ function SchoolAdminWatchQuestionScreen () {
 								</div>
 							)}
 
-							{canFetch && question && (
+							{canFetch && !isLoading && question && (
 								<>
 									<h1
 										className={

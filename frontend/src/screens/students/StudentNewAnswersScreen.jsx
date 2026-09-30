@@ -10,6 +10,7 @@ import {
 	resolveCurrentSubscription,
 	canViewQuestions,
 } from '../../utils/subscriptionAccess'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const PAGE_SIZE = 2
@@ -302,6 +303,9 @@ function StudentNewAnswersScreen () {
 		error?.data?.message || error?.error
 		|| 'No se pudieron cargar las nuevas respuestas.'
 
+	const isFetchingData =
+		isLoadingProfile || (canView && isLoading)
+
 	return (
 		<div className='chat-app ask-screen'>
 			<div className='main-container'>
@@ -340,10 +344,20 @@ function StudentNewAnswersScreen () {
 									/>
 								) : null}
 
-								{canView && isLoading && (
-									<p className='new-answers__status'>
-										Cargando respuestas…
-									</p>
+								{isFetchingData && (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>
+											{isLoadingProfile
+												? 'Cargando tu perfil…'
+												: 'Cargando respuestas…'}
+										</p>
+									</div>
 								)}
 
 								{canView && isError && (
@@ -360,7 +374,7 @@ function StudentNewAnswersScreen () {
 									</div>
 								)}
 
-								{canView && !isLoading && !isError
+								{canView && !isFetchingData && !isError
 									&& newAnswers.length === 0 && (
 									<div className='new-answers__empty'>
 										<div className='new-answers__empty-icon'>
@@ -373,7 +387,7 @@ function StudentNewAnswersScreen () {
 									</div>
 								)}
 
-								{canView && !isLoading && !isError
+								{canView && !isFetchingData && !isError
 									&& newAnswers.length > 0 && (
 									<div className='new-answers__timeline'>
 										<div
@@ -400,7 +414,7 @@ function StudentNewAnswersScreen () {
 									</div>
 								)}
 
-								{canView && !isLoading && !isError
+								{canView && !isFetchingData && !isError
 									&& totalPages > 1 && (
 									<div className='pagination pagination--answers new-answers__pagination'>
 										{Array.from(

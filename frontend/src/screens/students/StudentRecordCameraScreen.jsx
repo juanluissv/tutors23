@@ -10,6 +10,7 @@ import { useUploadStudentQuestionVideoMutation } from '../../slices/student/ques
 import { Button } from 'react-bootstrap'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const recIconSrc = `${process.env.PUBLIC_URL}/assets/img/rec3.png`
@@ -307,11 +308,17 @@ function StudentRecordCameraScreen () {
 												disabled={
 													!recordedBlob || isUploading
 												}
+												aria-busy={isUploading}
 												onClick={() => void handleSaveVideo()}
 											>
-												{isUploading
-													? 'Guardando…'
-													: 'Guardar video'}
+												{isUploading ? (
+													<span className="login-submit__busy">
+														<Loader size="sm" />
+														<span>Guardando…</span>
+													</span>
+												) : (
+													'Guardar video'
+												)}
 											</Button>
 										</div>
 									</div>

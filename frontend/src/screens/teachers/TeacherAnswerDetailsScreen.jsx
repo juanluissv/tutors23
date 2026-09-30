@@ -11,6 +11,7 @@ import TeacherHeader from '../../components/TeacherHeader'
 import { useGetQuestionByIdForTeacherQuery } from '../../slices/teachers/teacherQuestionsSlice'
 import { useCreateTeacherAnswerMutation } from '../../slices/teachers/teacherAnswersSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const TagIcon = () => (
@@ -227,12 +228,18 @@ function TeacherAnswerDetailsScreen () {
 								)}
 
 								{canFetch && isLoadingQuestion && (
-									<p className='login-card__subtitle'>
-										Cargando pregunta…
-									</p>
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>Cargando pregunta…</p>
+									</div>
 								)}
 
-								{canFetch && isQuestionError && (
+								{canFetch && isQuestionError && !isLoadingQuestion && (
 									<p className='login-card__subtitle'>
 										{questionErrorMessage}
 									</p>

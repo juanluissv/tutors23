@@ -5,6 +5,7 @@ import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetSubjectStudentsForTeacherQuery } from '../../slices/teachers/teacherApiSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i
@@ -147,12 +148,18 @@ function TeacherStudentsScreen () {
 							</p>
 
 							{isLoading && (
-								<p className='ts-page__subtitle'>
-									Cargando…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando estudiantes…</p>
+								</div>
 							)}
 
-							{isError && (
+							{isError && !isLoading && (
 								<div className='ts-table-wrapper'>
 									<p className='ts-page__subtitle'>
 										{errMessage}

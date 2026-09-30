@@ -14,6 +14,7 @@ import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useGetStudentQuestionByIdQuery } from '../../slices/student/questionsSlice'
 import { QUESTIONS_URL } from '../../constants'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const SUBJECT_THEME_CYCLE = ['sky', 'teal', 'indigo']
@@ -446,6 +447,8 @@ function StudentWatchQuestionScreen () {
 	const errorMessage =
 		error?.data?.message || error?.error || 'Could not load this question.'
 
+	const isFetchingData = canFetch && isLoading
+
 	if (!studentInfo) {
 		return null
 	}
@@ -487,13 +490,19 @@ function StudentWatchQuestionScreen () {
 								</>
 							)}
 
-							{canFetch && isLoading && (
-								<p className='watch-new__description'>
-									Loading question…
-								</p>
+							{isFetchingData && (
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando pregunta…</p>
+								</div>
 							)}
 
-							{canFetch && isError && (
+							{canFetch && isError && !isFetchingData && (
 								<div style={{ marginBottom: '1rem' }}>
 									<p className='watch-new__description'>
 										{errorMessage}
@@ -509,7 +518,7 @@ function StudentWatchQuestionScreen () {
 								</div>
 							)}
 
-							{canFetch && question && (
+							{canFetch && !isFetchingData && question && (
 								<>
 									<h1
 										className={`watch-new__subject watch-new__subject--${subjectColor}`}

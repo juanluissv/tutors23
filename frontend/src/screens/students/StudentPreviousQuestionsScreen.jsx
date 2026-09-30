@@ -16,6 +16,7 @@ import {
 	canViewQuestions,
 	getSubscriptionBlockReason,
 } from '../../utils/subscriptionAccess'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const PAGE_SIZE = 1
@@ -289,6 +290,9 @@ function StudentPreviousQuestionsScreen () {
 			? convo.subject.title
 			: null
 
+	const isFetchingData =
+		isLoadingProfile || (canView && isLoading)
+
 	return (
 		<div className='chat-app ask-screen chat-app--student-previous-questions'>
 			<div className='main-container'>
@@ -330,18 +334,23 @@ function StudentPreviousQuestionsScreen () {
 									/>
 								) : null}
 
-								{canView && isLoading && (
-									<p className='answers-heading' style={{
-										marginTop: '1rem',
-										textAlign: 'center',
-										width: '100%',
-									}}
+								{isFetchingData && (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
 									>
-										Cargando…
-									</p>
+										<Loader size='md' />
+										<p>
+											{isLoadingProfile
+												? 'Cargando tu perfil…'
+												: 'Cargando preguntas…'}
+										</p>
+									</div>
 								)}
 
-								{canView && isError && (
+								{canView && isError && !isFetchingData && (
 									<div style={{
 										marginTop: '1rem',
 										textAlign: 'center',
@@ -362,7 +371,7 @@ function StudentPreviousQuestionsScreen () {
 									</div>
 								)}
 
-								{canView && !isLoading && !isError && total === 0 && (
+								{canView && !isFetchingData && !isError && total === 0 && (
 									<p className='answers-heading' style={{
 										marginTop: '1rem',
 										textAlign: 'center',
@@ -386,7 +395,7 @@ function StudentPreviousQuestionsScreen () {
 									</p>
 								)}
 
-								{canView && !isLoading && !isError && showTimeline && (
+								{canView && !isFetchingData && !isError && showTimeline && (
 									<div className='qa-timeline'>
 										<div className='qa-timeline__pair'>
 											<div className={
@@ -554,7 +563,7 @@ function StudentPreviousQuestionsScreen () {
 									</div>
 								)}
 
-								{canView && !isLoading && !isError && totalPages > 1 && (
+								{canView && !isFetchingData && !isError && totalPages > 1 && (
 									<div className={
 										'pagination pagination--answers'
 									}

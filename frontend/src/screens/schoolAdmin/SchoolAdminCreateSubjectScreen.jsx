@@ -13,6 +13,7 @@ import AdminHeader from '../../components/AdminHeader'
 import { normalizeGradeLevels } from '../../utils/gradeLevel'
 import { normalizeUniversityPrograms } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const MAX_BOOK_BYTES = 200 * 1024 * 1024
@@ -162,10 +163,9 @@ function SchoolAdminCreateSubjectScreen () {
 	const [createSubject, { isLoading: isCreating }] = useCreateSubjectMutation()
 	const [setSubjectTeacherEmail, { isLoading: isAssigningTeacher }] =
 		useSetSubjectTeacherEmailMutation()
-	const isBusy = isCreating
-		|| isAssigningTeacher
-		|| isLoadingSchool
-		|| isLoadingTeachers
+	const isPageLoading = isLoadingSchool || isLoadingTeachers
+	const isSubmitting = isCreating || isAssigningTeacher
+	const isBusy = isSubmitting || isPageLoading
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -480,6 +480,25 @@ function SchoolAdminCreateSubjectScreen () {
 										desde editar materia.
 									</p>
 								</div>
+								{isPageLoading ? (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>
+											{isLoadingSchool && isLoadingTeachers
+												? 'Cargando datos del formulario…'
+												: isLoadingSchool
+													? (isUniversity
+														? 'Cargando programas…'
+														: 'Cargando grados…')
+													: 'Cargando profesores…'}
+										</p>
+									</div>
+								) : (
 								<form
 									className='login-form'
 									id='schooladmin-create-subject-form'
@@ -527,13 +546,7 @@ function SchoolAdminCreateSubjectScreen () {
 												</span>
 											)}
 										</div>
-										{isLoadingSchool ? (
-											<p className='subject-grade-picker__hint'>
-												{isUniversity
-													? 'Cargando programas…'
-													: 'Cargando grados…'}
-											</p>
-										) : cohorts.length === 0 ? (
+										{cohorts.length === 0 ? (
 											<p className='subject-grade-picker__hint'>
 												Aún no hay {isUniversity
 													? 'programas'
@@ -679,11 +692,7 @@ function SchoolAdminCreateSubjectScreen () {
 												</span>
 											)}
 										</div>
-										{isLoadingTeachers ? (
-											<p className='subject-teacher-picker__hint'>
-												Cargando profesores…
-											</p>
-										) : teachersList.length === 0 ? (
+										{teachersList.length === 0 ? (
 											<p className='subject-teacher-picker__hint'>
 												Aún no hay profesores.{' '}
 												<Link to='/schooladmins/addteacher'>
@@ -856,6 +865,23 @@ function SchoolAdminCreateSubjectScreen () {
 													Quitar archivo
 												</button>
 											) : null}
+											{isCreating
+												&& bookFile instanceof File
+												&& !isAssigningTeacher ? (
+												<div
+													className={
+														'new-answers__status '
+														+ 'new-answers__status--loading'
+													}
+													role='status'
+													aria-live='polite'
+													aria-busy='true'
+													style={{ marginTop: '0.75rem' }}
+												>
+													<Loader size='sm' />
+													<p>Subiendo PDF…</p>
+												</div>
+											) : null}
 										</div>
 									</div>
 									<button
@@ -869,14 +895,25 @@ function SchoolAdminCreateSubjectScreen () {
 											|| (isUniversity
 												&& selectedCohortIds.length === 0)
 										}
+										aria-busy={isSubmitting}
 									>
-										{isCreating || isAssigningTeacher
-											? 'Creando…'
-											: isLoadingSchool || isLoadingTeachers
-												? 'Cargando…'
-												: 'Crear materia'}
+										{isSubmitting ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>
+													{isAssigningTeacher
+														? 'Asignando profesor…'
+														: bookFile instanceof File
+															? 'Subiendo PDF…'
+															: 'Creando…'}
+												</span>
+											</span>
+										) : (
+											'Crear materia'
+										)}
 									</button>
 								</form>
+								)}
 							</div>
 						</div>
 					</div>

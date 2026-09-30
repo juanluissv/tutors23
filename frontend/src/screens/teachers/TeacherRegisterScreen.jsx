@@ -7,6 +7,7 @@ import { setTeacherCredentials } from '../../slices/teachers/authTeacherSlice'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function TeacherRegisterScreen () {
@@ -213,10 +214,16 @@ function TeacherRegisterScreen () {
 										name='register-button'
 										className='login-submit'
 										disabled={isLoading}
+										aria-busy={isLoading}
 									>
-										{isLoading
-											? 'Creando cuenta…'
-											: 'Registrarse'}
+										{isLoading ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Creando cuenta…</span>
+											</span>
+										) : (
+											'Registrarse'
+										)}
 									</button>
 								</form>
 								<p className='login-card__footer'>

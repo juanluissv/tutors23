@@ -11,6 +11,7 @@ import {
 	useDeleteSubjectBookChapterMutation,
 } from '../../slices/admin/schoolAdminApiSlice'
 import { SUBJECTS_URL } from '../../constants'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
@@ -274,6 +275,7 @@ function SchoolAdminBookChapters () {
 	const [chapterDrafts, setChapterDrafts] = useState([])
 	const [selectedDocumentId, setSelectedDocumentId] = useState('')
 	const [generatingChapterId, setGeneratingChapterId] = useState(null)
+	const [deletingChapterId, setDeletingChapterId] = useState(null)
 	const initializedSubjectRef = useRef(null)
 
 	const isValidSubjectParam =
@@ -497,6 +499,8 @@ function SchoolAdminBookChapters () {
 			return
 		}
 
+		setDeletingChapterId(String(chapterKey))
+
 		try {
 			const result = await deleteBookChapter({
 				id: String(subjectId),
@@ -510,6 +514,8 @@ function SchoolAdminBookChapters () {
 			const message = err?.data?.message
 				|| 'No se pudo eliminar el capítulo'
 			toast.error(message)
+		} finally {
+			setDeletingChapterId(null)
 		}
 	}
 
@@ -774,9 +780,15 @@ function SchoolAdminBookChapters () {
 									</div>
 
 									{isLoadingSubjects && !currentSubject ? (
-										<p className='book-chapters__loading'>
-											Cargando documentos…
-										</p>
+										<div
+											className='new-answers__status new-answers__status--loading'
+											role='status'
+											aria-live='polite'
+											aria-busy='true'
+										>
+											<Loader size='md' />
+											<p>Cargando documentos…</p>
+										</div>
 									) : hasDocuments ? (
 										<div
 											className='book-chapters__doc-picker'
@@ -924,9 +936,15 @@ function SchoolAdminBookChapters () {
 									</div>
 
 									{!hasDocuments ? null : isLoadingSubjects ? (
-										<p className='book-chapters__loading'>
-											Cargando capítulos…
-										</p>
+										<div
+											className='new-answers__status new-answers__status--loading'
+											role='status'
+											aria-live='polite'
+											aria-busy='true'
+										>
+											<Loader size='md' />
+											<p>Cargando capítulos…</p>
+										</div>
 									) : !selectedDocumentId && requiresSourceDocument ? (
 										<div className='book-chapters__select-doc-prompt'>
 											<p className='book-chapters__select-doc-prompt-title'>
@@ -978,6 +996,8 @@ function SchoolAdminBookChapters () {
 														: ''
 													const isGeneratingThis = generatingChapterId
 														=== chapterKey
+													const isDeletingThis = deletingChapterId
+														=== chapterKey
 													const hasPageRange = Boolean(
 														chapter.ChapterBeginPage
 														&& chapter.ChapterEndPage,
@@ -1009,10 +1029,18 @@ function SchoolAdminBookChapters () {
 																		type='button'
 																		className='book-chapters__remove-btn'
 																		disabled={isBusy}
+																		aria-busy={isDeletingThis}
 																		onClick={() =>
 																			void handleRemoveChapter(chapterKey)}
 																	>
-																		Eliminar
+																		{isDeletingThis ? (
+																			<span className='login-submit__busy'>
+																				<Loader size='sm' />
+																				<span>Eliminando…</span>
+																			</span>
+																		) : (
+																			'Eliminar'
+																		)}
 																	</button>
 																</div>
 
@@ -1140,11 +1168,17 @@ function SchoolAdminBookChapters () {
 																				type='button'
 																				className='login-submit book-chapters__save-btn book-chapters__save-btn--inline'
 																				disabled={isBusy}
+																				aria-busy={isSavingChapters}
 																				onClick={() => void handleSaveChapters()}
 																			>
-																				{isSavingChapters
-																					? 'Guardando…'
-																					: 'Guardar capítulos'}
+																				{isSavingChapters ? (
+																					<span className='login-submit__busy'>
+																						<Loader size='sm' />
+																						<span>Guardando…</span>
+																					</span>
+																				) : (
+																					'Guardar capítulos'
+																				)}
 																			</button>
 																		</div>
 																	</div>
@@ -1224,16 +1258,24 @@ function SchoolAdminBookChapters () {
 																					'book-chapters__generate-btn' +
 																					(generateDisabled
 																						? ' book-chapters__generate-btn--disabled'
+																						: '') +
+																					(isGeneratingThis
+																						? ' book-chapters__generate-btn--loading'
 																						: '')
 																				}
 																				disabled={generateDisabled}
+																				aria-busy={isGeneratingThis}
 																				onClick={() =>
 																					void handleGenerateChapterPdf(
 																						chapterKey,
 																					)}
 																			>
 																				<span className='book-chapters__generate-btn-icon'>
-																					<ChapterGenerateGlyph />
+																					{isGeneratingThis ? (
+																						<Loader size='sm' />
+																					) : (
+																						<ChapterGenerateGlyph />
+																					)}
 																				</span>
 																				<span className='book-chapters__generate-btn-title'>
 																					{isGeneratingThis

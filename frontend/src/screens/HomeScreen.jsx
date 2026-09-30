@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import Loader from '../components/Loader';
 import { useGetChatMutation } from '../slices/chatSlice';
 import {
   useGetProfileQuery,
@@ -1038,7 +1039,10 @@ function HomeScreen() {
     return null;
   }
 
-  const inputDisabled = isLoading || isLoadingProfile || !canUseAiTutor;
+  const isFetchingHubData = isLoadingProfile || isLoadingMySubjects;
+
+  const inputDisabled =
+    isLoading || isFetchingHubData || !canUseAiTutor;
 
   return (
     <div className="chat-app ask-screen chat-app--home">
@@ -1080,14 +1084,19 @@ function HomeScreen() {
                       {learningMaterial}
                     </h1>
                     <div className="home-hub__subjects-wrap">
-                      {isLoadingProfile || isLoadingMySubjects ? (
+                      {isFetchingHubData ? (
                         <div
-                          className="home-hub__subjects home-hub__subjects--loading"
-                          aria-hidden
+                          className="new-answers__status new-answers__status--loading home-hub__loading"
+                          role="status"
+                          aria-live="polite"
+                          aria-busy="true"
                         >
-                          <span className="home-hub__subject-bubble home-hub__subject-bubble--skeleton" />
-                          <span className="home-hub__subject-bubble home-hub__subject-bubble--skeleton" />
-                          <span className="home-hub__subject-bubble home-hub__subject-bubble--skeleton" />
+                          <Loader size="md" />
+                          <p>
+                            {isLoadingProfile
+                              ? 'Cargando tu perfil…'
+                              : 'Cargando materias…'}
+                          </p>
                         </div>
                       ) : subscribedSubjects.length > 0 ? (
                         <div className="home-hub__subjects">
@@ -1127,20 +1136,13 @@ function HomeScreen() {
                                   </p>
                                   {isLoadingBookLessons ? (
                                     <div
-                                      className="home-hub__questions-list"
-                                      aria-hidden
+                                      className="new-answers__status new-answers__status--loading home-hub__loading"
+                                      role="status"
+                                      aria-live="polite"
+                                      aria-busy="true"
                                     >
-                                      {Array.from({ length: 6 }).map(
-                                        (_, index) => (
-                                          <span
-                                            key={index}
-                                            className={
-                                              'home-hub__question-bubble ' +
-                                              'home-hub__question-bubble--skeleton'
-                                            }
-                                          />
-                                        ),
-                                      )}
+                                      <Loader size="md" />
+                                      <p>Cargando preguntas…</p>
                                     </div>
                                   ) : isBookLessonsError ? (
                                     <p className="home-hub__questions-empty">

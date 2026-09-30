@@ -19,6 +19,7 @@ import {
 } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const MAX_BOOK_BYTES = 200 * 1024 * 1024
@@ -627,7 +628,15 @@ function TeacherEditSubjectScreen () {
 						/>
 						<div className='content-area content-area--login'>
 							<div className='center-content2 login-screen login-screen--wide login-screen--subject-form'>
-								<p className='login-card__subtitle'>Cargando…</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando materia…</p>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -1237,12 +1246,18 @@ function TeacherEditSubjectScreen () {
 																	type='button'
 																	className='login-submit'
 																	disabled={isBusy}
+																	aria-busy={isUploadingDocument}
 																	onClick={() =>
 																		void handleUploadDocument()}
 																>
-																	{isUploadingDocument
-																		? 'Subiendo…'
-																		: 'Subir PDF'}
+																	{isUploadingDocument ? (
+																		<span className='login-submit__busy'>
+																			<Loader size='sm' />
+																			<span>Subiendo…</span>
+																		</span>
+																	) : (
+																		'Subir PDF'
+																	)}
 																</button>
 																<button
 																	type='button'
@@ -1373,10 +1388,16 @@ function TeacherEditSubjectScreen () {
 										type='submit'
 										className='login-submit'
 										disabled={isBusy}
+										aria-busy={isSaving}
 									>
-										{isSaving
-											? 'Guardando…'
-											: 'Guardar cambios'}
+										{isSaving ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Guardando…</span>
+											</span>
+										) : (
+											'Guardar cambios'
+										)}
 									</button>
 								</form>
 							</div>

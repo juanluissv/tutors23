@@ -22,6 +22,7 @@ import {
 	canViewQuestions,
 } from '../../utils/subscriptionAccess'
 import { buildSectionGroups, lessonKey } from '../../utils/courseOutline'
+import Loader from '../../components/Loader'
 import '../teachers/TeacherPreviewCourseScreen.css'
 import '../../App.css'
 
@@ -203,6 +204,9 @@ function StudentWatchCourseSreen () {
 		return null
 	}
 
+	const isFetchingData =
+		courseIdOk && (isLoadingProfile || (canView && isLoading))
+
 	return (
 		<div className='chat-app ask-screen'>
 			<div className='main-container'>
@@ -236,12 +240,22 @@ function StudentWatchCourseSreen () {
 									</div>
 								</StudentSubscriptionNotice>
 							)}
-							{courseIdOk && canView && isLoading && (
-								<p className='course-preview__muted'>
-									Cargando curso…
-								</p>
+							{isFetchingData && (
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>
+										{isLoadingProfile
+											? 'Cargando tu perfil…'
+											: 'Cargando curso…'}
+									</p>
+								</div>
 							)}
-							{courseIdOk && canView && isError && (
+							{courseIdOk && canView && isError && !isFetchingData && (
 								<div className='course-preview__alert-block'>
 									<p>{errText}</p>
 									<div className='course-preview__toolbar-row'>
@@ -261,7 +275,7 @@ function StudentWatchCourseSreen () {
 									</div>
 								</div>
 							)}
-							{courseIdOk && canView && !isLoading && !isError && course && (
+							{courseIdOk && canView && !isFetchingData && !isError && course && (
 								<div className='course-preview__shell'>
 									<header className='course-preview__toolbar'>
 										<div>

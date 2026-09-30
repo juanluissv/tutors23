@@ -9,6 +9,7 @@ import {
 	useUpdateProfileMutation,
 } from '../../slices/student/studentApiSlice'
 import { setStudentCredentials } from '../../slices/student/authStudentSlice'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const PROFILE_TAB = 'profile'
@@ -612,12 +613,18 @@ function StudentProfileScreen () {
 								)}
 
 								{studentInfo && isLoading && (
-									<p className='login-card__subtitle'>
-										Cargando perfil…
-									</p>
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>Cargando perfil…</p>
+									</div>
 								)}
 
-								{studentInfo && isError && (
+								{studentInfo && isError && !isLoading && (
 									<p
 										className='login-card__subtitle'
 										role='alert'
@@ -861,8 +868,16 @@ function StudentProfileScreen () {
 										type='submit'
 										className='login-submit'
 										disabled={isBusy}
+										aria-busy={isSaving}
 									>
-										{isBusy ? 'Guardando…' : 'Guardar cambios'}
+										{isSaving ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Guardando…</span>
+											</span>
+										) : (
+											'Guardar cambios'
+										)}
 									</button>
 								</form>
 								</div>

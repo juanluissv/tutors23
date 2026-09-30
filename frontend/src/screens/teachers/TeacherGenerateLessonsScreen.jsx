@@ -629,9 +629,15 @@ function TeacherGenerateLessonsScreen () {
 									</div>
 
 									{isLoadingSubjects && !currentSubject ? (
-										<p className='book-chapters__loading'>
-											Cargando documentos…
-										</p>
+										<div
+											className='new-answers__status new-answers__status--loading'
+											role='status'
+											aria-live='polite'
+											aria-busy='true'
+										>
+											<Loader size='md' />
+											<p>Cargando documentos…</p>
+										</div>
 									) : hasDocuments ? (
 										<div
 											className='book-chapters__doc-picker'
@@ -789,9 +795,15 @@ function TeacherGenerateLessonsScreen () {
 									</div>
 
 									{!hasDocuments ? null : isLoadingSubjects || isLoadingLessons ? (
-										<p className='book-chapters__loading'>
-											Cargando capítulos…
-										</p>
+										<div
+											className='new-answers__status new-answers__status--loading'
+											role='status'
+											aria-live='polite'
+											aria-busy='true'
+										>
+											<Loader size='md' />
+											<p>Cargando capítulos…</p>
+										</div>
 									) : !selectedDocumentId && requiresSourceDocument ? (
 										<div className='book-chapters__select-doc-prompt'>
 											<p className='book-chapters__select-doc-prompt-title'>
@@ -961,12 +973,16 @@ function TeacherGenerateLessonsScreen () {
 
 															{isThisGenerating ? (
 																<div
-																	className='generate-lessons__generating'
+																	className={
+																		'generate-lessons__generating '
+																		+ 'new-answers__status '
+																		+ 'new-answers__status--loading'
+																	}
 																	role='status'
 																	aria-live='polite'
 																	aria-busy='true'
 																>
-																	<Loader size='sm' />
+																	<Loader size='md' />
 																	<p className='generate-lessons__generating-title'>
 																		Generando lección…
 																	</p>
@@ -1026,6 +1042,7 @@ function TeacherGenerateLessonsScreen () {
 																	!hasChapterFile
 																	|| isThisGenerating
 																}
+																aria-busy={isThisGenerating}
 																onClick={() => {
 																	if (!chapter._id) {
 																		return

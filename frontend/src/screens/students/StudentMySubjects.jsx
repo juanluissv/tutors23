@@ -8,6 +8,7 @@ import {
 	useGetProfileQuery,
 } from '../../slices/student/studentApiSlice'
 import { TeacherSubjectsGrid } from '../teachers/TeacherSubjectsGrid'
+import Loader from '../../components/Loader'
 import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
@@ -155,6 +156,8 @@ function StudentMySubjects () {
 	const showSubscriptionNotice =
 		!isLoadingProfile && !canViewCourses
 
+	const isFetchingData = isLoadingProfile || isLoading
+
 	return (
 		<div className='chat-app ask-screen chat-app--student-subject-cards'>
 			<div className='main-container'>
@@ -170,50 +173,71 @@ function StudentMySubjects () {
 								subscription={currentSubscription}
 							/>
 						) : null}
-						<TeacherSubjectsGrid
-							pageTitle='Mis materias'
-							pageSubtitle={
-								'Materias en las que estás inscrito. Abre '
-								+ 'una materia para seguir aprendiendo o '
-								+ 'preguntarle a tu profesor.'
-							}
-							copy={{
-								loading: 'Cargando materias…',
-								error:
-									'No pudimos cargar tus materias. '
-									+ 'Intenta de nuevo en un momento.',
-								retry: 'Intentar de nuevo',
-								students: 'estudiantes',
-								published: 'Publicado',
-								draft: 'Borrador',
-								paginationAria: 'Páginas de materias',
-								showing: 'Mostrando',
-								of: 'de',
-								subjects: 'materias',
-								prev: 'Anterior',
-								next: 'Siguiente',
-								pageAriaPrefix: 'Página',
-								noTeacher: 'Sin profesor',
-								teacherPrefix: 'profesor  ',
-							}}
-							showStudentCount={false}
-							showSubjectMeta={false}
-							showTeacherName={true}
-							emptyMessage={getStudentSubjectsEmptyMessage(
-								currentSubscription,
-							)}
-							subjects={subjects}
-							isLoading={isLoading || isLoadingProfile}
-							isError={isError}
-							refetch={refetch}
-							renderCardActions={(subject) => (
-								<StudentSubjectCardActions
-									subject={subject}
-									canViewCourses={canViewCourses}
-									viewBlockReason={viewBlockReason}
-								/>
-							)}
-						/>
+						{isFetchingData ? (
+							<div className='teacher-subjects-page'>
+								<h1 className='teacher-subjects-page__title heading-gradient'>
+									Mis materias
+								</h1>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>
+										{isLoadingProfile
+											? 'Cargando tu perfil…'
+											: 'Cargando materias…'}
+									</p>
+								</div>
+							</div>
+						) : (
+							<TeacherSubjectsGrid
+								pageTitle='Mis materias'
+								pageSubtitle={
+									'Materias en las que estás inscrito. Abre '
+									+ 'una materia para seguir aprendiendo o '
+									+ 'preguntarle a tu profesor.'
+								}
+								copy={{
+									loading: 'Cargando materias…',
+									error:
+										'No pudimos cargar tus materias. '
+										+ 'Intenta de nuevo en un momento.',
+									retry: 'Intentar de nuevo',
+									students: 'estudiantes',
+									published: 'Publicado',
+									draft: 'Borrador',
+									paginationAria: 'Páginas de materias',
+									showing: 'Mostrando',
+									of: 'de',
+									subjects: 'materias',
+									prev: 'Anterior',
+									next: 'Siguiente',
+									pageAriaPrefix: 'Página',
+									noTeacher: 'Sin profesor',
+									teacherPrefix: 'profesor  ',
+								}}
+								showStudentCount={false}
+								showSubjectMeta={false}
+								showTeacherName={true}
+								emptyMessage={getStudentSubjectsEmptyMessage(
+									currentSubscription,
+								)}
+								subjects={subjects}
+								isLoading={false}
+								isError={isError}
+								refetch={refetch}
+								renderCardActions={(subject) => (
+									<StudentSubjectCardActions
+										subject={subject}
+										canViewCourses={canViewCourses}
+										viewBlockReason={viewBlockReason}
+									/>
+								)}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

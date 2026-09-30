@@ -14,6 +14,7 @@ import {
 } from '../../slices/teachers/teacherApiSlice'
 import { buildSectionGroups, lessonKey } from '../../utils/courseOutline'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import './TeacherPreviewCourseScreen.css'
 import '../../App.css'
 
@@ -228,11 +229,17 @@ function TeacherPreviewCourseScreen () {
 								</p>
 							)}
 							{courseIdOk && isLoading && (
-								<p className='course-preview__muted'>
-									Cargando vista previa…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando vista previa…</p>
+								</div>
 							)}
-							{courseIdOk && isError && (
+							{courseIdOk && isError && !isLoading && (
 								<div className='course-preview__alert-block'>
 									<p>
 										{localizeApiError(

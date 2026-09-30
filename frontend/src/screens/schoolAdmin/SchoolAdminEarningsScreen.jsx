@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { useGetSchoolEarningsQuery } from '../../slices/admin/schoolAdminApiSlice'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const PERIOD_OPTIONS = [
@@ -244,9 +245,15 @@ function SchoolAdminEarningsScreen () {
 							)}
 
 							{schoolId && isLoading && (
-								<p className='school-earnings-page__loading'>
-									Cargando ganancias…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando ganancias…</p>
+								</div>
 							)}
 
 							{schoolId && isError && !isLoading && (

@@ -9,6 +9,7 @@ import {
 	TeacherSubjectsGrid,
 	SubjectCardActionsDefault,
 } from './TeacherSubjectsGrid'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function TeacherSubjectsScreen () {
@@ -57,28 +58,45 @@ function TeacherSubjectsScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area'>
-						<TeacherSubjectsGrid
-							pageTitle='Mis materias'
-							pageSubtitle={
-								'Administra tus cursos, lecciones y las '
-								+ 'preguntas anteriores de tus estudiantes.'
-							}
-							emptyMessage={
-								'Aún no tienes materias. Cuando un '
-								+ 'administrador escolar te invite por '
-								+ 'correo, tus materias aparecerán aquí.'
-							}
-							subjects={subjects}
-							isLoading={isLoading}
-							isError={isError}
-							refetch={refetch}
-							isUniversity={isUniversity}
-							renderCardActions={(subject) => (
-								<SubjectCardActionsDefault
-									subjectId={String(subject._id)}
-								/>
-							)}
-						/>
+						{isLoading ? (
+							<div className='teacher-subjects-page'>
+								<h1 className='teacher-subjects-page__title heading-gradient'>
+									Mis materias
+								</h1>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando materias…</p>
+								</div>
+							</div>
+						) : (
+							<TeacherSubjectsGrid
+								pageTitle='Mis materias'
+								pageSubtitle={
+									'Administra tus cursos, lecciones y las '
+									+ 'preguntas anteriores de tus estudiantes.'
+								}
+								emptyMessage={
+									'Aún no tienes materias. Cuando un '
+									+ 'administrador escolar te invite por '
+									+ 'correo, tus materias aparecerán aquí.'
+								}
+								subjects={subjects}
+								isLoading={false}
+								isError={isError}
+								refetch={refetch}
+								isUniversity={isUniversity}
+								renderCardActions={(subject) => (
+									<SubjectCardActionsDefault
+										subjectId={String(subject._id)}
+									/>
+								)}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

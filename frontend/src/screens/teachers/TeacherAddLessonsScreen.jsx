@@ -10,6 +10,7 @@ import {
 	useGetCourseByIdForTeacherQuery,
 } from '../../slices/teachers/teacherApiSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import './TeacherAddLessonsScreen.css'
 import '../../App.css'
 
@@ -253,9 +254,15 @@ function TeacherAddLessonsScreen () {
 					/>
 					<div className='content-area'>
 						{isLoading ? (
-							<p className='course-builder__loading'>
-								Cargando curso…
-							</p>
+							<div
+								className='new-answers__status new-answers__status--loading'
+								role='status'
+								aria-live='polite'
+								aria-busy='true'
+							>
+								<Loader size='md' />
+								<p>Cargando curso…</p>
+							</div>
 						) : isError || !course ? (
 							<div className='course-builder__loading'>
 								<p>No pudimos cargar este curso.</p>
@@ -413,10 +420,16 @@ function TeacherAddLessonsScreen () {
 														disabled={
 															isSavingSection
 														}
+														aria-busy={isSavingSection}
 													>
-														{isSavingSection
-															? 'Guardando…'
-															: 'Agregar sección'}
+														{isSavingSection ? (
+															<span className='login-submit__busy'>
+																<Loader size='sm' />
+																<span>Guardando…</span>
+															</span>
+														) : (
+															'Agregar sección'
+														)}
 													</button>
 												</form>
 											</div>
@@ -749,10 +762,16 @@ function TeacherAddLessonsScreen () {
 															'course-builder__btn--cyan'
 														}
 														disabled={lessonLocked}
+														aria-busy={isSavingLesson}
 													>
-														{isSavingLesson
-															? 'Subiendo…'
-															: 'Agregar lección'}
+														{isSavingLesson ? (
+															<span className='login-submit__busy'>
+																<Loader size='sm' />
+																<span>Subiendo…</span>
+															</span>
+														) : (
+															'Agregar lección'
+														)}
 													</button>
 												</form>
 											</div>

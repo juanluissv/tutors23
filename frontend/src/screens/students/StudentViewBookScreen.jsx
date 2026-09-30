@@ -8,6 +8,7 @@ import {
 	useGetMySubjectsQuery,
 } from '../../slices/student/studentApiSlice'
 import { buildBookIndex } from '../../utils/buildBookIndex'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
@@ -523,9 +524,15 @@ function StudentViewBookScreen () {
 									</div>
 
 									{isLoadingSubjects && !currentSubject ? (
-										<p className='book-chapters__loading'>
-											Cargando documentos…
-										</p>
+										<div
+											className='new-answers__status new-answers__status--loading'
+											role='status'
+											aria-live='polite'
+											aria-busy='true'
+										>
+											<Loader size='md' />
+											<p>Cargando documentos…</p>
+										</div>
 									) : hasDocuments ? (
 										<div
 											className='book-chapters__doc-picker'
@@ -665,9 +672,19 @@ function StudentViewBookScreen () {
 									</section>
 
 									{!hasDocuments ? null : isLoadingSubjects || isLoadingLessons ? (
-										<p className='book-chapters__loading'>
-											Cargando lecciones…
-										</p>
+										<div
+											className='new-answers__status new-answers__status--loading'
+											role='status'
+											aria-live='polite'
+											aria-busy='true'
+										>
+											<Loader size='md' />
+											<p>
+												{isLoadingLessons && !isLoadingSubjects
+													? 'Cargando lecciones…'
+													: 'Cargando documentos…'}
+											</p>
+										</div>
 									) : !selectedDocumentId && requiresSourceDocument ? (
 										<div className='book-chapters__select-doc-prompt'>
 											<p className='book-chapters__select-doc-prompt-title'>

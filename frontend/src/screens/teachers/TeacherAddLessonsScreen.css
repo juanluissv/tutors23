@@ -370,6 +370,19 @@
 	transform: translateY(-1px);
 }
 
+.course-builder__btn .login-submit__busy {
+	justify-content: center;
+	width: 100%;
+}
+
+.course-builder__btn .loader__spinner--sm {
+	width: 22px;
+	height: 22px;
+	border-width: 2px;
+	border-color: rgb(255 255 255 / 0.35);
+	border-top-color: #ffffff;
+}
+
 .course-builder__back {
 	font-size: 0.8975rem;
 	margin: 1rem auto 0;

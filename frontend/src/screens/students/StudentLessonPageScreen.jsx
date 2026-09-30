@@ -15,6 +15,7 @@ import { useGetBookLessonByIdQuery } from '../../slices/student/studentApiSlice'
 import { useGetBookLessonByIdForSchoolAdminQuery } from '../../slices/admin/schoolAdminApiSlice'
 import { useGetBookLessonByIdForTeacherQuery } from '../../slices/teachers/teacherApiSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 import './StudentLessonPageScreen.css'
 
@@ -1621,8 +1622,13 @@ function StudentLessonPageScreen () {
 
 	if (isLoading) {
 		return renderShell(
-			<div className='lesson-doc__state'>
-				<div className='lesson-doc__spinner' aria-hidden />
+			<div
+				className='lesson-doc__state new-answers__status new-answers__status--loading'
+				role='status'
+				aria-live='polite'
+				aria-busy='true'
+			>
+				<Loader size='md' />
 				<p className='lesson-doc__state-text'>Cargando lección…</p>
 			</div>,
 		)

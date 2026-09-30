@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import Sidebar from '../../components/Sidebar'
 import Header from '../../components/Header'
 import { useUploadStudentQuestionVideoMutation } from '../../slices/student/questionsSlice'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const recIconSrc = `${process.env.PUBLIC_URL}/assets/img/rec3.png`
@@ -166,7 +167,7 @@ function StudentRecordScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className="content-area content-area--camera">
-						<div className="center-content2 student-camera student-camera--compact-preview">
+						<div className="center-content2 student-camera student-camera--screen-share">
 							{showRecordButtons ? (
 								<div className="student-camera__panel">
 									<div
@@ -311,11 +312,17 @@ function StudentRecordScreen () {
 												disabled={
 													!recordedBlob || isUploading
 												}
+												aria-busy={isUploading}
 												onClick={() => void handleSaveVideo()}
 											>
-												{isUploading
-													? 'Guardando…'
-													: 'Guardar video'}
+												{isUploading ? (
+													<span className="login-submit__busy">
+														<Loader size="sm" />
+														<span>Guardando…</span>
+													</span>
+												) : (
+													'Guardar video'
+												)}
 											</Button>
 										</div>
 									</div>

@@ -8,6 +8,7 @@ import {
 	useGetSubjectsByTeacherIdQuery,
 } from '../../slices/teachers/teacherApiSlice'
 import { TeacherCoursesGrid } from './TeacherCoursesGrid'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i
@@ -114,48 +115,65 @@ function TeacherCoursesScreen () {
 						toggleSidebar={toggleSidebar}
 					/>
 					<div className='content-area'>
-						<TeacherCoursesGrid
-							pageTitle={pageTitle}
-							pageSubtitle={
-								'Tus cursos de esta materia. Agrega secciones '
-								+ 'y lecciones desde el editor del curso '
-								+ 'cuando estés listo.'
-							}
-							backLink={{
-								to: '/teachers/subjects',
-								label: '← Volver a mis materias',
-							}}
-							emptyMessage={
-								'Aún no hay cursos para esta materia. Usa '
-								+ 'Crear curso en el menú lateral para '
-								+ 'agregar uno.'
-							}
-							courses={courses}
-							isLoading={isLoading}
-							isError={isError}
-							refetch={refetch}
-							renderCardActions={(course) => (
-								<div className='teacher-subject-card__row'>
-									<Link
-										to={
-											`/teachers/courses/${String(course._id)}/preview`
-										}
-										className='teacher-subject-card__btn'
-									>
-										Vista previa
-									</Link>
-									<Link
-										to={
-											`/teachers/courses/${String(course._id)}/`
-											+ 'addlessons'
-										}
-										className='teacher-subject-card__btn'
-									>
-										Agregar lecciones y secciones
-									</Link>
+						{isLoading ? (
+							<div className='teacher-subjects-page'>
+								<h1 className='teacher-subjects-page__title heading-gradient'>
+									{pageTitle}
+								</h1>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando cursos…</p>
 								</div>
-							)}
-						/>
+							</div>
+						) : (
+							<TeacherCoursesGrid
+								pageTitle={pageTitle}
+								pageSubtitle={
+									'Tus cursos de esta materia. Agrega secciones '
+									+ 'y lecciones desde el editor del curso '
+									+ 'cuando estés listo.'
+								}
+								backLink={{
+									to: '/teachers/subjects',
+									label: '← Volver a mis materias',
+								}}
+								emptyMessage={
+									'Aún no hay cursos para esta materia. Usa '
+									+ 'Crear curso en el menú lateral para '
+									+ 'agregar uno.'
+								}
+								courses={courses}
+								isLoading={false}
+								isError={isError}
+								refetch={refetch}
+								renderCardActions={(course) => (
+									<div className='teacher-subject-card__row'>
+										<Link
+											to={
+												`/teachers/courses/${String(course._id)}/preview`
+											}
+											className='teacher-subject-card__btn'
+										>
+											Vista previa
+										</Link>
+										<Link
+											to={
+												`/teachers/courses/${String(course._id)}/`
+												+ 'addlessons'
+											}
+											className='teacher-subject-card__btn'
+										>
+											Agregar lecciones y secciones
+										</Link>
+									</div>
+								)}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

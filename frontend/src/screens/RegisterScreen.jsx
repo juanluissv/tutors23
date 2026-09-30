@@ -6,6 +6,7 @@ import { setStudentCredentials } from '../slices/student/authStudentSlice'
 import { useRegisterMutation } from '../slices/student/studentApiSlice'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
+import Loader from '../components/Loader'
 import '../App.css'
 
 function RegisterScreen () {
@@ -198,8 +199,16 @@ function RegisterScreen () {
 										name='register-button'
 										className='login-submit'
 										disabled={isLoading}
+										aria-busy={isLoading}
 									>
-										{isLoading ? 'Registrando…' : 'Registrarse'}
+										{isLoading ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Registrando…</span>
+											</span>
+										) : (
+											'Registrarse'
+										)}
 									</button>
 								</form>
 								<p className='login-card__footer'>

@@ -9,6 +9,7 @@ import {
 	useGetProfileQuery,
 } from '../../slices/student/studentApiSlice'
 import { TeacherCoursesGrid } from '../teachers/TeacherCoursesGrid'
+import Loader from '../../components/Loader'
 import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
 import {
 	resolveCurrentSubscription,
@@ -127,6 +128,9 @@ function StudentCoursesScreen () {
 	const showSubscriptionNotice =
 		!isLoadingProfile && !canView
 
+	const isFetchingData =
+		isLoadingProfile || (canView && isLoading)
+
 	return (
 		<div className='chat-app ask-screen chat-app--student-subject-cards'>
 			<div className='main-container'>
@@ -142,70 +146,91 @@ function StudentCoursesScreen () {
 								subscription={currentSubscription}
 							/>
 						) : null}
-						<TeacherCoursesGrid
-							pageTitle={pageTitle}
-							pageSubtitle={
-								'Cursos publicados de esta materia. Puedes '
-								+ 'ver las lecciones de estos cursos'
-							}
-							copy={{
-								loading: 'Cargando cursos…',
-								error:
-									'No pudimos cargar los cursos de esta '
-									+ 'materia. Puede que no tengas acceso, '
-									+ 'o que haya un problema de red.',
-								retry: 'Intentar de nuevo',
-								published: 'Publicado',
-								draft: 'Borrador',
-							}}
-							emptyMessage={
-								canView
-									? (
-										'Aún no hay cursos publicados para '
-										+ 'esta materia. Vuelve más tarde, o '
-										+ 'revisa los enlaces que tu profesor '
-										+ 'te haya compartido.'
-									)
-									: (
-										viewBlockReason
-										|| (
-											'Suscríbete para desbloquear el '
-											+ 'acceso a los cursos de esta '
-											+ 'materia.'
+						{isFetchingData ? (
+							<div className='teacher-subjects-page'>
+								<h1 className='teacher-subjects-page__title heading-gradient'>
+									{pageTitle}
+								</h1>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>
+										{isLoadingProfile
+											? 'Cargando tu perfil…'
+											: 'Cargando cursos…'}
+									</p>
+								</div>
+							</div>
+						) : (
+							<TeacherCoursesGrid
+								pageTitle={pageTitle}
+								pageSubtitle={
+									'Cursos publicados de esta materia. Puedes '
+									+ 'ver las lecciones de estos cursos'
+								}
+								copy={{
+									loading: 'Cargando cursos…',
+									error:
+										'No pudimos cargar los cursos de esta '
+										+ 'materia. Puede que no tengas acceso, '
+										+ 'o que haya un problema de red.',
+									retry: 'Intentar de nuevo',
+									published: 'Publicado',
+									draft: 'Borrador',
+								}}
+								emptyMessage={
+									canView
+										? (
+											'Aún no hay cursos publicados para '
+											+ 'esta materia. Vuelve más tarde, o '
+											+ 'revisa los enlaces que tu profesor '
+											+ 'te haya compartido.'
 										)
+										: (
+											viewBlockReason
+											|| (
+												'Suscríbete para desbloquear el '
+												+ 'acceso a los cursos de esta '
+												+ 'materia.'
+											)
+										)
+								}
+								courses={courses}
+								isLoading={false}
+								isError={isError}
+								refetch={refetch}
+								renderCardActions={(course) => (
+									canView ? (
+										<Link
+											to={`/students/watchcourse/${String(
+												course._id,
+											)}`}
+											className={
+												'teacher-subject-card__btn ' +
+												'teacher-subject-card__btn--wide'
+											}
+										>
+											Ver curso
+										</Link>
+									) : (
+										<span
+											className={
+												'teacher-subject-card__btn ' +
+												'teacher-subject-card__btn--wide ' +
+												'teacher-subject-card__btn--disabled'
+											}
+											title={viewBlockReason || undefined}
+										>
+											Ver curso
+										</span>
 									)
-							}
-							courses={courses}
-							isLoading={isLoading || isLoadingProfile}
-							isError={isError}
-							refetch={refetch}
-							renderCardActions={(course) => (
-								canView ? (
-									<Link
-										to={`/students/watchcourse/${String(
-											course._id,
-										)}`}
-										className={
-											'teacher-subject-card__btn ' +
-											'teacher-subject-card__btn--wide'
-										}
-									>
-										Ver curso
-									</Link>
-								) : (
-									<span
-										className={
-											'teacher-subject-card__btn ' +
-											'teacher-subject-card__btn--wide ' +
-											'teacher-subject-card__btn--disabled'
-										}
-										title={viewBlockReason || undefined}
-									>
-										Ver curso
-									</span>
-								)
-							)}
-						/>
+								)}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

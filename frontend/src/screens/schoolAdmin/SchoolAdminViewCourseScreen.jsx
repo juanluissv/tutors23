@@ -5,6 +5,7 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { useGetCoursePreviewForSchoolAdminQuery } from '../../slices/admin/schoolAdminApiSlice'
 import { buildSectionGroups, lessonKey } from '../../utils/courseOutline'
+import Loader from '../../components/Loader'
 import '../teachers/TeacherPreviewCourseScreen.css'
 import '../../App.css'
 
@@ -200,11 +201,17 @@ function SchoolAdminViewCourseScreen () {
 								</p>
 							)}
 							{courseIdOk && isLoading && (
-								<p className='course-preview__muted'>
-									Cargando curso…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando curso…</p>
+								</div>
 							)}
-							{courseIdOk && isError && (
+							{courseIdOk && isError && !isLoading && (
 								<div className='course-preview__alert-block'>
 									<p>
 										{error?.data?.message

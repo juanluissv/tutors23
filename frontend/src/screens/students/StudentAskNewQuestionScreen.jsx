@@ -7,6 +7,7 @@ import Header from '../../components/Header'
 import { useCreateStudentQuestionMutation } from '../../slices/student/questionsSlice'
 import { useGetProfileQuery } from '../../slices/student/studentApiSlice'
 import StudentSubscriptionNotice from '../../components/StudentSubscriptionNotice'
+import Loader from '../../components/Loader'
 import {
 	resolveCurrentSubscription,
 	canAskNewQuestion,
@@ -308,10 +309,16 @@ function StudentAskNewQuestionScreen () {
 										type='submit'
 										className='answer-details__submit'
 										disabled={!canSubmit}
+										aria-busy={isSubmitting}
 									>
-										{isSubmitting
-											? 'Enviando…'
-											: 'Enviar pregunta'}
+										{isSubmitting ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Enviando…</span>
+											</span>
+										) : (
+											'Enviar pregunta'
+										)}
 									</button>
 								</form>
 							</div>

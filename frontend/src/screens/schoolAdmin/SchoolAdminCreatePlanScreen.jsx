@@ -24,6 +24,7 @@ import {
 	resizeSemesterRows,
 	validateSemesterForm,
 } from '../../utils/planSemester'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function getPlanPeriodLabels (isUniversity) {
@@ -334,12 +335,13 @@ function SchoolAdminCreatePlanScreen () {
 		)
 	}
 
-	const subjectsBusy = subjectsLoading || subjectsFetching
-	const formBusy = isSaving || subjectsBusy || isLoadingSchool
+	const isPageLoading =
+		isLoadingSchool || (!isUniversity && subjectsLoading)
+	const formBusy = isSaving || subjectsFetching
 
 	if (
 		!isUniversity
-		&& !subjectsBusy
+		&& !isPageLoading
 		&& !subjectsError
 		&& subjectsList.length === 0
 	) {
@@ -410,6 +412,25 @@ function SchoolAdminCreatePlanScreen () {
 											: 'Define el precio, cuántas preguntas incluye, qué materias pertenecen a este plan y las fechas del año escolar. Elige un grado para ver las materias de ese grado.'}
 									</p>
 								</div>
+								{isPageLoading ? (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>
+											{isLoadingSchool && subjectsLoading
+												? 'Cargando datos del formulario…'
+												: isLoadingSchool
+													? (isUniversity
+														? 'Cargando programas…'
+														: 'Cargando grados…')
+													: 'Cargando materias…'}
+										</p>
+									</div>
+								) : (
 								<form
 									className='login-form'
 									id='schooladmin-create-plan-form'
@@ -475,13 +496,7 @@ function SchoolAdminCreatePlanScreen () {
 										>
 											{isUniversity ? 'Programa' : 'Grado'}
 										</label>
-										{isLoadingSchool ? (
-											<p className='school-grades-levels__hint'>
-												{isUniversity
-													? 'Cargando programas…'
-													: 'Cargando grados…'}
-											</p>
-										) : isUniversity && programs.length === 0 ? (
+										{isUniversity && programs.length === 0 ? (
 											<p className='school-grades-levels__hint'>
 												Aún no hay programas en tu institución.{' '}
 												<Link to='/schooladmins/myschools'>
@@ -548,12 +563,7 @@ function SchoolAdminCreatePlanScreen () {
 										<span className='login-label'>
 											Materias en este plan
 										</span>
-										{subjectsBusy && (
-											<p className='login-card__subtitle login-card__subtitle--wide'>
-												Cargando materias…
-											</p>
-										)}
-										{subjectsError && !subjectsBusy && (
+										{subjectsError && !subjectsFetching && (
 											<div className='login-field'>
 												<p className='login-card__subtitle login-card__subtitle--wide'>
 													No se pudieron cargar las materias.
@@ -569,7 +579,7 @@ function SchoolAdminCreatePlanScreen () {
 												</button>
 											</div>
 										)}
-										{!subjectsBusy
+										{!subjectsFetching
 											&& !subjectsError
 											&& subjectsList.length === 0 && (
 											<p className='login-card__subtitle login-card__subtitle--wide'>
@@ -580,7 +590,7 @@ function SchoolAdminCreatePlanScreen () {
 												primero.
 											</p>
 										)}
-										{!subjectsBusy
+										{!subjectsFetching
 											&& !subjectsError
 											&& subjectsList.length > 0
 											&& selectedCohortLabel === '' && (
@@ -591,7 +601,7 @@ function SchoolAdminCreatePlanScreen () {
 												las materias de este plan.
 											</p>
 										)}
-										{!subjectsBusy
+										{!subjectsFetching
 											&& !subjectsError
 											&& selectedCohortLabel !== ''
 											&& filteredSubjects.length === 0 && (
@@ -607,7 +617,7 @@ function SchoolAdminCreatePlanScreen () {
 													: 'grado'}.
 											</p>
 										)}
-										{!subjectsBusy
+										{!subjectsFetching
 											&& !subjectsError
 											&& filteredSubjects.length > 0 && (
 											<div
@@ -700,10 +710,19 @@ function SchoolAdminCreatePlanScreen () {
 												: gradesLevels.length === 0
 													|| subjectsList.length === 0)
 										}
+										aria-busy={isSaving}
 									>
-										{isSaving ? 'Creando…' : 'Crear plan'}
+										{isSaving ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Creando…</span>
+											</span>
+										) : (
+											'Crear plan'
+										)}
 									</button>
 								</form>
+								)}
 							</div>
 						</div>
 					</div>

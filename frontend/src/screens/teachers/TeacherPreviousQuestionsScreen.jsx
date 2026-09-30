@@ -5,6 +5,7 @@ import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetTeacherPreviousQuestionsQuery } from '../../slices/teachers/teacherPreviousQuestionsSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const PAGE_SIZE = 1
@@ -337,14 +338,18 @@ function TeacherPreviousQuestionsScreen () {
 								)}
 
 								{subjectQuery != null && isLoading && (
-									<p className='answers-heading' style={{
-										marginTop: '1rem',
-										textAlign: 'center',
-										width: '100%',
-									}}
+									<div
+										className={
+											'new-answers__status '
+											+ 'new-answers__status--loading'
+										}
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
 									>
-										Cargando…
-									</p>
+										<Loader size='md' />
+										<p>Cargando preguntas…</p>
+									</div>
 								)}
 
 								{subjectQuery != null && isError && (

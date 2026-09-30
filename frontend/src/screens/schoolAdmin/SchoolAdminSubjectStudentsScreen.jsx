@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { useGetSubjectStudentsForSchoolAdminQuery } from '../../slices/admin/schoolAdminApiSlice'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i
@@ -150,12 +151,18 @@ function SchoolAdminSubjectStudentsScreen () {
 							</p>
 
 							{isLoading && (
-								<p className='ts-page__subtitle'>
-									Cargando…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando estudiantes…</p>
+								</div>
 							)}
 
-							{isError && (
+							{isError && !isLoading && (
 								<div className='ts-table-wrapper'>
 									<p className='ts-page__subtitle'>{errMessage}</p>
 									<button

@@ -15,6 +15,7 @@ import {
 	planMatchesProgram,
 } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function resolveSchoolId (school) {
@@ -132,7 +133,8 @@ function SchoolAdminAddStudentsScreen () {
 		selectedProgram,
 	])
 
-	const formBusy = isSaving || isLoadingSchool || isLoadingPlans
+	const isPageLoading = isLoadingSchool || isLoadingPlans
+	const formBusy = isSaving
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -288,6 +290,23 @@ function SchoolAdminAddStudentsScreen () {
 									</p>
 								</div>
 
+								{isPageLoading ? (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>
+											{isLoadingSchool && isLoadingPlans
+												? 'Cargando datos del formulario…'
+												: isLoadingSchool
+													? 'Cargando escuela…'
+													: 'Cargando planes…'}
+										</p>
+									</div>
+								) : (
 								<form
 									className='login-form'
 									id='schooladmin-add-student-form'
@@ -362,13 +381,7 @@ function SchoolAdminAddStudentsScreen () {
 										>
 											{isUniversity ? 'Programa' : 'Grado'}
 										</label>
-										{isLoadingSchool ? (
-											<p className='school-grades-levels__hint'>
-												{isUniversity
-													? 'Cargando programas…'
-													: 'Cargando grados…'}
-											</p>
-										) : isUniversity && programs.length === 0 ? (
+										{isUniversity && programs.length === 0 ? (
 											<p className='school-grades-levels__hint'>
 												Aún no hay programas en tu institución.{' '}
 												<Link to='/schooladmins/myschools'>
@@ -429,19 +442,13 @@ function SchoolAdminAddStudentsScreen () {
 										>
 											Plan de suscripción
 										</label>
-										{isLoadingPlans && (
-											<p className='school-grades-levels__hint'>
-												Cargando planes…
-											</p>
-										)}
-										{isPlansError && !isLoadingPlans && (
+										{isPlansError && (
 											<p className='school-grades-levels__hint'>
 												No se pudieron cargar los planes.
 												Intenta de nuevo más tarde.
 											</p>
 										)}
-										{!isLoadingPlans
-											&& !isPlansError
+										{!isPlansError
 											&& activePlans.length === 0 && (
 											<p className='school-grades-levels__hint'>
 												Aún no hay planes activos.{' '}
@@ -451,8 +458,7 @@ function SchoolAdminAddStudentsScreen () {
 												primero.
 											</p>
 										)}
-										{!isLoadingPlans
-											&& !isPlansError
+										{!isPlansError
 											&& activePlans.length > 0
 											&& (isUniversity
 												? selectedProgram
@@ -464,8 +470,7 @@ function SchoolAdminAddStudentsScreen () {
 												los planes correspondientes.
 											</p>
 										)}
-										{!isLoadingPlans
-											&& !isPlansError
+										{!isPlansError
 											&& (isUniversity
 												? selectedProgram
 												: selectedGradesLevel) !== ''
@@ -483,8 +488,7 @@ function SchoolAdminAddStudentsScreen () {
 													: 'grado'}.
 											</p>
 										)}
-										{!isLoadingPlans
-											&& !isPlansError
+										{!isPlansError
 											&& filteredPlans.length > 0 && (
 											<select
 												id='schooladmin-add-student-plan'
@@ -532,10 +536,19 @@ function SchoolAdminAddStudentsScreen () {
 												: gradesLevels.length === 0)
 											|| activePlans.length === 0
 										}
+										aria-busy={isSaving}
 									>
-										{isSaving ? 'Agregando…' : 'Agregar estudiante'}
+										{isSaving ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Agregando…</span>
+											</span>
+										) : (
+											'Agregar estudiante'
+										)}
 									</button>
 								</form>
+								)}
 							</div>
 						</div>
 					</div>

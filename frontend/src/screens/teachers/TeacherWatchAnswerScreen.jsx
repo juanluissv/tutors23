@@ -15,6 +15,7 @@ import TeacherHeader from '../../components/TeacherHeader'
 import { useGetTeacherAnswerByIdQuery } from '../../slices/teachers/teacherAnswersSlice'
 import { ANSWERS_URL } from '../../constants'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const SUBJECT_THEME_CYCLE = ['sky', 'teal', 'indigo']
@@ -505,12 +506,18 @@ function TeacherWatchAnswerScreen () {
 							)}
 
 							{canFetch && isLoading && (
-								<p className='watch-new__description'>
-									Cargando respuesta…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando respuesta…</p>
+								</div>
 							)}
 
-							{canFetch && isError && (
+							{canFetch && isError && !isLoading && (
 								<div style={{ marginBottom: '1rem' }}>
 									<p className='watch-new__description'>
 										{errorMessage}
@@ -526,7 +533,7 @@ function TeacherWatchAnswerScreen () {
 								</div>
 							)}
 
-							{canFetch && answer && (
+							{canFetch && !isLoading && answer && (
 								<>
 									<h1
 										className={`watch-new__subject watch-new__subject--${subjectColor}`}

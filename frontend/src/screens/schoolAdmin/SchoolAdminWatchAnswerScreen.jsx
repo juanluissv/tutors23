@@ -14,6 +14,7 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { useGetSchoolAdminAnswerByIdQuery } from '../../slices/admin/schoolAdminAnswersSlice'
 import { ANSWERS_URL } from '../../constants'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const SUBJECT_THEME_CYCLE = ['sky', 'teal', 'indigo']
@@ -480,12 +481,18 @@ function SchoolAdminWatchAnswerScreen () {
 							)}
 
 							{canFetch && isLoading && (
-								<p className='watch-new__description'>
-									Cargando respuesta…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando respuesta…</p>
+								</div>
 							)}
 
-							{canFetch && isError && (
+							{canFetch && isError && !isLoading && (
 								<div style={{ marginBottom: '1rem' }}>
 									<p className='watch-new__description'>{errorMessage}</p>
 									<button
@@ -499,7 +506,7 @@ function SchoolAdminWatchAnswerScreen () {
 								</div>
 							)}
 
-							{canFetch && answer && (
+							{canFetch && !isLoading && answer && (
 								<>
 									<h1
 										className={`watch-new__subject watch-new__subject--${subjectColor}`}

@@ -20,6 +20,7 @@ import {
 	canViewQuestions,
 } from '../../utils/subscriptionAccess'
 import { ANSWERS_URL } from '../../constants'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const SUBJECT_THEME_CYCLE = ['sky', 'teal', 'indigo']
@@ -472,6 +473,9 @@ function StudentWatchAnswerScreen () {
 	const errorMessage =
 		error?.data?.message || error?.error || 'Could not load this answer.'
 
+	const isFetchingData =
+		canFetch && (isLoadingProfile || (canView && isLoading))
+
 	if (!studentInfo) {
 		return null
 	}
@@ -516,11 +520,23 @@ function StudentWatchAnswerScreen () {
 								/>
 							) : null}
 
-							{canFetch && canView && isLoading && (
-								<p className='watch-new__description'>Loading answer…</p>
+							{isFetchingData && (
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>
+										{isLoadingProfile
+											? 'Cargando tu perfil…'
+											: 'Cargando respuesta…'}
+									</p>
+								</div>
 							)}
 
-							{canFetch && canView && isError && (
+							{canFetch && canView && isError && !isFetchingData && (
 								<div style={{ marginBottom: '1rem' }}>
 									<p className='watch-new__description'>{errorMessage}</p>
 									<button
@@ -534,7 +550,7 @@ function StudentWatchAnswerScreen () {
 								</div>
 							)}
 
-							{canFetch && canView && answer && (
+							{canFetch && canView && !isFetchingData && answer && (
 								<>
 									<h1
 										className={`watch-new__subject watch-new__subject--${subjectColor}`}

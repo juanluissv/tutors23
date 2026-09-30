@@ -9,6 +9,7 @@ import {
 	useSubscribeMutation,
 } from '../../slices/student/studentApiSlice'
 import { setStudentCredentials } from '../../slices/student/authStudentSlice'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const PLAN_FEATURES = [
@@ -635,7 +636,13 @@ function StudentSubscriptionScreen () {
 							</header>
 
 							{isLoadingProfile ? (
-								<div className='student-subscription-state'>
+								<div
+									className='student-subscription-state new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
 									<p className='student-subscription-state__text'>
 										Cargando tu plan…
 									</p>
@@ -993,15 +1000,25 @@ function StudentSubscriptionScreen () {
 													isSubscribing
 													|| isAlreadySubscribed
 												}
+												aria-busy={isSubscribing}
 											>
-												<span>
-													{isSubscribing
-														? 'Procesando el pago…'
-														: isAlreadySubscribed
-															? 'Ya estás suscrito'
-															: `Suscríbete por ${planPriceFormatted}/mes`}
-												</span>
-												<ArrowIcon />
+												{isSubscribing ? (
+													<span className='login-submit__busy'>
+														<Loader size='sm' />
+														<span>
+															Procesando el pago…
+														</span>
+													</span>
+												) : (
+													<>
+														<span>
+															{isAlreadySubscribed
+																? 'Ya estás suscrito'
+																: `Suscríbete por ${planPriceFormatted}/mes`}
+														</span>
+														<ArrowIcon />
+													</>
+												)}
 											</button>
 
 											<p className='student-subscription-payment__secure'>

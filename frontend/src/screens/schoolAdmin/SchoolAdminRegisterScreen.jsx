@@ -6,6 +6,7 @@ import { useRegisterSchoolAdminMutation } from '../../slices/admin/schoolAdminAp
 import { setSchoolAdminCredentials } from '../../slices/admin/authSchoolAdminSlice'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function SchoolAdminRegisterScreen () {
@@ -198,10 +199,16 @@ function SchoolAdminRegisterScreen () {
 										name='register-button'
 										className='login-submit'
 										disabled={isLoading}
+										aria-busy={isLoading}
 									>
-										{isLoading
-											? 'Creando cuenta…'
-											: 'Registrarse'}
+										{isLoading ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Creando cuenta…</span>
+											</span>
+										) : (
+											'Registrarse'
+										)}
 									</button>
 								</form>
 								<p className='login-card__footer'>

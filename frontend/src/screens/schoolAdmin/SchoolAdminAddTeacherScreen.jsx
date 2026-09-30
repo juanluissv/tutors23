@@ -9,6 +9,7 @@ import {
 } from '../../slices/admin/schoolAdminApiSlice'
 import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function resolveSchoolId (school) {
@@ -82,7 +83,8 @@ function SchoolAdminAddTeacherScreen () {
 
 	const teachersList = Array.isArray(teachers) ? teachers : []
 	const schoolType = schoolData?.schoolType ?? ''
-	const isBusy = isSaving || isLoadingSchool
+	const isPageLoading = isLoadingSchool || isLoadingTeachers
+	const formBusy = isSaving
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(!isSidebarOpen)
@@ -206,6 +208,24 @@ function SchoolAdminAddTeacherScreen () {
 									</p>
 								</div>
 
+								{isPageLoading ? (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>
+											{isLoadingSchool && isLoadingTeachers
+												? 'Cargando datos del formulario…'
+												: isLoadingSchool
+													? 'Cargando escuela…'
+													: 'Cargando profesores…'}
+										</p>
+									</div>
+								) : (
+								<>
 								<section
 									className='school-teachers-roster'
 									aria-label='Profesores ya en tu escuela'
@@ -214,7 +234,7 @@ function SchoolAdminAddTeacherScreen () {
 										<h2 className='school-teachers-roster__title'>
 											Profesores en tu escuela
 										</h2>
-										{!isLoadingTeachers && !isTeachersError && (
+										{!isTeachersError && (
 											<span
 												className='school-teachers-roster__count'
 												aria-label={`${teachersList.length} profesores`}
@@ -224,13 +244,7 @@ function SchoolAdminAddTeacherScreen () {
 										)}
 									</div>
 
-									{isLoadingTeachers && (
-										<p className='school-teachers-roster__status'>
-											Cargando profesores…
-										</p>
-									)}
-
-									{isTeachersError && !isLoadingTeachers && (
+									{isTeachersError && (
 										<div className='school-teachers-roster__empty'>
 											<p className='school-teachers-roster__status'>
 												No pudimos cargar tus profesores.
@@ -246,8 +260,7 @@ function SchoolAdminAddTeacherScreen () {
 										</div>
 									)}
 
-									{!isLoadingTeachers
-										&& !isTeachersError
+									{!isTeachersError
 										&& teachersList.length === 0 && (
 										<p className='school-teachers-roster__empty'>
 											Aún no hay profesores agregados. Usa el
@@ -256,8 +269,7 @@ function SchoolAdminAddTeacherScreen () {
 										</p>
 									)}
 
-									{!isLoadingTeachers
-										&& !isTeachersError
+									{!isTeachersError
 										&& teachersList.length > 0 && (
 										<ul className='school-teachers-roster__list'>
 											{teachersList.map((teacher) => {
@@ -320,7 +332,7 @@ function SchoolAdminAddTeacherScreen () {
 											autoComplete='given-name'
 											value={firstname}
 											required
-											disabled={isBusy}
+											disabled={formBusy}
 											onChange={(e) =>
 												setFirstname(e.target.value)}
 										/>
@@ -341,7 +353,7 @@ function SchoolAdminAddTeacherScreen () {
 											autoComplete='family-name'
 											value={lastname}
 											required
-											disabled={isBusy}
+											disabled={formBusy}
 											onChange={(e) =>
 												setLastname(e.target.value)}
 										/>
@@ -362,7 +374,7 @@ function SchoolAdminAddTeacherScreen () {
 											autoComplete='email'
 											value={email}
 											required
-											disabled={isBusy}
+											disabled={formBusy}
 											onChange={(e) => setEmail(e.target.value)}
 										/>
 									</div>
@@ -370,11 +382,21 @@ function SchoolAdminAddTeacherScreen () {
 										type='submit'
 										id='schooladmin-add-teacher-submit'
 										className='login-submit'
-										disabled={isBusy}
+										disabled={formBusy}
+										aria-busy={isSaving}
 									>
-										{isSaving ? 'Agregando…' : 'Agregar profesor'}
+										{isSaving ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Agregando…</span>
+											</span>
+										) : (
+											'Agregar profesor'
+										)}
 									</button>
 								</form>
+								</>
+								)}
 							</div>
 						</div>
 					</div>

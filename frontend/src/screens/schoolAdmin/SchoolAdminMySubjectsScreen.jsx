@@ -19,6 +19,7 @@ import {
 	subjectIncludesProgram,
 } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const GradCapIcon = () => (
@@ -426,9 +427,15 @@ function SchoolAdminMySubjectsScreen () {
 							)}
 
 							{isPageLoading && (
-								<p className='teacher-subjects-page__subtitle'>
-									Cargando materias…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando materias…</p>
+								</div>
 							)}
 
 							{isError && !isPageLoading && (

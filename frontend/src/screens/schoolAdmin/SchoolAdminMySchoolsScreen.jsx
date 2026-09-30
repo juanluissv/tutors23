@@ -19,6 +19,7 @@ import {
 	UNIVERSITY_PROGRAM_TYPES,
 } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const SCHOOL_TYPE_OPTIONS = [
@@ -80,7 +81,8 @@ function SchoolAdminMySchoolsScreen () {
 	})
 
 	const [updateSchool, { isLoading: isUpdating }] = useUpdateSchoolMutation()
-	const isBusy = isLoadingSchool || isUpdating
+	const isPageLoading = isLoadingSchool && !schoolData
+	const formBusy = isUpdating
 	const isUniversity = isUniversitySchool(schoolType)
 	const savedIsUniversity = isUniversitySchool(
 		normalizeSchoolType(schoolData?.schoolType),
@@ -300,10 +302,16 @@ function SchoolAdminMySchoolsScreen () {
 										institución.
 									</p>
 								</div>
-								{isLoadingSchool && !schoolData ? (
-									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Cargando escuela…
-									</p>
+								{isPageLoading ? (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>Cargando escuela…</p>
+									</div>
 								) : isSchoolQueryError && !schoolData ? (
 									<div className='login-form'>
 										<p className='login-card__subtitle login-card__subtitle--wide'>
@@ -353,7 +361,7 @@ function SchoolAdminMySchoolsScreen () {
 																placeholder='p. ej. Ciencias de la Computación'
 																autoComplete='off'
 																value={newProgram}
-																disabled={isBusy}
+																disabled={formBusy}
 																onChange={(e) =>
 																	setNewProgram(e.target.value)}
 																onKeyDown={(e) => {
@@ -373,7 +381,7 @@ function SchoolAdminMySchoolsScreen () {
 																placeholder='Departamento'
 																autoComplete='off'
 																value={newProgramDepartment}
-																disabled={isBusy}
+																disabled={formBusy}
 																onChange={(e) =>
 																	setNewProgramDepartment(
 																		e.target.value,
@@ -386,7 +394,7 @@ function SchoolAdminMySchoolsScreen () {
 																name='newProgramType'
 																className='login-input'
 																value={newProgramType}
-																disabled={isBusy}
+																disabled={formBusy}
 																onChange={(e) =>
 																	setNewProgramType(e.target.value)}
 															>
@@ -408,7 +416,7 @@ function SchoolAdminMySchoolsScreen () {
 														<button
 															type='button'
 															className='school-grades-levels__add-btn'
-															disabled={isBusy}
+															disabled={formBusy}
 															onClick={handleAddProgram}
 														>
 															Agregar
@@ -439,7 +447,7 @@ function SchoolAdminMySchoolsScreen () {
 																		type='button'
 																		className='school-grades-levels__chip-remove'
 																		aria-label={`Eliminar ${program.name}`}
-																		disabled={isBusy}
+																		disabled={formBusy}
 																		onClick={() =>
 																			handleRemoveProgram(program)}
 																	>
@@ -482,7 +490,7 @@ function SchoolAdminMySchoolsScreen () {
 																placeholder='p. ej. 10 o Año 2'
 																autoComplete='off'
 																value={newGradeLevel}
-																disabled={isBusy}
+																disabled={formBusy}
 																onChange={(e) =>
 																	setNewGradeLevel(e.target.value)}
 																onKeyDown={(e) => {
@@ -496,7 +504,7 @@ function SchoolAdminMySchoolsScreen () {
 														<button
 															type='button'
 															className='school-grades-levels__add-btn'
-															disabled={isBusy}
+															disabled={formBusy}
 															onClick={handleAddGradeLevel}
 														>
 															Agregar
@@ -519,7 +527,7 @@ function SchoolAdminMySchoolsScreen () {
 																		type='button'
 																		className='school-grades-levels__chip-remove'
 																		aria-label={`Eliminar ${level.name}`}
-																		disabled={isBusy}
+																		disabled={formBusy}
 																		onClick={() =>
 																			handleRemoveGradeLevel(level)}
 																	>
@@ -570,7 +578,7 @@ function SchoolAdminMySchoolsScreen () {
 												autoComplete='organization'
 												value={name}
 												required
-												disabled={isBusy}
+												disabled={formBusy}
 												onChange={(e) => setName(e.target.value)}
 											/>
 										</div>
@@ -587,7 +595,7 @@ function SchoolAdminMySchoolsScreen () {
 												className='login-input'
 												value={schoolType}
 												required
-												disabled={isBusy || !canChangeSchoolType}
+												disabled={formBusy || !canChangeSchoolType}
 												onChange={(e) =>
 													setSchoolType(e.target.value)}
 											>
@@ -634,7 +642,7 @@ function SchoolAdminMySchoolsScreen () {
 													autoComplete='country-name'
 													value={country}
 													required
-													disabled={isBusy}
+													disabled={formBusy}
 													onChange={(e) =>
 														setCountry(e.target.value)}
 												/>
@@ -655,7 +663,7 @@ function SchoolAdminMySchoolsScreen () {
 													autoComplete='address-level2'
 													value={city}
 													required
-													disabled={isBusy}
+													disabled={formBusy}
 													onChange={(e) =>
 														setCity(e.target.value)}
 												/>
@@ -676,7 +684,7 @@ function SchoolAdminMySchoolsScreen () {
 												placeholder='Calle, número, colonia…'
 												autoComplete='street-address'
 												value={address}
-												disabled={isBusy}
+												disabled={formBusy}
 												onChange={(e) =>
 													setAddress(e.target.value)}
 											/>
@@ -685,13 +693,17 @@ function SchoolAdminMySchoolsScreen () {
 											type='submit'
 											id='schooladmin-myschool-save'
 											className='login-submit'
-											disabled={isBusy}
+											disabled={formBusy}
+											aria-busy={isUpdating}
 										>
-											{isUpdating
-												? 'Actualizando…'
-												: isLoadingSchool
-													? 'Cargando…'
-													: 'Actualizar escuela'}
+											{isUpdating ? (
+												<span className='login-submit__busy'>
+													<Loader size='sm' />
+													<span>Actualizando…</span>
+												</span>
+											) : (
+												'Actualizar escuela'
+											)}
 										</button>
 									</form>
 								)}

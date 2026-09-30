@@ -6,6 +6,7 @@ import { useLoginSchoolAdminMutation } from '../../slices/admin/schoolAdminApiSl
 import { setSchoolAdminCredentials } from '../../slices/admin/authSchoolAdminSlice'
 import TeacherSidebar from '../../components/TeacherSidebar'
 import AdminHeader from '../../components/AdminHeader'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function SchoolAdminLoginScreen () {
@@ -139,10 +140,16 @@ function SchoolAdminLoginScreen () {
 										name='login-button'
 										className='login-submit'
 										disabled={isLoading}
+										aria-busy={isLoading}
 									>
-										{isLoading
-											? 'Iniciando sesión…'
-											: 'Iniciar sesión'}
+										{isLoading ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Iniciando sesión…</span>
+											</span>
+										) : (
+											'Iniciar sesión'
+										)}
 									</button>
 								</form>
 								<p className='login-card__footer'>

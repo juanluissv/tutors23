@@ -2850,6 +2850,18 @@
   cursor: not-allowed;
 }
 
+.book-chapters__remove-btn .login-submit__busy {
+  gap: 6px;
+}
+
+.book-chapters__remove-btn .loader__spinner--sm {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+  border-color: rgba(185, 28, 28, 0.25);
+  border-top-color: #b91c1c;
+}
+
 .book-chapters__upload-panel {
   display: flex;
   flex-direction: column;
@@ -3055,6 +3067,18 @@
   font-size: 0.6875rem;
   color: #7c3aed;
   opacity: 0.85;
+}
+
+.book-chapters__generate-btn--loading {
+  border-style: solid;
+}
+
+.book-chapters__generate-btn-icon .loader__spinner--sm {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  border-color: rgba(124, 58, 237, 0.25);
+  border-top-color: #7c3aed;
 }
 
 .book-chapters__actions {
@@ -4185,6 +4209,18 @@
   opacity: 0.65;
   cursor: not-allowed;
   transform: none;
+}
+
+.answer-details__submit .login-submit__busy {
+  margin: 0 auto;
+}
+
+.answer-details__submit .loader__spinner--sm {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
 }
 
 @media (max-width: 768px) {
@@ -5928,6 +5964,19 @@ a.qa-timeline__video {
   font-size: 0.95rem;
 }
 
+.new-answers__status--loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+}
+
+.new-answers__status--loading p {
+  margin: 0;
+}
+
 /* Centered page header variant */
 .new-answers-page--centered .new-answers-page__title {
   text-align: center;
@@ -6636,6 +6685,14 @@ a.qa-timeline__video {
   filter: grayscale(0.15) brightness(0.96);
   opacity: 0.85;
   cursor: not-allowed;
+}
+
+.chat-app--teacher-login .login-submit .loader__spinner--sm {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
 }
 
 .chat-app--teacher-login .login-card__link {
@@ -12520,6 +12577,25 @@ a.upload-card {
   max-height: min(calc(52vh * 0.7), calc(420px * 0.7));
 }
 
+/* Screen-share record: larger live preview while recording */
+.center-content2.student-camera.student-camera--screen-share {
+  max-width: min(920px, 92vw);
+}
+
+.student-camera--screen-share .student-camera__panel--wide {
+  padding: 22px 20px 22px;
+}
+
+.student-camera--screen-share .student-camera__preview-shell {
+  margin-bottom: 16px;
+}
+
+.student-camera--screen-share .student-camera__preview-frame--live {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: min(64vh, 540px);
+}
+
 /* Live screen share: full capture visible (letterboxing), not cropped like cover */
 .student-camera__preview-frame--live .student-camera__preview-video {
   object-fit: contain;
@@ -12692,6 +12768,14 @@ a.upload-card {
   color: #ffffff !important;
 }
 
+.student-camera__btn--primary .loader__spinner--sm {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+}
+
 .student-camera__btn--secondary {
   color: #ffffff !important;
   background: linear-gradient(
@@ -12819,6 +12903,11 @@ a.upload-card {
 
 .home-hub__subjects-wrap {
   margin: 0 0 8px;
+}
+
+.home-hub__loading {
+  min-height: 160px;
+  width: 100%;
 }
 
 .home-hub__subjects {
@@ -14441,6 +14530,14 @@ a.upload-card {
 	transform: none;
 }
 
+.student-subscription-payment__submit .loader__spinner--sm {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+}
+
 .student-subscription-payment__submit:focus-visible {
   outline: none;
   box-shadow:
@@ -15912,6 +16009,27 @@ a.upload-card {
   box-shadow: none;
 }
 
+.create-tutor__generate-btn--loading {
+  border-style: solid;
+}
+
+.create-tutor__generate-btn-icon .loader__spinner--sm {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  border-color: rgba(124, 58, 237, 0.25);
+  border-top-color: #7c3aed;
+}
+
+.create-tutor__upload-video-btn-icon .loader__spinner--sm,
+.create-tutor__upload-transcribe-btn-icon .loader__spinner--sm {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  border-color: rgba(2, 132, 199, 0.25);
+  border-top-color: #0284c7;
+}
+
 .create-tutor__generate-btn--questions {
   background: linear-gradient(
     165deg,
@@ -16475,6 +16593,11 @@ a.upload-card {
   font-weight: 500;
   line-height: 1.3;
   color: #64748b;
+}
+
+.create-tutor__upload-video-btn--loading,
+.create-tutor__upload-transcribe-btn--loading {
+  border-style: solid;
 }
 
 .create-tutor__upload-video-btn--disabled,

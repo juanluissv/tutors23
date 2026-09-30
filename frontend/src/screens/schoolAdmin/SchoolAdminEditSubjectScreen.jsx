@@ -21,6 +21,7 @@ import {
 	normalizeUniversityPrograms,
 } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const MAX_BOOK_BYTES = 200 * 1024 * 1024
@@ -399,9 +400,6 @@ function SchoolAdminEditSubjectScreen () {
 
 	const isUniversity = isUniversitySchool(schoolData?.schoolType)
 	const programs = normalizeUniversityPrograms(schoolData?.programs)
-	const isBusy = isLoadingList || isLoadingTeachers || isLoadingSchool
-		|| isSaving || isUploadingDocument || isDeletingDocument
-		|| isSettingMainDocument
 
 	const isValidSubjectParam =
 		subjectId != null && OBJECT_ID_RE.test(String(subjectId))
@@ -412,6 +410,13 @@ function SchoolAdminEditSubjectScreen () {
 		}
 		return subjects.find((s) => String(s._id) === String(subjectId))
 	}, [subjects, subjectId, isValidSubjectParam])
+
+	const isPageLoading = (isLoadingList && !currentSubject)
+		|| isLoadingSchool
+		|| isLoadingTeachers
+	const isBusy = isPageLoading
+		|| isSaving || isUploadingDocument || isDeletingDocument
+		|| isSettingMainDocument
 
 	const assignedTeacher = useMemo(() => {
 		if (!currentSubject || teachersList.length === 0) {
@@ -939,10 +944,26 @@ function SchoolAdminEditSubjectScreen () {
 										curso opcional — PDF, hasta 200 MB.
 									</p>
 								</div>
-								{isLoadingList && !currentSubject ? (
-									<p className='login-card__subtitle login-card__subtitle--wide'>
-										Cargando…
-									</p>
+								{isPageLoading ? (
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>
+											{isLoadingList && !currentSubject
+												? 'Cargando materia…'
+												: isLoadingSchool && isLoadingTeachers
+													? 'Cargando datos del formulario…'
+													: isLoadingSchool
+														? (isUniversity
+															? 'Cargando programas…'
+															: 'Cargando datos de la escuela…')
+														: 'Cargando profesores…'}
+										</p>
+									</div>
 								) : (
 									<form
 										className='login-form'
@@ -985,11 +1006,7 @@ function SchoolAdminEditSubjectScreen () {
 														</span>
 													)}
 												</div>
-												{isLoadingSchool ? (
-													<p className='subject-grade-picker__hint'>
-														Cargando programas…
-													</p>
-												) : programs.length === 0 ? (
+												{programs.length === 0 ? (
 													<p className='subject-grade-picker__hint'>
 														Aún no hay programas en tu institución.{' '}
 														<Link to='/schooladmins/myschools'>
@@ -1147,11 +1164,7 @@ function SchoolAdminEditSubjectScreen () {
 													</span>
 												) : null}
 											</div>
-											{isLoadingTeachers ? (
-												<p className='subject-teacher-picker__hint'>
-													Cargando profesores…
-												</p>
-											) : teachersList.length === 0 ? (
+											{teachersList.length === 0 ? (
 												<p className='subject-teacher-picker__hint'>
 													Aún no hay profesores.{' '}
 													<Link to='/schooladmins/addteacher'>
@@ -1655,12 +1668,18 @@ function SchoolAdminEditSubjectScreen () {
 																		type='button'
 																		className='login-submit'
 																		disabled={isBusy}
+																		aria-busy={isUploadingDocument}
 																		onClick={() =>
 																			void handleUploadDocument()}
 																	>
-																		{isUploadingDocument
-																			? 'Subiendo…'
-																			: 'Subir PDF'}
+																		{isUploadingDocument ? (
+																			<span className='login-submit__busy'>
+																				<Loader size='sm' />
+																				<span>Subiendo…</span>
+																			</span>
+																		) : (
+																			'Subir PDF'
+																		)}
 																	</button>
 																	<button
 																		type='button'
@@ -1797,8 +1816,16 @@ function SchoolAdminEditSubjectScreen () {
 												|| (isUniversity
 													&& selectedProgramIds.length === 0)
 											}
+											aria-busy={isSaving}
 										>
-											{isSaving ? 'Guardando…' : 'Guardar cambios'}
+											{isSaving ? (
+												<span className='login-submit__busy'>
+													<Loader size='sm' />
+													<span>Guardando…</span>
+												</span>
+											) : (
+												'Guardar cambios'
+											)}
 										</button>
 									</form>
 								)}

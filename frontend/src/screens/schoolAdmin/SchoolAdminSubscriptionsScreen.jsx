@@ -6,6 +6,7 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { getGradeLevelLabel } from '../../utils/gradeLevel'
 import { getSubjectProgramsLabel } from '../../utils/universityProgram'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
@@ -252,9 +253,15 @@ function SchoolAdminSubscriptionsScreen () {
 							</div>
 
 							{isLoading && (
-								<p className='teacher-subjects-page__subtitle'>
-									Cargando suscriptores…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando suscriptores…</p>
+								</div>
 							)}
 
 							{isError && !isLoading && (

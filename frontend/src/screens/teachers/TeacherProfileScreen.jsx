@@ -9,6 +9,7 @@ import {
 } from '../../slices/teachers/teacherApiSlice'
 import { setTeacherCredentials } from '../../slices/teachers/authTeacherSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function TeacherProfileScreen () {
@@ -331,10 +332,16 @@ function TeacherProfileScreen () {
 										type='submit'
 										className='login-submit'
 										disabled={isBusy}
+										aria-busy={isSaving}
 									>
-										{isBusy
-											? 'Guardando…'
-											: 'Guardar cambios'}
+										{isSaving ? (
+											<span className='login-submit__busy'>
+												<Loader size='sm' />
+												<span>Guardando…</span>
+											</span>
+										) : (
+											'Guardar cambios'
+										)}
 									</button>
 								</form>
 								)}

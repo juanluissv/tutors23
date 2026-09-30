@@ -10,6 +10,7 @@ import AdminHeader from '../../components/AdminHeader'
 import {
 	useGetSchoolAdminPreviousQuestionsQuery,
 } from '../../slices/admin/schoolAdminPreviousQuestionsSlice'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const PAGE_SIZE = 1
@@ -319,17 +320,21 @@ function SchoolAdminPreviousQuestionsScreen () {
 								)}
 
 								{subjectQuery != null && isLoading && (
-									<p className='answers-heading' style={{
-										marginTop: '1rem',
-										textAlign: 'center',
-										width: '100%',
-									}}
+									<div
+										className={
+											'new-answers__status '
+											+ 'new-answers__status--loading'
+										}
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
 									>
-										Cargando…
-									</p>
+										<Loader size='md' />
+										<p>Cargando preguntas…</p>
+									</div>
 								)}
 
-								{subjectQuery != null && isError && (
+								{subjectQuery != null && isError && !isLoading && (
 									<div style={{
 										marginTop: '1rem',
 										textAlign: 'center',

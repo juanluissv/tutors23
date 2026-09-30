@@ -5,6 +5,7 @@ import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import { useGetQuestionsByTeacherIdQuery } from '../../slices/teachers/teacherQuestionsSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const PAGE_SIZE = 2
@@ -357,9 +358,15 @@ function TeacherNewQuestionsScreen () {
 								</p>
 
 								{isLoading && (
-									<p className='new-answers__status'>
-										Cargando preguntas…
-									</p>
+									<div
+										className='new-answers__status new-answers__status--loading'
+										role='status'
+										aria-live='polite'
+										aria-busy='true'
+									>
+										<Loader size='md' />
+										<p>Cargando preguntas…</p>
+									</div>
 								)}
 
 								{isError && (

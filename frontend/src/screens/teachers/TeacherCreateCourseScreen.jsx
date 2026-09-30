@@ -9,6 +9,7 @@ import {
 	useGetSubjectsByTeacherIdQuery,
 } from '../../slices/teachers/teacherApiSlice'
 import { localizeApiError } from '../../utils/localizeApiMessage'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 function TeacherCreateCourseScreen () {
@@ -215,10 +216,16 @@ function TeacherCreateCourseScreen () {
 												isFormDisabled
 												|| !hasSubjects
 											}
+											aria-busy={isSubmitting}
 										>
-											{isSubmitting
-												? 'Creando…'
-												: 'Crear curso'}
+											{isSubmitting ? (
+												<span className='login-submit__busy'>
+													<Loader size='sm' />
+													<span>Creando…</span>
+												</span>
+											) : (
+												'Crear curso'
+											)}
 										</button>
 									</form>
 								) : null}

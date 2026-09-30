@@ -10,6 +10,7 @@ import AdminSidebar from '../../components/AdminSidebar'
 import AdminHeader from '../../components/AdminHeader'
 import { getSubjectProgramsLabel } from '../../utils/universityProgram'
 import { isUniversitySchool } from '../../utils/schoolType'
+import Loader from '../../components/Loader'
 import '../../App.css'
 
 const ClipboardIcon = () => (
@@ -311,9 +312,15 @@ function SchoolAdminPlansScreen () {
 							)}
 
 							{isPageLoading && (
-								<p className='teacher-subjects-page__subtitle'>
-									Cargando planes…
-								</p>
+								<div
+									className='new-answers__status new-answers__status--loading'
+									role='status'
+									aria-live='polite'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<p>Cargando planes…</p>
+								</div>
 							)}
 
 							{isError && !isPageLoading && (
