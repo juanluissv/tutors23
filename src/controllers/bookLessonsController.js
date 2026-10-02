@@ -40,6 +40,7 @@ import {
 	generateVideoTts,
 	probeMp3DurationSeconds,
 } from '../utils/generateVideoTts.js'
+import { generateLessonAudioWithKaraokeVtt } from '../utils/generateLessonAudioWithKaraokeVtt.js'
 import { applyAudioDurationToVideoScript } from '../utils/retimeVideoScriptToAudio.js'
 import { buildCreatomateRenderScript } from '../utils/buildCreatomateRenderScript.js'
 import {
@@ -127,6 +128,23 @@ function videoScriptAudioFileIdFromLesson (lesson) {
 
 function videoScriptAudioFileUrlFromLesson (lesson) {
 	const fileId = videoScriptAudioFileIdFromLesson(lesson)
+	if (!fileId) {
+		return ''
+	}
+	return getLessonPlaybackUrl(fileId)
+		|| getPublicBookUrlFromKey(fileId)
+		|| ''
+}
+
+function lessonTextAudioFileIdFromLesson (lesson) {
+	return lesson?.lessonTextAudioFileId
+		&& String(lesson.lessonTextAudioFileId).trim() !== ''
+		? String(lesson.lessonTextAudioFileId).trim()
+		: null
+}
+
+function lessonTextAudioFileUrlFromLesson (lesson) {
+	const fileId = lessonTextAudioFileIdFromLesson(lesson)
 	if (!fileId) {
 		return ''
 	}
@@ -386,6 +404,16 @@ function bookLessonIndexToJson (lesson) {
 		videoScriptAudioFileUrl:
 			videoScriptAudioFileUrlFromLesson(lesson) || undefined,
 		hasVideoScriptAudio: Boolean(videoScriptAudioFileIdFromLesson(lesson)),
+		lessonTextAudioFileId:
+			lessonTextAudioFileIdFromLesson(lesson) || undefined,
+		lessonTextAudioFileUrl:
+			lessonTextAudioFileUrlFromLesson(lesson) || undefined,
+		lessonTextAudioDurationSeconds: Number(
+			lesson?.lessonTextAudioDurationSeconds,
+		) || undefined,
+		lessonTextAudioGeneratedAt:
+			lesson?.lessonTextAudioGeneratedAt || undefined,
+		hasLessonTextAudio: Boolean(lessonTextAudioFileIdFromLesson(lesson)),
 		hasSceneIllustrations: Boolean(videoScript?.hasSceneIllustrations),
 		sceneIllustrationCount: videoScript?.sceneIllustrationCount || 0,
 		...creatomateFieldsForLessonJson(lesson),
@@ -498,6 +526,16 @@ function bookLessonToJson (lesson, subjectMeta = {}, chatIndexId) {
 		videoScriptAudioFileUrl:
 			videoScriptAudioFileUrlFromLesson(lesson) || undefined,
 		hasVideoScriptAudio: Boolean(videoScriptAudioFileIdFromLesson(lesson)),
+		lessonTextAudioFileId:
+			lessonTextAudioFileIdFromLesson(lesson) || undefined,
+		lessonTextAudioFileUrl:
+			lessonTextAudioFileUrlFromLesson(lesson) || undefined,
+		lessonTextAudioDurationSeconds: Number(
+			lesson?.lessonTextAudioDurationSeconds,
+		) || undefined,
+		lessonTextAudioGeneratedAt:
+			lesson?.lessonTextAudioGeneratedAt || undefined,
+		hasLessonTextAudio: Boolean(lessonTextAudioFileIdFromLesson(lesson)),
 		hasSceneIllustrations: Boolean(videoScript?.hasSceneIllustrations),
 		sceneIllustrationCount: videoScript?.sceneIllustrationCount || 0,
 		...creatomateFieldsForLessonJson(lesson),
@@ -540,6 +578,16 @@ async function loadChapterPdfBytes (res, fileKey) {
 		res.status(502)
 		throw new Error('Could not load the chapter PDF from storage.')
 	}
+}
+
+async function loadChapterTxtFromStorage (res, fileKey) {
+	const body = await loadChapterPdfBytes(res, fileKey)
+	const text = body?.toString('utf8') || ''
+	if (!text.trim()) {
+		res.status(422)
+		throw new Error('The chapter text file is empty.')
+	}
+	return text.trim()
 }
 
 async function assertStudentCanAccessLesson (res, studentId, lesson) {
@@ -1176,6 +1224,192 @@ const generateVideoScriptAudioFromLesson = asyncHandler(async (req, res) => {
 		res.status(502)
 		throw new Error('Failed to upload the video narration audio to storage.')
 	}
+})
+
+async function persistLessonAudioAndKaraokeVtt ({
+	res,
+	lesson,
+	chapter,
+	subjectId,
+	chapterId,
+	chapterIndex,
+}) {
+	const content = Array.isArray(lesson.content) ? lesson.content : []
+	if (content.length === 0) {
+		res.status(422)
+		throw new Error('The web lesson has no content to narrate.')
+	}
+
+	let generated
+	try {
+		generated = await generateLessonAudioWithKaraokeVtt(lesson)
+	} catch (genErr) {
+		console.error(genErr)
+		res.status(genErr.statusCode || 502)
+		throw new Error(
+			genErr.message
+			|| 'Could not generate lesson narration and karaoke captions.',
+		)
+	}
+
+	const {
+		audioBuffer,
+		vttContent,
+		audioDurationSeconds,
+		cueCount,
+	} = generated
+
+	if (!audioBuffer?.length) {
+		res.status(422)
+		throw new Error('No audio was generated from the lesson text.')
+	}
+
+	const s3 = getS3()
+	const bucket = getBookBucketName()
+	if (!s3 || !bucket) {
+		res.status(503)
+		throw new Error(
+			'File storage is not configured. Set AWS credentials and '
+			+ 'AWS_S3_BUCKET.',
+		)
+	}
+
+	const previousAudioKey = lessonTextAudioFileIdFromLesson(lesson)
+	const previousTranscribeKey = chapterTranscribeFileIdFromLesson(lesson)
+	const prefix = getBookKeyPrefix()
+	const random = crypto.randomBytes(8).toString('hex')
+	const slug = sanitizeChapterPdfSlug(
+		chapter.ChapterTitle,
+		chapter.ChapterNumber ?? chapterIndex + 1,
+	)
+	const audioKey = `${prefix}/${subjectId}/chapters/${chapterId}-lesson-audio-${slug}-${random}.mp3`
+	const vttKey = `${prefix}/${subjectId}/chapters/${chapterId}-lesson-karaoke-${slug}-${random}.vtt`
+
+	try {
+		const audioUpload = await s3.upload({
+			Bucket: bucket,
+			Key: audioKey,
+			Body: audioBuffer,
+			ContentType: 'audio/mpeg',
+		}).promise()
+
+		const vttUpload = await s3.upload({
+			Bucket: bucket,
+			Key: vttKey,
+			Body: Buffer.from(vttContent, 'utf8'),
+			ContentType: 'text/vtt; charset=utf-8',
+		}).promise()
+
+		lesson.lessonTextAudioFileId = audioUpload.Key
+		lesson.lessonTextAudioDurationSeconds = audioDurationSeconds
+		lesson.lessonTextAudioGeneratedAt = new Date()
+		lesson.lessonTextAudioVoice = DEFAULT_VOICE
+		lesson.chapterTranscribeFileId = vttUpload.Key
+		await lesson.save()
+
+		if (previousAudioKey && previousAudioKey !== audioUpload.Key) {
+			await deleteChapterFileFromS3(previousAudioKey)
+		}
+		if (previousTranscribeKey && previousTranscribeKey !== vttUpload.Key) {
+			await deleteChapterFileFromS3(previousTranscribeKey)
+		}
+
+		const lessonTextAudioFileId = String(audioUpload.Key).trim()
+		const lessonTextAudioFileUrl = getLessonPlaybackUrl(
+			lessonTextAudioFileId,
+		)
+			|| getPublicBookUrlFromKey(lessonTextAudioFileId)
+			|| undefined
+		const chapterTranscribeFileId = String(vttUpload.Key).trim()
+		const chapterTranscribeFileUrl = getPublicBookUrlFromKey(
+			chapterTranscribeFileId,
+		) || undefined
+
+		return {
+			chapterId: String(chapter._id),
+			lessonId: String(lesson._id),
+			lessonTextAudioFileId,
+			lessonTextAudioFileUrl,
+			lessonTextAudioDurationSeconds: audioDurationSeconds,
+			hasLessonTextAudio: true,
+			chapterTranscribeFileId,
+			chapterTranscribeFileUrl,
+			hasKaraokeVtt: true,
+			karaokeCueCount: cueCount,
+		}
+	} catch (uploadErr) {
+		console.error(uploadErr)
+		res.status(502)
+		throw new Error(
+			'Failed to upload lesson audio or karaoke captions to storage.',
+		)
+	}
+}
+
+async function loadLessonForChapterAudio (res, subject, chapterId) {
+	if (!mongoose.Types.ObjectId.isValid(chapterId)) {
+		res.status(400)
+		throw new Error('Invalid chapter id')
+	}
+
+	const chapterIndex = (subject.bookChapters || []).findIndex(
+		(item) => String(item._id) === String(chapterId),
+	)
+
+	if (chapterIndex < 0) {
+		res.status(404)
+		throw new Error('Chapter not found')
+	}
+
+	const chapter = subject.bookChapters[chapterIndex]
+	const lesson = await BookLessons.findOne({
+		subject: subject._id,
+		'bookChapter.chapterId': chapter._id,
+	})
+
+	if (!lesson) {
+		res.status(400)
+		throw new Error(
+			'This chapter has no web lesson yet. Generate the web lesson first.',
+		)
+	}
+
+	return { chapter, chapterIndex, lesson }
+}
+
+// POST /api/subjects/:id/book-chapters/:chapterId/generate-lesson-audio
+const generateLessonTextAudioFromLesson = asyncHandler(async (req, res) => {
+	const { id, chapterId } = req.params
+	const { subject } = await loadSubjectForBookChapters(req, res, id)
+	const { chapter, chapterIndex, lesson } = await loadLessonForChapterAudio(
+		res,
+		subject,
+		chapterId,
+	)
+
+	const txtFileId = chapter.ChapterTxtFileId
+		&& String(chapter.ChapterTxtFileId).trim() !== ''
+		? String(chapter.ChapterTxtFileId).trim()
+		: null
+
+	if (!txtFileId) {
+		res.status(422)
+		throw new Error(
+			'This chapter has no tutor text file yet. '
+			+ 'Generate the tutor text first.',
+		)
+	}
+
+	const payload = await persistLessonAudioAndKaraokeVtt({
+		res,
+		lesson,
+		chapter,
+		subjectId: id,
+		chapterId,
+		chapterIndex,
+	})
+
+	res.status(200).json(payload)
 })
 
 // POST /api/subjects/:id/book-chapters/:chapterId/generate-scene-illustrations
@@ -2088,6 +2322,7 @@ export {
 	generateSuggestedQuestionsFromLesson,
 	generateVideoScriptFromLesson,
 	generateVideoScriptAudioFromLesson,
+	generateLessonTextAudioFromLesson,
 	generateSceneIllustrationsFromLesson,
 	generateAnimatedVideoFromLesson,
 	checkAnimatedVideoStatusFromLesson,

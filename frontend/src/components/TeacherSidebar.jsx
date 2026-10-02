@@ -431,6 +431,18 @@ function TeacherSidebar ({ isOpen, toggleSidebar }) {
 	const isTeacherCoursesSection =
 		location.pathname.startsWith('/teachers/courses')
 
+	const isTeacherBookChaptersSection =
+		location.pathname.startsWith('/teachers/bookchapters')
+
+	const isTeacherGenerateLessonsSection =
+		location.pathname.startsWith('/teachers/generatelessons')
+
+	const isTeacherCreateTutorSection =
+		location.pathname.startsWith('/teachers/createtutor')
+
+	const isTeacherViewBookSection =
+		location.pathname.startsWith('/teachers/viewbook')
+
 	const mySubjectsNavClass = ({ isActive }) =>
 		`sidebar-nav-link${
 			isActive
@@ -438,6 +450,10 @@ function TeacherSidebar ({ isOpen, toggleSidebar }) {
 			|| isWatchNewSection
 			|| isWatchAnswerSection
 			|| isTeacherCoursesSection
+			|| isTeacherBookChaptersSection
+			|| isTeacherGenerateLessonsSection
+			|| isTeacherCreateTutorSection
+			|| isTeacherViewBookSection
 				? ' sidebar-nav-link--active'
 				: ''
 		}`

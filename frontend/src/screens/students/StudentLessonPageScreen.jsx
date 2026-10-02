@@ -963,7 +963,15 @@ function StudentLessonPageScreen () {
 	const chapterVideoUrl = lesson?.chapterVideoFileUrl
 		? String(lesson.chapterVideoFileUrl).trim()
 		: ''
+	const lessonTextAudioUrl = lesson?.lessonTextAudioFileUrl
+		? String(lesson.lessonTextAudioFileUrl).trim()
+		: ''
 	const hasTutorVideo = chapterVideoUrl !== ''
+	const hasLessonTextAudio = lessonTextAudioUrl !== ''
+	const tutorPlaybackUrl = hasTutorVideo
+		? chapterVideoUrl
+		: lessonTextAudioUrl
+	const hasTutorPlayback = tutorPlaybackUrl !== ''
 	const hasTutorTranscribe = Boolean(
 		lesson?.chapterTranscribeFileId || lesson?.chapterTranscribeFileUrl,
 	)
@@ -1004,7 +1012,10 @@ function StudentLessonPageScreen () {
 	const hasPracticeClip = practiceVideoUrl !== ''
 	const activeVideoUrl = hasPracticeClip
 		? practiceVideoUrl
-		: chapterVideoUrl
+		: tutorPlaybackUrl
+	const showTutorMediaCircle = hasTutorVideo
+		|| (isPracticeMode && hasPracticeClip)
+	const isAudioOnlyTutor = hasTutorPlayback && !showTutorMediaCircle
 	const canControlLessonVideo = !isPracticeMode || hasPracticeClip
 	const practiceTotal = suggestedQuestions.length
 	const safePracticeIndex = currentPracticeQuestion
@@ -1823,10 +1834,13 @@ function StudentLessonPageScreen () {
 				Reproducción web del material de estudio · {folioLabel}
 			</p>
 
-			{hasTutorVideo ? (
+			{hasTutorPlayback ? (
 				<div
 					className={
 						'fixed-video-bottom-right lesson-doc-tutor-video' +
+						(isAudioOnlyTutor
+							? ' lesson-doc-tutor-video--audio-only'
+							: '') +
 						(practiceStep !== 'idle'
 							? ' lesson-doc-tutor-video--practice'
 							: '') +
@@ -1843,8 +1857,10 @@ function StudentLessonPageScreen () {
 							onClick={handleClassVideoToggle}
 							title={
 								isClassVideoPlaying
-									? 'Pausar video'
-									: 'Reproducir video'
+									? (hasTutorVideo ? 'Pausar video' : 'Pausar audio')
+									: (hasTutorVideo
+										? 'Reproducir video'
+										: 'Reproducir audio')
 							}
 						>
 							{isClassVideoPlaying ? (
@@ -1878,32 +1894,52 @@ function StudentLessonPageScreen () {
 						</button>
 					</div>
 					) : null}
-					<div className='lesson-doc-tutor-circle-shell'>
-						<div className='fixed-video-wrapper'>
-							{videoLoading ? (
-								<div className='fixed-video-loading-overlay'>
-									<svg
-										width='28'
-										height='28'
-										viewBox='0 0 24 24'
-										fill='none'
-										stroke='#ffffff'
-										strokeWidth='2'
-										className='audio-loading-spinner'
-									>
-										<circle
-											cx='12'
-											cy='12'
-											r='10'
-											strokeOpacity='0.25'
-										/>
-										<path
-											d='M12 2a10 10 0 0 1 10 10'
-											strokeLinecap='round'
-										/>
-									</svg>
-								</div>
-							) : null}
+					{showTutorMediaCircle ? (
+						<div className='lesson-doc-tutor-circle-shell'>
+							<div className='fixed-video-wrapper'>
+								{videoLoading ? (
+									<div className='fixed-video-loading-overlay'>
+										<svg
+											width='28'
+											height='28'
+											viewBox='0 0 24 24'
+											fill='none'
+											stroke='#ffffff'
+											strokeWidth='2'
+											className='audio-loading-spinner'
+										>
+											<circle
+												cx='12'
+												cy='12'
+												r='10'
+												strokeOpacity='0.25'
+											/>
+											<path
+												d='M12 2a10 10 0 0 1 10 10'
+												strokeLinecap='round'
+											/>
+										</svg>
+									</div>
+								) : null}
+								<video
+									key={`${practiceStep}-${activeVideoUrl}`}
+									ref={classVideoRef}
+									src={activeVideoUrl}
+									playsInline
+									controls={false}
+									onLoadedData={() => setVideoLoading(false)}
+									onLoadStart={() => setVideoLoading(true)}
+									onError={() => setVideoLoading(false)}
+									onPlay={() => setIsClassVideoPlaying(true)}
+									onPause={() => setIsClassVideoPlaying(false)}
+									onTimeUpdate={(e) => (
+										handleTimeUpdate(e.target.currentTime)
+									)}
+								/>
+							</div>
+						</div>
+					) : (
+						<div className='lesson-doc-tutor-media-sr' aria-hidden>
 							<video
 								key={`${practiceStep}-${activeVideoUrl}`}
 								ref={classVideoRef}
@@ -1920,7 +1956,7 @@ function StudentLessonPageScreen () {
 								)}
 							/>
 						</div>
-					</div>
+					)}
 
 					{/* <div className='fixed-video-question-wrap lesson-doc-tutor-question-wrap'>
 						<textarea

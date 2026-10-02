@@ -191,6 +191,22 @@ const bookLessonsSchema = mongoose.Schema({
 		type: String,
 		required: false,
 	},
+	lessonTextAudioFileId: {
+		type: String,
+		required: false,
+	},
+	lessonTextAudioDurationSeconds: {
+		type: Number,
+		required: false,
+	},
+	lessonTextAudioGeneratedAt: {
+		type: Date,
+		required: false,
+	},
+	lessonTextAudioVoice: {
+		type: String,
+		required: false,
+	},
 	creatomateRenderId: {
 		type: String,
 		required: false,

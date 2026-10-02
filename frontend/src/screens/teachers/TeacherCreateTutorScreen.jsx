@@ -9,6 +9,7 @@ import {
 	useGenerateSuggestedQuestionsFromLessonByTeacherMutation,
 	useGenerateVideoScriptFromLessonByTeacherMutation,
 	useGenerateVideoScriptAudioFromLessonByTeacherMutation,
+	useGenerateLessonTextAudioFromLessonByTeacherMutation,
 	useGenerateSceneIllustrationsFromLessonByTeacherMutation,
 	useGenerateAnimatedVideoFromLessonByTeacherMutation,
 	useCheckAnimatedVideoStatusFromLessonByTeacherMutation,
@@ -26,6 +27,9 @@ import { SUBJECTS_URL } from '../../constants'
 import '../../App.css'
 
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
+
+/** Mismas acciones que `isSuperAdmin` en SchoolAdminCreateTutor; ocultas para profesores. */
+const SHOW_TEACHER_ADVANCED_VIDEO_ACTIONS = false
 
 const BOOK_INDEX_LABELS = {
 	chapterFallback: (n) => `Capítulo ${n}`,
@@ -334,6 +338,8 @@ function TeacherCreateTutorScreen () {
 		useState(null)
 	const [generatingVideoAudioChapterId, setGeneratingVideoAudioChapterId] =
 		useState(null)
+	const [generatingLessonTextAudioChapterId, setGeneratingLessonTextAudioChapterId] =
+		useState(null)
 	const [
 		generatingIllustrationsChapterId,
 		setGeneratingIllustrationsChapterId,
@@ -352,6 +358,7 @@ function TeacherCreateTutorScreen () {
 	const [questionErrors, setQuestionErrors] = useState({})
 	const [videoScriptErrors, setVideoScriptErrors] = useState({})
 	const [videoAudioErrors, setVideoAudioErrors] = useState({})
+	const [lessonTextAudioErrors, setLessonTextAudioErrors] = useState({})
 	const [illustrationErrors, setIllustrationErrors] = useState({})
 	const [animatedVideoErrors, setAnimatedVideoErrors] = useState({})
 	const [animatedVideoStatusMessages, setAnimatedVideoStatusMessages] = useState({})
@@ -367,6 +374,8 @@ function TeacherCreateTutorScreen () {
 		useGenerateVideoScriptFromLessonByTeacherMutation()
 	const [generateVideoScriptAudio] =
 		useGenerateVideoScriptAudioFromLessonByTeacherMutation()
+	const [generateLessonTextAudio] =
+		useGenerateLessonTextAudioFromLessonByTeacherMutation()
 	const [generateSceneIllustrations] =
 		useGenerateSceneIllustrationsFromLessonByTeacherMutation()
 	const [generateAnimatedVideo] =
@@ -556,6 +565,32 @@ function TeacherCreateTutorScreen () {
 					videoScriptAudioFileId: audioFileId || '',
 					videoScriptAudioFileUrl: lesson?.videoScriptAudioFileUrl || '',
 					audioGeneratedAt: lesson?.videoScript?.audioGeneratedAt || null,
+				})
+			}
+		}
+		return map
+	}, [bookLessons])
+
+	const lessonTextAudioByChapterId = useMemo(() => {
+		const map = new Map()
+		for (const lesson of bookLessons) {
+			const chapterId = lesson?.bookChapter?.chapterId
+			if (!chapterId) {
+				continue
+			}
+			const audioFileId = lesson?.lessonTextAudioFileId
+				&& String(lesson.lessonTextAudioFileId).trim() !== ''
+				? String(lesson.lessonTextAudioFileId).trim()
+				: null
+			if (audioFileId || lesson?.hasLessonTextAudio) {
+				map.set(String(chapterId), {
+					lessonTextAudioFileId: audioFileId || '',
+					lessonTextAudioFileUrl: lesson?.lessonTextAudioFileUrl || '',
+					lessonTextAudioDurationSeconds: Number(
+						lesson?.lessonTextAudioDurationSeconds,
+					) || 0,
+					lessonTextAudioGeneratedAt:
+						lesson?.lessonTextAudioGeneratedAt || null,
 				})
 			}
 		}
@@ -892,6 +927,38 @@ function TeacherCreateTutorScreen () {
 		}
 	}
 
+	const handleGenerateLessonTextAudio = async (chapterId) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		setGeneratingLessonTextAudioChapterId(String(chapterId))
+		setLessonTextAudioErrors((prev) => {
+			const next = { ...prev }
+			delete next[String(chapterId)]
+			return next
+		})
+
+		try {
+			await generateLessonTextAudio({
+				id: subjectId,
+				chapterId: String(chapterId),
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = tutorErrorMessage(
+				err,
+				'Could not generate lesson audio. Please try again.',
+			)
+			setLessonTextAudioErrors((prev) => ({
+				...prev,
+				[String(chapterId)]: message,
+			}))
+		} finally {
+			setGeneratingLessonTextAudioChapterId(null)
+		}
+	}
+
 	const handleGenerateSceneIllustrations = async (chapterId, force = false) => {
 		if (!subjectId || !chapterId) {
 			return
@@ -1017,6 +1084,7 @@ function TeacherCreateTutorScreen () {
 			|| generatingQuestionsChapterId
 			|| generatingVideoScriptChapterId
 			|| generatingVideoAudioChapterId
+			|| generatingLessonTextAudioChapterId
 			|| generatingAnimatedVideoChapterId
 			|| checkingVideoStatusChapterId
 		) {
@@ -1036,6 +1104,7 @@ function TeacherCreateTutorScreen () {
 			|| generatingQuestionsChapterId
 			|| generatingVideoScriptChapterId
 			|| generatingVideoAudioChapterId
+			|| generatingLessonTextAudioChapterId
 			|| generatingAnimatedVideoChapterId
 			|| checkingVideoStatusChapterId
 		) {
@@ -1593,6 +1662,9 @@ function TeacherCreateTutorScreen () {
 														const videoAudioMeta = videoAudioByChapterId.get(
 															chapterKey,
 														)
+														const lessonTextAudioMeta = lessonTextAudioByChapterId.get(
+															chapterKey,
+														)
 														const illustrationsMeta =
 															sceneIllustrationsByChapterId.get(
 																chapterKey,
@@ -1625,6 +1697,10 @@ function TeacherCreateTutorScreen () {
 															videoAudioMeta?.videoScriptAudioFileId
 															|| videoAudioMeta?.videoScriptAudioFileUrl,
 														)
+														const hasLessonTextAudio = Boolean(
+															lessonTextAudioMeta?.lessonTextAudioFileId
+															|| lessonTextAudioMeta?.lessonTextAudioFileUrl,
+														)
 														const hasSceneIllustrations = Boolean(
 															illustrationsMeta?.complete
 															|| (
@@ -1645,6 +1721,8 @@ function TeacherCreateTutorScreen () {
 															generatingVideoScriptChapterId === chapterKey
 														const isGeneratingVideoAudioThis =
 															generatingVideoAudioChapterId === chapterKey
+														const isGeneratingLessonTextAudioThis =
+															generatingLessonTextAudioChapterId === chapterKey
 														const isGeneratingIllustrationsThis =
 															generatingIllustrationsChapterId === chapterKey
 														const isGeneratingAnimatedVideoThis =
@@ -1659,6 +1737,8 @@ function TeacherCreateTutorScreen () {
 														const questionError = questionErrors[chapterKey]
 														const videoScriptError = videoScriptErrors[chapterKey]
 														const videoAudioError = videoAudioErrors[chapterKey]
+														const lessonTextAudioError =
+															lessonTextAudioErrors[chapterKey]
 														const illustrationError =
 															illustrationErrors[chapterKey]
 														const animatedVideoError = animatedVideoErrors[chapterKey]
@@ -1671,6 +1751,7 @@ function TeacherCreateTutorScreen () {
 															|| generatingQuestionsChapterId
 															|| generatingVideoScriptChapterId
 															|| generatingVideoAudioChapterId
+															|| generatingLessonTextAudioChapterId
 															|| generatingIllustrationsChapterId
 															|| generatingAnimatedVideoChapterId
 															|| checkingVideoStatusChapterId
@@ -1679,6 +1760,8 @@ function TeacherCreateTutorScreen () {
 														)
 														const videoAudioDisabled = actionDisabled
 															|| !hasVideoScript
+														const lessonTextAudioDisabled = actionDisabled
+															|| !hasTutorTxt
 														const illustrationsDisabled = actionDisabled
 															|| !hasVideoScript
 														const animatedVideoDisabled = actionDisabled
@@ -1751,6 +1834,43 @@ function TeacherCreateTutorScreen () {
 																			</a>
 																		</p>
 																	) : null}
+																	{lessonTextAudioError ? (
+																		<p className='create-tutor__error'>
+																			{lessonTextAudioError}
+																		</p>
+																	) : null}
+																	{hasLessonTextAudio ? (
+																		<p className='create-tutor__lesson-audio-status'>
+																			Lesson narration audio ready
+																			{lessonTextAudioMeta?.lessonTextAudioDurationSeconds > 0
+																				? (
+																					<>
+																						{' '}
+																						(~{Math.round(
+																							lessonTextAudioMeta.lessonTextAudioDurationSeconds / 60,
+																						)} min)
+																					</>
+																				)
+																				: null}
+																			{lessonTextAudioMeta?.lessonTextAudioFileUrl ? (
+																				<>
+																					{' '}
+																					(
+																					<a
+																						href={
+																							lessonTextAudioMeta.lessonTextAudioFileUrl
+																						}
+																						className='create-tutor__lesson-audio-link'
+																						target='_blank'
+																						rel='noopener noreferrer'
+																					>
+																						listen
+																					</a>
+																					)
+																				</>
+																			) : null}
+																		</p>
+																	) : null}
 																	{hasTutorVideo && videoMeta?.chapterVideoFileUrl ? (
 																		<p className='create-tutor__video-status'>
 																			<a
@@ -1780,7 +1900,9 @@ function TeacherCreateTutorScreen () {
 																				target='_blank'
 																				rel='noopener noreferrer'
 																			>
-																				Abrir subtítulos del video
+																				{hasTutorVideo
+																					? 'Abrir subtítulos del video'
+																					: 'Abrir VTT karaoke (read-along)'}
 																				<span
 																					className='teacher-book-upload__open-link-icon'
 																					aria-hidden
@@ -2005,6 +2127,48 @@ function TeacherCreateTutorScreen () {
 																				: 'Generar 10 preguntas sugeridas'}
 																	</span>
 																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--lesson-audio' +
+																		(lessonTextAudioDisabled
+																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(isGeneratingLessonTextAudioThis
+																			? ' create-tutor__generate-btn--loading'
+																			: '')
+																	}
+																	disabled={lessonTextAudioDisabled}
+																	aria-busy={isGeneratingLessonTextAudioThis}
+																	title={
+																		!hasTutorTxt
+																			? 'Generate the tutor text file first'
+																			: undefined
+																	}
+																	onClick={() =>
+																		void handleGenerateLessonTextAudio(
+																			chapterKey,
+																		)}
+																>
+																	<CreateTutorBtnIcon
+																		busy={isGeneratingLessonTextAudioThis}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isGeneratingLessonTextAudioThis
+																			? 'Generando audio y VTT…'
+																			: hasLessonTextAudio
+																				? 'Regenerar audio + VTT karaoke'
+																				: 'Generar audio + VTT karaoke'}
+																	</span>
+																	<span className='create-tutor__generate-btn-hint'>
+																		Narración por bloques · subtítulos con blockId
+																	</span>
+																</button>
+																{SHOW_TEACHER_ADVANCED_VIDEO_ACTIONS ? (
+																<>
 																<button
 																	type='button'
 																	className={
@@ -2270,6 +2434,8 @@ function TeacherCreateTutorScreen () {
 																		SRT de HeyGen · se convierte a VTT
 																	</span>
 																</button>
+																</>
+																) : null}
 															</div>
 														</li>
 														)

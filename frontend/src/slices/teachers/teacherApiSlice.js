@@ -417,6 +417,15 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
                 { type: 'BookLesson', id: `SUBJECT_${id}` },
             ],
         }),
+        generateLessonTextAudioFromLessonByTeacher: builder.mutation({
+            query: ({ id, chapterId }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-lesson-audio`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
         generateSceneIllustrationsFromLessonByTeacher: builder.mutation({
             query: ({ id, chapterId, force = false }) => ({
                 url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-scene-illustrations`,
@@ -506,6 +515,7 @@ export const {
     useGenerateSuggestedQuestionsFromLessonByTeacherMutation,
     useGenerateVideoScriptFromLessonByTeacherMutation,
     useGenerateVideoScriptAudioFromLessonByTeacherMutation,
+    useGenerateLessonTextAudioFromLessonByTeacherMutation,
     useGenerateSceneIllustrationsFromLessonByTeacherMutation,
     useGenerateAnimatedVideoFromLessonByTeacherMutation,
     useCheckAnimatedVideoStatusFromLessonByTeacherMutation,

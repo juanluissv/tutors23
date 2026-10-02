@@ -215,6 +215,10 @@ async function generateVideoTts (text, options = {}) {
 export {
 	generateVideoTts,
 	probeMp3DurationSeconds,
+	concatMp3Buffers,
+	synthesizeChunk,
+	getOpenAIClient,
+	splitTextForTts,
 	DEFAULT_VOICE,
 	TTS_MODEL,
 	DEFAULT_INSTRUCTIONS,

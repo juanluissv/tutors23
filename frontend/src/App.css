@@ -16439,6 +16439,36 @@ a.upload-card {
   );
 }
 
+.create-tutor__generate-btn--lesson-audio {
+  background: linear-gradient(
+    165deg,
+    #f5f3ff 0%,
+    #ede9fe 55%,
+    #e0e7ff 100%
+  );
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+.create-tutor__generate-btn--lesson-audio:hover {
+  background: linear-gradient(
+    165deg,
+    #ede9fe 0%,
+    #ddd6fe 55%,
+    #c7d2fe 100%
+  );
+}
+
+.create-tutor__lesson-audio-status {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  color: #6d28d9;
+}
+
+.create-tutor__lesson-audio-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .create-tutor__video-audio-status {
   margin: 8px 0 0;
   font-size: 0.8125rem;
