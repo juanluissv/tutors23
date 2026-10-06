@@ -237,8 +237,107 @@ function formatSuggestedQuestions (lesson) {
 			answerVideoUrl: playbackUrlFromStoredPracticeVideo(
 				item?.answerVideoUrl,
 			),
+			questionAudioUrl: playbackUrlFromStoredPracticeVideo(
+				item?.questionAudioUrl,
+			),
+			answerAudioUrl: playbackUrlFromStoredPracticeVideo(
+				item?.answerAudioUrl,
+			),
 		}))
 		.filter((item) => item.question)
+}
+
+const PRACTICE_QUESTION_AUDIO_KIND = 'question-audio'
+const PRACTICE_ANSWER_AUDIO_KIND = 'answer-audio'
+
+function practiceAudioFieldFromKind (kind) {
+	if (kind === PRACTICE_ANSWER_AUDIO_KIND) {
+		return 'answerAudioUrl'
+	}
+	if (kind === PRACTICE_QUESTION_AUDIO_KIND) {
+		return 'questionAudioUrl'
+	}
+	return null
+}
+
+function practiceAudioPrefixFromKind (kind) {
+	return kind === PRACTICE_ANSWER_AUDIO_KIND
+		? getAnswerVideoKeyPrefix()
+		: getQuestionVideoKeyPrefix()
+}
+
+function practiceAudioClipLabelFromKind (kind) {
+	return kind === PRACTICE_ANSWER_AUDIO_KIND ? 'answer-audio' : 'question-audio'
+}
+
+async function synthesizeAndUploadSuggestedQuestionAudio ({
+	s3,
+	bucket,
+	subjectId,
+	chapterId,
+	chapter,
+	chapterIndex,
+	questions,
+	index,
+	kind,
+}) {
+	const field = practiceAudioFieldFromKind(kind)
+	if (!field) {
+		throw new Error('Audio kind must be question-audio or answer-audio.')
+	}
+
+	const item = questions[index]
+	if (!item) {
+		throw new Error('Suggested question not found.')
+	}
+
+	const textField = kind === PRACTICE_ANSWER_AUDIO_KIND ? 'answer' : 'question'
+	const narration = String(item[textField] ?? '').trim()
+	if (!narration) {
+		throw new Error(
+			kind === PRACTICE_ANSWER_AUDIO_KIND
+				? 'This suggested question has no answer text.'
+				: 'This suggested question has no question text.',
+		)
+	}
+
+	let audioBuffer
+	try {
+		audioBuffer = await generateVideoTts(narration)
+	} catch (genErr) {
+		genErr.statusCode = genErr.statusCode || 502
+		throw genErr
+	}
+
+	if (!audioBuffer?.length) {
+		throw new Error('No audio was generated from the practice text.')
+	}
+
+	const previousFileKey = storedPracticeVideoKey(item[field])
+	const prefix = practiceAudioPrefixFromKind(kind)
+	const random = crypto.randomBytes(8).toString('hex')
+	const slug = sanitizeChapterPdfSlug(
+		chapter.ChapterTitle,
+		chapter.ChapterNumber ?? chapterIndex + 1,
+	)
+	const clipLabel = practiceAudioClipLabelFromKind(kind)
+	const key = `${prefix}/${subjectId}/chapters/${chapterId}`
+		+ `-${clipLabel}-${index + 1}-${slug}-${random}.mp3`
+
+	const upload = await s3.upload({
+		Bucket: bucket,
+		Key: key,
+		Body: audioBuffer,
+		ContentType: 'audio/mpeg',
+	}).promise()
+
+	item[field] = upload.Key
+
+	if (previousFileKey && previousFileKey !== upload.Key) {
+		await deleteChapterFileFromS3(previousFileKey)
+	}
+
+	return upload.Key
 }
 
 function formatVideoScript (lesson) {
@@ -2085,6 +2184,187 @@ const uploadSuggestedQuestionVideo = asyncHandler(async (req, res) => {
 	}
 })
 
+// POST /api/subjects/:id/book-chapters/:chapterId/generate-suggested-questions-audio
+const generateSuggestedQuestionsAudioFromLesson = asyncHandler(
+	async (req, res) => {
+		const { id, chapterId } = req.params
+		const { subject } = await loadSubjectForBookChapters(req, res, id)
+
+		if (!mongoose.Types.ObjectId.isValid(chapterId)) {
+			res.status(400)
+			throw new Error('Invalid chapter id')
+		}
+
+		const rawIndex = req.body?.questionIndex
+		const audioKind = String(req.body?.audioKind || '').trim().toLowerCase()
+		const force = Boolean(req.body?.force)
+		const singleMode = rawIndex !== undefined && rawIndex !== null
+			&& audioKind !== ''
+
+		if (singleMode) {
+			const index = Number.parseInt(String(rawIndex), 10)
+			if (!Number.isInteger(index) || index < 0) {
+				res.status(400)
+				throw new Error('Invalid suggested question index')
+			}
+			if (
+				audioKind !== PRACTICE_QUESTION_AUDIO_KIND
+				&& audioKind !== PRACTICE_ANSWER_AUDIO_KIND
+			) {
+				res.status(400)
+				throw new Error(
+					'Audio kind must be question-audio or answer-audio.',
+				)
+			}
+		} else if (audioKind !== '' || rawIndex !== undefined) {
+			res.status(400)
+			throw new Error(
+				'Provide both questionIndex and audioKind for a single clip, '
+				+ 'or omit both to generate all missing practice audios.',
+			)
+		}
+
+		const chapterIndex = (subject.bookChapters || []).findIndex(
+			(item) => String(item._id) === String(chapterId),
+		)
+
+		if (chapterIndex < 0) {
+			res.status(404)
+			throw new Error('Chapter not found')
+		}
+
+		const chapter = subject.bookChapters[chapterIndex]
+		const lesson = await BookLessons.findOne({
+			subject: subject._id,
+			'bookChapter.chapterId': chapter._id,
+		})
+
+		if (!lesson) {
+			res.status(400)
+			throw new Error(
+				'This chapter has no web lesson yet. Generate the web lesson first.',
+			)
+		}
+
+		const questions = Array.isArray(lesson.suggestedQuestions)
+			? lesson.suggestedQuestions
+			: []
+
+		if (questions.length === 0) {
+			res.status(422)
+			throw new Error(
+				'This chapter has no suggested questions yet. Generate them first.',
+			)
+		}
+
+		const s3 = getS3()
+		const bucket = getBookBucketName()
+		if (!s3 || !bucket) {
+			res.status(503)
+			throw new Error(
+				'File storage is not configured. Set AWS credentials and '
+				+ 'AWS_S3_BUCKET.',
+			)
+		}
+
+		const jobs = []
+		if (singleMode) {
+			const index = Number.parseInt(String(rawIndex), 10)
+			if (index >= questions.length || !questions[index]) {
+				res.status(404)
+				throw new Error(
+					'Suggested question not found. Generate the 10 questions first.',
+				)
+			}
+			jobs.push({ index, kind: audioKind })
+		} else {
+			for (let index = 0; index < questions.length; index += 1) {
+				const item = questions[index]
+				if (!item) {
+					continue
+				}
+				const questionText = String(item.question ?? '').trim()
+				const answerText = String(item.answer ?? '').trim()
+				if (questionText && (
+					force || !String(item.questionAudioUrl ?? '').trim()
+				)) {
+					jobs.push({
+						index,
+						kind: PRACTICE_QUESTION_AUDIO_KIND,
+					})
+				}
+				if (answerText && (
+					force || !String(item.answerAudioUrl ?? '').trim()
+				)) {
+					jobs.push({
+						index,
+						kind: PRACTICE_ANSWER_AUDIO_KIND,
+					})
+				}
+			}
+		}
+
+		if (jobs.length === 0) {
+			res.status(200).json({
+				chapterId: String(chapter._id),
+				lessonId: String(lesson._id),
+				generatedCount: 0,
+				skippedCount: 0,
+				suggestedQuestions: formatSuggestedQuestions(lesson),
+			})
+			return
+		}
+
+		let generatedCount = 0
+		const errors = []
+
+		for (const job of jobs) {
+			try {
+				await synthesizeAndUploadSuggestedQuestionAudio({
+					s3,
+					bucket,
+					subjectId: id,
+					chapterId,
+					chapter,
+					chapterIndex,
+					questions,
+					index: job.index,
+					kind: job.kind,
+				})
+				generatedCount += 1
+			} catch (clipErr) {
+				console.error(clipErr)
+				errors.push({
+					questionIndex: job.index,
+					audioKind: job.kind,
+					message: clipErr.message || 'Could not generate practice audio.',
+				})
+			}
+		}
+
+		lesson.suggestedQuestions = questions
+		lesson.markModified('suggestedQuestions')
+		await lesson.save()
+
+		if (generatedCount === 0) {
+			res.status(502)
+			throw new Error(
+				errors[0]?.message
+				|| 'Could not generate any practice question audio.',
+			)
+		}
+
+		res.status(200).json({
+			chapterId: String(chapter._id),
+			lessonId: String(lesson._id),
+			generatedCount,
+			failedCount: errors.length,
+			errors: errors.length > 0 ? errors : undefined,
+			suggestedQuestions: formatSuggestedQuestions(lesson),
+		})
+	},
+)
+
 // PUT /api/subjects/:id/book-chapters/:chapterId/tutor-transcribe
 const uploadChapterTutorTranscribe = asyncHandler(async (req, res) => {
 	const { id, chapterId } = req.params
@@ -2320,6 +2600,7 @@ export {
 	generateBookLessonsFromChapter,
 	generateChapterTutorTxtFromLesson,
 	generateSuggestedQuestionsFromLesson,
+	generateSuggestedQuestionsAudioFromLesson,
 	generateVideoScriptFromLesson,
 	generateVideoScriptAudioFromLesson,
 	generateLessonTextAudioFromLesson,

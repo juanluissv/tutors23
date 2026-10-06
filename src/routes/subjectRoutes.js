@@ -32,6 +32,7 @@ import {
     generateBookLessonsFromChapter,
     generateChapterTutorTxtFromLesson,
     generateSuggestedQuestionsFromLesson,
+    generateSuggestedQuestionsAudioFromLesson,
     generateVideoScriptFromLesson,
     generateVideoScriptAudioFromLesson,
     generateLessonTextAudioFromLesson,
@@ -190,6 +191,12 @@ router.post(
 );
 
 router.post(
+    '/:id/teacher/book-chapters/:chapterId/generate-suggested-questions-audio',
+    protectTeacher,
+    generateSuggestedQuestionsAudioFromLesson,
+);
+
+router.post(
     '/:id/teacher/book-chapters/:chapterId/generate-video-script',
     protectTeacher,
     generateVideoScriptFromLesson,
@@ -274,6 +281,12 @@ router.post(
     '/:id/book-chapters/:chapterId/generate-suggested-questions',
     protectSchoolAdmin,
     generateSuggestedQuestionsFromLesson,
+);
+
+router.post(
+    '/:id/book-chapters/:chapterId/generate-suggested-questions-audio',
+    protectSchoolAdmin,
+    generateSuggestedQuestionsAudioFromLesson,
 );
 
 router.post(

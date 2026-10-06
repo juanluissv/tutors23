@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logoutStudent } from '../slices/student/authStudentSlice'
 import { useLogoutMutation } from '../slices/student/studentApiSlice'
@@ -30,6 +30,8 @@ function Header({
 	toggleSidebar,
 }) {
 	const navigate = useNavigate()
+	const { pathname } = useLocation()
+	const isStudentLessonPage = /^\/students\/lessonpage\//.test(pathname)
 	const dispatch = useDispatch()
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 	const dropdownRef = useRef(null)
@@ -102,7 +104,12 @@ function Header({
 			<div className="header-left">
 				<button
 					type="button"
-					className="header-logo"
+					className={
+						'header-logo' +
+						(isStudentLessonPage
+							? ' header-logo--lesson-page-offset'
+							: '')
+					}
 					onClick={() => navigate('/')}
 					aria-label="Ask to Learn — go to home"
 				>

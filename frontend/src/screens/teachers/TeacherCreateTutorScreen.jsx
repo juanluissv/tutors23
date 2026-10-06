@@ -5,8 +5,14 @@ import TeacherSidebar from '../../components/TeacherSidebar'
 import TeacherHeader from '../../components/TeacherHeader'
 import Loader from '../../components/Loader'
 import {
+	audioCountsFromQuestions,
+	practiceAudioKey,
+	PracticeSuggestedQuestionsAudioPanel,
+} from '../../components/PracticeSuggestedQuestionsAudioPanel'
+import {
 	useGenerateChapterTutorTxtFromLessonByTeacherMutation,
 	useGenerateSuggestedQuestionsFromLessonByTeacherMutation,
+	useGenerateSuggestedQuestionsAudioFromLessonByTeacherMutation,
 	useGenerateVideoScriptFromLessonByTeacherMutation,
 	useGenerateVideoScriptAudioFromLessonByTeacherMutation,
 	useGenerateLessonTextAudioFromLessonByTeacherMutation,
@@ -354,6 +360,13 @@ function TeacherCreateTutorScreen () {
 	const [pendingUploadChapterId, setPendingUploadChapterId] = useState(null)
 	const [pendingTranscribeChapterId, setPendingTranscribeChapterId] =
 		useState(null)
+	const [expandedPracticeAudioChapterId, setExpandedPracticeAudioChapterId] =
+		useState(null)
+	const [generatingPracticeAudioKey, setGeneratingPracticeAudioKey] =
+		useState(null)
+	const [generatingPracticeAudioChapterId, setGeneratingPracticeAudioChapterId] =
+		useState(null)
+	const [practiceAudioErrors, setPracticeAudioErrors] = useState({})
 	const [chapterErrors, setChapterErrors] = useState({})
 	const [questionErrors, setQuestionErrors] = useState({})
 	const [videoScriptErrors, setVideoScriptErrors] = useState({})
@@ -370,6 +383,8 @@ function TeacherCreateTutorScreen () {
 	const [generateTutorTxt] = useGenerateChapterTutorTxtFromLessonByTeacherMutation()
 	const [generateSuggestedQuestions] =
 		useGenerateSuggestedQuestionsFromLessonByTeacherMutation()
+	const [generateSuggestedQuestionsAudio] =
+		useGenerateSuggestedQuestionsAudioFromLessonByTeacherMutation()
 	const [generateVideoScript] =
 		useGenerateVideoScriptFromLessonByTeacherMutation()
 	const [generateVideoScriptAudio] =
@@ -512,12 +527,28 @@ function TeacherCreateTutorScreen () {
 			if (!chapterId) {
 				continue
 			}
-			const count = Array.isArray(lesson?.suggestedQuestions)
-				? lesson.suggestedQuestions.length
-				: 0
-			if (count > 0 || lesson?.hasSuggestedQuestions) {
+			const items = Array.isArray(lesson?.suggestedQuestions)
+				? lesson.suggestedQuestions
+					.map((item) => ({
+						question: String(item?.question ?? '').trim(),
+						answer: String(item?.answer ?? '').trim(),
+						questionAudioUrl: String(
+							item?.questionAudioUrl ?? '',
+						).trim(),
+						answerAudioUrl: String(
+							item?.answerAudioUrl ?? '',
+						).trim(),
+					}))
+					.filter((item) => item.question)
+				: []
+			if (items.length > 0 || lesson?.hasSuggestedQuestions) {
+				const audioCounts = audioCountsFromQuestions(items)
 				map.set(String(chapterId), {
-					count: count || 10,
+					count: items.length || audioCounts.questionCount || 10,
+					items,
+					audioClipCount: audioCounts.clipCount,
+					audioClipTotal: audioCounts.clipTotal,
+					audioCompleteCount: audioCounts.completeCount,
 				})
 			}
 		}
@@ -708,6 +739,16 @@ function TeacherCreateTutorScreen () {
 	const filteredSuggestedQuestionsReadyCount = countForFilteredChapters(
 		suggestedQuestionsByChapterId,
 	)
+	const filteredPracticeAudiosReadyCount = useMemo(() => {
+		let ready = 0
+		for (const chapterId of filteredChapterIds) {
+			const meta = suggestedQuestionsByChapterId.get(chapterId)
+			if (meta?.count > 0 && meta.audioCompleteCount === meta.count) {
+				ready += 1
+			}
+		}
+		return ready
+	}, [filteredChapterIds, suggestedQuestionsByChapterId])
 	const filteredVideoScriptReadyCount = countForFilteredChapters(
 		videoScriptByChapterId,
 	)
@@ -860,6 +901,97 @@ function TeacherCreateTutorScreen () {
 			}))
 		} finally {
 			setGeneratingQuestionsChapterId(null)
+		}
+	}
+
+	const handleTogglePracticeAudioPanel = (chapterId) => {
+		const nextId = String(chapterId)
+		setExpandedPracticeAudioChapterId((current) => (
+			current === nextId ? null : nextId
+		))
+	}
+
+	const generatePracticeAudioClip = async (
+		chapterId,
+		questionIndex,
+		audioKind,
+		{ force = true } = {},
+	) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		const slotKey = practiceAudioKey(
+			chapterId,
+			questionIndex,
+			audioKind,
+		)
+
+		setGeneratingPracticeAudioKey(slotKey)
+		setPracticeAudioErrors((prev) => {
+			const next = { ...prev }
+			delete next[slotKey]
+			return next
+		})
+
+		try {
+			await generateSuggestedQuestionsAudio({
+				id: subjectId,
+				chapterId: String(chapterId),
+				questionIndex,
+				audioKind,
+				force,
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = tutorErrorMessage(
+				err,
+				'No se pudo generar el audio de práctica. Intenta de nuevo.',
+			)
+			setPracticeAudioErrors((prev) => ({
+				...prev,
+				[slotKey]: message,
+			}))
+		} finally {
+			setGeneratingPracticeAudioKey(null)
+		}
+	}
+
+	const handleGenerateAllPracticeAudios = async (chapterId, force = false) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		const chapterKey = String(chapterId)
+		setGeneratingPracticeAudioChapterId(chapterKey)
+		setPracticeAudioErrors((prev) => {
+			const next = { ...prev }
+			for (const key of Object.keys(next)) {
+				if (key.startsWith(`${chapterKey}:`)) {
+					delete next[key]
+				}
+			}
+			return next
+		})
+
+		try {
+			await generateSuggestedQuestionsAudio({
+				id: subjectId,
+				chapterId: chapterKey,
+				force,
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = tutorErrorMessage(
+				err,
+				'No se pudieron generar los audios de práctica. Intenta de nuevo.',
+			)
+			setPracticeAudioErrors((prev) => ({
+				...prev,
+				[`${chapterKey}:batch`]: message,
+			}))
+		} finally {
+			setGeneratingPracticeAudioChapterId(null)
 		}
 	}
 
@@ -1520,8 +1652,9 @@ function TeacherCreateTutorScreen () {
 																)}
 															</strong>
 															. Genera el texto del
-															tutor, guiones y archivos
-															por capítulo.
+															tutor, audios TTS de
+															práctica, guiones y
+															archivos por capítulo.
 														</>
 													)
 													: 'Selecciona un documento fuente arriba para empezar el flujo del tutor.'}
@@ -1549,7 +1682,7 @@ function TeacherCreateTutorScreen () {
 											<p className='view-book__summary-hint'>
 												{readyCount === 0
 													? 'Primero genera lecciones web para este documento y luego crea tutores con IA a partir de ellas.'
-													: `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas · ${filteredVideoScriptReadyCount} tienen guion de video · ${filteredVideoAudioReadyCount} tienen audio de narración · ${filteredSceneIllustrationsReadyCount} tienen ilustraciones de escena · ${filteredTutorVideoReadyCount} tienen video del tutor · ${filteredTutorTranscribeReadyCount} tienen subtítulos.`}
+													: `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas · ${filteredPracticeAudiosReadyCount} tienen todos los audios TTS de práctica · ${filteredVideoScriptReadyCount} tienen guion de video · ${filteredVideoAudioReadyCount} tienen audio de narración · ${filteredSceneIllustrationsReadyCount} tienen ilustraciones de escena · ${filteredTutorVideoReadyCount} tienen video del tutor · ${filteredTutorTranscribeReadyCount} tienen subtítulos.`}
 											</p>
 										</div>
 										<Link
@@ -1689,6 +1822,18 @@ function TeacherCreateTutorScreen () {
 														)
 														const hasSuggestedQuestions = Boolean(
 															questionsMeta?.count > 0,
+														)
+														const practiceQuestions = Array.isArray(
+															questionsMeta?.items,
+														)
+															? questionsMeta.items
+															: []
+														const isPracticeAudioPanelOpen =
+															expandedPracticeAudioChapterId === chapterKey
+														const arePracticeAudiosComplete = Boolean(
+															questionsMeta?.count > 0
+															&& questionsMeta.audioCompleteCount
+																=== questionsMeta.count,
 														)
 														const hasVideoScript = Boolean(
 															videoScriptMeta?.sceneCount > 0,
@@ -1927,6 +2072,9 @@ function TeacherCreateTutorScreen () {
 																			{questionsMeta.count}{' '}
 																			preguntas sugeridas listas
 																			para los estudiantes
+																			{questionsMeta.audioClipTotal > 0
+																				? ` · ${questionsMeta.audioClipCount}/${questionsMeta.audioClipTotal} audios TTS`
+																				: ''}
 																		</p>
 																	) : null}
 																	{videoScriptError ? (
@@ -2126,6 +2274,58 @@ function TeacherCreateTutorScreen () {
 																				? 'Regenerar 10 preguntas sugeridas'
 																				: 'Generar 10 preguntas sugeridas'}
 																	</span>
+																</button>
+																<button
+																	type='button'
+																	className={
+																		'create-tutor__generate-btn ' +
+																		'create-tutor__generate-btn--practice-audio' +
+																		(!hasSuggestedQuestions
+																			? ' create-tutor__generate-btn--disabled'
+																			: '') +
+																		(generatingPracticeAudioChapterId
+																			=== chapterKey
+																			? ' create-tutor__generate-btn--loading'
+																			: '')
+																	}
+																	disabled={!hasSuggestedQuestions}
+																	title={
+																		!hasSuggestedQuestions
+																			? 'Primero genera las 10 preguntas'
+																			: undefined
+																	}
+																	onClick={() => {
+																		handleTogglePracticeAudioPanel(
+																			chapterKey,
+																		)
+																	}}
+																>
+																	<CreateTutorBtnIcon
+																		busy={
+																			generatingPracticeAudioChapterId
+																				=== chapterKey
+																		}
+																		className='create-tutor__generate-btn-icon'
+																		Glyph={TutorGenerateGlyph}
+																	/>
+																	<span className='create-tutor__generate-btn-title'>
+																		{isPracticeAudioPanelOpen
+																			? 'Ocultar audios TTS de práctica'
+																			: (arePracticeAudiosComplete
+																				? 'Revisar audios TTS de práctica'
+																				: 'Generar audios TTS de práctica')}
+																	</span>
+																	{hasSuggestedQuestions ? (
+																		<span className='create-tutor__generate-btn-hint'>
+																			{questionsMeta.audioCompleteCount
+																				?? 0}/{questionsMeta.count}{' '}
+																			preguntas con audio completo
+																		</span>
+																	) : (
+																		<span className='create-tutor__generate-btn-hint'>
+																			OpenAI TTS · pregunta y respuesta
+																		</span>
+																	)}
 																</button>
 																<button
 																	type='button'
@@ -2437,6 +2637,48 @@ function TeacherCreateTutorScreen () {
 																</>
 																) : null}
 															</div>
+															{isPracticeAudioPanelOpen
+																&& hasSuggestedQuestions ? (
+																<PracticeSuggestedQuestionsAudioPanel
+																	chapterId={chapterKey}
+																	questions={practiceQuestions}
+																	generatingPracticeAudioKey={
+																		generatingPracticeAudioKey
+																	}
+																	generatingAllPracticeAudio={
+																		generatingPracticeAudioChapterId
+																			=== chapterKey
+																	}
+																	practiceAudioErrors={
+																		practiceAudioErrors
+																	}
+																	onGenerateAllAudios={() => {
+																		const meta =
+																			suggestedQuestionsByChapterId.get(
+																				chapterKey,
+																			)
+																		const allAudioReady = Boolean(
+																			meta?.audioClipTotal > 0
+																			&& meta.audioClipCount
+																				>= meta.audioClipTotal,
+																		)
+																		void handleGenerateAllPracticeAudios(
+																			chapterKey,
+																			allAudioReady,
+																		)
+																	}}
+																	onGenerateAudio={(
+																		questionIndex,
+																		audioKind,
+																	) => {
+																		void generatePracticeAudioClip(
+																			chapterKey,
+																			questionIndex,
+																			audioKind,
+																		)
+																	}}
+																/>
+															) : null}
 														</li>
 														)
 													})}

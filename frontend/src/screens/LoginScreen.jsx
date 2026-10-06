@@ -9,6 +9,9 @@ import Header from '../components/Header'
 import '../App.css'
 import Loader from '../components/Loader';
 
+const DEMO_LESSON_PATH =
+	'/students/lessonpage/6a3979882d6dcf3adc9b6ef4'
+
 function LoginScreen () {
 	const isSidebarOpen = false
 
@@ -26,7 +29,7 @@ function LoginScreen () {
 
 	const { search } = useLocation();
 	const sp = new URLSearchParams(search);
-	const redirect = sp.get('redirect') || '/';
+	const redirect = sp.get('redirect') || DEMO_LESSON_PATH
 
   	const handleSubmit = async (e) => {
 		e.preventDefault()

@@ -951,6 +951,20 @@
   transform: translateY(0);
 }
 
+@media (min-width: 769px) {
+  .chat-app.ask-screen .header-logo.header-logo--lesson-page-offset {
+    transform: translateX(-35%);
+  }
+
+  .chat-app.ask-screen .header-logo.header-logo--lesson-page-offset:hover {
+    transform: translateX(-35%) translateY(-1px);
+  }
+
+  .chat-app.ask-screen .header-logo.header-logo--lesson-page-offset:active {
+    transform: translateX(-35%) translateY(0);
+  }
+}
+
 /* Teacher header brand (compact; avoids global .logo-text sizing) */
 .teacher-header__logo-label {
   margin: 0;
@@ -16254,6 +16268,62 @@ a.upload-card {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 12px;
+}
+
+.create-tutor__practice-audio-block {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.create-tutor__practice-audio-block--standalone {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.create-tutor__practice-audio-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.create-tutor__practice-audio-all-btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(79, 70, 229, 0.45);
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.create-tutor__practice-audio-all-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.create-tutor__practice-progress-bar--audio {
+  background: linear-gradient(90deg, #0d9488, #14b8a6);
+}
+
+.create-tutor__practice-audio-slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.create-tutor__practice-audio {
+  width: 100%;
+  max-width: 100%;
+  height: 32px;
+  margin-bottom: 6px;
 }
 
 .create-tutor__practice-slot {

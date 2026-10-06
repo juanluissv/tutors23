@@ -399,6 +399,28 @@ export const teacherApiSlice = apiSlice.injectEndpoints({
                 { type: 'BookLesson', id: `SUBJECT_${id}` },
             ],
         }),
+        generateSuggestedQuestionsAudioFromLessonByTeacher: builder.mutation({
+            query: ({
+                id,
+                chapterId,
+                questionIndex,
+                audioKind,
+                force = false,
+            }) => ({
+                url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-suggested-questions-audio`,
+                method: 'POST',
+                body: {
+                    ...(questionIndex !== undefined && questionIndex !== null
+                        ? { questionIndex }
+                        : {}),
+                    ...(audioKind ? { audioKind } : {}),
+                    ...(force ? { force } : {}),
+                },
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'BookLesson', id: `SUBJECT_${id}` },
+            ],
+        }),
         generateVideoScriptFromLessonByTeacher: builder.mutation({
             query: ({ id, chapterId }) => ({
                 url: `${SUBJECTS_URL}/${id}/teacher/book-chapters/${chapterId}/generate-video-script`,
@@ -513,6 +535,7 @@ export const {
     useGenerateBookLessonsFromChapterByTeacherMutation,
     useGenerateChapterTutorTxtFromLessonByTeacherMutation,
     useGenerateSuggestedQuestionsFromLessonByTeacherMutation,
+    useGenerateSuggestedQuestionsAudioFromLessonByTeacherMutation,
     useGenerateVideoScriptFromLessonByTeacherMutation,
     useGenerateVideoScriptAudioFromLessonByTeacherMutation,
     useGenerateLessonTextAudioFromLessonByTeacherMutation,

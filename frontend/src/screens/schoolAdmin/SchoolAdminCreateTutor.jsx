@@ -6,6 +6,7 @@ import AdminHeader from '../../components/AdminHeader'
 import {
 	useGenerateChapterTutorTxtFromLessonMutation,
 	useGenerateSuggestedQuestionsFromLessonMutation,
+	useGenerateSuggestedQuestionsAudioFromLessonMutation,
 	useGenerateVideoScriptFromLessonMutation,
 	useGenerateVideoScriptAudioFromLessonMutation,
 	useGenerateLessonTextAudioFromLessonMutation,
@@ -326,6 +327,39 @@ function practiceUploadKey (chapterId, questionIndex, videoKind) {
 	return `${chapterId}:${questionIndex}:${videoKind}`
 }
 
+function practiceAudioKey (chapterId, questionIndex, audioKind) {
+	return `${chapterId}:${questionIndex}:${audioKind}`
+}
+
+function audioCountsFromQuestions (items) {
+	const questions = Array.isArray(items) ? items : []
+	let clipCount = 0
+	let completeCount = 0
+	for (const item of questions) {
+		const hasQuestion = Boolean(
+			String(item?.questionAudioUrl || '').trim(),
+		)
+		const hasAnswer = Boolean(
+			String(item?.answerAudioUrl || '').trim(),
+		)
+		if (hasQuestion) {
+			clipCount += 1
+		}
+		if (hasAnswer) {
+			clipCount += 1
+		}
+		if (hasQuestion && hasAnswer) {
+			completeCount += 1
+		}
+	}
+	return {
+		questionCount: questions.length,
+		clipCount,
+		clipTotal: questions.length * 2,
+		completeCount,
+	}
+}
+
 function clipCountsFromQuestions (items) {
 	const questions = Array.isArray(items) ? items : []
 	let clipCount = 0
@@ -470,18 +504,110 @@ function PracticeClipSlot ({
 	)
 }
 
+function PracticeAudioSlot ({
+	label,
+	audioUrl,
+	isGenerating,
+	error,
+	disabled,
+	variant,
+	onGenerateClick,
+}) {
+	const hasAudio = Boolean(String(audioUrl || '').trim())
+
+	return (
+		<div
+			className={
+				'create-tutor__practice-slot' +
+				` create-tutor__practice-slot--${variant}` +
+				(hasAudio
+					? ' create-tutor__practice-slot--ready'
+					: '') +
+				(isGenerating
+					? ' create-tutor__practice-slot--busy'
+					: '')
+			}
+		>
+			<p className='create-tutor__practice-slot-kicker'>
+				{label}
+			</p>
+			{isGenerating ? (
+				<div
+					className='new-answers__status new-answers__status--loading'
+					role='status'
+					aria-live='polite'
+					aria-busy='true'
+				>
+					<Loader size='sm' />
+					<p className='create-tutor__practice-slot-status'>
+						Generando audio con OpenAI…
+					</p>
+				</div>
+			) : hasAudio ? (
+				<div className='create-tutor__practice-slot-ready'>
+					<audio
+						className='create-tutor__practice-audio'
+						controls
+						preload='metadata'
+						src={audioUrl}
+					>
+						Tu navegador no reproduce audio.
+					</audio>
+					<button
+						type='button'
+						className='create-tutor__practice-replace'
+						disabled={disabled}
+						onClick={onGenerateClick}
+					>
+						Regenerar
+					</button>
+				</div>
+			) : (
+				<button
+					type='button'
+					className='create-tutor__practice-choose'
+					disabled={disabled}
+					onClick={onGenerateClick}
+				>
+					<span className='create-tutor__practice-choose-title'>
+						Generar MP3
+					</span>
+					<span className='create-tutor__practice-choose-hint'>
+						OpenAI gpt-4o-mini-tts · se sube a AWS
+					</span>
+				</button>
+			)}
+			{error ? (
+				<p className='create-tutor__practice-slot-error'>
+					{error}
+				</p>
+			) : null}
+		</div>
+	)
+}
+
 function PracticeVideosPanel ({
 	chapterId,
 	questions,
+	showHeyGenVideos = false,
 	uploadingPracticeKey,
 	practiceVideoErrors,
+	generatingPracticeAudioKey,
+	generatingAllPracticeAudio,
+	practiceAudioErrors,
 	onUploadClick,
 	onDropFile,
+	onGenerateAllAudios,
+	onGenerateAudio,
 }) {
 	const [copiedKey, setCopiedKey] = useState('')
 	const counts = clipCountsFromQuestions(questions)
+	const audioCounts = audioCountsFromQuestions(questions)
 	const percent = counts.clipTotal > 0
 		? Math.round((counts.clipCount / counts.clipTotal) * 100)
+		: 0
+	const audioPercent = audioCounts.clipTotal > 0
+		? Math.round((audioCounts.clipCount / audioCounts.clipTotal) * 100)
 		: 0
 
 	const handleCopy = async (key, text) => {
@@ -500,39 +626,107 @@ function PracticeVideosPanel ({
 
 	return (
 		<div className='create-tutor__practice-panel'>
-			<div className='create-tutor__practice-panel-head'>
-				<div>
-					<p className='create-tutor__practice-panel-title'>
-						Videos de práctica de HeyGen
+			{showHeyGenVideos ? (
+				<>
+					<div className='create-tutor__practice-panel-head'>
+						<div>
+							<p className='create-tutor__practice-panel-title'>
+								Videos de práctica de HeyGen
+							</p>
+							<p className='create-tutor__practice-panel-copy'>
+								Graba un clip de pregunta y uno de respuesta en
+								HeyGen para cada consigna, luego sube los MP4 aquí.
+								Puedes hacer clic o soltar un archivo en cada
+								espacio.
+							</p>
+						</div>
+						<p className='create-tutor__practice-panel-count'>
+							{counts.clipCount}/{counts.clipTotal} clips
+						</p>
+					</div>
+					<div
+						className='create-tutor__practice-progress'
+						role='progressbar'
+						aria-valuemin={0}
+						aria-valuemax={100}
+						aria-valuenow={percent}
+						aria-label='Progreso de subida de videos de práctica'
+					>
+						<span
+							className='create-tutor__practice-progress-bar'
+							style={{ width: `${percent}%` }}
+						/>
+					</div>
+					<p className='create-tutor__practice-panel-meta'>
+						{counts.completeCount} de {counts.questionCount} preguntas
+						tienen ambos videos
 					</p>
-					<p className='create-tutor__practice-panel-copy'>
-						Graba un clip de pregunta y uno de respuesta en
-						HeyGen para cada consigna, luego sube los MP4 aquí.
-						Puedes hacer clic o soltar un archivo en cada
-						espacio.
-					</p>
-				</div>
-				<p className='create-tutor__practice-panel-count'>
-					{counts.clipCount}/{counts.clipTotal} clips
-				</p>
-			</div>
+				</>
+			) : null}
 			<div
-				className='create-tutor__practice-progress'
-				role='progressbar'
-				aria-valuemin={0}
-				aria-valuemax={100}
-				aria-valuenow={percent}
-				aria-label='Progreso de subida de videos de práctica'
+				className={
+					'create-tutor__practice-audio-block' +
+					(showHeyGenVideos
+						? ''
+						: ' create-tutor__practice-audio-block--standalone')
+				}
 			>
-				<span
-					className='create-tutor__practice-progress-bar'
-					style={{ width: `${percent}%` }}
-				/>
+				<div className='create-tutor__practice-audio-head'>
+					<div>
+						<p className='create-tutor__practice-panel-title'>
+							Audios TTS de práctica
+						</p>
+						<p className='create-tutor__practice-panel-copy'>
+							Genera MP3 de la pregunta y la respuesta con la
+							misma API de OpenAI que la narración del video.
+							Se guardan en AWS como questionAudioUrl y
+							answerAudioUrl.
+						</p>
+					</div>
+					<button
+						type='button'
+						className='create-tutor__practice-audio-all-btn'
+						disabled={
+							generatingAllPracticeAudio
+							|| Boolean(generatingPracticeAudioKey)
+							|| Boolean(uploadingPracticeKey)
+						}
+						onClick={() => {
+							onGenerateAllAudios()
+						}}
+					>
+						{generatingAllPracticeAudio
+							? 'Generando audios…'
+							: (audioCounts.clipCount >= audioCounts.clipTotal
+								&& audioCounts.clipTotal > 0
+								? 'Regenerar todos los audios'
+								: 'Generar audios faltantes')}
+					</button>
+				</div>
+				<div
+					className='create-tutor__practice-progress'
+					role='progressbar'
+					aria-valuemin={0}
+					aria-valuemax={100}
+					aria-valuenow={audioPercent}
+					aria-label='Progreso de audios TTS de práctica'
+				>
+					<span
+						className='create-tutor__practice-progress-bar create-tutor__practice-progress-bar--audio'
+						style={{ width: `${audioPercent}%` }}
+					/>
+				</div>
+				<p className='create-tutor__practice-panel-meta'>
+					{audioCounts.completeCount} de {audioCounts.questionCount}{' '}
+					preguntas tienen ambos audios · {audioCounts.clipCount}/
+					{audioCounts.clipTotal} clips
+				</p>
+				{practiceAudioErrors[`${chapterId}:batch`] ? (
+					<p className='create-tutor__practice-slot-error'>
+						{practiceAudioErrors[`${chapterId}:batch`]}
+					</p>
+				) : null}
 			</div>
-			<p className='create-tutor__practice-panel-meta'>
-				{counts.completeCount} de {counts.questionCount} preguntas
-				tienen ambos videos
-			</p>
 			<ol className='create-tutor__practice-list'>
 				{questions.map((item, questionIndex) => {
 					const questionText = String(item?.question || '').trim()
@@ -548,6 +742,18 @@ function PracticeVideosPanel ({
 						chapterId,
 						questionIndex,
 						answerKind,
+					)
+					const questionAudioKind = 'question-audio'
+					const answerAudioKind = 'answer-audio'
+					const questionAudioSlotKey = practiceAudioKey(
+						chapterId,
+						questionIndex,
+						questionAudioKind,
+					)
+					const answerAudioSlotKey = practiceAudioKey(
+						chapterId,
+						questionIndex,
+						answerAudioKind,
 					)
 					const copyQuestionKey = `${chapterId}:q:${questionIndex}`
 					const copyAnswerKey = `${chapterId}:a:${questionIndex}`
@@ -611,52 +817,100 @@ function PracticeVideosPanel ({
 									) : null}
 								</div>
 							</div>
-							<div className='create-tutor__practice-slots'>
-								<PracticeClipSlot
-									label='Video de la pregunta'
-									hint='Suelta el MP4 de HeyGen o explora'
+							{showHeyGenVideos ? (
+								<div className='create-tutor__practice-slots'>
+									<PracticeClipSlot
+										label='Video de la pregunta'
+										hint='Suelta el MP4 de HeyGen o explora'
+										variant='question'
+										videoUrl={item?.questionVideoUrl}
+										isUploading={
+											uploadingPracticeKey === questionKey
+										}
+										error={practiceVideoErrors[questionKey]}
+										disabled={Boolean(uploadingPracticeKey)}
+										onUploadClick={() => {
+											onUploadClick(
+												questionIndex,
+												questionKind,
+											)
+										}}
+										onDropFile={(file) => {
+											onDropFile(
+												questionIndex,
+												questionKind,
+												file,
+											)
+										}}
+									/>
+									<PracticeClipSlot
+										label='Video de la respuesta'
+										hint='Suelta el MP4 de HeyGen o explora'
+										variant='answer'
+										videoUrl={item?.answerVideoUrl}
+										isUploading={
+											uploadingPracticeKey === answerKey
+										}
+										error={practiceVideoErrors[answerKey]}
+										disabled={Boolean(uploadingPracticeKey)}
+										onUploadClick={() => {
+											onUploadClick(
+												questionIndex,
+												answerKind,
+											)
+										}}
+										onDropFile={(file) => {
+											onDropFile(
+												questionIndex,
+												answerKind,
+												file,
+											)
+										}}
+									/>
+								</div>
+							) : null}
+							<div className='create-tutor__practice-audio-slots'>
+								<PracticeAudioSlot
+									label='Audio de la pregunta'
 									variant='question'
-									videoUrl={item?.questionVideoUrl}
-									isUploading={
-										uploadingPracticeKey === questionKey
+									audioUrl={item?.questionAudioUrl}
+									isGenerating={
+										generatingPracticeAudioKey
+											=== questionAudioSlotKey
 									}
-									error={practiceVideoErrors[questionKey]}
-									disabled={Boolean(uploadingPracticeKey)}
-									onUploadClick={() => {
-										onUploadClick(
+									error={practiceAudioErrors[questionAudioSlotKey]}
+									disabled={
+										generatingAllPracticeAudio
+										|| Boolean(generatingPracticeAudioKey)
+										|| Boolean(uploadingPracticeKey)
+										|| !questionText
+									}
+									onGenerateClick={() => {
+										onGenerateAudio(
 											questionIndex,
-											questionKind,
-										)
-									}}
-									onDropFile={(file) => {
-										onDropFile(
-											questionIndex,
-											questionKind,
-											file,
+											questionAudioKind,
 										)
 									}}
 								/>
-								<PracticeClipSlot
-									label='Video de la respuesta'
-									hint='Suelta el MP4 de HeyGen o explora'
+								<PracticeAudioSlot
+									label='Audio de la respuesta'
 									variant='answer'
-									videoUrl={item?.answerVideoUrl}
-									isUploading={
-										uploadingPracticeKey === answerKey
+									audioUrl={item?.answerAudioUrl}
+									isGenerating={
+										generatingPracticeAudioKey
+											=== answerAudioSlotKey
 									}
-									error={practiceVideoErrors[answerKey]}
-									disabled={Boolean(uploadingPracticeKey)}
-									onUploadClick={() => {
-										onUploadClick(
+									error={practiceAudioErrors[answerAudioSlotKey]}
+									disabled={
+										generatingAllPracticeAudio
+										|| Boolean(generatingPracticeAudioKey)
+										|| Boolean(uploadingPracticeKey)
+										|| !answerText
+									}
+									onGenerateClick={() => {
+										onGenerateAudio(
 											questionIndex,
-											answerKind,
-										)
-									}}
-									onDropFile={(file) => {
-										onDropFile(
-											questionIndex,
-											answerKind,
-											file,
+											answerAudioKind,
 										)
 									}}
 								/>
@@ -709,6 +963,11 @@ function SchoolAdminCreateTutor () {
 		useState(null)
 	const [uploadingPracticeKey, setUploadingPracticeKey] = useState(null)
 	const [practiceVideoErrors, setPracticeVideoErrors] = useState({})
+	const [generatingPracticeAudioKey, setGeneratingPracticeAudioKey] =
+		useState(null)
+	const [generatingPracticeAudioChapterId, setGeneratingPracticeAudioChapterId] =
+		useState(null)
+	const [practiceAudioErrors, setPracticeAudioErrors] = useState({})
 	const [pendingPracticeUpload, setPendingPracticeUpload] = useState(null)
 	const [chapterErrors, setChapterErrors] = useState({})
 	const [questionErrors, setQuestionErrors] = useState({})
@@ -744,6 +1003,8 @@ function SchoolAdminCreateTutor () {
 		useUploadChapterTutorTranscribeMutation()
 	const [uploadSuggestedQuestionVideo] =
 		useUploadSuggestedQuestionVideoMutation()
+	const [generateSuggestedQuestionsAudio] =
+		useGenerateSuggestedQuestionsAudioFromLessonMutation()
 
 	const isValidSubjectParam =
 		subjectId != null && OBJECT_ID_RE.test(String(subjectId))
@@ -882,17 +1143,27 @@ function SchoolAdminCreateTutor () {
 						answerVideoUrl: String(
 							item?.answerVideoUrl ?? '',
 						).trim(),
+						questionAudioUrl: String(
+							item?.questionAudioUrl ?? '',
+						).trim(),
+						answerAudioUrl: String(
+							item?.answerAudioUrl ?? '',
+						).trim(),
 					}))
 					.filter((item) => item.question)
 				: []
 			if (items.length > 0 || lesson?.hasSuggestedQuestions) {
 				const counts = clipCountsFromQuestions(items)
+				const audioCounts = audioCountsFromQuestions(items)
 				map.set(String(chapterId), {
 					count: items.length || counts.questionCount || 10,
 					items,
 					clipCount: counts.clipCount,
 					clipTotal: counts.clipTotal,
 					completeCount: counts.completeCount,
+					audioClipCount: audioCounts.clipCount,
+					audioClipTotal: audioCounts.clipTotal,
+					audioCompleteCount: audioCounts.completeCount,
 				})
 			}
 		}
@@ -1104,6 +1375,17 @@ function SchoolAdminCreateTutor () {
 		for (const chapterId of filteredChapterIds) {
 			const meta = suggestedQuestionsByChapterId.get(chapterId)
 			if (meta?.count > 0 && meta.completeCount === meta.count) {
+				ready += 1
+			}
+		}
+		return ready
+	}, [filteredChapterIds, suggestedQuestionsByChapterId])
+
+	const filteredPracticeAudiosReadyCount = useMemo(() => {
+		let ready = 0
+		for (const chapterId of filteredChapterIds) {
+			const meta = suggestedQuestionsByChapterId.get(chapterId)
+			if (meta?.count > 0 && meta.audioCompleteCount === meta.count) {
 				ready += 1
 			}
 		}
@@ -1576,6 +1858,88 @@ function SchoolAdminCreateTutor () {
 		}
 	}
 
+	const generatePracticeAudioClip = async (
+		chapterId,
+		questionIndex,
+		audioKind,
+		{ force = true } = {},
+	) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		const slotKey = practiceAudioKey(
+			chapterId,
+			questionIndex,
+			audioKind,
+		)
+
+		setGeneratingPracticeAudioKey(slotKey)
+		setPracticeAudioErrors((prev) => {
+			const next = { ...prev }
+			delete next[slotKey]
+			return next
+		})
+
+		try {
+			await generateSuggestedQuestionsAudio({
+				id: subjectId,
+				chapterId: String(chapterId),
+				questionIndex,
+				audioKind,
+				force,
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'No se pudo generar el audio de práctica. Intenta de nuevo.'
+			setPracticeAudioErrors((prev) => ({
+				...prev,
+				[slotKey]: message,
+			}))
+		} finally {
+			setGeneratingPracticeAudioKey(null)
+		}
+	}
+
+	const handleGenerateAllPracticeAudios = async (chapterId, force = false) => {
+		if (!subjectId || !chapterId) {
+			return
+		}
+
+		const chapterKey = String(chapterId)
+		setGeneratingPracticeAudioChapterId(chapterKey)
+		setPracticeAudioErrors((prev) => {
+			const next = { ...prev }
+			for (const key of Object.keys(next)) {
+				if (key.startsWith(`${chapterKey}:`)) {
+					delete next[key]
+				}
+			}
+			return next
+		})
+
+		try {
+			await generateSuggestedQuestionsAudio({
+				id: subjectId,
+				chapterId: chapterKey,
+				force,
+			}).unwrap()
+			await refetchLessons()
+		} catch (err) {
+			const message = err?.data?.message
+				|| err?.message
+				|| 'No se pudieron generar los audios de práctica. Intenta de nuevo.'
+			setPracticeAudioErrors((prev) => ({
+				...prev,
+				[`${chapterKey}:batch`]: message,
+			}))
+		} finally {
+			setGeneratingPracticeAudioChapterId(null)
+		}
+	}
+
 	const handlePracticeUploadClick = (
 		chapterId,
 		questionIndex,
@@ -1978,8 +2342,8 @@ function SchoolAdminCreateTutor () {
 															. Genera el texto del
 															tutor
 															{isSuperAdmin
-																? ', videos de práctica, guiones y archivos por capítulo.'
-																: ' y preguntas sugeridas por capítulo.'}
+																? ', audios TTS de práctica, videos de HeyGen, guiones y archivos por capítulo.'
+																: ', audios TTS de práctica y preguntas sugeridas por capítulo.'}
 														</>
 													)
 													: 'Selecciona un documento fuente arriba para empezar el flujo del tutor.'}
@@ -2009,7 +2373,7 @@ function SchoolAdminCreateTutor () {
 													? 'Primero genera lecciones web para este documento y luego crea tutores con IA a partir de ellas.'
 													: isSuperAdmin
 														? `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas · ${filteredPracticeVideosReadyCount} tienen todos los videos de práctica de HeyGen · ${filteredVideoScriptReadyCount} tienen guion de video · ${filteredVideoAudioReadyCount} tienen audio de narración · ${filteredSceneIllustrationsReadyCount} tienen ilustraciones de escena · ${filteredTutorVideoReadyCount} tienen video del tutor · ${filteredTutorTranscribeReadyCount} tienen subtítulos.`
-														: `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas.`}
+														: `${filteredTutorTxtReadyCount} de ${readyCount} lecciones tienen el texto del tutor listo · ${filteredSuggestedQuestionsReadyCount} tienen preguntas sugeridas · ${filteredPracticeAudiosReadyCount} tienen todos los audios TTS de práctica.`}
 											</p>
 										</div>
 										<Link
@@ -2172,6 +2536,11 @@ function SchoolAdminCreateTutor () {
 														const arePracticeVideosComplete = Boolean(
 															questionsMeta?.count > 0
 															&& questionsMeta.completeCount
+																=== questionsMeta.count,
+														)
+														const arePracticeAudiosComplete = Boolean(
+															questionsMeta?.count > 0
+															&& questionsMeta.audioCompleteCount
 																=== questionsMeta.count,
 														)
 														const hasVideoScript = Boolean(
@@ -2414,6 +2783,9 @@ function SchoolAdminCreateTutor () {
 																		<p className='create-tutor__questions-status'>
 																			{questionsMeta.count}{' '}
 																			preguntas sugeridas listas
+																			{questionsMeta.audioClipTotal > 0
+																				? ` · ${questionsMeta.audioClipCount}/${questionsMeta.audioClipTotal} audios TTS`
+																				: ''}
 																			{isSuperAdmin && questionsMeta.clipTotal > 0
 																				? ` · ${questionsMeta.clipCount}/${questionsMeta.clipTotal} clips de HeyGen subidos`
 																				: ''}
@@ -2617,6 +2989,60 @@ function SchoolAdminCreateTutor () {
 																				: 'Generar 10 preguntas sugeridas'}
 																	</span>
 																</button>
+																{!isSuperAdmin ? (
+																	<button
+																		type='button'
+																		className={
+																			'create-tutor__generate-btn ' +
+																			'create-tutor__generate-btn--practice-audio' +
+																			(!hasSuggestedQuestions
+																				? ' create-tutor__generate-btn--disabled'
+																				: '') +
+																			(generatingPracticeAudioChapterId
+																				=== chapterKey
+																				? ' create-tutor__generate-btn--loading'
+																				: '')
+																		}
+																		disabled={!hasSuggestedQuestions}
+																		title={
+																			!hasSuggestedQuestions
+																				? 'Primero genera las 10 preguntas'
+																				: undefined
+																		}
+																		onClick={() => {
+																			handleTogglePracticePanel(
+																				chapterKey,
+																			)
+																		}}
+																	>
+																		<CreateTutorBtnIcon
+																			busy={
+																				generatingPracticeAudioChapterId
+																					=== chapterKey
+																			}
+																			className='create-tutor__generate-btn-icon'
+																			Glyph={TutorGenerateGlyph}
+																		/>
+																		<span className='create-tutor__generate-btn-title'>
+																			{isPracticePanelOpen
+																				? 'Ocultar audios TTS de práctica'
+																				: (arePracticeAudiosComplete
+																					? 'Revisar audios TTS de práctica'
+																					: 'Generar audios TTS de práctica')}
+																		</span>
+																		{hasSuggestedQuestions ? (
+																			<span className='create-tutor__generate-btn-hint'>
+																				{questionsMeta.audioCompleteCount
+																					?? 0}/{questionsMeta.count}{' '}
+																				preguntas con audio completo
+																			</span>
+																		) : (
+																			<span className='create-tutor__generate-btn-hint'>
+																				OpenAI TTS · pregunta y respuesta
+																			</span>
+																		)}
+																	</button>
+																) : null}
 																<button
 																	type='button'
 																	className={
@@ -2980,18 +3406,53 @@ function SchoolAdminCreateTutor () {
 																	</button>
 																) : null}
 															</div>
-															{isSuperAdmin
-																&& isPracticePanelOpen
+															{isPracticePanelOpen
 																&& hasSuggestedQuestions ? (
 																<PracticeVideosPanel
 																	chapterId={chapterKey}
 																	questions={practiceQuestions}
+																	showHeyGenVideos={isSuperAdmin}
 																	uploadingPracticeKey={
 																		uploadingPracticeKey
 																	}
 																	practiceVideoErrors={
 																		practiceVideoErrors
 																	}
+																	generatingPracticeAudioKey={
+																		generatingPracticeAudioKey
+																	}
+																	generatingAllPracticeAudio={
+																		generatingPracticeAudioChapterId
+																			=== chapterKey
+																	}
+																	practiceAudioErrors={
+																		practiceAudioErrors
+																	}
+																	onGenerateAllAudios={() => {
+																		const meta =
+																			suggestedQuestionsByChapterId.get(
+																				chapterKey,
+																			)
+																		const allAudioReady = Boolean(
+																			meta?.audioClipTotal > 0
+																			&& meta.audioClipCount
+																				>= meta.audioClipTotal,
+																		)
+																		void handleGenerateAllPracticeAudios(
+																			chapterKey,
+																			allAudioReady,
+																		)
+																	}}
+																	onGenerateAudio={(
+																		questionIndex,
+																		audioKind,
+																	) => {
+																		void generatePracticeAudioClip(
+																			chapterKey,
+																			questionIndex,
+																			audioKind,
+																		)
+																	}}
 																	onUploadClick={(
 																		questionIndex,
 																		videoKind,

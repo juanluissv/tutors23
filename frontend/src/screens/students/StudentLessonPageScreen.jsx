@@ -843,9 +843,44 @@ const POSITION_BONUS_MAX = 0.4
 const POSITION_BONUS_SPAN = 6
 const LAPTOP_SIDEBAR_EXPAND_BREAKPOINT = 1450
 const FOREST_LESSON_ID = '6a3979882d6dcf3adc9b6ef4'
+const FOREST_FEATURE_VIDEO_URL =
+	'https://res.cloudinary.com/dutglmj02/video/upload/v1775596686/bosques1_ne7opd.mp4'
 
 function getInitialSidebarOpen () {
 	return window.innerWidth >= LAPTOP_SIDEBAR_EXPAND_BREAKPOINT
+}
+
+function practiceMediaForStep (item, step) {
+	if (!item || step === 'idle') {
+		return { mediaUrl: '', usesVideo: false }
+	}
+
+	const questionVideoUrl = String(item?.questionVideoUrl ?? '').trim()
+	const answerVideoUrl = String(item?.answerVideoUrl ?? '').trim()
+	const questionAudioUrl = String(item?.questionAudioUrl ?? '').trim()
+	const answerAudioUrl = String(item?.answerAudioUrl ?? '').trim()
+
+	if (step === 'question') {
+		if (questionVideoUrl) {
+			return { mediaUrl: questionVideoUrl, usesVideo: true }
+		}
+		if (questionAudioUrl) {
+			return { mediaUrl: questionAudioUrl, usesVideo: false }
+		}
+		return { mediaUrl: '', usesVideo: false }
+	}
+
+	if (step === 'answer') {
+		if (answerVideoUrl) {
+			return { mediaUrl: answerVideoUrl, usesVideo: true }
+		}
+		if (answerAudioUrl) {
+			return { mediaUrl: answerAudioUrl, usesVideo: false }
+		}
+		return { mediaUrl: '', usesVideo: false }
+	}
+
+	return { mediaUrl: '', usesVideo: false }
 }
 
 function StudentLessonPageScreen () {
@@ -864,6 +899,8 @@ function StudentLessonPageScreen () {
 	const [allCues, setAllCues] = useState([])
 	const [videoLoading, setVideoLoading] = useState(true)
 	const [featureVideoLoading, setFeatureVideoLoading] = useState(true)
+	const [isFeatureVideoPanelOpen, setIsFeatureVideoPanelOpen] = useState(false)
+	const [featureVideoModalLoading, setFeatureVideoModalLoading] = useState(true)
 	const [isClassVideoPlaying, setIsClassVideoPlaying] = useState(false)
 	const [questionText, setQuestionText] = useState('')
 	const [isSuggestedPanelOpen, setIsSuggestedPanelOpen] = useState(false)
@@ -873,6 +910,7 @@ function StudentLessonPageScreen () {
 
 	const contentRef = useRef(null)
 	const classVideoRef = useRef(null)
+	const featureVideoModalRef = useRef(null)
 	const questionTextareaRef = useRef(null)
 	// Cached, tokenized snapshot of the highlightable lesson blocks.
 	const matchIndexRef = useRef({ entries: [], idf: new Map() })
@@ -991,6 +1029,12 @@ function StudentLessonPageScreen () {
 				answerVideoUrl: String(
 					item?.answerVideoUrl ?? '',
 				).trim(),
+				questionAudioUrl: String(
+					item?.questionAudioUrl ?? '',
+				).trim(),
+				answerAudioUrl: String(
+					item?.answerAudioUrl ?? '',
+				).trim(),
 			}))
 			.filter((item) => item.question)
 	}, [lesson])
@@ -1004,19 +1048,27 @@ function StudentLessonPageScreen () {
 	const practiceQuestionText = currentPracticeQuestion?.question || ''
 	const practiceAnswerText = currentPracticeQuestion?.answer || ''
 	const isPracticeMode = practiceStep !== 'idle'
-	const practiceVideoUrl = practiceStep === 'question'
-		? (currentPracticeQuestion?.questionVideoUrl || '')
-		: (practiceStep === 'answer'
-			? (currentPracticeQuestion?.answerVideoUrl || '')
-			: '')
-	const hasPracticeClip = practiceVideoUrl !== ''
+	const practiceMedia = practiceMediaForStep(
+		currentPracticeQuestion,
+		practiceStep,
+	)
+	const practiceMediaUrl = practiceMedia.mediaUrl
+	const practiceUsesVideo = practiceMedia.usesVideo
+	const hasPracticeClip = isPracticeMode && practiceMediaUrl !== ''
 	const activeVideoUrl = hasPracticeClip
-		? practiceVideoUrl
+		? practiceMediaUrl
 		: tutorPlaybackUrl
-	const showTutorMediaCircle = hasTutorVideo
-		|| (isPracticeMode && hasPracticeClip)
-	const isAudioOnlyTutor = hasTutorPlayback && !showTutorMediaCircle
+	const showTutorMediaCircle = (!isPracticeMode && hasTutorVideo)
+		|| (isPracticeMode && hasPracticeClip && practiceUsesVideo)
+	const isAudioOnlyTutor = (
+		!isPracticeMode && hasTutorPlayback && !hasTutorVideo
+	) || (
+		isPracticeMode && hasPracticeClip && !practiceUsesVideo
+	)
 	const canControlLessonVideo = !isPracticeMode || hasPracticeClip
+	const isPracticeAudioOnly = isPracticeMode
+		&& hasPracticeClip
+		&& !practiceUsesVideo
 	const practiceTotal = suggestedQuestions.length
 	const safePracticeIndex = currentPracticeQuestion
 		? Math.min(practiceIndex, practiceTotal - 1)
@@ -1328,6 +1380,40 @@ function StudentLessonPageScreen () {
 		}
 	}
 
+	const handleOpenFeatureVideoPanel = () => {
+		setFeatureVideoModalLoading(true)
+		setIsFeatureVideoPanelOpen(true)
+	}
+
+	const handleCloseFeatureVideoPanel = useCallback(() => {
+		const video = featureVideoModalRef.current
+		if (video) {
+			video.pause()
+		}
+		setIsFeatureVideoPanelOpen(false)
+	}, [])
+
+	useEffect(() => {
+		if (!isFeatureVideoPanelOpen) {
+			return undefined
+		}
+
+		const handleKeyDown = (event) => {
+			if (event.key === 'Escape') {
+				handleCloseFeatureVideoPanel()
+			}
+		}
+
+		document.addEventListener('keydown', handleKeyDown)
+		const previousOverflow = document.body.style.overflow
+		document.body.style.overflow = 'hidden'
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown)
+			document.body.style.overflow = previousOverflow
+		}
+	}, [isFeatureVideoPanelOpen, handleCloseFeatureVideoPanel])
+
 	const adjustQuestionTextareaHeight = (el) => {
 		if (!el) {
 			return
@@ -1460,18 +1546,23 @@ function StudentLessonPageScreen () {
 			setPracticeIndex(0)
 			setPracticeStep('question')
 		})
-		syncPracticePlayback(firstQuestion?.questionVideoUrl)
+		syncPracticePlayback(
+			practiceMediaForStep(firstQuestion, 'question').mediaUrl,
+		)
 	}
 
 	const handleShowPracticeAnswer = () => {
 		if (practiceStep !== 'question') {
 			return
 		}
-		const answerUrl = currentPracticeQuestion?.answerVideoUrl || ''
+		const answerMedia = practiceMediaForStep(
+			currentPracticeQuestion,
+			'answer',
+		)
 		flushSync(() => {
 			setPracticeStep('answer')
 		})
-		syncPracticePlayback(answerUrl)
+		syncPracticePlayback(answerMedia.mediaUrl)
 	}
 
 	const handleGoToPracticeQuestion = (nextIndex) => {
@@ -1483,7 +1574,9 @@ function StudentLessonPageScreen () {
 			setPracticeIndex(nextIndex)
 			setPracticeStep('question')
 		})
-		syncPracticePlayback(nextQuestion?.questionVideoUrl)
+		syncPracticePlayback(
+			practiceMediaForStep(nextQuestion, 'question').mediaUrl,
+		)
 	}
 
 	const handlePreviousPracticeQuestion = () => {
@@ -1501,6 +1594,22 @@ function StudentLessonPageScreen () {
 		})
 		playActiveVideo()
 	}
+
+	useEffect(() => {
+		if (practiceStep === 'idle') {
+			return
+		}
+		if (!practiceMediaUrl) {
+			pauseActiveVideo()
+			return
+		}
+		const frameId = window.requestAnimationFrame(() => {
+			playActiveVideo()
+		})
+		return () => {
+			window.cancelAnimationFrame(frameId)
+		}
+	}, [practiceStep, practiceIndex, practiceMediaUrl])
 
 	const handleToggleSuggestedQuestion = (index) => {
 		setExpandedQuestionIndex((current) => (
@@ -1686,6 +1795,10 @@ function StudentLessonPageScreen () {
 	const folioLabel = [unitTheme, mainTitle].filter(Boolean).join(' · ')
 		|| mainTitle
 	const totalSheets = sheets.length + 1
+	const showLessonPlayControl = hasTutorPlayback
+		&& !isPracticeMode
+		&& canControlLessonVideo
+	const showForestFeatureVideo = lessonId === FOREST_LESSON_ID
 
 	let activityCounter = 0
 
@@ -1721,14 +1834,97 @@ function StudentLessonPageScreen () {
 						<span>{mainTitle}</span>
 					</span>
 				</div>
-				{backPath ? (
+				{showForestFeatureVideo || showLessonPlayControl ? (
 					<div className='lesson-doc__toolbar-actions'>
-						<Link
-							to={backPath}
-							className='lesson-doc__btn lesson-doc__btn--ghost'
-						>
-							← Volver
-						</Link>
+						{showForestFeatureVideo ? (
+							<button
+								type='button'
+								className='lesson-doc__btn lesson-doc__btn--feature-video'
+								onClick={handleOpenFeatureVideoPanel}
+								title='Ver video de lección'
+							>
+								<span
+									className='lesson-doc__btn-feature-video-icon'
+									aria-hidden
+								>
+									<svg
+										width='18'
+										height='18'
+										viewBox='0 0 24 24'
+										fill='none'
+										stroke='currentColor'
+										strokeWidth='2'
+										strokeLinecap='round'
+										strokeLinejoin='round'
+									>
+										<rect
+											x='2'
+											y='5'
+											width='20'
+											height='14'
+											rx='2.5'
+										/>
+										<polygon
+											points='10 9 16 12 10 15 10 9'
+											fill='currentColor'
+											stroke='none'
+										/>
+									</svg>
+								</span>
+								<span className='lesson-doc__btn-feature-video-label'>
+									Ver video de lección
+								</span>
+							</button>
+						) : null}
+						{showLessonPlayControl ? (
+							<button
+								type='button'
+								className={
+									'lesson-doc__btn lesson-doc__btn--lesson-play' +
+									(isClassVideoPlaying
+										? ' lesson-doc__btn--lesson-play--active'
+										: '')
+								}
+								onClick={handleClassVideoToggle}
+								aria-pressed={isClassVideoPlaying}
+								title={
+									isClassVideoPlaying
+										? 'Pausar lección'
+										: 'Iniciar lección'
+								}
+							>
+								<span
+									className='lesson-doc__btn-lesson-play-icon'
+									aria-hidden
+								>
+									{isClassVideoPlaying ? (
+										<svg
+											width='18'
+											height='18'
+											viewBox='0 0 24 24'
+											fill='currentColor'
+										>
+											<rect x='6' y='5' width='4' height='14' rx='1' />
+											<rect x='14' y='5' width='4' height='14' rx='1' />
+										</svg>
+									) : (
+										<svg
+											width='18'
+											height='18'
+											viewBox='0 0 24 24'
+											fill='currentColor'
+										>
+											<path d='M8 5v14l11-7L8 5z' />
+										</svg>
+									)}
+								</span>
+								<span className='lesson-doc__btn-lesson-play-label'>
+									{isClassVideoPlaying
+										? 'Pausar lección'
+										: 'Iniciar lección'}
+								</span>
+							</button>
+						) : null}
 					</div>
 				) : null}
 			</div>
@@ -1814,7 +2010,7 @@ function StudentLessonPageScreen () {
 				<div className='valores-semana1-feature-wrap'>
 					<video
 						className='valores-semana1-feature-video unidad-video'
-						src='https://res.cloudinary.com/dutglmj02/video/upload/v1775596686/bosques1_ne7opd.mp4'
+						src={FOREST_FEATURE_VIDEO_URL}
 						controls
 						onLoadedData={() => setFeatureVideoLoading(false)}
 						onLoadStart={() => setFeatureVideoLoading(true)}
@@ -1846,6 +2042,9 @@ function StudentLessonPageScreen () {
 							: '') +
 						(practiceStep === 'answer'
 							? ' lesson-doc-tutor-video--answer'
+							: '') +
+						(isPracticeAudioOnly
+							? ' lesson-doc-tutor-video--practice-audio-only'
 							: '')
 					}
 				>
@@ -1958,39 +2157,39 @@ function StudentLessonPageScreen () {
 						</div>
 					)}
 
-					{/* <div className='fixed-video-question-wrap lesson-doc-tutor-question-wrap'>
-						<textarea
-							ref={questionTextareaRef}
-							rows={2}
-							className='fixed-video-question-input lesson-doc-tutor-question-input'
-							placeholder={'Hazme una\npregunta'}
-							value={questionText}
-							onChange={handleQuestionChange}
-						/>
-						<button
-							type='button'
-							className='fixed-video-question-send lesson-doc-tutor-question-send'
-							onClick={handleSendQuestion}
-							aria-label='Enviar pregunta'
-						>
-							<svg
-								width='16'
-								height='16'
-								viewBox='0 0 24 24'
-								fill='none'
-								stroke='currentColor'
-								strokeWidth='2'
-								strokeLinecap='round'
-								strokeLinejoin='round'
+					{!isStaffView && hasTutorPlayback ? (
+						<div className='fixed-video-question-wrap lesson-doc-tutor-question-wrap'>
+							<textarea
+								ref={questionTextareaRef}
+								rows={2}
+								className='fixed-video-question-input lesson-doc-tutor-question-input'
+								placeholder='Hazme una pregunta de la leccion'
+								value={questionText}
+								onChange={handleQuestionChange}
+							/>
+							<button
+								type='button'
+								className='fixed-video-question-send lesson-doc-tutor-question-send'
+								onClick={handleSendQuestion}
+								aria-label='Enviar pregunta'
 							>
-								<line x1='22' y1='2' x2='11' y2='13' />
-								<polygon points='22 2 15 22 11 13 2 9 22 2' />
-							</svg>
-						</button>
-					</div> */}
-					{(practiceStep !== 'idle'
-						|| (!isStaffView && hasSuggestedQuestions)
-					) ? (
+								<svg
+									width='16'
+									height='16'
+									viewBox='0 0 24 24'
+									fill='none'
+									stroke='currentColor'
+									strokeWidth='2'
+									strokeLinecap='round'
+									strokeLinejoin='round'
+								>
+									<line x1='22' y1='2' x2='11' y2='13' />
+									<polygon points='22 2 15 22 11 13 2 9 22 2' />
+								</svg>
+							</button>
+						</div>
+					) : null}
+					{practiceStep !== 'idle' ? (
 						<div className='lesson-doc-practice-stack'>
 						{practiceStep !== 'idle' ? (
 							<div
@@ -2047,40 +2246,21 @@ function StudentLessonPageScreen () {
 							</div>
 						) : null}
 						{!isStaffView && hasSuggestedQuestions
-							&& practiceStep !== 'answer' ? (
+							&& practiceStep === 'question' ? (
 							<button
 								type='button'
-								className={
-									'lesson-doc-practice-btn' +
-									(practiceStep === 'question'
-										? ' lesson-doc-practice-btn--reveal'
-										: '')
-								}
-								onClick={
-									practiceStep === 'question'
-										? handleShowPracticeAnswer
-										: handleStartPracticeQuestion
-								}
-								aria-label={
-									practiceStep === 'question'
-										? 'Mostrar respuesta'
-										: 'Examen de práctica'
-								}
+								className='lesson-doc-practice-btn lesson-doc-practice-btn--reveal'
+								onClick={handleShowPracticeAnswer}
+								aria-label='Mostrar respuesta'
 							>
 								<span
 									className='lesson-doc-practice-btn__icon'
 									aria-hidden
 								>
-									{practiceStep === 'question' ? (
-										<PracticeRevealIcon size={16} />
-									) : (
-										<SparklesIcon size={16} />
-									)}
+									<PracticeRevealIcon size={16} />
 								</span>
 								<span className='lesson-doc-practice-btn__text'>
-									{practiceStep === 'question'
-										? 'Mostrar respuesta'
-										: 'Examen de práctica'}
+									Mostrar respuesta
 								</span>
 								<span
 									className='lesson-doc-practice-btn__arrow'
@@ -2140,30 +2320,34 @@ function StudentLessonPageScreen () {
 						) : null}
 					</div>
 					) : null}
-					{/* <button
-						type='button'
-						className='lesson-doc-suggested-link'
-						onClick={handleOpenSuggestedPanel}
-						aria-haspopup='dialog'
-					>
-						<span
-							className='lesson-doc-suggested-link__icon'
-							aria-hidden
-						>
-							<SparklesIcon size={16} />
-						</span>
-						<span className='lesson-doc-suggested-link__text'>
-							Examen de práctica
-							
-						</span>
-						<span
-							className='lesson-doc-suggested-link__arrow'
-							aria-hidden
-						>
-							→
-						</span>
-					</button> */}
 				</div>
+			) : null}
+
+			{!isStaffView && hasSuggestedQuestions && practiceStep === 'idle' ? (
+				<button
+					type='button'
+					className='lesson-doc-practice-btn lesson-doc-practice-btn--page-bottom'
+					onClick={handleStartPracticeQuestion}
+					aria-label='Examen de práctica'
+				>
+					<span
+						className='lesson-doc-practice-btn__icon'
+						aria-hidden
+					>
+						<SparklesIcon size={16} />
+					</span>
+					<span className='lesson-doc-practice-btn__text'>
+						Examen
+						<br />
+						de práctica
+					</span>
+					<span
+						className='lesson-doc-practice-btn__arrow'
+						aria-hidden
+					>
+						→
+					</span>
+				</button>
 			) : null}
 
 			{isSuggestedPanelOpen && hasSuggestedQuestions ? (
@@ -2174,6 +2358,84 @@ function StudentLessonPageScreen () {
 					onToggle={handleToggleSuggestedQuestion}
 					onClose={handleCloseSuggestedPanel}
 				/>
+			) : null}
+
+			{isFeatureVideoPanelOpen && showForestFeatureVideo ? (
+				<div
+					className='lesson-doc-feature-video-overlay'
+					role='presentation'
+					onClick={handleCloseFeatureVideoPanel}
+				>
+					<div
+						className='lesson-doc-feature-video-panel'
+						role='dialog'
+						aria-modal='true'
+						aria-labelledby='lesson-doc-feature-video-title'
+						onClick={(event) => event.stopPropagation()}
+					>
+						<div className='lesson-doc-feature-video-panel__hero'>
+							<span
+								className='lesson-doc-feature-video-panel__glow'
+								aria-hidden
+							/>
+							<button
+								type='button'
+								className='lesson-doc-feature-video-panel__close'
+								onClick={handleCloseFeatureVideoPanel}
+								aria-label='Cerrar video'
+							>
+								<svg
+									width='18'
+									height='18'
+									viewBox='0 0 24 24'
+									fill='none'
+									stroke='currentColor'
+									strokeWidth='2.5'
+									strokeLinecap='round'
+									aria-hidden
+								>
+									<line x1='18' y1='6' x2='6' y2='18' />
+									<line x1='6' y1='6' x2='18' y2='18' />
+								</svg>
+							</button>
+							<p className='lesson-doc-feature-video-panel__kicker'>
+								Video de la lección
+							</p>
+							<h2
+								id='lesson-doc-feature-video-title'
+								className='lesson-doc-feature-video-panel__title'
+							>
+								{unitTheme || mainTitle}
+							</h2>
+						</div>
+						<div className='lesson-doc-feature-video-panel__body'>
+							{featureVideoModalLoading ? (
+								<div
+									className='lesson-doc-feature-video-panel__loading'
+									aria-busy='true'
+								>
+									<Loader size='md' />
+									<span>Cargando video…</span>
+								</div>
+							) : null}
+							<video
+								ref={featureVideoModalRef}
+								className='lesson-doc-feature-video-panel__video'
+								src={FOREST_FEATURE_VIDEO_URL}
+								controls
+								playsInline
+								onLoadedData={() => setFeatureVideoModalLoading(false)}
+								onLoadStart={() => setFeatureVideoModalLoading(true)}
+								onError={() => setFeatureVideoModalLoading(false)}
+								style={{
+									display: featureVideoModalLoading
+										? 'none'
+										: 'block',
+								}}
+							/>
+						</div>
+					</div>
+				</div>
 			) : null}
 		</>,
 	)
